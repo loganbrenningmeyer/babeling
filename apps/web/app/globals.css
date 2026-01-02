@@ -1,0 +1,51 @@
+@import "tailwindcss";
+
+/* Basic reset */
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+
+/* Layout */
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.page {
+  padding: 48px 0;
+}
+
+/* Nav */
+.nav {
+  border-bottom: 1px solid rgba(0,0,0,0.08);
+  background: white;
+  position: sticky;
+  top: 0;
+}
+
+.navInner {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-weight: 700;
+  text-decoration: none;
+  color: inherit;
+}
+
+.navLinks {
+  display: flex;
+  gap: 16px;
+}
+
+.navLink {
+  text-decoration: none;
+  color: rgba(0,0,0,0.75);
+}
+
+.navLink:hover {
+  color: rgba(0,0,0,1);
+}
