@@ -13,7 +13,7 @@ export default function RootLayout({
             <a className="font-semibold" href="/">Babeling</a>
             <div className="flex gap-4 text-sm">
               <a className="text-zinc-700 hover:text-zinc-950" href="/">Home</a>
-              <a className="text-zinc-700 hover:text-zinc-950" href="/pages/about">About</a>
+              <a className="text-zinc-700 hover:text-zinc-950" href="about/">About</a>
             </div>
           </div>
         </nav>
