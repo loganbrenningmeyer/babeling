@@ -3,21 +3,24 @@
 import { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button";
 
 export default function About() {
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function translate(text: string) {
-    setLoading(true);
+  async function translate() {
+    if (!inputText.trim()) return;
 
+    setLoading(true);
+    
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ text })
+      body: JSON.stringify({ text: inputText })
     });
 
     const data = await res.json();
@@ -35,14 +38,14 @@ export default function About() {
         <CardContent>
           <Textarea
             placeholder="Type something..."
-            className="min-h-screen"
+            className="min-h-[70vh]"
             value={inputText}
-            onChange={(e) => {
-              const text = e.target.value;
-              setInputText(text);
-              translate(text);
-            }}
+            onChange={(e) => setInputText(e.target.value)}
           />
+
+          <Button onClick={translate} disabled={loading}>
+            {loading ? "Translating..." : "Translate"}
+          </Button>
         </CardContent>
       </Card>
 
