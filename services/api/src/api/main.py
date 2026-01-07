@@ -1,6 +1,6 @@
 from fastapi import FastAPI
-from nlp.babeling_nlp.align import Aligner
-from nlp.babeling_nlp.translate import Translator
+from babeling_nlp.align import Aligner
+from babeling_nlp.translate import Translator
 from pydantic import BaseModel
 
 class TextInput(BaseModel):
