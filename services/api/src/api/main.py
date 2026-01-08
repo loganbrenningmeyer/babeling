@@ -9,10 +9,10 @@ class TextInput(BaseModel):
 # ----------
 # Create Aligner
 # ----------
-# aligner = Aligner(
-#     model_name="microsoft/mdeberta-v3-base",
-#     ckpt_path="checkpoints/model-finetune-step55000.ckpt"
-# )
+aligner = Aligner(
+    model_name="microsoft/mdeberta-v3-base",
+    ckpt_path="checkpoints/model-finetune-step55000.ckpt"
+)
 
 # ----------
 # Create Translator
