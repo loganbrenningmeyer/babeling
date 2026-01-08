@@ -1,12 +1,12 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { text } = await req.json();
+    const { source } = await req.json();
 
     const res = await fetch("http://localhost:8000/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({ source }),
     });
 
     const data = await res.json();

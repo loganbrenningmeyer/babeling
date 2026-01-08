@@ -5,7 +5,7 @@
   "scripts": {
     "dev": "concurrently \"npm:dev:web\" \"npm:dev:api\"",
     "dev:web": "next dev",
-    "dev:api": "cd ../../services/api && uvicorn api.main:app --reload --port 8000",
+    "dev:api": "cd ../../services/api && python -m uvicorn api.main:app --reload --port 8000 --app-dir src",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

@@ -3,6 +3,7 @@ __pycache__/
 node_modules/
 .next/
 out/
+artifacts/*
 *.ckpt
 .DS_Store
 Icon
