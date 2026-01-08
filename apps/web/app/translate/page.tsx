@@ -17,6 +17,8 @@ export default function About() {
   // Word-tokenized source / target lists
   const [sourceWords, setSourceWords] = useState<string[]>([]);
   const [targetWords, setTargetWords] = useState<string[]>([]);
+  const [sourceSpaces, setSourceSpaces] = useState<string[]>([]);
+  const [targetSpaces, setTargetSpaces] = useState<string[]>([]);
   // Currently hovered word index
   const [hoveredSourceIndex, setHoveredSourceIndex] = useState<number | null>(null);
   const [hoveredTargetIndex, setHoveredTargetIndex] = useState<number | null>(null);
@@ -25,6 +27,7 @@ export default function About() {
   const [tgtToSrc, setTgtToSrc] = useState<AlignmentMap>({});
 
   const [translationLoading, setTranslationLoading] = useState(false);
+  const [showAligned, setShowAligned] = useState(false);
 
   async function translate_and_align() {
     if (!sourceText.trim()) return;
@@ -62,11 +65,14 @@ export default function About() {
     // Set HoverText words <string []>
     setSourceWords(align_data.src_words);
     setTargetWords(align_data.tgt_words);
+    setSourceSpaces(align_data.src_spaces);
+    setTargetSpaces(align_data.tgt_spaces);
     // Word alignment mappings Record<number, number[]>
     setSrcToTgt(align_data.src_to_tgt);
     setTgtToSrc(align_data.tgt_to_src);
 
     setTranslationLoading(false);
+    setShowAligned(true);
   }
 
   const alignedSourceIndices = 
@@ -74,76 +80,110 @@ export default function About() {
   const alignedTargetIndices = 
     hoveredSourceIndex !== null ? srcToTgt[hoveredSourceIndex] ?? [] : [];
 
+  function translateAgain() {
+    setShowAligned(false);
+    setHoveredSourceIndex(null);
+    setHoveredTargetIndex(null);
+  }
 
   return (
-    <div className="min-h-screen grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
-      {/* Source Text */}
-      <Card>
-        <CardHeader>
-          <CardTitle>English</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder="Type some English text..."
-            className="min-h-[50vh]"
-            value={sourceText}
-            onChange={(e) => setSourceText(e.target.value)}
-          />
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {!showAligned ? (
+        <>
+          {/* Source Text */}
+          <Card>
+            <CardHeader>
+              <CardTitle>English</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder="Type some English text..."
+                className="
+                  text-sm font-sans leading-6
+                  border-0 p-0 
+                  focus-visible:ring-0
+                  focus-visible:ring-offset-0
+                "
+                value={sourceText}
+                onChange={(e) => setSourceText(e.target.value)}
+              />
 
-          <Button onClick={translate_and_align} disabled={translationLoading}>
-            {translationLoading ? "Translating and Aligning..." : "Translate"}
-          </Button>
-        </CardContent>
-      </Card>
+              <Button 
+                onClick={translate_and_align} 
+                disabled={translationLoading}
+                className="mt-4"
+              >
+                {translationLoading ? "Translating and Aligning..." : "Translate"}
+              </Button>
+            </CardContent>
+          </Card>
 
-      {/* Target Text */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Right Text</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Textarea
-            placeholder={translationLoading ? "Translating..." : ""}
-            className="min-h-[50vh]"
-            value={targetText}
-            readOnly
-          />
-        </CardContent>
-      </Card>
+          {/* Target Text */}
+          <Card>
+            <CardHeader>
+              <CardTitle>French</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder={translationLoading ? "Translating..." : ""}
+                className="
+                  min-h-[50vh] 
+                  text-sm font-sans leading-6
+                  border-0 p-0 
+                  focus-visible:ring-0
+                  focus-visible:ring-offset-0
+                "
+                value={targetText}
+                readOnly
+              />
+            </CardContent>
+          </Card>
+        </>
+      ) : (
+        <>
+          {/* English HoverText */}
+          <Card>
+            <CardHeader>
+              <CardTitle>English Words</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HoverText 
+                words={sourceWords}
+                spaces={sourceSpaces}
+                onHover={setHoveredSourceIndex}
+                highlightIndices={[
+                  ...(hoveredSourceIndex !== null ? [hoveredSourceIndex] : []),
+                  ...alignedSourceIndices
+                ]}
+              />
+              <Button 
+                onClick={translateAgain} 
+                className="mt-4"
+              >
+                {"Translate again"}
+              </Button>
+            </CardContent>
+          </Card>
 
-      {/* English HoverText */}
-      <Card>
-        <CardHeader>
-          <CardTitle>English Words</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HoverText 
-            words={sourceWords}
-            onHover={setHoveredSourceIndex}
-            highlightIndices={[
-              ...(hoveredSourceIndex !== null ? [hoveredSourceIndex] : []),
-              ...alignedSourceIndices
-            ]}
-          />
-        </CardContent>
-      </Card>
-
-      {/* French HoverText */}
-      <Card>
-        <CardHeader>
-          <CardTitle>French Words</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <HoverText 
-            words={targetWords}
-            onHover={setHoveredTargetIndex}
-            highlightIndices={[
-              ...(hoveredTargetIndex !== null ? [hoveredTargetIndex] : []),
-              ...alignedTargetIndices
-            ]}
-          />
-        </CardContent>
-      </Card>
+          {/* French HoverText */}
+          <Card>
+            <CardHeader>
+              <CardTitle>French Words</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <HoverText 
+                words={targetWords}
+                spaces={targetSpaces}
+                onHover={setHoveredTargetIndex}
+                highlightIndices={[
+                  ...(hoveredTargetIndex !== null ? [hoveredTargetIndex] : []),
+                  ...alignedTargetIndices
+                ]}
+              />
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

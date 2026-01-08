@@ -56,27 +56,23 @@ def translate(req: TranslateRequest):
 # ====================
 # Align
 # ====================
-def format_alignments(alignments):
-    """
-    Convert defaultdict[(src_i, src_word)] -> list of dicts
-    """
-    formatted = []
+def get_token_spaces(sentence, tokens):
+    i = 0
+    spaces = []
 
-    for (src_i, src_word), tgt_list in alignments.items():
-        formatted.append({
-            "src_index": src_i,
-            "src_word": src_word,
-            "aligned": [
-                {
-                    "tgt_index": tgt_i,
-                    "tgt_word": tgt_word,
-                    "score": float(score),
-                }
-                for tgt_i, tgt_word, score in tgt_list
-            ],
-        })
+    for token in tokens:
+        start = sentence.find(token, i)
+        end = start + len(token)
 
-    return formatted
+        j = end
+        while j < len(sentence) and sentence[j].isspace():
+            j += 1
+
+        spaces.append(sentence[end:j])
+
+        i = j
+
+    return spaces
 
 class AlignRequest(BaseModel):
     source: str
@@ -86,6 +82,9 @@ class AlignRequest(BaseModel):
 def align(req: AlignRequest):
     src_words, tgt_words, alignments = aligner.align(req.source, req.target, threshold=0.5)
 
+    # ----------
+    # Create word index mappings
+    # ----------
     src_to_tgt = {}
     tgt_to_src = {tgt_idx: [] for tgt_idx in range(len(tgt_words))}
     
@@ -98,9 +97,17 @@ def align(req: AlignRequest):
         for tgt_idx in tgt_idxs:
             tgt_to_src[tgt_idx].append(src_idx) 
 
+    # ----------
+    # Determine spacing after words
+    # ----------
+    src_spaces = get_token_spaces(req.source, src_words)
+    tgt_spaces = get_token_spaces(req.target, tgt_words)
+
     return {
         "src_words": src_words,
         "tgt_words": tgt_words,
         "src_to_tgt": src_to_tgt,
-        "tgt_to_src": tgt_to_src
+        "tgt_to_src": tgt_to_src,
+        "src_spaces": src_spaces,
+        "tgt_spaces": tgt_spaces
     }

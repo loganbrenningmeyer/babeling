@@ -18,6 +18,8 @@ export async function POST(req: Request) {
         src_words: data.src_words,
         tgt_words: data.tgt_words,
         src_to_tgt: data.src_to_tgt,
-        tgt_to_src: data.tgt_to_src
+        tgt_to_src: data.tgt_to_src,
+        src_spaces: data.src_spaces,
+        tgt_spaces: data.tgt_spaces
      });
 }

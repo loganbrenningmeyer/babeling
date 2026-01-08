@@ -1,6 +1,7 @@
 type HoverTextProps = {
   // words: Word-tokenized text
   words: string[];
+  spaces: string[];
   // Word indices that should be highlighted currently
   highlightIndices?: number[];
   // Callback to parent saying which word index is being hovered currently
@@ -10,29 +11,32 @@ type HoverTextProps = {
 
 export function HoverText({
   words,
+  spaces,
   highlightIndices = [],
   onHover,
 }: HoverTextProps) {
   return (
-    <p className="flex flex-wrap leading-relaxed">
-      {/* Return span for each word in word list */}
+    <p className="flex-wrap items-baseline text-sm leading-6 font-sans p-0">
       {words.map((word, i) => {
-        // For word (i), true if parent says to highlight (i)
         const isHighlighted = highlightIndices.includes(i);
 
         return (
-          <span
-            key={i}
-            // setHoveredSourceIndex(i)
-            onMouseEnter={() => onHover?.(i)}
-            // setHoveredSourceIndex(null)
-            onMouseLeave={() => onHover?.(null)}
-            // Highlight when hovered or isHighlighted is true
-            className={`rounded px-0.5 py-0.5 transition hover:bg-blue-500/20
-              ${isHighlighted ? "bg-blue-500/20" : ""}
-            `}
-          >
-            {word}
+          <span key={i} className="inline">
+            {/* Word */}
+            <span
+              onMouseEnter={() => onHover?.(i)}
+              onMouseLeave={() => onHover?.(null)}
+              className={`inline rounded transition hover:bg-blue-500/20 ${
+                isHighlighted ? "bg-blue-500/20" : ""
+              }`}
+            >
+              {word}
+            </span>
+
+            {/* Space (not interactive, not highlighted) */}
+            <span aria-hidden className="select-none">
+                {spaces[i]}
+            </span>
           </span>
         );
       })}
