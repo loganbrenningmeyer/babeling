@@ -80,7 +80,7 @@ class AlignRequest(BaseModel):
 
 @app.post("/align")
 def align(req: AlignRequest):
-    src_words, tgt_words, alignments = aligner.align(req.source, req.target, threshold=0.5)
+    src_words, tgt_words, alignments = aligner.align(req.source, req.target, threshold=0.1)
 
     # ----------
     # Create word index mappings

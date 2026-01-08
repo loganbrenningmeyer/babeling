@@ -99,6 +99,7 @@ export default function About() {
               <Textarea
                 placeholder="Type some English text..."
                 className="
+                  min-h-[40vh]
                   text-sm font-sans leading-6
                   border-0 p-0 
                   focus-visible:ring-0
@@ -127,7 +128,7 @@ export default function About() {
               <Textarea
                 placeholder={translationLoading ? "Translating..." : ""}
                 className="
-                  min-h-[50vh] 
+                  min-h-[40vh]
                   text-sm font-sans leading-6
                   border-0 p-0 
                   focus-visible:ring-0
@@ -144,7 +145,7 @@ export default function About() {
           {/* English HoverText */}
           <Card>
             <CardHeader>
-              <CardTitle>English Words</CardTitle>
+              <CardTitle>English</CardTitle>
             </CardHeader>
             <CardContent>
               <HoverText 
@@ -155,6 +156,7 @@ export default function About() {
                   ...(hoveredSourceIndex !== null ? [hoveredSourceIndex] : []),
                   ...alignedSourceIndices
                 ]}
+                textType="source"
               />
               <Button 
                 onClick={translateAgain} 
@@ -168,7 +170,7 @@ export default function About() {
           {/* French HoverText */}
           <Card>
             <CardHeader>
-              <CardTitle>French Words</CardTitle>
+              <CardTitle>French</CardTitle>
             </CardHeader>
             <CardContent>
               <HoverText 
@@ -179,6 +181,7 @@ export default function About() {
                   ...(hoveredTargetIndex !== null ? [hoveredTargetIndex] : []),
                   ...alignedTargetIndices
                 ]}
+                textType="target"
               />
             </CardContent>
           </Card>
