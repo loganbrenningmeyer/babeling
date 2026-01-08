@@ -17,6 +17,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ 
         src_words: data.src_words,
         tgt_words: data.tgt_words,
-        alignments: data.alignments,
+        src_to_tgt: data.src_to_tgt,
+        tgt_to_src: data.tgt_to_src
      });
 }

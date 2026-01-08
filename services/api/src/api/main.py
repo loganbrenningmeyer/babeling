@@ -85,12 +85,22 @@ class AlignRequest(BaseModel):
 @app.post("/align")
 def align(req: AlignRequest):
     src_words, tgt_words, alignments = aligner.align(req.source, req.target, threshold=0.5)
-    formatted_alignments = format_alignments(alignments)
-    print(f"src_words: {src_words}")
-    print(f"tgt_words: {tgt_words}")
-    print(f"alignments: {alignments}")
+
+    src_to_tgt = {}
+    tgt_to_src = {tgt_idx: [] for tgt_idx in range(len(tgt_words))}
+    
+    # src_to_tgt: Source word index -> Target word indices
+    for (src_idx, _), tgt_als in alignments.items():
+        src_to_tgt[src_idx] = [tgt_idx for tgt_idx, _, _ in tgt_als]
+
+    # tgt_to_src: Target word index -> Source word indices
+    for src_idx, tgt_idxs in src_to_tgt.items():
+        for tgt_idx in tgt_idxs:
+            tgt_to_src[tgt_idx].append(src_idx) 
+
     return {
         "src_words": src_words,
         "tgt_words": tgt_words,
-        "alignments": formatted_alignments
+        "src_to_tgt": src_to_tgt,
+        "tgt_to_src": tgt_to_src
     }
