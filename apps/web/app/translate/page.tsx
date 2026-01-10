@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button";
@@ -8,111 +9,144 @@ import { Button } from "@/components/ui/button";
 import { HoverText } from "../components/HoverText";
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
 
-type AlignmentMap = Record<number, number[]>;
-type IdToWords = Record<number, number[]>;
+type Session = {
+  sourceText: string;
+  targetText: string;
+
+  src: {
+    words: string[];
+    spaces: string[];
+    sentIds: number[];
+    parIds: number[];
+    sentIdToWords: Record<number, number[]>;
+    parIdToWords: Record<number, number[]>;
+  };
+
+  tgt: {
+    words: string[];
+    spaces: string[];
+  };
+
+  align: {
+    srcToTgt: Record<number, number[]>;
+    tgtToSrc: Record<number, number[]>;
+  }
+}
 
 export default function Translate() {
-  // Raw source / target strings
+  // -------------------------
+  // Core state
+  // -------------------------
   const [sourceText, setSourceText] = useState("");
-  const [targetText, setTargetText] = useState("");
-  // Word-tokenized source / target lists
-  const [sourceWords, setSourceWords] = useState<string[]>([]);
-  const [targetWords, setTargetWords] = useState<string[]>([]);
-
-  const [sourceSpaces, setSourceSpaces] = useState<string[]>([]);
-  const [targetSpaces, setTargetSpaces] = useState<string[]>([]);
-
-  const [sourceSentIds, setSourceSentIds] = useState<number[]>([]);
-  const [sourceParIds, setSourceParIds] = useState<number[]>([]);
-  const [sourceSentIdToWords, setSourceSentIdToWords] = useState<IdToWords>({});
-  const [sourceParIdToWords, setSourceParIdToWords] = useState<IdToWords>({});
-
-  // Currently hovered word index
+  const [explainText, setExplainText] = useState("");
+  const [session, setSession] = useState<Session | null>(null);
+  // -------------------------
+  // UI state
+  // -------------------------
+  const [translationLoading, setTranslationLoading] = useState(false);
+  const [blurMode, setBlurMode] = useState<BlurMode>("word");
+  const [showAligned, setShowAligned] = useState(false);
+  // -------------------------
+  // Interaction state
+  // -------------------------
   const [hoveredSourceIndex, setHoveredSourceIndex] = useState<number | null>(null);
   const [hoveredTargetIndex, setHoveredTargetIndex] = useState<number | null>(null);
-  // word index -> aligned word indices mapping
-  const [srcToTgt, setSrcToTgt] = useState<AlignmentMap>({});
-  const [tgtToSrc, setTgtToSrc] = useState<AlignmentMap>({});
-  // Blur mode toggle
-  const [blurMode, setBlurMode] = useState<BlurMode>("word");
 
-  const [translationLoading, setTranslationLoading] = useState(false);
-  const [showAligned, setShowAligned] = useState(false);
+  // -------------------------
+  // Derived values
+  // -------------------------
+  const alignedSourceIndices = 
+    hoveredTargetIndex !== null ? session?.align.tgtToSrc[hoveredTargetIndex] ?? [] : [];
+  const alignedTargetIndices = 
+    hoveredSourceIndex !== null ? session?.align.srcToTgt[hoveredSourceIndex] ?? [] : [];
 
-  // ----------
-  // Translate text and compute source/target alignments
-  // ----------
+  // -------------------------
+  // Handlers
+  // -------------------------
   async function translate_and_align() {
     if (!sourceText.trim()) return;
 
     setTranslationLoading(true);
 
-    // ---------- 
-    // Translate 
-    // ----------
+    // Translate
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ source: sourceText })
     });
-
-    // Set translated text
     const translate_data = await translate_res.json();
     const target = translate_data.translation
-    setTargetText(target);
 
-    // ----------
     // Align
-    // ----------
     const align_res = await fetch("/api/align", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ 
         source: sourceText, 
-        target,
+        target
       })
     });
-
     const align_data = await align_res.json();
 
-    // Set HoverText words <string []>
-    setSourceWords(align_data.src_words);
-    setTargetWords(align_data.tgt_words);
-
-    setSourceSpaces(align_data.src_spaces);
-    setTargetSpaces(align_data.tgt_spaces);
-
-    setSourceSentIds(align_data.src_sent_ids);
-    setSourceParIds(align_data.src_par_ids);
-    
-    setSourceSentIdToWords(align_data.src_sent_id_to_words);
-    setSourceParIdToWords(align_data.src_par_id_to_words);
-
-    // Word alignment mappings Record<number, number[]>
-    setSrcToTgt(align_data.src_to_tgt);
-    setTgtToSrc(align_data.tgt_to_src);
+    // Update session
+    setSession({
+      sourceText,
+      targetText: target,
+      src: {
+        words: align_data.src_words,
+        spaces: align_data.src_spaces,
+        sentIds: align_data.src_sent_ids,
+        parIds: align_data.src_par_ids,
+        sentIdToWords: align_data.src_sent_id_to_words,
+        parIdToWords: align_data.src_par_id_to_words
+      },
+      tgt: {
+        words: align_data.tgt_words,
+        spaces: align_data.tgt_spaces
+      },
+      align: {
+        srcToTgt: align_data.src_to_tgt,
+        tgtToSrc: align_data.tgt_to_src
+      }
+    });
 
     setTranslationLoading(false);
     setShowAligned(true);
   }
 
-  // ----------
-  // Aligned word indices given hovered word
-  // ----------  
-  const alignedSourceIndices = 
-    hoveredTargetIndex !== null ? tgtToSrc[hoveredTargetIndex] ?? [] : [];
-  const alignedTargetIndices = 
-    hoveredSourceIndex !== null ? srcToTgt[hoveredSourceIndex] ?? [] : [];
-
-  // ----------
-  // Reset translation for new input
-  // ----------
   function translateAgain() {
     setShowAligned(false);
     setHoveredSourceIndex(null);
     setHoveredTargetIndex(null);
+    setSourceText("");
+    setSession(null);
+    setExplainText("");
   }
 
+  async function explainTargetWord(targetIndex: number) {
+    if (!session) return;
+
+    const res = await fetch("/api/explain", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        src_words: session.src.words,
+        tgt_words: session.tgt.words,
+        src_spaces: session.src.spaces,
+        tgt_spaces: session.tgt.spaces,
+        tgt_to_src: session.align.tgtToSrc,
+        tgt_idx: targetIndex
+      })
+    });
+    const explain_data = await res.json();
+    const explanation = explain_data.explanation;
+
+    setExplainText(explanation);
+  }
+
+  // -------------------------
+  // Render
+  // -------------------------
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
       {!showAligned ? (
@@ -151,18 +185,20 @@ export default function Translate() {
               <CardTitle>French</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                placeholder={translationLoading ? "Translating..." : ""}
-                className="
-                  min-h-[40vh] resize-none
-                  !text-base font-sans leading-6
-                  border-0 p-4 
-                  focus-visible:ring-0 focus-visible:ring-offset-0
-                  shadow
-                "
-                value={targetText}
-                readOnly
-              />
+              {session && (
+                <Textarea
+                  placeholder={translationLoading ? "Translating..." : ""}
+                  className="
+                    min-h-[40vh] resize-none
+                    !text-base font-sans leading-6
+                    border-0 p-4 
+                    focus-visible:ring-0 focus-visible:ring-offset-0
+                    shadow
+                  "
+                  value={session.targetText}
+                  readOnly
+                />
+              )}
             </CardContent>
           </Card>
         </>
@@ -174,21 +210,25 @@ export default function Translate() {
               <CardTitle>English</CardTitle>
             </CardHeader>
             <CardContent>
-              <HoverText 
-                words={sourceWords}
-                spaces={sourceSpaces}
-                sentIds={sourceSentIds}
-                parIds={sourceParIds}
-                sentIdToWords={sourceSentIdToWords}
-                parIdToWords={sourceParIdToWords}
-                onHover={setHoveredSourceIndex}
-                highlightIndices={[
-                  ...(hoveredSourceIndex !== null ? [hoveredSourceIndex] : []),
-                  ...alignedSourceIndices
-                ]}
-                textType="source"
-                blurMode={blurMode}
-              />
+              {session && (
+                <HoverText 
+                  variant="source"
+                  words={session.src.words}
+                  spaces={session.src.spaces}
+                  onHover={setHoveredSourceIndex}
+                  highlightIndices={[
+                    ...(hoveredSourceIndex !== null ? [hoveredSourceIndex] : []),
+                    ...alignedSourceIndices
+                  ]}
+                  blur={{
+                    mode: blurMode,
+                    sentIds: session.src.sentIds,
+                    parIds: session.src.parIds,
+                    sentIdToWords: session.src.sentIdToWords,
+                    parIdToWords: session.src.parIdToWords
+                  }}
+                />
+              )}
 
               <div className="flex mt-4 gap-3 items-center">
                 <Button 
@@ -208,16 +248,39 @@ export default function Translate() {
               <CardTitle>French</CardTitle>
             </CardHeader>
             <CardContent>
-              <HoverText 
-                words={targetWords}
-                spaces={targetSpaces}
-                onHover={setHoveredTargetIndex}
-                highlightIndices={[
-                  ...(hoveredTargetIndex !== null ? [hoveredTargetIndex] : []),
-                  ...alignedTargetIndices
-                ]}
-                textType="target"
-                blurMode="word"
+              {session && (
+                <HoverText 
+                  variant="target"
+                  words={session.tgt.words}
+                  spaces={session.tgt.spaces}
+                  onHover={setHoveredTargetIndex}
+                  highlightIndices={[
+                    ...(hoveredTargetIndex !== null ? [hoveredTargetIndex] : []),
+                    ...alignedTargetIndices
+                  ]}
+                  onWordClick={explainTargetWord}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Explanation */}
+          <Card className="md:col-span-2">
+            <CardHeader>
+              <CardTitle>Explanation</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Textarea
+                placeholder="Click a French word to get an explanation..."
+                className="
+                  min-h-[20vh] resize-none
+                  !text-base font-sans leading-6
+                  border-0 p-4 
+                  focus-visible:ring-0 focus-visible:ring-offset-0
+                  shadow
+                "
+                value={explainText}
+                readOnly
               />
             </CardContent>
           </Card>

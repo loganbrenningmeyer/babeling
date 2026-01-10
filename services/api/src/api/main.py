@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from babeling_nlp.align import Aligner
-from babeling_nlp.translate import Translator
+from babeling_nlp.translate import GeminiAPI
 from pydantic import BaseModel
 from pathlib import Path
 from collections import defaultdict
@@ -26,10 +26,10 @@ aligner = Aligner(
 )
 
 # ----------
-# Create Translator
+# Prepare GeminiAPI
 # ----------
 print("Creating Translator...")
-translator = Translator()
+gemini_api = GeminiAPI()
 
 # ----------
 # Initialize FastAPI
@@ -50,7 +50,7 @@ class TranslateRequest(BaseModel):
 
 @app.post("/translate")
 def translate(req: TranslateRequest):
-    return {"translation": translator.translate_en_fr(req.source)}
+    return {"translation": gemini_api.translate_en_fr(req.source)}
 
 # ====================
 # Align
@@ -155,3 +155,25 @@ def align(req: AlignRequest):
         "src_par_ids": src_par_ids,
         "src_par_id_to_words": src_par_id_to_words
     }
+
+# ====================
+# Explain
+# ====================
+class ExplainRequest(BaseModel):
+    src_words: list[str]
+    tgt_words: list[str]
+    src_spaces: list[str]
+    tgt_spaces: list[str]
+    tgt_to_src: dict[int, list[int]]
+    tgt_idx: int
+
+@app.post("/explain")
+def explain(req: ExplainRequest):
+    return {"explanation": gemini_api.explain_en_fr(
+        req.src_words,
+        req.tgt_words,
+        req.src_spaces,
+        req.tgt_spaces,
+        req.tgt_to_src,
+        req.tgt_idx
+    )}
