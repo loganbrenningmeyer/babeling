@@ -135,6 +135,13 @@ export default function Translate() {
                 value={sourceText}
                 onChange={(e) => setSourceText(e.target.value)}
               />
+              <Button 
+                onClick={translate_and_align} 
+                disabled={translationLoading}
+                className="mt-4 shadow"
+              >
+                {translationLoading ? "Translating and Aligning..." : "Translate"}
+              </Button>
             </CardContent>
           </Card>
 
@@ -156,14 +163,6 @@ export default function Translate() {
                 value={targetText}
                 readOnly
               />
-
-              <Button 
-                onClick={translate_and_align} 
-                disabled={translationLoading}
-                className="mt-4"
-              >
-                {translationLoading ? "Translating and Aligning..." : "Translate"}
-              </Button>
             </CardContent>
           </Card>
         </>
@@ -191,7 +190,15 @@ export default function Translate() {
                 blurMode={blurMode}
               />
 
-              <BlurModeToggle value={blurMode} onChange={setBlurMode} />
+              <div className="flex mt-4 gap-3 items-center">
+                <Button 
+                  onClick={translateAgain}
+                  className="shadow"
+                >
+                  {"Translate again"}
+                </Button>
+                <BlurModeToggle value={blurMode} onChange={setBlurMode} />
+              </div>
             </CardContent>
           </Card>
 
@@ -212,12 +219,6 @@ export default function Translate() {
                 textType="target"
                 blurMode="word"
               />
-              <Button 
-                onClick={translateAgain} 
-                className="mt-4"
-              >
-                {"Translate again"}
-              </Button>
             </CardContent>
           </Card>
         </>

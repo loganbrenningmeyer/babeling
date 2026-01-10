@@ -4,6 +4,7 @@ node_modules/
 .next/
 out/
 artifacts/*
+apps/web/components/
 *.ckpt
 .DS_Store
 Icon

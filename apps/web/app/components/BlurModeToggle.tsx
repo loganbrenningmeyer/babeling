@@ -11,20 +11,21 @@ export function BlurModeToggle({
 }) {
     return (
         <ToggleGroup
-            type="single"
-            value={value}
-            onValueChange={(v) => {
-                if (!v) return;
-                onChange(v as BlurMode);
-            }}
+        type="single"
+        value={value}
+        onValueChange={(v) => {
+            if (!v) return;
+            onChange(v as BlurMode);
+        }}
+        className="shadow"
         >
             <ToggleGroupItem value="word">
                 Word
             </ToggleGroupItem>
-            <ToggleGroupItem value="sentence">
+            <ToggleGroupItem value="sentence" className="border-l">
                 Sentence
             </ToggleGroupItem>
-            <ToggleGroupItem value="paragraph">
+            <ToggleGroupItem value="paragraph" className="border-l">
                 Paragraph
             </ToggleGroupItem>
         </ToggleGroup>
