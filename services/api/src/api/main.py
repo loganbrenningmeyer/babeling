@@ -3,18 +3,17 @@ from babeling_nlp.align import Aligner
 from babeling_nlp.translate import Translator
 from pydantic import BaseModel
 from pathlib import Path
+from collections import defaultdict
 
-# Path to this file: services/api/src/api/main.py
-API_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve().parents[4]
 # parents breakdown:
 # [0] main.py
 # [1] api/
 # [2] src/
 # [3] api/
 # [4] services/
-# [5] babeling/   ← we want this
+# [5] babeling/
 
-REPO_ROOT = API_ROOT
 CKPT_PATH = REPO_ROOT / "artifacts" / "binaryalign" / "en-fr" / "model-finetune-step55000.ckpt"
 
 # ----------
@@ -74,6 +73,41 @@ def get_token_spaces(sentence, tokens):
 
     return spaces
 
+def get_sentence_ids(words: list[str]):
+    punctuation = ['.', '!', '?']
+
+    sent_ids = []
+    sent_id_to_words = defaultdict(list)
+    sent_id = 0
+
+    for i, word in enumerate(words):
+        if word in punctuation:
+            sent_ids.append(sent_id)
+            sent_id_to_words[sent_id].append(i)
+            sent_id += 1
+            continue
+
+        sent_ids.append(sent_id)
+        sent_id_to_words[sent_id].append(i)
+
+    return sent_ids, dict(sent_id_to_words)
+
+def get_paragraph_ids(words: list[str]):
+    par_ids = []
+    par_id_to_words = defaultdict(list)
+    par_id = 0
+
+    for i, word in enumerate(words):
+        if word == "\n":
+            par_id += 1
+            par_id_to_words[par_id].append(i)
+            continue
+
+        par_ids.append(par_id)
+        par_id_to_words[par_id].append(i)
+
+    return par_ids, dict(par_id_to_words)
+
 class AlignRequest(BaseModel):
     source: str
     target: str
@@ -103,11 +137,21 @@ def align(req: AlignRequest):
     src_spaces = get_token_spaces(req.source, src_words)
     tgt_spaces = get_token_spaces(req.target, tgt_words)
 
+    # ----------
+    # Get sentence / paragraph IDs by word
+    # ----------
+    src_sent_ids, src_sent_id_to_words = get_sentence_ids(src_words)
+    src_par_ids, src_par_id_to_words = get_paragraph_ids(src_words)
+
     return {
         "src_words": src_words,
         "tgt_words": tgt_words,
         "src_to_tgt": src_to_tgt,
         "tgt_to_src": tgt_to_src,
         "src_spaces": src_spaces,
-        "tgt_spaces": tgt_spaces
+        "tgt_spaces": tgt_spaces,
+        "src_sent_ids": src_sent_ids,
+        "src_sent_id_to_words": src_sent_id_to_words,
+        "src_par_ids": src_par_ids,
+        "src_par_id_to_words": src_par_id_to_words
     }

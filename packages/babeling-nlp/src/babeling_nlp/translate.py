@@ -34,7 +34,7 @@ class Translator:
                 system_instruction=SYSTEM_TRANSLATE_EN_FR,
                 response_mime_type="application/json",
                 response_schema=TranslationOut,
-                temperature=0.2,
+                temperature=0.1,
                 max_output_tokens=256,
                 thinking_config=types.ThinkingConfig(thinking_budget=0)
             ),
