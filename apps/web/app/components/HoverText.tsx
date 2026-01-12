@@ -91,7 +91,7 @@ export function HoverText({
   };
 
   return (
-    <p className="min-h-[40vh] flex-wrap items-baseline p-4 text-base leading-6 font-sans shadow">
+    <p className="min-h-[40vh] rounded-md flex-wrap items-baseline p-4 text-base leading-6 font-sans shadow">
       {words.map((word, i) => {
         const isHighlighted = highlightIndices.includes(i);
         const isBlurred = blur ? blurred.has(i) : false;

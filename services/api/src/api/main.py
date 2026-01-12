@@ -1,3 +1,4 @@
+import json
 from fastapi import FastAPI
 from babeling_nlp.align import Aligner
 from babeling_nlp.translate import GeminiAPI
@@ -30,6 +31,9 @@ aligner = Aligner(
 # ----------
 print("Creating Translator...")
 gemini_api = GeminiAPI()
+
+with open(REPO_ROOT / "french.jsonl", "r") as f:
+    french_dict = json.load(f)
 
 # ----------
 # Initialize FastAPI
@@ -167,13 +171,24 @@ class ExplainRequest(BaseModel):
     tgt_to_src: dict[int, list[int]]
     tgt_idx: int
 
+def define_fr(word: str):
+    try:
+        dict_entry = french_dict[word.lower()]
+        dict_entry["word"] = word
+        return dict_entry
+    except: 
+        return None
+
 @app.post("/explain")
 def explain(req: ExplainRequest):
-    return {"explanation": gemini_api.explain_en_fr(
-        req.src_words,
-        req.tgt_words,
-        req.src_spaces,
-        req.tgt_spaces,
-        req.tgt_to_src,
-        req.tgt_idx
-    )}
+    return {
+        "definition": define_fr(req.tgt_words[req.tgt_idx]),
+        "explanation": gemini_api.explain_en_fr(
+            req.src_words,
+            req.tgt_words,
+            req.src_spaces,
+            req.tgt_spaces,
+            req.tgt_to_src,
+            req.tgt_idx
+        ),
+    }

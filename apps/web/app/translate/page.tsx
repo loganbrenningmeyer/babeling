@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 
 import { HoverText } from "../components/HoverText";
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
+import { DefinitionEntry, DefinitionCard } from "../components/DefinitionCard";
 
 type Session = {
   sourceText: string;
@@ -39,11 +40,13 @@ export default function Translate() {
   // -------------------------
   const [sourceText, setSourceText] = useState("");
   const [explainText, setExplainText] = useState("");
+  const [definition, setDefinition] = useState<DefinitionEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   // -------------------------
   // UI state
   // -------------------------
   const [translationLoading, setTranslationLoading] = useState(false);
+  const [explanationLoading, setExplanationLoading] = useState(false);
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [showAligned, setShowAligned] = useState(false);
   // -------------------------
@@ -121,10 +124,13 @@ export default function Translate() {
     setSourceText("");
     setSession(null);
     setExplainText("");
+    setDefinition(null);
   }
 
   async function explainTargetWord(targetIndex: number) {
     if (!session) return;
+
+    setExplanationLoading(true);
 
     const res = await fetch("/api/explain", {
       method: "POST",
@@ -138,10 +144,11 @@ export default function Translate() {
         tgt_idx: targetIndex
       })
     });
-    const explain_data = await res.json();
-    const explanation = explain_data.explanation;
+    const data = await res.json();
 
-    setExplainText(explanation);
+    setExplainText(data.explanation);
+    setDefinition(data.definition);
+    setExplanationLoading(false);
   }
 
   // -------------------------
@@ -149,7 +156,7 @@ export default function Translate() {
   // -------------------------
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      {!showAligned ? (
+      {!showAligned && !translationLoading ? (
         <>
           {/* Source Text */}
           <Card>
@@ -210,7 +217,10 @@ export default function Translate() {
               <CardTitle>English</CardTitle>
             </CardHeader>
             <CardContent>
-              {session && (
+              {translationLoading || !session ? (
+                <div className="min-h-[40vh] rounded-md bg-muted animate-pulse" />
+              ) : (
+                // {session && (
                 <HoverText 
                   variant="source"
                   words={session.src.words}
@@ -228,6 +238,8 @@ export default function Translate() {
                     parIdToWords: session.src.parIdToWords
                   }}
                 />
+                // )}
+
               )}
 
               <div className="flex mt-4 gap-3 items-center">
@@ -248,7 +260,10 @@ export default function Translate() {
               <CardTitle>French</CardTitle>
             </CardHeader>
             <CardContent>
-              {session && (
+              {translationLoading || !session ? (
+                <div className="min-h-[40vh] rounded-md bg-muted animate-pulse" />
+              ) : (
+              // {session && (
                 <HoverText 
                   variant="target"
                   words={session.tgt.words}
@@ -265,23 +280,47 @@ export default function Translate() {
           </Card>
 
           {/* Explanation */}
-          <Card className="md:col-span-2">
+          <Card>
             <CardHeader>
               <CardTitle>Explanation</CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                placeholder="Click a French word to get an explanation..."
-                className="
-                  min-h-[20vh] resize-none
-                  !text-base font-sans leading-6
-                  border-0 p-4 
-                  focus-visible:ring-0 focus-visible:ring-offset-0
-                  shadow
-                "
-                value={explainText}
-                readOnly
-              />
+              {explanationLoading ? (
+                <div className="h-[20vh] rounded-md 
+                  bg-gradient-to-r from-muted via-muted-foreground/10 to-muted
+                  animate-pulse" 
+                />
+              ) : (
+                <Textarea
+                  placeholder={explanationLoading ? "Getting explanation..." : "Click a French word to get an explanation..."}
+                  className="
+                    min-h-[20vh] resize-none
+                    !text-base font-sans leading-6
+                    border-0 p-4 
+                    focus-visible:ring-0 focus-visible:ring-offset-0
+                    shadow
+                  "
+                  value={explainText}
+                  readOnly
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Definition */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Definition</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {explanationLoading ? (
+                <div className="h-[20vh] rounded-md 
+                  bg-gradient-to-r from-muted via-muted-foreground/10 to-muted
+                  animate-pulse" 
+                />
+              ) : (
+                <DefinitionCard definition={definition}/>
+              )}
             </CardContent>
           </Card>
         </>

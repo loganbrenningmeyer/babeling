@@ -18,5 +18,8 @@ export async function POST(req: Request) {
 
     const res_data = await res.json();
 
-    return NextResponse.json({ explanation: res_data.explanation });
+    return NextResponse.json({ 
+        explanation: res_data.explanation, 
+        definition: res_data.definition 
+    });
 }
