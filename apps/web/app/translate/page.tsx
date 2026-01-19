@@ -1,20 +1,18 @@
 "use client";
 
 import { useState } from "react";
-
 import { Button } from "@/components/ui/button";
 
 import { HoverText } from "../components/HoverText";
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
-import { DefinitionEntry, DefinitionCard } from "../components/DefinitionCard";
-import {
-  ExplanationEntry,
-  ExplanationCard,
-} from "../components/ExplanationCard";
+import { DefineEntry, DefineCard } from "../components/DefineCard";
+import { ExplainEntry, ExplainCard } from "../components/ExplainCard";
 import { Pane } from "../components/Pane";
 import { AppTextarea } from "../components/AppTextarea";
 import { TextSurface } from "../components/TextSurface";
-import { LoadingSurface } from "../components/LoadingSurface";
+import { AnchoredPopover } from "../components/AnchoredPopover";
+import { ExplainSkeleton } from "../components/ExplainSkeleton";
+import { TextSkeleton } from "../components/TextSkeleton";
 
 type Session = {
   sourceText: string;
@@ -45,11 +43,8 @@ export default function Translate() {
   // Core state
   // -------------------------
   const [sourceText, setSourceText] = useState("");
-  const [explanationData, setExplanationData] =
-    useState<ExplanationEntry | null>(null);
-  const [definitionData, setDefinitionData] = useState<DefinitionEntry | null>(
-    null
-  );
+  const [explainData, setExplainData] = useState<ExplainEntry | null>(null);
+  const [defineData, setDefineData] = useState<DefineEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   // -------------------------
   // UI state
@@ -59,8 +54,10 @@ export default function Translate() {
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
   const [showAligned, setShowAligned] = useState(false);
   // -------------------------
-  // Interaction state
+  // Popover / interaction state
   // -------------------------
+  const [popoverOpen, setPopoverOpen] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [hoveredSourceIndex, setHoveredSourceIndex] = useState<number | null>(
     null
   );
@@ -140,13 +137,22 @@ export default function Translate() {
     setHoveredTargetIndex(null);
     setSourceText("");
     setSession(null);
-    setExplanationData(null);
-    setDefinitionData(null);
+    setExplainData(null);
+    setDefineData(null);
   }
 
-  async function explainTargetWord(targetIndex: number) {
+  async function handleTargetWordClick(i: number, el: HTMLElement) {
     if (!session) return;
 
+    // -------------------------
+    // Store target word idx / where it is
+    // -------------------------
+    setAnchorEl(el);
+    setPopoverOpen(true);
+
+    // -------------------------
+    // Get explanation / definition
+    // -------------------------
     setExplanationLoading(true);
 
     const res = await fetch("/api/explain", {
@@ -158,22 +164,23 @@ export default function Translate() {
         src_spaces: session.src.spaces,
         tgt_spaces: session.tgt.spaces,
         tgt_to_src: session.align.tgtToSrc,
-        tgt_idx: targetIndex,
+        tgt_idx: i,
       }),
     });
     const data = await res.json();
 
-    setExplanationData({
+    setExplainData({
       explanation: data.explanation.explanation,
       examples: data.explanation.examples,
     });
-    setDefinitionData({
+    setDefineData({
       word: data.definition.word,
       pos: data.definition.pos,
       definition: data.definition.definition,
       pronunciation: data.definition.pronunciation,
       infinitive: data.definition.infinitive,
     });
+
     setExplanationLoading(false);
   }
 
@@ -222,10 +229,10 @@ export default function Translate() {
            /* English HoverText
            /* ------------------------- */}
           <Pane title="English">
-            {translationLoading || !session ? (
-              <LoadingSurface className="min-h-[40vh]" />
-            ) : (
-              <TextSurface className="min-h-[40vh]">
+            <TextSurface className="min-h-[40vh]">
+              {translationLoading || !session ? (
+                <TextSkeleton blurClassName="blur-sm" />
+              ) : (
                 <HoverText
                   variant="source"
                   words={session.src.words}
@@ -245,8 +252,8 @@ export default function Translate() {
                     parIdToWords: session.src.parIdToWords,
                   }}
                 />
-              </TextSurface>
-            )}
+              )}
+            </TextSurface>
 
             {/* Buttons: Translate again / Blur mode */}
             <div className="flex mt-4 gap-3 items-center">
@@ -261,10 +268,10 @@ export default function Translate() {
            /* French HoverText
            /* ------------------------- */}
           <Pane title="French">
-            {translationLoading || !session ? (
-              <LoadingSurface className="min-h-[40vh]" />
-            ) : (
-              <TextSurface className="min-h-[40vh]">
+            <TextSurface className="min-h-[40vh]">
+              {translationLoading || !session ? (
+                <TextSkeleton />
+              ) : (
                 <HoverText
                   variant="target"
                   words={session.tgt.words}
@@ -276,37 +283,31 @@ export default function Translate() {
                       : []),
                     ...alignedTargetIndices,
                   ]}
-                  onWordClick={explainTargetWord}
+                  onWordClick={handleTargetWordClick}
                 />
-              </TextSurface>
-            )}
+              )}
+            </TextSurface>
           </Pane>
 
           {/* -------------------------
-           /* Explanation
+           /* Explain / Define Popover
            /* ------------------------- */}
-          <Pane title="Explanation">
-            {explanationLoading ? (
-              <LoadingSurface className="min-h-[20vh]" />
+          <AnchoredPopover
+            open={popoverOpen}
+            onOpenChange={setPopoverOpen}
+            anchorEl={anchorEl}
+            className="min-h-[360px] min-w-[420px]"
+          >
+            {explanationLoading || !session ? (
+              <ExplainSkeleton />
             ) : (
-              <TextSurface className="min-h-[20vh]">
-                <ExplanationCard data={explanationData} />
-              </TextSurface>
+              <div className="p-4 space-y-4">
+                <DefineCard data={defineData} />
+                <div className="h-px bg-border" />
+                <ExplainCard data={explainData} />
+              </div>
             )}
-          </Pane>
-
-          {/* -------------------------
-           /* Definition
-           /* ------------------------- */}
-          <Pane title="Definition">
-            {explanationLoading ? (
-              <LoadingSurface className="min-h-[20vh]" />
-            ) : (
-              <TextSurface className="min-h-[20vh]">
-                <DefinitionCard data={definitionData} />
-              </TextSurface>
-            )}
-          </Pane>
+          </AnchoredPopover>
         </>
       )}
     </div>

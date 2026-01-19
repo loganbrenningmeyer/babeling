@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-export type DefinitionEntry = {
+export type DefineEntry = {
   word: string;
   pos: string;
   definition: string;
@@ -9,11 +9,11 @@ export type DefinitionEntry = {
   infinitive: string | null;
 };
 
-export function DefinitionCard({
+export function DefineCard({
   data,
   className,
 }: {
-  data: DefinitionEntry | null;
+  data: DefineEntry | null;
   className?: string;
 }) {
   if (!data) {

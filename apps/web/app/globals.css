@@ -65,3 +65,9 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
     @apply border-border outline-ring/50; }
   body {
     @apply bg-background text-foreground; } }
+
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}

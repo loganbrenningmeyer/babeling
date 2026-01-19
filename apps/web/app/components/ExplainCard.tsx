@@ -1,16 +1,16 @@
 import ReactMarkdown from "react-markdown";
 import { cn } from "@/lib/utils";
 
-export type ExplanationEntry = {
+export type ExplainEntry = {
   explanation: string;
   examples: string[];
 };
 
-export function ExplanationCard({
+export function ExplainCard({
   data,
   className,
 }: {
-  data: ExplanationEntry | null;
+  data: ExplainEntry | null;
   className?: string;
 }) {
   if (!data) {

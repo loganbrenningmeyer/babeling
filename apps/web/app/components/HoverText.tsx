@@ -19,7 +19,7 @@ type HoverTextProps = {
   highlightIndices?: number[];
   variant: "source" | "target";
   onHover?: (index: number | null) => void;
-  onWordClick?: (index: number) => void;
+  onWordClick?: (index: number, el: HTMLElement) => void;
   blur?: BlurConfig;
   className?: string;
 };
@@ -87,11 +87,11 @@ export function HoverText({
     });
   };
 
-  const handleClick = (i: number) => {
+  const handleClick = (i: number, e: React.MouseEvent) => {
     // If blur is enabled, click toggles blur
     if (blur) toggleBlur(i);
     // Otherwise, use click handler
-    onWordClick?.(i);
+    onWordClick?.(i, e.currentTarget as HTMLElement);
   };
 
   return (
@@ -106,7 +106,7 @@ export function HoverText({
             <span
               onMouseEnter={() => onHover?.(i)}
               onMouseLeave={() => onHover?.(null)}
-              onClick={() => handleClick(i)}
+              onClick={(e) => handleClick(i, e)}
               className={`inline-block rounded cursor-pointer transition-colors duration-150
                 ${isHighlighted ? highlightColor : ""}
               `}
