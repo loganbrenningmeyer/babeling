@@ -6,49 +6,57 @@ from pydantic import BaseModel
 from pathlib import Path
 from collections import defaultdict
 
+# -------------------------
+# Paths
+# -------------------------
 REPO_ROOT = Path(__file__).resolve().parents[4]
-# parents breakdown:
-# [0] main.py
-# [1] api/
-# [2] src/
-# [3] api/
-# [4] services/
-# [5] babeling/
+CKPT_PATH = (
+    REPO_ROOT
+    / "artifacts"
+    / "binaryalign"
+    / "en-fr"
+    / "model-finetune-step55000.ckpt"
+)
 
-CKPT_PATH = REPO_ROOT / "artifacts" / "binaryalign" / "en-fr" / "model-finetune-step55000.ckpt"
+PROMPTS_DIR = Path(__file__).parent / "prompts"
 
-# ----------
-# Create Aligner
-# ----------
+def load_prompt(filename: str) -> str:
+    return (PROMPTS_DIR / filename).read_text(encoding="utf-8")
+
+# -------------------------
+# Load BinaryAlign model
+# -------------------------
 print("Loading Aligner...")
 aligner = Aligner(
     model_name="microsoft/mdeberta-v3-base",
     ckpt_path=CKPT_PATH
 )
 
-# ----------
-# Prepare GeminiAPI
-# ----------
+# -------------------------
+# Prepare GeminiAPI / French dictionary
+# -------------------------
 print("Creating Translator...")
-gemini_api = GeminiAPI()
+system_translate = load_prompt("translate_en_fr.txt")
+system_explain = load_prompt("explain_en_fr.txt")
+
+gemini_api = GeminiAPI(
+    system_translate=system_translate,
+    system_explain=system_explain
+)
 
 with open(REPO_ROOT / "french.jsonl", "r") as f:
     french_dict = json.load(f)
 
-# ----------
-# Initialize FastAPI
-# ----------
+# -------------------------
+# Initialize FastAPI app
+# -------------------------
 print("Initializing FastAPI...")
 app = FastAPI()
 
 
-@app.get("/hello")
-def hello():
-    return {"message": "Hello from Python NLP service!"}
-
-# ====================
-# Translate
-# ====================
+# =========================
+# Translate (/translate)
+# =========================
 class TranslateRequest(BaseModel):
     source: str
 
@@ -56,9 +64,10 @@ class TranslateRequest(BaseModel):
 def translate(req: TranslateRequest):
     return {"translation": gemini_api.translate_en_fr(req.source)}
 
-# ====================
-# Align
-# ====================
+
+# =========================
+# Align (/align)
+# =========================
 def get_token_spaces(sentence, tokens):
     i = 0
     spaces = []
@@ -160,9 +169,10 @@ def align(req: AlignRequest):
         "src_par_id_to_words": src_par_id_to_words
     }
 
-# ====================
-# Explain
-# ====================
+
+# =========================
+# Explain & Define (/explain)
+# =========================
 class ExplainRequest(BaseModel):
     src_words: list[str]
     tgt_words: list[str]
@@ -174,21 +184,25 @@ class ExplainRequest(BaseModel):
 def define_fr(word: str):
     try:
         dict_entry = french_dict[word.lower()]
-        dict_entry["word"] = word
+        dict_entry["word"] = word.lower()
         return dict_entry
-    except: 
+    except Exception as e: 
+        print(f"{e}: Definition error!", flush=False)
         return None
 
 @app.post("/explain")
 def explain(req: ExplainRequest):
+    explanation_data = gemini_api.explain_en_fr(
+        req.src_words,
+        req.tgt_words,
+        req.src_spaces,
+        req.tgt_spaces,
+        req.tgt_to_src,
+        req.tgt_idx
+    )
+    definition_data = define_fr(req.tgt_words[req.tgt_idx])
+
     return {
-        "definition": define_fr(req.tgt_words[req.tgt_idx]),
-        "explanation": gemini_api.explain_en_fr(
-            req.src_words,
-            req.tgt_words,
-            req.src_spaces,
-            req.tgt_spaces,
-            req.tgt_to_src,
-            req.tgt_idx
-        ),
+        "explanation": explanation_data,
+        "definition": definition_data
     }

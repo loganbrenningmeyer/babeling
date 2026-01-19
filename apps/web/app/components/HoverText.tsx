@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { cn } from "@/lib/utils";
+
 import { BlurMode } from "./BlurModeToggle";
 
 type IdToWords = Record<number, number[]>;
@@ -9,16 +11,17 @@ type BlurConfig = {
   parIds: number[];
   sentIdToWords: IdToWords;
   parIdToWords: IdToWords;
-}
+};
 
 type HoverTextProps = {
   words: string[];
   spaces: string[];
   highlightIndices?: number[];
-  variant: "source" | "target"
+  variant: "source" | "target";
   onHover?: (index: number | null) => void;
   onWordClick?: (index: number) => void;
   blur?: BlurConfig;
+  className?: string;
 };
 
 export function HoverText({
@@ -28,7 +31,8 @@ export function HoverText({
   variant,
   onHover,
   onWordClick,
-  blur
+  blur,
+  className,
 }: HoverTextProps) {
   // Define source / target highlight colors
   const highlightColor =
@@ -37,21 +41,21 @@ export function HoverText({
       : "bg-orange-500/20 hover:bg-orange-500/30";
 
   // Toggle blur/unblur (initially all blurred source)
-  const [blurred, setBlurred] = useState<Set<number>>(
-    () => (blur ? new Set(words.map((_, i) => i)) : new Set())
+  const [blurred, setBlurred] = useState<Set<number>>(() =>
+    blur ? new Set(words.map((_, i) => i)) : new Set()
   );
 
   useEffect(() => {
     if (!blur) return;
     // Reblur everything when blurMode changes
-    setBlurred(new Set(words.map((_, i) => i)))
+    setBlurred(new Set(words.map((_, i) => i)));
   }, [blur?.mode, blur ? words : null]);
 
   const toggleBlur = (i: number) => {
     // Do not blur target text
     if (!blur) return;
 
-    setBlurred(prev => {
+    setBlurred((prev) => {
       const next = new Set(prev);
       // Word blur
       if (blur.mode === "word") {
@@ -91,7 +95,7 @@ export function HoverText({
   };
 
   return (
-    <p className="min-h-[40vh] rounded-md flex-wrap items-baseline p-4 text-base leading-6 font-sans shadow">
+    <p className={cn("flex-wrap items-baseline", className)}>
       {words.map((word, i) => {
         const isHighlighted = highlightIndices.includes(i);
         const isBlurred = blur ? blurred.has(i) : false;
@@ -108,14 +112,16 @@ export function HoverText({
               `}
             >
               {/* Text blur */}
-              <span className={`inline-block ${isBlurred ? "blur-sm" : "blur-none"}`}>
+              <span
+                className={`inline-block ${isBlurred ? "blur-sm" : "blur-none"}`}
+              >
                 {word}
               </span>
             </span>
 
             {/* Space (not interactive, not highlighted) */}
             <span aria-hidden className="select-none">
-                {spaces[i]}
+              {spaces[i]}
             </span>
           </span>
         );

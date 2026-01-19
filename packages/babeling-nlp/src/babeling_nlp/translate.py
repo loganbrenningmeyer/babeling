@@ -1,6 +1,5 @@
 import os
 import json
-import torch
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
@@ -9,45 +8,40 @@ from pydantic import BaseModel
 class TranslationOut(BaseModel):
     translation: str
 
+
 class ExplanationOut(BaseModel):
     explanation: str
+    examples: list[str]
 
 
-SYSTEM_TRANSLATE_EN_FR = """You are a professional translator.
-Translate from English to French.
+def mark_words(words, spaces, mark_idxs, tag):
+    out = []
+    for i, (word, space) in enumerate(zip(words, spaces)):
+        if i in mark_idxs:
+            out.append(f"<{tag}>{word}</{tag}>{space}")
+        else:
+            out.append(word + space)
 
-Rules:
-- Preserve meaning, tone, and register.
-- Do NOT add commentary, notes, or alternatives.
-- Keep punctuation, casing, numbers, and named entities consistent.
-- Preserve formatting (quotes, dashes, etc.).
-Return only the requested JSON.
-"""
-
-SYSTEM_EXPLAIN_EN_FR = """You are a bilingual translation coach (English to French).
-
-Explain the translation choice for the marked French word, grounded in the provided source and target text.
-
-- The selected French word is marked by <TARGET></TARGET>
-- The aligned English word(s) are marked by <SOURCE></SOURCE>
-"""
+    return "".join(out)
 
 
 class GeminiAPI:
-    def __init__(self):
+    def __init__(self, system_translate: str, system_explain: str):
         self.client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+        self.system_translate = system_translate
+        self.system_explain = system_explain
 
     def translate_en_fr(self, source: str) -> str:
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=source,
             config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_TRANSLATE_EN_FR,
+                system_instruction=self.system_translate,
                 response_mime_type="application/json",
                 response_schema=TranslationOut,
                 temperature=0.1,
                 max_output_tokens=1024,
-                thinking_config=types.ThinkingConfig(thinking_budget=0)
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
             ),
         )
 
@@ -56,7 +50,7 @@ class GeminiAPI:
 
         data = json.loads(response.text)
         return data["translation"]
-    
+
     def explain_en_fr(
         self,
         src_words: list[str],
@@ -64,44 +58,40 @@ class GeminiAPI:
         src_spaces: list[str],
         tgt_spaces: list[str],
         tgt_to_src: dict,
-        tgt_idx: int
+        tgt_idx: int,
     ) -> str:
         # ----------
         # Add source / target markers
         # ----------
-        tgt_words[tgt_idx] = f"<TARGET>{tgt_words[tgt_idx]}</TARGET>"
-        for src_idx in tgt_to_src[tgt_idx]:
-            src_words[src_idx] = f"<SOURCE>{src_words[src_idx]}</SOURCE>"
-        
-        # ----------
-        # Construct marked source / target text
-        # ----------
-        source = "".join(word + space for word, space in zip(src_words, src_spaces))
-        target = "".join(word + space for word, space in zip(tgt_words, tgt_spaces))
+        src_mark_idxs = set(tgt_to_src.get(tgt_idx, []))
+        tgt_mark_idxs = {tgt_idx}
 
-        prompt = f"""Source sentence:
-        {source}
+        source = mark_words(src_words, src_spaces, src_mark_idxs, "SOURCE")
+        target = mark_words(tgt_words, tgt_spaces, tgt_mark_idxs, "TARGET")
 
-        Target sentence:
-        {target}
-        """
+        # ----------
+        # Construct prompt
+        # ----------
+        prompt = f"[Source sentence]\n{source}\n\n[Target sentence]\n{target}"
 
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=prompt,
             config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_EXPLAIN_EN_FR,
+                system_instruction=self.system_explain,
                 response_mime_type="application/json",
                 response_schema=ExplanationOut,
                 temperature=0.1,
-                max_output_tokens=1024,
-                thinking_config=types.ThinkingConfig(thinking_budget=0)
+                max_output_tokens=256,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
             ),
         )
 
         if getattr(response, "parsed", None):
-            return response.parsed.explanation
+            return {
+                "explanation": response.parsed.explanation,
+                "examples": response.parsed.examples,
+            }
 
         data = json.loads(response.text)
-        return data["explanation"]
-
+        return {"explanation": data["explanation"], "examples": data["examples"]}
