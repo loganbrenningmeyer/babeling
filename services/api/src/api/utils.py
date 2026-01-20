@@ -16,6 +16,11 @@ def get_token_spaces(sentence, tokens):
 
     for token in tokens:
         start = sentence.find(token, i)
+
+        if start == -1:
+            spaces.append("")
+            continue
+
         end = start + len(token)
 
         j = end
@@ -23,7 +28,6 @@ def get_token_spaces(sentence, tokens):
             j += 1
 
         spaces.append(sentence[end:j])
-
         i = j
 
     return spaces

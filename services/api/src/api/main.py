@@ -102,6 +102,7 @@ def align(req: AlignRequest):
         src_sent_id_to_words,
         src_par_ids,
         src_par_id_to_words,
+        tgt_sent_ids
     ) = aligner.align(req.source, req.target)
 
     # -------------------------
@@ -121,21 +122,13 @@ def align(req: AlignRequest):
         "src_sent_id_to_words": src_sent_id_to_words,
         "src_par_ids": src_par_ids,
         "src_par_id_to_words": src_par_id_to_words,
+        "tgt_sent_ids": tgt_sent_ids,
     }
 
 
 # =========================
 # Explain & Define (/explain)
 # =========================
-class ExplainRequest(BaseModel):
-    src_words: list[str]
-    tgt_words: list[str]
-    src_spaces: list[str]
-    tgt_spaces: list[str]
-    tgt_to_src: dict[int, list[int]]
-    tgt_idx: int
-
-
 def define_fr(word: str):
     definition = {
         "word": word,
@@ -154,6 +147,15 @@ def define_fr(word: str):
     
     return definition
 
+class ExplainRequest(BaseModel):
+    src_words: list[str]
+    tgt_words: list[str]
+    src_spaces: list[str]
+    tgt_spaces: list[str]
+    src_sent_ids: list[int]
+    tgt_sent_ids: list[int]
+    tgt_to_src: dict[int, list[int]]
+    tgt_idx: int
 
 @app.post("/explain")
 def explain(req: ExplainRequest):
@@ -162,6 +164,8 @@ def explain(req: ExplainRequest):
         req.tgt_words,
         req.src_spaces,
         req.tgt_spaces,
+        req.src_sent_ids,
+        req.tgt_sent_ids,
         req.tgt_to_src,
         req.tgt_idx,
     )

@@ -11,6 +11,8 @@ export async function POST(req: Request) {
       tgt_words: req_data.tgt_words,
       src_spaces: req_data.src_spaces,
       tgt_spaces: req_data.tgt_spaces,
+      src_sent_ids: req_data.src_sent_ids,
+      tgt_sent_ids: req_data.tgt_sent_ids,
       tgt_to_src: req_data.tgt_to_src,
       tgt_idx: req_data.tgt_idx,
     }),

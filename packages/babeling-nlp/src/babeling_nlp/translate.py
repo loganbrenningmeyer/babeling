@@ -22,7 +22,7 @@ def mark_words(words, spaces, mark_idxs, tag):
         else:
             out.append(word + space)
 
-    return "".join(out)
+    return out
 
 
 class GeminiAPI:
@@ -57,6 +57,8 @@ class GeminiAPI:
         tgt_words: list[str],
         src_spaces: list[str],
         tgt_spaces: list[str],
+        src_sent_ids: list[int],
+        tgt_sent_ids: list[int],
         tgt_to_src: dict,
         tgt_idx: int,
     ) -> str:
@@ -66,8 +68,16 @@ class GeminiAPI:
         src_mark_idxs = set(tgt_to_src.get(tgt_idx, []))
         tgt_mark_idxs = {tgt_idx}
 
-        source = mark_words(src_words, src_spaces, src_mark_idxs, "SOURCE")
-        target = mark_words(tgt_words, tgt_spaces, tgt_mark_idxs, "TARGET")
+        sent_id = tgt_sent_ids[tgt_idx]
+
+        src_marked = mark_words(src_words, src_spaces, src_mark_idxs, "SOURCE")
+        tgt_marked = mark_words(tgt_words, tgt_spaces, tgt_mark_idxs, "TARGET")
+
+        src_sent = [w for i, w in zip(src_sent_ids, src_marked) if i == sent_id]
+        tgt_sent = [w for i, w in zip(tgt_sent_ids, tgt_marked) if i == sent_id]
+
+        source = "".join(src_sent)
+        target = "".join(tgt_sent)
 
         # ----------
         # Construct prompt

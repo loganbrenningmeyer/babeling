@@ -30,6 +30,7 @@ type Session = {
   tgt: {
     words: string[];
     spaces: string[];
+    sentIds: number[];
   };
 
   align: {
@@ -123,6 +124,7 @@ export default function Translate() {
       tgt: {
         words: align_data.tgt_words,
         spaces: align_data.tgt_spaces,
+        sentIds: align_data.tgt_sent_ids,
       },
       align: {
         srcToTgt: align_data.src_to_tgt,
@@ -166,6 +168,8 @@ export default function Translate() {
         tgt_words: session.tgt.words,
         src_spaces: session.src.spaces,
         tgt_spaces: session.tgt.spaces,
+        src_sent_ids: session.src.sentIds,
+        tgt_sent_ids: session.tgt.sentIds,
         tgt_to_src: session.align.tgtToSrc,
         tgt_idx: i,
       }),
@@ -309,7 +313,7 @@ export default function Translate() {
               open={popoverOpen}
               onOpenChange={setPopoverOpen}
               anchorEl={anchorEl}
-              className="min-h-[360px] min-w-[420px]"
+              className="min-h-[500px] min-w-[400px]"
             >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />

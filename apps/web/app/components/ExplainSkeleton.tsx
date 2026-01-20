@@ -25,9 +25,9 @@ export function ExplainSkeleton({
   animateClassName = "bg-muted-foreground/20 animate-pulse",
 }: ExplainSkeletonProps) {
   return (
-    <div className={cn("space-y-4 p-4", containerClassName)}>
+    <div className={cn("space-y-8 p-4", containerClassName)}>
       {/* Definition */}
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className={cn("h-4 w-1/4 rounded", animateClassName)} />
         <div className={cn("h-3 w-1/3 rounded", animateClassName)} />
         <div className={cn("h-3 w-5/6 rounded", animateClassName)} />
@@ -36,7 +36,7 @@ export function ExplainSkeleton({
       <div className="h-px bg-border" />
 
       {/* Explanation */}
-      <div className="space-y-2">
+      <div className="space-y-4">
         <div className={cn("h-4 w-full rounded", animateClassName)} />
         <div className={cn("h-4 w-full rounded", animateClassName)} />
         <div className={cn("h-4 w-full rounded", animateClassName)} />
@@ -44,7 +44,7 @@ export function ExplainSkeleton({
       </div>
 
       {/* Examples */}
-      <div className="space-y-3">
+      <div className="space-y-8">
         <BulletSkeletonLine className={animateClassName} />
         <BulletSkeletonLine className={animateClassName} />
         <BulletSkeletonLine className={animateClassName} />

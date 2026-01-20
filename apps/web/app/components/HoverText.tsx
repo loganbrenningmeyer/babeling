@@ -138,6 +138,24 @@ export function HoverText({
     return space;
   }
 
+  function renderSpace(space: string) {
+    if (!space) return null;
+
+    // Split on newlines and insert <br/>
+    const parts = space.split("\n");
+
+    // If there are no newlines, just render the string
+    if (parts.length === 1) return parts[0];
+
+    const out: React.ReactNode[] = [];
+    for (let k = 0; k < parts.length; k++) {
+      if (k > 0) out.push(<br key={`br-${k}`} />);
+      // Render the chunk after each newline (could be indentation spaces)
+      if (parts[k].length > 0) out.push(parts[k]);
+    }
+    return out;
+  }
+
   // -------------------------
   // Build spans for each word/punctuation cluster
   // -------------------------
@@ -188,7 +206,7 @@ export function HoverText({
 
         {/* Space after cluster */}
         <span aria-hidden className="select-none whitespace-pre-wrap">
-          {normalizeSpaceForPunct(nextToken, space)}
+          {renderSpace(normalizeSpaceForPunct(nextToken, space))}
         </span>
       </span>
     );
