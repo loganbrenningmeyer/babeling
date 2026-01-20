@@ -16,11 +16,12 @@ export function DefineCard({
   data: DefineEntry | null;
   className?: string;
 }) {
-  if (!data) {
+  if (!data?.definition) {
     return (
-      <div className={cn("text-base text-muted-foreground", className)}>
-        Click a French word to get a definition...
-      </div>
+      <>
+        <div className="mb-1 text-lg font-semibold">{data?.word}</div>
+        <p className="text-sm text-muted-foreground">Definition unavailable.</p>
+      </>
     );
   }
 

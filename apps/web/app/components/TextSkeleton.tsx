@@ -7,7 +7,7 @@ type TextSkeletonProps = {
 };
 
 export function TextSkeleton({
-  containerClassName = "min-h-[40vh]",
+  containerClassName,
   animateClassName = "bg-muted-foreground/20 animate-pulse",
   blurClassName = "blur-none",
 }: TextSkeletonProps) {

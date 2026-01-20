@@ -19,7 +19,7 @@ export default function RootLayout({
           </div>
         </nav>
 
-        <main className="mx-auto max-w-5xl px-4 py-12">
+        <main className="w-full py-12">
           {children}
         </main>
       </body>

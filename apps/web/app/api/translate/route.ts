@@ -11,5 +11,5 @@ export async function POST(req: Request) {
 
     const data = await res.json();
 
-    return NextResponse.json({ translation: data.translation });
+    return NextResponse.json({ source: data.source, target: data.target });
 }

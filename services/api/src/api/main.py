@@ -6,31 +6,28 @@ from pydantic import BaseModel
 from pathlib import Path
 from collections import defaultdict
 
+from .utils import *
+
 # -------------------------
 # Paths
 # -------------------------
 REPO_ROOT = Path(__file__).resolve().parents[4]
 CKPT_PATH = (
-    REPO_ROOT
-    / "artifacts"
-    / "binaryalign"
-    / "en-fr"
-    / "model-finetune-step55000.ckpt"
+    REPO_ROOT / "artifacts" / "binaryalign" / "en-fr" / "model-finetune-step55000.ckpt"
 )
 
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
+
 def load_prompt(filename: str) -> str:
     return (PROMPTS_DIR / filename).read_text(encoding="utf-8")
+
 
 # -------------------------
 # Load BinaryAlign model
 # -------------------------
 print("Loading Aligner...")
-aligner = Aligner(
-    model_name="microsoft/mdeberta-v3-base",
-    ckpt_path=CKPT_PATH
-)
+aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
 
 # -------------------------
 # Prepare GeminiAPI / French dictionary
@@ -39,10 +36,7 @@ print("Creating Translator...")
 system_translate = load_prompt("translate_en_fr.txt")
 system_explain = load_prompt("explain_en_fr.txt")
 
-gemini_api = GeminiAPI(
-    system_translate=system_translate,
-    system_explain=system_explain
-)
+gemini_api = GeminiAPI(system_translate=system_translate, system_explain=system_explain)
 
 with open(REPO_ROOT / "french.jsonl", "r") as f:
     french_dict = json.load(f)
@@ -62,111 +56,71 @@ class TranslateRequest(BaseModel):
 
 @app.post("/translate")
 def translate(req: TranslateRequest):
-    return {"translation": gemini_api.translate_en_fr(req.source)}
+    # -------------------------
+    # Normalize wrapped text / Mark linebreaks <LB>
+    # -------------------------
+    source = normalize_wrapped_text(req.source)
+    source = mark_linebreaks(source)
+
+    # -- Translate
+    target = gemini_api.translate_en_fr(source)
+
+    # -------------------------
+    # Replace <LB> markers with \n
+    # -------------------------
+    source = remove_linebreaks(source)
+    target = remove_linebreaks(target)
+
+    return {"source": source, "target": target}
 
 
 # =========================
 # Align (/align)
 # =========================
-def get_token_spaces(sentence, tokens):
-    i = 0
-    spaces = []
-
-    for token in tokens:
-        start = sentence.find(token, i)
-        end = start + len(token)
-
-        j = end
-        while j < len(sentence) and sentence[j].isspace():
-            j += 1
-
-        spaces.append(sentence[end:j])
-
-        i = j
-
-    return spaces
-
-def get_sentence_ids(words: list[str]):
-    punctuation = ['.', '!', '?']
-
-    sent_ids = []
-    sent_id_to_words = defaultdict(list)
-    sent_id = 0
-
-    for i, word in enumerate(words):
-        if word in punctuation:
-            sent_ids.append(sent_id)
-            sent_id_to_words[sent_id].append(i)
-            sent_id += 1
-            continue
-
-        sent_ids.append(sent_id)
-        sent_id_to_words[sent_id].append(i)
-
-    return sent_ids, dict(sent_id_to_words)
-
-def get_paragraph_ids(words: list[str]):
-    par_ids = []
-    par_id_to_words = defaultdict(list)
-    par_id = 0
-
-    for i, word in enumerate(words):
-        if word == "\n":
-            par_id += 1
-            par_id_to_words[par_id].append(i)
-            continue
-
-        par_ids.append(par_id)
-        par_id_to_words[par_id].append(i)
-
-    return par_ids, dict(par_id_to_words)
-
 class AlignRequest(BaseModel):
     source: str
     target: str
 
+
 @app.post("/align")
 def align(req: AlignRequest):
-    src_words, tgt_words, alignments = aligner.align(req.source, req.target, threshold=0.1)
-
-    # ----------
-    # Create word index mappings
-    # ----------
-    src_to_tgt = {}
-    tgt_to_src = {tgt_idx: [] for tgt_idx in range(len(tgt_words))}
+    """
     
-    # src_to_tgt: Source word index -> Target word indices
-    for (src_idx, _), tgt_als in alignments.items():
-        src_to_tgt[src_idx] = [tgt_idx for tgt_idx, _, _ in tgt_als]
+    
+    Args:
+    
+    
+    Returns:
+    
+    """
+    (
+        src_words,
+        tgt_words,
+        src_alignments,
+        tgt_alignments,
+        src_sent_ids,
+        src_sent_id_to_words,
+        src_par_ids,
+        src_par_id_to_words,
+    ) = aligner.align(req.source, req.target)
 
-    # tgt_to_src: Target word index -> Source word indices
-    for src_idx, tgt_idxs in src_to_tgt.items():
-        for tgt_idx in tgt_idxs:
-            tgt_to_src[tgt_idx].append(src_idx) 
-
-    # ----------
+    # -------------------------
     # Determine spacing after words
-    # ----------
+    # -------------------------
     src_spaces = get_token_spaces(req.source, src_words)
     tgt_spaces = get_token_spaces(req.target, tgt_words)
-
-    # ----------
-    # Get sentence / paragraph IDs by word
-    # ----------
-    src_sent_ids, src_sent_id_to_words = get_sentence_ids(src_words)
-    src_par_ids, src_par_id_to_words = get_paragraph_ids(src_words)
 
     return {
         "src_words": src_words,
         "tgt_words": tgt_words,
-        "src_to_tgt": src_to_tgt,
-        "tgt_to_src": tgt_to_src,
+        "src_to_tgt": src_alignments,
+        "tgt_to_src": tgt_alignments,
         "src_spaces": src_spaces,
         "tgt_spaces": tgt_spaces,
         "src_sent_ids": src_sent_ids,
         "src_sent_id_to_words": src_sent_id_to_words,
         "src_par_ids": src_par_ids,
-        "src_par_id_to_words": src_par_id_to_words
+        "src_par_id_to_words": src_par_id_to_words,
     }
 
 
@@ -181,14 +135,25 @@ class ExplainRequest(BaseModel):
     tgt_to_src: dict[int, list[int]]
     tgt_idx: int
 
+
 def define_fr(word: str):
+    definition = {
+        "word": word,
+        "pos": "",
+        "definition": "",
+        "pronunciation": "",
+        "infinitive": ""
+    }
+
     try:
-        dict_entry = french_dict[word.lower()]
-        dict_entry["word"] = word.lower()
-        return dict_entry
-    except Exception as e: 
-        print(f"{e}: Definition error!", flush=False)
-        return None
+        dict_entry: dict = french_dict[word.lower()]
+        for k in definition.keys() & dict_entry.keys():
+            definition[k] = dict_entry[k]
+    except Exception as e:
+        pass
+    
+    return definition
+
 
 @app.post("/explain")
 def explain(req: ExplainRequest):
@@ -198,11 +163,8 @@ def explain(req: ExplainRequest):
         req.src_spaces,
         req.tgt_spaces,
         req.tgt_to_src,
-        req.tgt_idx
+        req.tgt_idx,
     )
     definition_data = define_fr(req.tgt_words[req.tgt_idx])
 
-    return {
-        "explanation": explanation_data,
-        "definition": definition_data
-    }
+    return {"explanation": explanation_data, "definition": definition_data}

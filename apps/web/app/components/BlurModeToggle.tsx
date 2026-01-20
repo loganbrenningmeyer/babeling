@@ -4,10 +4,12 @@ export type BlurMode = "word" | "sentence" | "paragraph";
 
 export function BlurModeToggle({
     value,
-    onChange
+    onChange,
+    className = "shadow",
 }: {
     value: BlurMode;
     onChange: (v: BlurMode) => void;
+    className?: string;
 }) {
     return (
         <ToggleGroup
@@ -17,7 +19,7 @@ export function BlurModeToggle({
             if (!v) return;
             onChange(v as BlurMode);
         }}
-        className="shadow"
+        className={className}
         >
             <ToggleGroupItem value="word">
                 Word

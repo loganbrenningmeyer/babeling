@@ -22,5 +22,5 @@ class Aligner:
 
         self.binaryalign = BinaryAlign(model, tokenizer, "en", "fr")
 
-    def align(self, src_sentence: str, tgt_sentence: str, threshold: float):
-        return self.binaryalign.align(src_sentence, tgt_sentence, threshold)
+    def align(self, source: str, target: str, threshold: float=0.1):
+        return self.binaryalign.align_document_pair(source, target, threshold)

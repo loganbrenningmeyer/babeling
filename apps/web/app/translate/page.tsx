@@ -92,14 +92,17 @@ export default function Translate() {
       body: JSON.stringify({ source: sourceText }),
     });
     const translate_data = await translate_res.json();
-    const target = translate_data.translation;
+
+    // Update normalized source text / get translated target
+    const source = translate_data.source;
+    const target = translate_data.target;
 
     // Align
     const align_res = await fetch("/api/align", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        source: sourceText,
+        source,
         target,
       }),
     });
@@ -107,7 +110,7 @@ export default function Translate() {
 
     // Update session
     setSession({
-      sourceText,
+      sourceText: source,
       targetText: target,
       src: {
         words: align_data.src_words,
@@ -132,10 +135,10 @@ export default function Translate() {
   }
 
   function translateAgain() {
+    setSourceText("");
     setShowAligned(false);
     setHoveredSourceIndex(null);
     setHoveredTargetIndex(null);
-    setSourceText("");
     setSession(null);
     setExplainData(null);
     setDefineData(null);
@@ -173,13 +176,17 @@ export default function Translate() {
       explanation: data.explanation.explanation,
       examples: data.explanation.examples,
     });
-    setDefineData({
-      word: data.definition.word,
-      pos: data.definition.pos,
-      definition: data.definition.definition,
-      pronunciation: data.definition.pronunciation,
-      infinitive: data.definition.infinitive,
-    });
+    setDefineData(
+      data.definition
+        ? {
+            word: data.definition.word,
+            pos: data.definition.pos,
+            definition: data.definition.definition,
+            pronunciation: data.definition.pronunciation,
+            infinitive: data.definition.infinitive,
+          }
+        : null
+    );
 
     setExplanationLoading(false);
   }
@@ -188,15 +195,15 @@ export default function Translate() {
   // Render
   // -------------------------
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div>
+      {/* -------------------------
+      //* Source Text Input 
+      //* ------------------------- */}
       {!showAligned && !translationLoading ? (
-        <>
-          {/* -------------------------
-           /* English Source Text
-           /* ------------------------- */}
+        <div className="mx-auto max-w-5xl px-4">
           <Pane title="English">
             <AppTextarea
-              className="min-h-[40vh]"
+              className="min-h-[60vh]"
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value)}
               placeholder="Type some English text..."
@@ -204,110 +211,117 @@ export default function Translate() {
             <Button
               onClick={translate_and_align}
               disabled={translationLoading}
-              className="mt-4 shadow"
+              className="mt-6 shadow"
             >
               {translationLoading ? "Translating and Aligning..." : "Translate"}
             </Button>
           </Pane>
-
-          {/* -------------------------
-           /* French Target Text
-           /* ------------------------- */}
-          <Pane title="French">
-            <TextSurface className="min-h-[40vh]">
-              {session?.targetText ?? (
-                <span className="text-muted-foreground">
-                  Waiting for translation...
-                </span>
-              )}
-            </TextSurface>
-          </Pane>
-        </>
+        </div>
       ) : (
         <>
           {/* -------------------------
-           /* English HoverText
-           /* ------------------------- */}
-          <Pane title="English">
-            <TextSurface className="min-h-[40vh]">
-              {translationLoading || !session ? (
-                <TextSkeleton blurClassName="blur-sm" />
-              ) : (
-                <HoverText
-                  variant="source"
-                  words={session.src.words}
-                  spaces={session.src.spaces}
-                  onHover={setHoveredSourceIndex}
-                  highlightIndices={[
-                    ...(hoveredSourceIndex !== null
-                      ? [hoveredSourceIndex]
-                      : []),
-                    ...alignedSourceIndices,
-                  ]}
-                  blur={{
-                    mode: blurMode,
-                    sentIds: session.src.sentIds,
-                    parIds: session.src.parIds,
-                    sentIdToWords: session.src.sentIdToWords,
-                    parIdToWords: session.src.parIdToWords,
-                  }}
+          //* Source / Target HoverText
+          //* ------------------------- */}
+          <div className="mx-auto max-w-5xl px-4">
+            <Pane>
+              <TextSurface className="min-h-[60vh]">
+                {/* Column headers */}
+                <div className="grid grid-cols-2 border-b border-border text-sm font-medium text-muted-foreground">
+                  <div className="px-4 py-2 border-r border-border">
+                    English
+                  </div>
+                  <div className="px-4 py-2 pl-8">French</div>
+                </div>
+
+                {/* Column content */}
+                <div className="grid grid-cols-2 flex-1">
+                  {/* -------------------------
+                  //* Left: English
+                  //* ------------------------- */}
+                  <div className="p-4 pr-6 border-r border-border">
+                    {translationLoading || !session ? (
+                      <TextSkeleton blurClassName="blur-sm" />
+                    ) : (
+                      <HoverText
+                        variant="source"
+                        words={session.src.words}
+                        spaces={session.src.spaces}
+                        onHover={setHoveredSourceIndex}
+                        highlightIndices={[
+                          ...(hoveredSourceIndex !== null
+                            ? [hoveredSourceIndex]
+                            : []),
+                          ...alignedSourceIndices,
+                        ]}
+                        blur={{
+                          mode: blurMode,
+                          sentIds: session.src.sentIds,
+                          parIds: session.src.parIds,
+                          sentIdToWords: session.src.sentIdToWords,
+                          parIdToWords: session.src.parIdToWords,
+                        }}
+                      />
+                    )}
+                  </div>
+
+                  {/* -------------------------
+                  //* Right: French
+                  //* ------------------------- */}
+                  <div className="p-4 pl-8">
+                    {translationLoading || !session ? (
+                      <TextSkeleton />
+                    ) : (
+                      <HoverText
+                        variant="target"
+                        words={session.tgt.words}
+                        spaces={session.tgt.spaces}
+                        onHover={setHoveredTargetIndex}
+                        highlightIndices={[
+                          ...(hoveredTargetIndex !== null
+                            ? [hoveredTargetIndex]
+                            : []),
+                          ...alignedTargetIndices,
+                        ]}
+                        onWordClick={handleTargetWordClick}
+                      />
+                    )}
+                  </div>
+                </div>
+              </TextSurface>
+
+              {/* Buttons: Translate again / Blur mode */}
+              <div className="flex items-center mt-6 gap-6">
+                <Button onClick={translateAgain} className="shadow">
+                  {"Translate again"}
+                </Button>
+                <BlurModeToggle
+                  value={blurMode}
+                  onChange={setBlurMode}
+                  className="shadow border"
                 />
-              )}
-            </TextSurface>
-
-            {/* Buttons: Translate again / Blur mode */}
-            <div className="flex mt-4 gap-3 items-center">
-              <Button onClick={translateAgain} className="shadow">
-                {"Translate again"}
-              </Button>
-              <BlurModeToggle value={blurMode} onChange={setBlurMode} />
-            </div>
-          </Pane>
-
-          {/* -------------------------
-           /* French HoverText
-           /* ------------------------- */}
-          <Pane title="French">
-            <TextSurface className="min-h-[40vh]">
-              {translationLoading || !session ? (
-                <TextSkeleton />
-              ) : (
-                <HoverText
-                  variant="target"
-                  words={session.tgt.words}
-                  spaces={session.tgt.spaces}
-                  onHover={setHoveredTargetIndex}
-                  highlightIndices={[
-                    ...(hoveredTargetIndex !== null
-                      ? [hoveredTargetIndex]
-                      : []),
-                    ...alignedTargetIndices,
-                  ]}
-                  onWordClick={handleTargetWordClick}
-                />
-              )}
-            </TextSurface>
-          </Pane>
-
-          {/* -------------------------
-           /* Explain / Define Popover
-           /* ------------------------- */}
-          <AnchoredPopover
-            open={popoverOpen}
-            onOpenChange={setPopoverOpen}
-            anchorEl={anchorEl}
-            className="min-h-[360px] min-w-[420px]"
-          >
-            {explanationLoading || !session ? (
-              <ExplainSkeleton />
-            ) : (
-              <div className="p-4 space-y-4">
-                <DefineCard data={defineData} />
-                <div className="h-px bg-border" />
-                <ExplainCard data={explainData} />
               </div>
-            )}
-          </AnchoredPopover>
+            </Pane>
+
+            {/* -------------------------
+            /* Explain / Define Popover
+            /* ------------------------- */}
+            <AnchoredPopover
+              open={popoverOpen}
+              onOpenChange={setPopoverOpen}
+              anchorEl={anchorEl}
+              className="min-h-[360px] min-w-[420px]"
+            >
+              {explanationLoading || !session ? (
+                <ExplainSkeleton />
+              ) : (
+                <div className="p-4 space-y-4">
+                  <DefineCard data={defineData} />
+                  <div className="h-px bg-border" />
+                  <ExplainCard data={explainData} />
+                </div>
+              )}
+            </AnchoredPopover>
+          </div>
         </>
       )}
     </div>

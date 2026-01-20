@@ -9,11 +9,12 @@ export function AppTextarea({
     <Textarea
       className={cn(
         `
-        resize-none
+        w-full resize-none
         !text-base font-sans leading-6
         border-0 p-4
         focus-visible:ring-0 focus-visible:ring-offset-0
         shadow
+        whitespace-pre-wrap
         `,
         className
       )}

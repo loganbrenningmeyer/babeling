@@ -12,7 +12,7 @@ Return ONLY valid JSON with keys:
 
 Formatting rules:
 - You MAY use Markdown.
-- Use **bold** only for key linguistic terms or decisive concepts.
+- Use **bold** for key linguistic terms or decisive concepts in the explanation.
 - Use *italics* only for nuance or contrast.
 - Use bullet points only when they improve clarity.
 - Do NOT use bullet points to list the example sentences.
@@ -27,4 +27,5 @@ Explanation rules:
 - Do NOT explain simple English words that the reader very likely knows. 
 
 Examples rules:
+- **bold** the marked French word within the examples.
 - Provide 2–3 minimal example French sentences that demonstrate the usage of the marked French word.
