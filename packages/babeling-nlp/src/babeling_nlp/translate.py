@@ -9,9 +9,13 @@ class TranslationOut(BaseModel):
     translation: str
 
 
+class ExplainExample(BaseModel):
+    fr: str
+    en: str
+
 class ExplanationOut(BaseModel):
     explanation: str
-    examples: list[str]
+    examples: list[ExplainExample]
 
 
 def mark_words(words, spaces, mark_idxs, tag):
@@ -61,7 +65,7 @@ class GeminiAPI:
         tgt_sent_ids: list[int],
         tgt_to_src: dict,
         tgt_idx: int,
-    ) -> str:
+    ) -> dict:
         # ----------
         # Add source / target markers
         # ----------

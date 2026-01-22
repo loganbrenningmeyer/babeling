@@ -8,7 +8,9 @@ The aligned English word(s) are marked by <SOURCE></SOURCE>.
 Output format:
 Return ONLY valid JSON with keys:
 - "explanation": string (Markdown allowed)
-- "examples": array of 2-3 strings (Markdown allowed)
+- "examples": array of 2-3 objects, each with:
+    - "fr": string (French example sentence)
+    - "en": string (English translation of that sentence)
 
 Formatting rules:
 - You MAY use Markdown.
@@ -27,5 +29,8 @@ Explanation rules:
 - Do NOT explain simple English words that the reader very likely knows. 
 
 Examples rules:
-- **bold** the marked French word within the examples.
-- Provide 2–3 minimal example French sentences that demonstrate the usage of the marked French word.
+- Provide 2–3 minimal French example sentences that demonstrate the usage of the marked French word.
+- In each French example, **bold** the marked French word.
+- Each French example MUST have a corresponding natural English translation.
+- English translations should be idiomatic, not literal.
+- Do NOT bold anything in the English translations.
