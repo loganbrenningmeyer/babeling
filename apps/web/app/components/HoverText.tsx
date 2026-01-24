@@ -27,6 +27,7 @@ type HoverTextProps = {
   onHover?: (index: number | null) => void;
   onWordClick?: (index: number, el: HTMLElement) => void;
   blur?: BlurConfig;
+  disabled?: boolean;
   className?: string;
 };
 
@@ -38,6 +39,7 @@ export function HoverText({
   onHover,
   onWordClick,
   blur,
+  disabled,
   className,
 }: HoverTextProps) {
   // Define source / target highlight colors
@@ -228,5 +230,5 @@ export function HoverText({
     i = j + 1;    // Advance past the cluster
   }
 
-  return <p className={cn("whitespace-pre-wrap", className)}>{hoverWords}</p>;
+  return <p className={cn("whitespace-pre-wrap", disabled ? "pointer-events-none" : "", className)}>{hoverWords}</p>;
 }

@@ -1,7 +1,8 @@
 import json
 from fastapi import FastAPI
+from fastapi.responses import Response
 from babeling_nlp.align import Aligner
-from babeling_nlp.translate import GeminiAPI
+from babeling_nlp.gemini import GeminiAPI
 from pydantic import BaseModel
 from pathlib import Path
 from collections import defaultdict
@@ -172,3 +173,18 @@ def explain(req: ExplainRequest):
     definition_data = define_fr(req.tgt_words[req.tgt_idx])
 
     return {"explanation": explanation_data, "definition": definition_data}
+
+
+# =========================
+# Pronounce (/pronounce)
+# =========================
+class PronounceRequest(BaseModel):
+    text: str
+
+@app.post("/pronounce")
+def pronounce(req: PronounceRequest):
+    wav_bytes = gemini_api.pronounce(req.text)
+    return Response(
+        content=wav_bytes,
+        media_type="audio/wav"
+    )

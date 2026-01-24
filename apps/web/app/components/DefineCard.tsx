@@ -1,6 +1,8 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
+import { PronounceButton } from "./PronounceButton";
+
 export type DefineEntry = {
   word: string;
   pos: string;
@@ -13,33 +15,31 @@ export function DefineCard({
   data,
   className,
 }: {
-  data: DefineEntry | null;
+  data: DefineEntry;
   className?: string;
 }) {
-  if (!data?.definition) {
-    return (
-      <>
-        <div className="mb-1 text-lg font-semibold">{data?.word}</div>
-        <p className="text-sm text-muted-foreground">Definition unavailable.</p>
-      </>
-    );
-  }
-
   return (
     <div className={cn("space-y-3", className)}>
       {/* Headword */}
-      <div className="text-lg font-semibold">{data.word}</div>
+      <div className="gap-2 inline-flex">
+        <div className="text-lg font-semibold">{data.word}</div>
+        <PronounceButton text={data.word} />
+      </div>
 
-      {/* Top line: POS + pronunciation */}
       <div className="flex flex-wrap items-center gap-2">
-        <Badge variant="secondary">{data.pos}</Badge>
-
+        {/* IPA Pronunciation / Audio */}
         {data.pronunciation && (
-          <span className="text-sm text-muted-foreground">
-            /{data.pronunciation}/
-          </span>
+          <Badge variant="outline" className="h-6 inline-flex text-sm">
+            {data.pronunciation}
+          </Badge>
         )}
 
+        {/* Part of Speech */}
+        {data.pos && (
+          <Badge variant="secondary" className="h-6 inline-flex text-sm">{data.pos}</Badge>
+        )}
+
+        {/* Infinitive */}
         {data.infinitive && (
           <span className="text-sm text-muted-foreground">
             infinitive:{" "}
@@ -49,9 +49,12 @@ export function DefineCard({
           </span>
         )}
       </div>
-
+      
       {/* Definition body */}
-      <p className="text-base leading-6">{data.definition}</p>
+      <p className="text-base leading-6">
+        {data.definition ? data.definition : "Definition unavailable."}
+      </p>
+
     </div>
   );
 }

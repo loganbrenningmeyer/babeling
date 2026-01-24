@@ -1,5 +1,7 @@
 import os
+import io
 import json
+import wave
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
@@ -109,3 +111,38 @@ class GeminiAPI:
 
         data = json.loads(response.text)
         return {"explanation": data["explanation"], "examples": data["examples"]}
+
+    def pronounce(self, text: str, num_attempts: int=10):
+        for attempt in range(num_attempts):
+            try:
+                response = self.client.models.generate_content(
+                    model="gemini-2.5-flash-preview-tts",
+                    contents=f"Prononce en français (France, fr-FR): {text}",
+                    config=types.GenerateContentConfig(
+                        response_modalities=["AUDIO"],
+                        speech_config=types.SpeechConfig(
+                            voice_config=types.VoiceConfig(
+                                prebuilt_voice_config=types.PrebuiltVoiceConfig(
+                                voice_name='Erinome',
+                                )
+                            )
+                        ),
+                    )
+                )
+
+                pcm = response.candidates[0].content.parts[0].inline_data.data
+
+                # -------------------------
+                # Wrap PCM frames into a WAV container
+                # -------------------------
+                buf = io.BytesIO()
+                with wave.open(buf, "wb") as wf:
+                    wf.setnchannels(1)
+                    wf.setsampwidth(2)
+                    wf.setframerate(24000)
+                    wf.writeframes(pcm)
+                return buf.getvalue()
+            except:
+                continue
+
+        raise RuntimeError(f"Gemini TTS returned no audio after {num_attempts} attempts.")

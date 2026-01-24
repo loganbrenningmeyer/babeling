@@ -20,19 +20,11 @@ export function ExplainCard({
   data,
   className,
 }: {
-  data: ExplainEntry | null;
+  data: ExplainEntry;
   className?: string;
 }) {
-  if (!data) {
-    return (
-      <div className={cn("text-base text-muted-foreground", className)}>
-        Click a French word to get an explanation...
-      </div>
-    );
-  }
-
   return (
-    <div className={cn("prose max-w-none", className)}>
+    <div className={cn("prose prose-sm max-w-none", className)}>
       <ReactMarkdown>{data.explanation}</ReactMarkdown>
       
       <TooltipProvider delayDuration={200}>

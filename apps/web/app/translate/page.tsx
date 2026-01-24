@@ -55,6 +55,9 @@ export default function Translate() {
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
   const [showAligned, setShowAligned] = useState(false);
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
+  const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
+  const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
+  const [targetLocked, setTargetLocked] = useState(false);
   // -------------------------
   // Popover / interaction state
   // -------------------------
@@ -70,13 +73,19 @@ export default function Translate() {
   // -------------------------
   // Derived values
   // -------------------------
-  const alignedSourceIndices =
-    hoveredTargetIndex !== null
-      ? (session?.align.tgtToSrc[hoveredTargetIndex] ?? [])
-      : [];
-  const alignedTargetIndices =
-    hoveredSourceIndex !== null
-      ? (session?.align.srcToTgt[hoveredSourceIndex] ?? [])
+  const activeSourceIndex = popoverOpen ? null : hoveredSourceIndex;
+  const activeTargetIndex = popoverOpen ? lockedTargetIndex : hoveredTargetIndex;
+
+  const activeAlignedSource =
+    popoverOpen
+      ? lockedSourceIndices
+      : hoveredTargetIndex !== null
+        ? (session?.align.tgtToSrc[hoveredTargetIndex] ?? [])
+        : [];
+    
+  const activeAlignedTarget =
+    activeSourceIndex !== null
+      ? (session?.align.srcToTgt[activeSourceIndex] ?? [])
       : [];
 
   // -------------------------
@@ -152,11 +161,18 @@ export default function Translate() {
 
   async function handleTargetWordClick(i: number, el: HTMLElement) {
     if (!session) return;
+    if (targetLocked) return;
+    setTargetLocked(true);
 
     // -------------------------
     // Unblur aligned English words
     // -------------------------
     const srcIdxs = session.align.tgtToSrc[i] ?? [];
+
+    setLockedTargetIndex(i);
+    setLockedSourceIndices(srcIdxs);
+    setHoveredTargetIndex(i);
+
     setBlurredSource(prev => {
       const next = new Set(prev);
       for (const idx of srcIdxs) next.delete(idx);
@@ -208,6 +224,19 @@ export default function Translate() {
 
     setExplanationLoading(false);
   }
+  
+  // -------------------------
+  // Hover Highlighting
+  // -------------------------
+  const handleSourceHover = (idx: number | null) => {
+    if (popoverOpen) return;        // lock
+    setHoveredSourceIndex(idx);
+  };
+
+  const handleTargetHover = (idx: number | null) => {
+    if (popoverOpen) return;        // lock
+    setHoveredTargetIndex(idx);
+  };
 
   // -------------------------
   // Render
@@ -264,12 +293,10 @@ export default function Translate() {
                         variant="source"
                         words={session.src.words}
                         spaces={session.src.spaces}
-                        onHover={setHoveredSourceIndex}
+                        onHover={handleSourceHover}
                         highlightIndices={[
-                          ...(hoveredSourceIndex !== null
-                            ? [hoveredSourceIndex]
-                            : []),
-                          ...alignedSourceIndices,
+                          ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
+                          ...activeAlignedSource,
                         ]}
                         blur={{
                           mode: blurMode,
@@ -294,14 +321,13 @@ export default function Translate() {
                     ) : (
                       <HoverText
                         variant="target"
+                        disabled={popoverOpen}
                         words={session.tgt.words}
                         spaces={session.tgt.spaces}
-                        onHover={setHoveredTargetIndex}
+                        onHover={handleTargetHover}
                         highlightIndices={[
-                          ...(hoveredTargetIndex !== null
-                            ? [hoveredTargetIndex]
-                            : []),
-                          ...alignedTargetIndices,
+                          ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
+                          ...activeAlignedTarget,
                         ]}
                         onWordClick={handleTargetWordClick}
                       />
@@ -328,17 +354,27 @@ export default function Translate() {
             /* ------------------------- */}
             <AnchoredPopover
               open={popoverOpen}
-              onOpenChange={setPopoverOpen}
+              onOpenChange={(open) => {
+                setPopoverOpen(open);
+
+                if (!open) {
+                  setTargetLocked(false);
+                  setLockedTargetIndex(null);
+                  setLockedSourceIndices([]);
+                  setHoveredTargetIndex(null);
+                  setHoveredSourceIndex(null);
+                }
+              }}
               anchorEl={anchorEl}
-              className="min-h-[500px] min-w-[400px]"
+              className="min-w-[400px]"
             >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
                 <div className="p-4 space-y-4">
-                  <DefineCard data={defineData} />
+                  {defineData && <DefineCard data={defineData} />}
                   <div className="h-px bg-border" />
-                  <ExplainCard data={explainData} />
+                  {explainData && <ExplainCard data={explainData} />}
                 </div>
               )}
             </AnchoredPopover>
