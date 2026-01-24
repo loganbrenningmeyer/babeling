@@ -141,6 +141,7 @@ class GeminiAPI:
                     wf.setsampwidth(2)
                     wf.setframerate(24000)
                     wf.writeframes(pcm)
+                print(f"Attempt {attempt + 1}", flush=False)
                 return buf.getvalue()
             except:
                 continue
