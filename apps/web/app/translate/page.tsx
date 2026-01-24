@@ -54,6 +54,7 @@ export default function Translate() {
   const [explanationLoading, setExplanationLoading] = useState(false);
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
   const [showAligned, setShowAligned] = useState(false);
+  const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
   // -------------------------
   // Popover / interaction state
   // -------------------------
@@ -132,6 +133,9 @@ export default function Translate() {
       },
     });
 
+    // Initialize source words to blurred
+    setBlurredSource(new Set(align_data.src_words.map((_: any, i: number) => i)));
+
     setTranslationLoading(false);
     setShowAligned(true);
   }
@@ -148,6 +152,16 @@ export default function Translate() {
 
   async function handleTargetWordClick(i: number, el: HTMLElement) {
     if (!session) return;
+
+    // -------------------------
+    // Unblur aligned English words
+    // -------------------------
+    const srcIdxs = session.align.tgtToSrc[i] ?? [];
+    setBlurredSource(prev => {
+      const next = new Set(prev);
+      for (const idx of srcIdxs) next.delete(idx);
+      return next;
+    })
 
     // -------------------------
     // Store target word idx / where it is
@@ -263,6 +277,9 @@ export default function Translate() {
                           parIds: session.src.parIds,
                           sentIdToWords: session.src.sentIdToWords,
                           parIdToWords: session.src.parIdToWords,
+
+                          blurred: blurredSource,
+                          setBlurred: setBlurredSource,
                         }}
                       />
                     )}

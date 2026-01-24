@@ -14,6 +14,9 @@ type BlurConfig = {
   parIds: number[];
   sentIdToWords: IdToWords;
   parIdToWords: IdToWords;
+
+  blurred?: Set<number>;
+  setBlurred?: React.Dispatch<React.SetStateAction<Set<number>>>;
 };
 
 type HoverTextProps = {
@@ -44,17 +47,20 @@ export function HoverText({
       : "bg-orange-500/20 hover:bg-orange-500/30";
 
   // Toggle blur/unblur (initially all blurred source)
-  const [blurred, setBlurred] = useState<Set<number>>(() =>
+  const [internalBlurred, internalSetBlurred] = useState<Set<number>>(() =>
     blur ? new Set(words.map((_, i) => i)) : new Set()
   );
+
+  const blurred = blur?.blurred ?? internalBlurred;
+  const setBlurred = blur?.setBlurred ?? internalSetBlurred;
 
   // -------------------------
   // Reblur everything when blurMode changes
   // -------------------------
-  useEffect(() => {
-    if (!blur) return;
-    setBlurred(new Set(words.map((_, i) => i)));
-  }, [blur?.mode, blur ? words : null]);
+  // useEffect(() => {
+  //   if (!blur) return;
+  //   setBlurred(new Set(words.map((_, i) => i)));
+  // }, [blur?.mode, blur ? words : null]);
 
   // -------------------------
   // Toggle source blur by word / sentence / paragraph
@@ -65,9 +71,11 @@ export function HoverText({
 
     setBlurred((prev) => {
       const next = new Set(prev);
+      const wordIsBlurred = next.has(i);
+
       // Word blur
       if (blur.mode === "word") {
-        next.has(i) ? next.delete(i) : next.add(i);
+        wordIsBlurred ? next.delete(i) : next.add(i);
         return next;
       }
 
@@ -76,7 +84,10 @@ export function HoverText({
         const sentId = blur.sentIds[i];
         const idxs = blur.sentIdToWords[sentId];
         for (const j of idxs) {
-          next.has(j) ? next.delete(j) : next.add(j);
+          // Toggle sentence with clicked word
+          if (next.has(j) === wordIsBlurred) {
+            next.has(j) ? next.delete(j) : next.add(j);
+          }
         }
         return next;
       }
@@ -86,7 +97,10 @@ export function HoverText({
         const parId = blur.parIds[i];
         const idxs = blur.parIdToWords[parId];
         for (const j of idxs) {
-          next.has(j) ? next.delete(j) : next.add(j);
+          // Toggle paragraph with clicked word
+          if (next.has(j) === wordIsBlurred) {
+            next.has(j) ? next.delete(j) : next.add(j);
+          }
         }
         return next;
       }
