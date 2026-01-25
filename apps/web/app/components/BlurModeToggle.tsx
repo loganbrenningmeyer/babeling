@@ -19,15 +19,15 @@ export function BlurModeToggle({
             if (!v) return;
             onChange(v as BlurMode);
         }}
-        className={className}
+        className={`grid grid-cols-3 ${className}`}
         >
-            <ToggleGroupItem value="word">
+            <ToggleGroupItem value="word" className="w-full">
                 Word
             </ToggleGroupItem>
-            <ToggleGroupItem value="sentence" className="border-l">
+            <ToggleGroupItem value="sentence" className="w-full border-l">
                 Sentence
             </ToggleGroupItem>
-            <ToggleGroupItem value="paragraph" className="border-l">
+            <ToggleGroupItem value="paragraph" className="w-full border-l">
                 Paragraph
             </ToggleGroupItem>
         </ToggleGroup>

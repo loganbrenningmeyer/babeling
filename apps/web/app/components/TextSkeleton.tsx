@@ -36,6 +36,21 @@ export function TextSkeleton({
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
         <div className={cn("h-4 w-5/6 rounded", animateClassName, blurClassName)} />
       </div>
+
+      {/* Paragraph 4 */}
+      <div className="space-y-2 pt-4">
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-2/3 rounded", animateClassName, blurClassName)} />
+      </div>
+
+      {/* Paragraph 5 */}
+      <div className="space-y-2 pt-4">
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+      </div>
     </div>
   );
 }

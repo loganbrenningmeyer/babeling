@@ -100,8 +100,10 @@ def align(req: AlignRequest):
         src_alignments,
         tgt_alignments,
         src_sent_ids,
+        src_sent_to_par_ids,
         src_sent_id_to_words,
         src_par_ids,
+        src_par_to_sent_ids,
         src_par_id_to_words,
         tgt_sent_ids
     ) = aligner.align(req.source, req.target)
@@ -120,8 +122,10 @@ def align(req: AlignRequest):
         "src_spaces": src_spaces,
         "tgt_spaces": tgt_spaces,
         "src_sent_ids": src_sent_ids,
+        "src_sent_to_par_ids": src_sent_to_par_ids,
         "src_sent_id_to_words": src_sent_id_to_words,
         "src_par_ids": src_par_ids,
+        "src_par_to_sent_ids": src_par_to_sent_ids,
         "src_par_id_to_words": src_par_id_to_words,
         "tgt_sent_ids": tgt_sent_ids,
     }

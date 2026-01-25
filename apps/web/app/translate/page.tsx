@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { HoverText } from "../components/HoverText";
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
@@ -14,6 +15,7 @@ import { AnchoredPopover } from "../components/AnchoredPopover";
 import { ExplainSkeleton } from "../components/ExplainSkeleton";
 import { TextSkeleton } from "../components/TextSkeleton";
 
+
 type Session = {
   sourceText: string;
   targetText: string;
@@ -22,8 +24,10 @@ type Session = {
     words: string[];
     spaces: string[];
     sentIds: number[];
-    parIds: number[];
+    sentToParIds: Record<number, number>;
     sentIdToWords: Record<number, number[]>;
+    parIds: number[];
+    parToSentIds: Record<number, number[]>;
     parIdToWords: Record<number, number[]>;
   };
 
@@ -52,12 +56,20 @@ export default function Translate() {
   // -------------------------
   const [translationLoading, setTranslationLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
+
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
-  const [showAligned, setShowAligned] = useState(false);
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
+
+  const [showAligned, setShowAligned] = useState(false);
+  
+  // Lock target/source when Popover is showing
   const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
   const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
   const [targetLocked, setTargetLocked] = useState(false);
+
+  // Current sentence/paragraph for arrow navigation
+  const [navSentId, setNavSentId] = useState<number>(-1);
+  const [navParId, setNavParId] = useState<number>(-1);
   // -------------------------
   // Popover / interaction state
   // -------------------------
@@ -127,8 +139,10 @@ export default function Translate() {
         words: align_data.src_words,
         spaces: align_data.src_spaces,
         sentIds: align_data.src_sent_ids,
-        parIds: align_data.src_par_ids,
+        sentToParIds: align_data.src_sent_to_par_ids,
         sentIdToWords: align_data.src_sent_id_to_words,
+        parIds: align_data.src_par_ids,
+        parToSentIds: align_data.src_par_to_sent_ids,
         parIdToWords: align_data.src_par_id_to_words,
       },
       tgt: {
@@ -239,6 +253,163 @@ export default function Translate() {
   };
 
   // -------------------------
+  // Internal text traversal
+  // -------------------------
+  function revealWordIndices(idxs: number[]) {
+    setBlurredSource(prev => {
+      if (idxs.length === 0) return prev;
+      const next = new Set(prev);
+      for (const i of idxs) next.delete(i);
+      return next;
+    })
+  }
+
+  function revealSentence(sentId: number) {
+    if (!session) return;
+    const idxs = session.src.sentIdToWords[sentId];
+    revealWordIndices(idxs);
+  }
+
+  function revealParagraph(parId: number) {
+    if (!session) return;
+    const idxs = session.src.parIdToWords[parId];
+    revealWordIndices(idxs);
+  }
+
+  function hideWordIndices(idxs: number[]) {
+    setBlurredSource(prev => {
+      if (idxs.length === 0) return prev;
+      const next = new Set(prev);
+      for (const i of idxs) next.add(i);
+      return next;
+    })
+  }
+
+  function hideSentence(sentId: number) {
+    if (!session) return;
+    const idxs = session.src.sentIdToWords[sentId];
+    hideWordIndices(idxs);
+  }
+
+  function hideParagraph(parId: number) {
+    if (!session) return;
+    const idxs = session.src.parIdToWords[parId];
+    hideWordIndices(idxs);
+  }
+
+  function isParagraphFullyRevealed(parId: number) {
+    if (!session) return true;
+    const idxs = session.src.parIdToWords[parId] ?? [];
+    return idxs.every((i) => !blurredSource.has(i));
+  }
+
+  function getLastSentInPar(parId: number) {
+    if (!session) return 0;
+    const sents = session.src.parToSentIds[parId] ?? [];
+    return sents.length ? sents[sents.length - 1] : 0;
+  }
+
+  function getMaxParId() {
+    if (!session) return 0;
+    // safer than Object.keys length if ids are 0..N already:
+    return Math.max(...session.src.parIds);
+  }
+
+  function getMaxSentId() {
+    if (!session) return 0;
+    return Math.max(...session.src.sentIds);
+  }
+
+  const handlePrev = (mode: "sentence" | "paragraph") => {
+    if (!session) return;
+
+    // Sentence
+    if (mode === "sentence") {
+      if (navSentId === -1) return;
+      if (navSentId === 0) {
+        hideSentence(navSentId);
+        setNavSentId(-1);
+        setNavParId(-1);
+        return;
+      }
+
+      const prevSentId = navSentId > 0 ? navSentId - 1 : 0;
+
+      const curParId = session.src.sentToParIds[navSentId];
+      const prevParId = session.src.sentToParIds[prevSentId];
+
+      if (curParId !== prevParId) {
+        setNavParId(prevParId);
+      }
+      hideSentence(navSentId);
+      setNavSentId(prevSentId);
+      return;
+    }
+
+    // Paragraph
+    if (navParId === -1) return;
+    if (navParId === 0) {
+      hideParagraph(navParId);
+      setNavParId(-1);
+      setNavSentId(-1);
+      return;
+    }
+
+    const prevParId = navParId > 0 ? navParId - 1 : 0;
+    const lastSentIdInPrevPar = getLastSentInPar(prevParId);
+
+    hideParagraph(navParId);
+    setNavParId(prevParId);
+    setNavSentId(lastSentIdInPrevPar);
+  }
+
+  const handleNext = (mode: "sentence" | "paragraph") => {
+    if (!session) return;
+
+    // Sentence
+    if (mode === "sentence") {
+      const maxSentId = getMaxSentId();
+
+      if (navSentId < 0) {
+        setNavSentId(0);
+        setNavParId(session.src.sentToParIds[0]);
+        revealSentence(0);
+        return;
+      }
+
+      if (navSentId >= maxSentId) return;
+
+      const nextSentId = navSentId + 1;
+
+      const nextParId = session.src.sentToParIds[nextSentId];
+      setNavParId(nextParId);
+      setNavSentId(nextSentId);
+      revealSentence(nextSentId);
+      return;
+    }
+
+    // Paragraph
+    const maxParId = getMaxParId();
+    const curParId = navParId < 0 ? 0 : navParId;
+
+    if (!isParagraphFullyRevealed(curParId)) {
+      revealParagraph(curParId);
+      setNavParId(curParId);
+      setNavSentId(getLastSentInPar(curParId));
+      return;
+    }
+
+    if (curParId >= maxParId) return;
+
+    const nextParId = curParId + 1;
+    revealParagraph(nextParId);
+    setNavParId(nextParId);
+    setNavSentId(getLastSentInPar(nextParId));
+    return;
+  }
+
+
+  // -------------------------
   // Render
   // -------------------------
   return (
@@ -250,7 +421,7 @@ export default function Translate() {
         <div className="mx-auto max-w-5xl px-4">
           <Pane title="English">
             <AppTextarea
-              className="min-h-[60vh]"
+              className="h-[70vh] overflow-hidden pb-8"
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value)}
               placeholder="Type some English text..."
@@ -260,7 +431,7 @@ export default function Translate() {
               disabled={translationLoading}
               className="mt-6 shadow"
             >
-              {translationLoading ? "Translating and Aligning..." : "Translate"}
+              Translate
             </Button>
           </Pane>
         </div>
@@ -271,21 +442,20 @@ export default function Translate() {
           //* ------------------------- */}
           <div className="mx-auto max-w-5xl px-4">
             <Pane>
-              <TextSurface className="min-h-[60vh]">
-                {/* Column headers */}
+              <TextSurface className="relative h-[70vh] flex flex-col overflow-hidden pb-8">
+                {/* Headers */}
                 <div className="grid grid-cols-2 border-b border-border text-sm font-medium text-muted-foreground">
-                  <div className="px-4 py-2 border-r border-border">
-                    English
-                  </div>
+                  <div className="px-4 py-2 border-r border-border">English</div>
                   <div className="px-4 py-2 pl-8">French</div>
                 </div>
-
-                {/* Column content */}
-                <div className="grid grid-cols-2 flex-1">
+                
+                {/* [English] | [French] */}
+                <div className="grid grid-cols-2 flex-1 min-h-0 overflow-y-auto no-scrollbar">
                   {/* -------------------------
                   //* Left: English
                   //* ------------------------- */}
-                  <div className="p-4 pr-6 border-r border-border">
+                  <div className="border-r border-border p-4 pr-4">
+                    {/* Body */}
                     {translationLoading || !session ? (
                       <TextSkeleton blurClassName="blur-sm" />
                     ) : (
@@ -315,6 +485,7 @@ export default function Translate() {
                   {/* -------------------------
                   //* Right: French
                   //* ------------------------- */}
+                  {/* Body */}
                   <div className="p-4 pl-8">
                     {translationLoading || !session ? (
                       <TextSkeleton />
@@ -334,18 +505,72 @@ export default function Translate() {
                     )}
                   </div>
                 </div>
+
+                {/* Bottom fade overlay */}
+                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 
+                                bg-gradient-to-t from-background to-transparent" />
+
+                {/* -------------------------
+                //* Internal Traversal Buttons
+                //* ------------------------- */}
+                {/* Previous Sentence */}
+                <Button 
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-3 left-3 z-10 rounded-full opacity-60 hover:opacity-100"
+                  onClick={() => handlePrev("sentence")}
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+                
+                {/* Previous Paragraph */}
+                <Button 
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-3 left-12 z-10 rounded-full opacity-60 hover:opacity-100"
+                  onClick={() => handlePrev("paragraph")}
+                  aria-label="Previous"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                {/* Next Sentence */}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  className="absolute bottom-3 right-3 z-10 rounded-full opacity-60 hover:opacity-100"
+                  onClick={() => handleNext("sentence")}
+                  aria-label="Next"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                {/* Next Paragraph */}
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="icon"
+                  className="absolute bottom-3 right-12 z-10 rounded-full opacity-60 hover:opacity-100"
+                  onClick={() => handleNext("paragraph")}
+                  aria-label="Next"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </TextSurface>
 
-              {/* Buttons: Translate again / Blur mode */}
-              <div className="flex items-center mt-6 gap-6">
-                <Button onClick={translateAgain} className="shadow">
-                  {"Translate again"}
-                </Button>
-                <BlurModeToggle
-                  value={blurMode}
-                  onChange={setBlurMode}
-                  className="shadow border"
-                />
+              {/* Toggle Blur Mode */}
+              <div className="grid grid-cols-2 mt-6">
+                <div className="col-span-2 flex justify-center">
+                  <BlurModeToggle
+                    value={blurMode}
+                    onChange={setBlurMode}
+                    className="shadow border"
+                  />
+                </div>
               </div>
             </Pane>
 

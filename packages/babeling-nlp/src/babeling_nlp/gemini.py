@@ -141,9 +141,10 @@ class GeminiAPI:
                     wf.setsampwidth(2)
                     wf.setframerate(24000)
                     wf.writeframes(pcm)
-                print(f"Attempt {attempt + 1}", flush=False)
+                print(f"[Success]: Attempt {attempt + 1} / {num_attempts}", flush=False)
                 return buf.getvalue()
             except:
+                print(f"[Error]: Attempt {attempt + 1} / {num_attempts}", flush=False)
                 continue
 
         raise RuntimeError(f"Gemini TTS returned no audio after {num_attempts} attempts.")
