@@ -1,10 +1,8 @@
 import React from "react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { BlurMode } from "./BlurModeToggle";
-import { after } from "node:test";
-import next from "next";
 
 type IdToWords = Record<number, number[]>;
 
@@ -55,14 +53,6 @@ export function HoverText({
 
   const blurred = blur?.blurred ?? internalBlurred;
   const setBlurred = blur?.setBlurred ?? internalSetBlurred;
-
-  // -------------------------
-  // Reblur everything when blurMode changes
-  // -------------------------
-  // useEffect(() => {
-  //   if (!blur) return;
-  //   setBlurred(new Set(words.map((_, i) => i)));
-  // }, [blur?.mode, blur ? words : null]);
 
   // -------------------------
   // Toggle source blur by word / sentence / paragraph
