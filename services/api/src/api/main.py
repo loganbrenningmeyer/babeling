@@ -1,4 +1,7 @@
+import os
 import json
+import base64
+import requests
 from fastapi import FastAPI
 from fastapi.responses import Response
 from babeling_nlp.align import Aligner
@@ -187,8 +190,28 @@ class PronounceRequest(BaseModel):
 
 @app.post("/pronounce")
 def pronounce(req: PronounceRequest):
-    wav_bytes = gemini_api.pronounce(req.text)
+    INWORLD_API_KEY = os.environ.get("INWORLD_RUNTIME_BASE64_CREDENTIAL")
+    url = "https://api.inworld.ai/tts/v1/voice"
+
+    headers = {
+        "Authorization": f"Basic {INWORLD_API_KEY}",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "text": req.text,
+        "voiceId": "Hélène",
+        "modelId": "inworld-tts-1.5-max"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    response.raise_for_status()
+
+    data = response.json()
+
+    audio_bytes = base64.b64decode(data["audioContent"])
+
     return Response(
-        content=wav_bytes,
+        content=audio_bytes,
         media_type="audio/wav"
     )
