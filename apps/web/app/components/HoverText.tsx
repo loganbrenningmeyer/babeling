@@ -10,8 +10,8 @@ type BlurConfig = {
   mode: BlurMode;
   sentIds: number[];
   parIds: number[];
-  sentIdToWords: IdToWords;
-  parIdToWords: IdToWords;
+  sentToWordIds: IdToWords;
+  parToWordIds: IdToWords;
 
   blurred?: Set<number>;
   setBlurred?: React.Dispatch<React.SetStateAction<Set<number>>>;
@@ -20,6 +20,7 @@ type BlurConfig = {
 type HoverTextProps = {
   words: string[];
   spaces: string[];
+  indexOffset?: number;
   highlightIndices?: number[];
   variant: "source" | "target";
   onHover?: (index: number | null) => void;
@@ -32,6 +33,7 @@ type HoverTextProps = {
 export function HoverText({
   words,
   spaces,
+  indexOffset = 0,
   highlightIndices = [],
   variant,
   onHover,
@@ -74,7 +76,7 @@ export function HoverText({
       // Sentence blur
       if (blur.mode === "sentence") {
         const sentId = blur.sentIds[i];
-        const idxs = blur.sentIdToWords[sentId];
+        const idxs = blur.sentToWordIds[sentId];
         for (const j of idxs) {
           // Toggle sentence with clicked word
           if (next.has(j) === wordIsBlurred) {
@@ -87,7 +89,7 @@ export function HoverText({
       // Paragraph blur
       if (blur.mode === "paragraph") {
         const parId = blur.parIds[i];
-        const idxs = blur.parIdToWords[parId];
+        const idxs = blur.parToWordIds[parId];
         for (const j of idxs) {
           // Toggle paragraph with clicked word
           if (next.has(j) === wordIsBlurred) {
@@ -114,6 +116,11 @@ export function HoverText({
   // -------------------------
   // Non-breaking space w/ adjacent punctuation
   // -------------------------
+  const LEADING_PUNCT = new Set([
+    '"', "'", "“", "‘", "«",
+    "(", "[", "{",
+  ]);
+
   const TRAILING_PUNCT = new Set([
     ",", ".", ";", ":", "!", "?", "…",
     '"', "'", "”", "’", "»",
@@ -122,7 +129,14 @@ export function HoverText({
 
   const isInlineSpace = (s: string) => /^[^\S\n]+$/.test(s);
 
-  function shouldCling(nextToken: string | undefined, space: string) {
+  function shouldClingPrev(prevToken: string | undefined, space: string) {
+    if (!prevToken) return false;
+    if (!LEADING_PUNCT.has(prevToken)) return false;
+
+    return space === "" || isInlineSpace(space);
+  }
+
+  function shouldClingNext(nextToken: string | undefined, space: string) {
     if (!nextToken) return false;
     if (!TRAILING_PUNCT.has(nextToken)) return false;
 
@@ -169,29 +183,40 @@ export function HoverText({
   let i = 0;
 
   while (i < words.length) {
-    const baseIndex = i;    // Index used for hover/click/highlight
-    let j = i;
-    let clusterText = words[i];
+    let start = i;
+    let end = i;
 
-    // Collect adjacent trailing punctuation
-    while (shouldCling(words[j + 1], spaces[j] ?? "")) {
-      const nextToken = words[j + 1] ?? "";
-      const space = spaces[j] ?? "";
+    let clusterText = words[i] ?? "";
 
-      // Convert inline space to non-breaking
-      const gluedSpace = isInlineSpace(space)
-        ? normalizeSpaceForPunct(nextToken, space)
-        : space;
-
-      clusterText += gluedSpace + nextToken;
-      j += 1;
+    // If current token is an opening punct, glue it to the next token (if same line)
+    if (
+      LEADING_PUNCT.has(words[i] ?? "") &&
+      (spaces[i] === "" || isInlineSpace(spaces[i] ?? "")) &&
+      words[i + 1] !== undefined
+    ) {
+      const nextToken = words[i + 1]!;
+      const glue = spaces[i] ?? ""; // typically "" after an opening quote
+      clusterText += glue + nextToken;
+      end = i + 1;
     }
+
+    // Now glue trailing punctuation after `end`
+    while (shouldClingNext(words[end + 1], spaces[end] ?? "")) {
+      const nextToken = words[end + 1] ?? "";
+      const space = spaces[end] ?? "";
+      clusterText += normalizeSpaceForPunct(nextToken, space) + nextToken;
+      end += 1;
+    }
+
+    // Choose which token index should “own” this cluster for hover/highlight/blur.
+    // If we started on an opener and glued a word, use the word's index.
+    const anchorLocalIndex =
+      LEADING_PUNCT.has(words[start] ?? "") && end > start ? start + 1 : start;
+
+    const baseIndex = anchorLocalIndex + indexOffset;
 
     const isHighlighted = highlightIndices.includes(baseIndex);
     const isBlurred = blur ? blurred.has(baseIndex) : false;
-
-    const nextToken = words[j + 1] as string | undefined;
-    const space = spaces[j] ?? "";
 
     hoverWords.push(
       <span key={baseIndex} className="inline">
@@ -212,12 +237,12 @@ export function HoverText({
 
         {/* Space after cluster */}
         <span aria-hidden className="select-none whitespace-pre-wrap">
-          {renderSpace(normalizeSpaceForPunct(nextToken, space))}
+          {renderSpace(normalizeSpaceForPunct(words[end + 1], spaces[end] ?? ""))}
         </span>
       </span>
     );
 
-    i = j + 1;    // Advance past the cluster
+    i = end + 1;    // Advance past the cluster
   }
 
   return <p className={cn("whitespace-pre-wrap", disabled ? "pointer-events-none" : "", className)}>{hoverWords}</p>;

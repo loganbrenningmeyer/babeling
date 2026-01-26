@@ -41,7 +41,7 @@ def normalize_wrapped_text(text: str):
     # De-wrap each paragraph: replace remaining newlines with spaces
     paras = [re.sub(r"\s*\n\s*", " ", p).strip() for p in paras if p.strip()]
 
-    # Re-join paragraphs with a blank line
+    # Re-join paragraphs with a single newline (already spaced by ParagraphGrid)
     return "\n\n".join(paras)
 
 def mark_linebreaks(text: str):

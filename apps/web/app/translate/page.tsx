@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
-import { HoverText } from "../components/HoverText";
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
 import { DefineEntry, DefineCard } from "../components/DefineCard";
 import { ExplainEntry, ExplainCard } from "../components/ExplainCard";
@@ -14,9 +13,10 @@ import { TextSurface } from "../components/TextSurface";
 import { AnchoredPopover } from "../components/AnchoredPopover";
 import { ExplainSkeleton } from "../components/ExplainSkeleton";
 import { TextSkeleton } from "../components/TextSkeleton";
+import { ParagraphGrid } from "../components/ParagraphGrid";
 
 
-type Session = {
+export type Session = {
   sourceText: string;
   targetText: string;
 
@@ -25,10 +25,10 @@ type Session = {
     spaces: string[];
     sentIds: number[];
     sentToParIds: Record<number, number>;
-    sentIdToWords: Record<number, number[]>;
+    sentToWordIds: Record<number, number[]>;
     parIds: number[];
     parToSentIds: Record<number, number[]>;
-    parIdToWords: Record<number, number[]>;
+    parToWordIds: Record<number, number[]>;
   };
 
   tgt: {
@@ -57,7 +57,7 @@ export default function Translate() {
   const [translationLoading, setTranslationLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
 
-  const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
+  const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
 
   const [showAligned, setShowAligned] = useState(false);
@@ -140,10 +140,10 @@ export default function Translate() {
         spaces: align_data.src_spaces,
         sentIds: align_data.src_sent_ids,
         sentToParIds: align_data.src_sent_to_par_ids,
-        sentIdToWords: align_data.src_sent_id_to_words,
+        sentToWordIds: align_data.src_sent_to_word_ids,
         parIds: align_data.src_par_ids,
         parToSentIds: align_data.src_par_to_sent_ids,
-        parIdToWords: align_data.src_par_id_to_words,
+        parToWordIds: align_data.src_par_to_word_ids,
       },
       tgt: {
         words: align_data.tgt_words,
@@ -253,7 +253,7 @@ export default function Translate() {
   };
 
   // -------------------------
-  // Internal text traversal
+  // Text blur helper functions
   // -------------------------
   function revealWordIndices(idxs: number[]) {
     setBlurredSource(prev => {
@@ -266,13 +266,13 @@ export default function Translate() {
 
   function revealSentence(sentId: number) {
     if (!session) return;
-    const idxs = session.src.sentIdToWords[sentId];
+    const idxs = session.src.sentToWordIds[sentId];
     revealWordIndices(idxs);
   }
 
   function revealParagraph(parId: number) {
     if (!session) return;
-    const idxs = session.src.parIdToWords[parId];
+    const idxs = session.src.parToWordIds[parId];
     revealWordIndices(idxs);
   }
 
@@ -287,19 +287,25 @@ export default function Translate() {
 
   function hideSentence(sentId: number) {
     if (!session) return;
-    const idxs = session.src.sentIdToWords[sentId];
+    const idxs = session.src.sentToWordIds[sentId];
     hideWordIndices(idxs);
   }
 
   function hideParagraph(parId: number) {
     if (!session) return;
-    const idxs = session.src.parIdToWords[parId];
+    const idxs = session.src.parToWordIds[parId];
     hideWordIndices(idxs);
   }
 
   function isParagraphFullyRevealed(parId: number) {
     if (!session) return true;
-    const idxs = session.src.parIdToWords[parId] ?? [];
+    const idxs = session.src.parToWordIds[parId] ?? [];
+    return idxs.every((i) => !blurredSource.has(i));
+  }
+
+  function isSentenceFullyRevealed(sentId: number) {
+    if (!session) return true;
+    const idxs = session.src.sentToWordIds[sentId] ?? [];
     return idxs.every((i) => !blurredSource.has(i));
   }
 
@@ -320,6 +326,17 @@ export default function Translate() {
     return Math.max(...session.src.sentIds);
   }
 
+  function findNextBlurredSentence(start: number): number | null {
+    for (let s = Math.max(0, start); s <= getMaxSentId(); s++) {
+      if (!isSentenceFullyRevealed(s)) return s;
+    }
+    return null;
+  }
+
+  // -------------------------
+  // Text navigation
+  // -------------------------
+  // Go to previous sentence / paragraph
   const handlePrev = (mode: "sentence" | "paragraph") => {
     if (!session) return;
 
@@ -363,6 +380,7 @@ export default function Translate() {
     setNavSentId(lastSentIdInPrevPar);
   }
 
+  // Go to next sentence / paragraph
   const handleNext = (mode: "sentence" | "paragraph") => {
     if (!session) return;
 
@@ -379,7 +397,8 @@ export default function Translate() {
 
       if (navSentId >= maxSentId) return;
 
-      const nextSentId = navSentId + 1;
+      const nextSentId = findNextBlurredSentence(navSentId);
+      if (nextSentId === null) return;
 
       const nextParId = session.src.sentToParIds[nextSentId];
       setNavParId(nextParId);
@@ -408,10 +427,56 @@ export default function Translate() {
     return;
   }
 
+  // -------------------------
+  // Arrow Key Navigation
+  // -------------------------
+  useEffect(() => {
+    if (!showAligned) return;
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (popoverOpen) return;
+      switch (e.key) {
+        // Left: Previous Sentence
+        case "ArrowLeft":
+          e.preventDefault();
+          handlePrev("sentence");
+          break;
+        // Right: Next Sentence
+        case "ArrowRight":
+          e.preventDefault();
+          handleNext("sentence");
+          break;
+        // Up: Previous Paragraph
+        case "ArrowUp":
+          e.preventDefault();
+          handlePrev("paragraph");
+          break;
+        // Down: Next Paragraph
+        case "ArrowDown":
+          e.preventDefault();
+          handleNext("paragraph");
+          break;
+
+        default:
+          break;
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [
+    showAligned,
+    popoverOpen,
+    handlePrev,
+    handleNext,
+  ]);
+
 
   // -------------------------
   // Render
   // -------------------------
+  const PANE_H = "h-[80vh]"
+
   return (
     <div>
       {/* -------------------------
@@ -419,20 +484,26 @@ export default function Translate() {
       //* ------------------------- */}
       {!showAligned && !translationLoading ? (
         <div className="mx-auto max-w-5xl px-4">
-          <Pane title="English">
-            <AppTextarea
-              className="h-[70vh] overflow-hidden pb-8"
-              value={sourceText}
-              onChange={(e) => setSourceText(e.target.value)}
-              placeholder="Type some English text..."
-            />
-            <Button
-              onClick={translate_and_align}
-              disabled={translationLoading}
-              className="mt-6 shadow"
-            >
-              Translate
-            </Button>
+          <Pane title="English" className={`${PANE_H} flex flex-col`}>
+            {/* Input Box */}
+            <div className="flex-1 min-h-0">
+              <AppTextarea
+                className="h-full min-h-0 overflow-y-auto"
+                value={sourceText}
+                onChange={(e) => setSourceText(e.target.value)}
+                placeholder="Type some English text..."
+              />
+            </div>
+            {/* Translate Button */}
+            <div className="pt-6 shrink-0 flex justify-end">
+              <Button
+                onClick={translate_and_align}
+                disabled={translationLoading}
+                className="shadow"
+              >
+                Translate
+              </Button>
+            </div>
           </Pane>
         </div>
       ) : (
@@ -441,136 +512,116 @@ export default function Translate() {
           //* Source / Target HoverText
           //* ------------------------- */}
           <div className="mx-auto max-w-5xl px-4">
-            <Pane>
-              <TextSurface className="relative h-[70vh] flex flex-col overflow-hidden pb-8">
-                {/* Headers */}
-                <div className="grid grid-cols-2 border-b border-border text-sm font-medium text-muted-foreground">
-                  <div className="px-4 py-2 border-r border-border">English</div>
-                  <div className="px-4 py-2 pl-8">French</div>
-                </div>
-                
-                {/* [English] | [French] */}
-                <div className="grid grid-cols-2 flex-1 min-h-0 overflow-y-auto no-scrollbar">
-                  {/* -------------------------
-                  //* Left: English
-                  //* ------------------------- */}
-                  <div className="border-r border-border p-4 pr-4">
-                    {/* Body */}
-                    {translationLoading || !session ? (
-                      <TextSkeleton blurClassName="blur-sm" />
-                    ) : (
-                      <HoverText
-                        variant="source"
-                        words={session.src.words}
-                        spaces={session.src.spaces}
-                        onHover={handleSourceHover}
-                        highlightIndices={[
-                          ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
-                          ...activeAlignedSource,
-                        ]}
-                        blur={{
-                          mode: blurMode,
-                          sentIds: session.src.sentIds,
-                          parIds: session.src.parIds,
-                          sentIdToWords: session.src.sentIdToWords,
-                          parIdToWords: session.src.parIdToWords,
+            <Pane className={`${PANE_H} flex flex-col`}>
+              {/* Pane Body */}
+              <div className="flex-1 min-h-0">
+                <TextSurface className="relative h-full flex flex-col overflow-hidden">
+                  {/* Headers */}
+                  <div className="grid grid-cols-2 border-b border-border text-sm font-medium text-muted-foreground">
+                    <div className="px-4 py-2 border-r border-border">English</div>
+                    <div className="px-4 py-2 pl-8">French</div>
+                  </div>
 
-                          blurred: blurredSource,
-                          setBlurred: setBlurredSource,
-                        }}
-                      />
-                    )}
+                  {/* Aligned Paragraph Grid: [English] | [French] */}
+                  <div className="relative flex-1 min-h-0">
+                    <div className="relative h-full overflow-y-auto no-scrollbar pb-8">
+                      {translationLoading || !session ? (
+                        <div className="grid grid-cols-2">
+                          <div className="border-r border-border p-4 pr-4">
+                            <TextSkeleton blurClassName="blur-sm" />
+                          </div>
+                          <div className="p-4 pl-8">
+                            <TextSkeleton />
+                          </div>
+                        </div>                    
+                      ) : (
+                        <ParagraphGrid 
+                          session={session}
+                          blurMode={blurMode}
+                          blurredSource={blurredSource}
+                          setBlurredSource={setBlurredSource}
+                          sourceHighlightIndices={[
+                            ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
+                            ...activeAlignedSource,
+                          ]}
+                          targetHighlightIndices={[
+                            ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
+                            ...activeAlignedTarget,
+                          ]}
+                          onSourceHover={handleSourceHover}
+                          onTargetHover={handleTargetHover}
+                          onTargetWordClick={handleTargetWordClick}
+                          targetDisabled={popoverOpen}
+                        />
+                      )}
+                    </div>
                   </div>
 
                   {/* -------------------------
-                  //* Right: French
+                  //* Internal Traversal Buttons
                   //* ------------------------- */}
-                  {/* Body */}
-                  <div className="p-4 pl-8">
-                    {translationLoading || !session ? (
-                      <TextSkeleton />
-                    ) : (
-                      <HoverText
-                        variant="target"
-                        disabled={popoverOpen}
-                        words={session.tgt.words}
-                        spaces={session.tgt.spaces}
-                        onHover={handleTargetHover}
-                        highlightIndices={[
-                          ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
-                          ...activeAlignedTarget,
-                        ]}
-                        onWordClick={handleTargetWordClick}
-                      />
-                    )}
+                  {/* CONTROLS REGION (non-scrolling) */}
+                  <div className="shrink-0 border-t border-border px-3 h-12 flex items-center">
+                    <div className="flex w-full items-center justify-between">
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full opacity-60 hover:opacity-100"
+                          onClick={() => handlePrev("sentence")}
+                          aria-label="Previous sentence"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="rounded-full opacity-60 hover:opacity-100"
+                          onClick={() => handlePrev("paragraph")}
+                          aria-label="Previous paragraph"
+                        >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
+                      </div>
+
+                      <div className="flex gap-2">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="rounded-full opacity-60 hover:opacity-100"
+                          onClick={() => handleNext("paragraph")}
+                          aria-label="Next paragraph"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="icon"
+                          className="rounded-full opacity-60 hover:opacity-100"
+                          onClick={() => handleNext("sentence")}
+                          aria-label="Next sentence"
+                        >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </TextSurface>
+              </div>
 
-                {/* Bottom fade overlay */}
-                <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 
-                                bg-gradient-to-t from-background to-transparent" />
-
-                {/* -------------------------
-                //* Internal Traversal Buttons
-                //* ------------------------- */}
-                {/* Previous Sentence */}
-                <Button 
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute bottom-3 left-3 z-10 rounded-full opacity-60 hover:opacity-100"
-                  onClick={() => handlePrev("sentence")}
-                  aria-label="Previous"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                
-                {/* Previous Paragraph */}
-                <Button 
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="absolute bottom-3 left-12 z-10 rounded-full opacity-60 hover:opacity-100"
-                  onClick={() => handlePrev("paragraph")}
-                  aria-label="Previous"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                {/* Next Sentence */}
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="icon"
-                  className="absolute bottom-3 right-3 z-10 rounded-full opacity-60 hover:opacity-100"
-                  onClick={() => handleNext("sentence")}
-                  aria-label="Next"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                {/* Next Paragraph */}
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="absolute bottom-3 right-12 z-10 rounded-full opacity-60 hover:opacity-100"
-                  onClick={() => handleNext("paragraph")}
-                  aria-label="Next"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </TextSurface>
-
-              {/* Toggle Blur Mode */}
-              <div className="grid grid-cols-2 mt-6">
-                <div className="col-span-2 flex justify-center">
-                  <BlurModeToggle
-                    value={blurMode}
-                    onChange={setBlurMode}
-                    className="shadow border"
-                  />
-                </div>
+              {/* Pane Footer */}
+              <div className="mt-6 shrink-0 flex justify-center">
+                <BlurModeToggle
+                  value={blurMode}
+                  onChange={setBlurMode}
+                  className="shadow border"
+                />
               </div>
             </Pane>
 
