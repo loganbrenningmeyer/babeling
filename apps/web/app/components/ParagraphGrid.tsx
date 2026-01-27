@@ -87,7 +87,10 @@ export function ParagraphGrid({
   const tgtParToWordIds = useMemo(() => buildTgtParToWordIds(session), [session]);
 
   return (
-    <div className={className}>
+    <div className={cn("relative min-h-full", className)}>
+      {/* Vertical Divider */}
+      <div className="pointer-events-none absolute inset-y-0 right-1/2 w-0.5 bg-border" />
+
       {parIds.map((parId, idx) => {
         const srcIdxs = session.src.parToWordIds[parId];
         const tgtIdxs = tgtParToWordIds[parId];
@@ -100,7 +103,7 @@ export function ParagraphGrid({
         return (
           <div key={parId} className="grid grid-cols-2">
             {/* Left: Source paragraph */}
-            <div className="border-r border-border p-4 pr-4">
+            <div className="p-4 pr-8">
               <HoverText
                 variant="source"
                 words={srcSlice.words}
@@ -117,6 +120,7 @@ export function ParagraphGrid({
                   blurred: blurredSource,
                   setBlurred: setBlurredSource,
                 }}
+                className="text-lg"
               />
             </div>
 
@@ -131,17 +135,18 @@ export function ParagraphGrid({
                 onHover={onTargetHover}
                 highlightIndices={targetHighlightIndices}
                 onWordClick={onTargetWordClick}
+                className="text-lg"
               />
             </div>
 
             {/* Row 2: aligned inset dividers (two separate lines) */}
             {idx < parIds.length - 1 && (
               <>
-                <div className="border-r border-border pl-4 pr-8 pb-3">
-                  <div className="h-px bg-border/40 mx-2" />
+                <div className="border-r border-border pl-4 pr-8">
+                  <div className="h-0.5 bg-border/40 mx-2" />
                 </div>
-                <div className="px-4 pb-3 pl-8">
-                  <div className="h-px bg-border/40 mx-2" />
+                <div className="px-4 pl-8">
+                  <div className="h-0.5 bg-border/40 mx-2" />
                 </div>
               </>
             )}

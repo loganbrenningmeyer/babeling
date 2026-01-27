@@ -13,7 +13,7 @@ export function TextSurface({
         `
         rounded-md
         p-4
-        !text-base font-sans leading-6
+        font-sans leading-6
         shadow
         bg-background
         `,

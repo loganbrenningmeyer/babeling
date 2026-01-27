@@ -480,7 +480,8 @@ export default function Translate() {
   // -------------------------
   // Render
   // -------------------------
-  const PANE_H = "h-[80vh]"
+  const PANE_H = "h-[80dvh]"
+  const PANE_DIV = `w-full ${PANE_H} px-36`
 
   return (
     <div>
@@ -488,7 +489,7 @@ export default function Translate() {
       //* Source Text Input 
       //* ------------------------- */}
       {!showAligned && !translationLoading ? (
-        <div className="mx-auto max-w-5xl px-4">
+        <div className={PANE_DIV}>
           <Pane className={`${PANE_H} flex flex-col min-h-0 bg-muted`}>
             {/* Input Box */}
             <div className="flex-1 min-h-0">
@@ -545,14 +546,14 @@ export default function Translate() {
           {/* -------------------------
           //* Source / Target HoverText
           //* ------------------------- */}
-          <div className="mx-auto max-w-5xl px-4">
+          <div className={PANE_DIV}>
             <Pane className={`${PANE_H} flex flex-col`}>
               {/* Pane Body */}
               <div className="flex-1 min-h-0">
                 <TextSurface className="relative h-full flex flex-col overflow-hidden">
                   {/* Headers */}
-                  <div className="grid grid-cols-2 border-b border-border text-sm font-medium text-muted-foreground">
-                    <div className="px-4 py-2 border-r border-border">English</div>
+                  <div className="grid grid-cols-2 border-b-2 border-border font-medium text-muted-foreground">
+                    <div className="px-4 py-2 border-r-2 border-border">English</div>
                     <div className="px-4 py-2 pl-8">French</div>
                   </div>
 
@@ -561,7 +562,7 @@ export default function Translate() {
                     <div className="relative h-full overflow-y-auto no-scrollbar pb-8">
                       {translationLoading || !session ? (
                         <div className="grid grid-cols-2">
-                          <div className="border-r border-border p-4 pr-4">
+                          <div className="border-r-2 border-border p-4 pr-8">
                             <TextSkeleton blurClassName="blur-sm" />
                           </div>
                           <div className="p-4 pl-8">
