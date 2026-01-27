@@ -30,4 +30,4 @@ Validation Requirement:
 - If they are not identical, revise the translation until they match.
 
 Output Format:
-Return ONLY the requested JSON.
+Return ONLY the translated text.

@@ -7,10 +7,6 @@ from google.genai import types
 from pydantic import BaseModel
 
 
-class TranslationOut(BaseModel):
-    translation: str
-
-
 class ExplainExample(BaseModel):
     fr: str
     en: str
@@ -43,19 +39,13 @@ class GeminiAPI:
             contents=source,
             config=types.GenerateContentConfig(
                 system_instruction=self.system_translate,
-                response_mime_type="application/json",
-                response_schema=TranslationOut,
                 temperature=0.1,
-                max_output_tokens=1024,
+                max_output_tokens=4096,
                 thinking_config=types.ThinkingConfig(thinking_budget=0),
             ),
         )
 
-        if getattr(response, "parsed", None):
-            return response.parsed.translation
-
-        data = json.loads(response.text)
-        return data["translation"]
+        return response.text.strip()
 
     def explain_en_fr(
         self,

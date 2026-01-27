@@ -14,6 +14,7 @@ import { AnchoredPopover } from "../components/AnchoredPopover";
 import { ExplainSkeleton } from "../components/ExplainSkeleton";
 import { TextSkeleton } from "../components/TextSkeleton";
 import { ParagraphGrid } from "../components/ParagraphGrid";
+import { UploadSurface } from "../components/UploadSurface";
 
 
 export type Session = {
@@ -56,10 +57,8 @@ export default function Translate() {
   // -------------------------
   const [translationLoading, setTranslationLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
-
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
-
   const [showAligned, setShowAligned] = useState(false);
   
   // Lock target/source when Popover is showing
@@ -81,6 +80,10 @@ export default function Translate() {
   const [hoveredTargetIndex, setHoveredTargetIndex] = useState<number | null>(
     null
   );
+  // -------------------------
+  // Input files state
+  // -------------------------
+  const [sourceFile, setSourceFile] = useState<File | null>(null);
 
   // -------------------------
   // Derived values
@@ -104,7 +107,9 @@ export default function Translate() {
   // Handlers
   // -------------------------
   async function translate_and_align() {
-    if (!sourceText.trim()) return;
+    if (!sourceText.trim() && !sourceFile) return;
+
+    const sourceToSend = sourceFile ? await sourceFile.text() : sourceText;
 
     setTranslationLoading(true);
 
@@ -112,7 +117,7 @@ export default function Translate() {
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: sourceText }),
+      body: JSON.stringify({ source: sourceToSend }),
     });
     const translate_data = await translate_res.json();
 
@@ -484,7 +489,7 @@ export default function Translate() {
       //* ------------------------- */}
       {!showAligned && !translationLoading ? (
         <div className="mx-auto max-w-5xl px-4">
-          <Pane title="English" className={`${PANE_H} flex flex-col`}>
+          <Pane className={`${PANE_H} flex flex-col min-h-0 bg-muted`}>
             {/* Input Box */}
             <div className="flex-1 min-h-0">
               <AppTextarea
@@ -494,15 +499,44 @@ export default function Translate() {
                 placeholder="Type some English text..."
               />
             </div>
+            {/* Upload Card */}
+            <div className="pt-3 shrink-0">
+              <UploadSurface 
+                className="h-36"
+                file={sourceFile}
+                onFileChange={setSourceFile}
+              />
+            </div>
             {/* Translate Button */}
-            <div className="pt-6 shrink-0 flex justify-end">
+            <div className="pt-6 shrink-0 flex justify-center">
               <Button
                 onClick={translate_and_align}
                 disabled={translationLoading}
-                className="shadow"
+                className="
+                  group
+                  relative
+                  shadow
+                  w-full h-12
+                  transition
+                  hover:shadow-md
+                  hover:-translate-y-[1px]
+                "
               >
-                Translate
+                <span className="relative">
+                  Translate
+                  <span
+                    className="
+                      absolute left-0 -bottom-1
+                      h-[2px] w-full
+                      bg-current
+                      origin-left scale-x-0
+                      transition-transform duration-300
+                      group-hover:scale-x-100
+                    "
+                  />
+                </span>
               </Button>
+
             </div>
           </Pane>
         </div>

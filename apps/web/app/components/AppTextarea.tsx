@@ -1,24 +1,26 @@
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { AppSurface } from "./AppSurface";
+
 
 export function AppTextarea({
   className,
   ...props
 }: React.ComponentProps<typeof Textarea>) {
   return (
-    <Textarea
-      className={cn(
-        `
-        w-full resize-none
-        !text-base font-sans leading-6
-        border-0 p-4
-        focus-visible:ring-0 focus-visible:ring-offset-0
-        shadow
-        whitespace-pre-wrap
-        `,
-        className
-      )}
-      {...props}
-    />
+    <AppSurface className={cn("h-full", className)}>
+      <Textarea
+        className={cn(
+          `
+          h-full w-full resize-none
+          !text-base font-sans leading-6
+          border-0 p-4
+          focus-visible:ring-0 focus-visible:ring-offset-0
+          whitespace-pre-wrap
+          `
+        )}
+        {...props}
+      />
+    </AppSurface>
   );
 }
