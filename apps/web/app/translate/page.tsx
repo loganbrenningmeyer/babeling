@@ -563,6 +563,19 @@ export default function Translate() {
       const ae = document.activeElement;
       if (ae instanceof HTMLElement) ae.blur();
 
+      // Page navigation
+      if (e.metaKey || e.ctrlKey) {
+        switch (e.key) {
+          case "ArrowLeft":
+            goPrevPage();
+            return;
+          case "ArrowRight":
+            goNextPage();
+            return;
+        }
+      }
+
+      // Sentence / Paragraph navigation
       switch (e.key) {
         case "ArrowLeft":
           handlePrev("sentence");
@@ -678,7 +691,7 @@ export default function Translate() {
                     <div className="shrink-0 w-12 pr-4 border-r border-border/50 flex items-center justify-center">
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         size="icon"
                         className="rounded-full opacity-60 hover:opacity-100"
                         onClick={goPrevPage}
@@ -729,7 +742,7 @@ export default function Translate() {
                     <div className="shrink-0 w-12 pl-4 border-l border-border/50 flex items-center justify-center">
                       <Button
                         type="button"
-                        variant="ghost"
+                        variant="secondary"
                         size="icon"
                         className="rounded-full opacity-60 hover:opacity-100"
                         onClick={goNextPage}

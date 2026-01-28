@@ -41,6 +41,8 @@ export function TextSkeleton({
       <div className="space-y-2 pt-4">
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
         <div className={cn("h-4 w-2/3 rounded", animateClassName, blurClassName)} />
       </div>
 
@@ -50,6 +52,15 @@ export function TextSkeleton({
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
         <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+      </div>
+
+      {/* Paragraph 6 */}
+      <div className="space-y-2 pt-4">
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName, blurClassName)} />
+        <div className={cn("h-4 w-2/3 rounded", animateClassName, blurClassName)} />
       </div>
     </div>
   );
