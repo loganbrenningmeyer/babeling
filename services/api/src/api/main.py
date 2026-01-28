@@ -2,15 +2,16 @@ import os
 import json
 import base64
 import requests
+import spacy
 from fastapi import FastAPI
 from fastapi.responses import Response
-from babeling_nlp.align import Aligner
-from babeling_nlp.gemini import GeminiAPI
 from pydantic import BaseModel
 from pathlib import Path
-from collections import defaultdict
 
 from .utils import *
+from babeling_nlp.align import Aligner
+from babeling_nlp.gemini import GeminiAPI
+from babeling_nlp.segment import Segmenter
 
 # -------------------------
 # Paths
@@ -32,6 +33,14 @@ def load_prompt(filename: str) -> str:
 # -------------------------
 print("Loading Aligner...")
 aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
+
+# -------------------------
+# Create Segmenter
+# -------------------------
+SRC_LANG = "en"
+TGT_LANG = "fr"
+
+segmenter = Segmenter(SRC_LANG, TGT_LANG)
 
 # -------------------------
 # Prepare GeminiAPI / French dictionary
@@ -63,8 +72,7 @@ def translate(req: TranslateRequest):
     # -------------------------
     # Normalize wrapped text / Mark linebreaks <LB>
     # -------------------------
-    source = normalize_wrapped_text(req.source)
-    source = mark_linebreaks(source)
+    source = mark_linebreaks(req.source)
 
     # -- Translate
     target = gemini_api.translate_en_fr(source)
@@ -97,6 +105,15 @@ def align(req: AlignRequest):
     Returns:
     
     """
+    # -------------------------
+    # Split source / target into paragraphs and sentences
+    # -------------------------
+    src_par_sent_words = segmenter.split_par_sent_words(req.source, SRC_LANG)
+    tgt_par_sent_words = segmenter.split_par_sent_words(req.target, TGT_LANG)
+
+    # -------------------------
+    # Align sentences
+    # -------------------------
     (
         src_words,
         tgt_words,
@@ -109,7 +126,7 @@ def align(req: AlignRequest):
         src_par_to_sent_ids,
         src_par_to_word_ids,
         tgt_sent_ids
-    ) = aligner.align(req.source, req.target)
+    ) = aligner.align(src_par_sent_words, tgt_par_sent_words)
 
     # -------------------------
     # Determine spacing after words
@@ -215,3 +232,15 @@ def pronounce(req: PronounceRequest):
         content=audio_bytes,
         media_type="audio/wav"
     )
+
+
+# =========================
+# Split Pages (/split_pages)
+# =========================
+class SplitPagesRequest(BaseModel):
+    text: str
+
+@app.post("/split_pages")
+def split_pages(req: SplitPagesRequest):
+    pages = segmenter.split_pages(req.text)
+    return {"pages": pages}

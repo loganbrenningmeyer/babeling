@@ -7,5 +7,5 @@ artifacts/*
 apps/web/components/
 *.ckpt
 .DS_Store
-Icon
+Icon?
 .vscode/

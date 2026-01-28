@@ -63,6 +63,7 @@ export function AnchoredPopover({
           sideOffset={10}
           className={cn(
             "z-50 w-[380px] rounded-xl border bg-background shadow-md overflow-hidden",
+            "outline-none focus:outline-none focus-visible:outline-none",
             className
           )}
         >

@@ -20,7 +20,7 @@ class Aligner:
         model.to(device)
         model.eval()
 
-        self.binaryalign = BinaryAlign(model, tokenizer, "en", "fr")
+        self.binaryalign = BinaryAlign(model, tokenizer)
 
-    def align(self, source: str, target: str, threshold: float=0.025):
-        return self.binaryalign.align_document_pair(source, target, threshold)
+    def align(self, src_par_sent_words: str, tgt_par_sent_words: str, threshold: float=0.025):
+        return self.binaryalign.align_document_pair(src_par_sent_words, tgt_par_sent_words, threshold)

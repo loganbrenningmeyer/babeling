@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
@@ -42,6 +42,12 @@ export type Session = {
     srcToTgt: Record<number, number[]>;
     tgtToSrc: Record<number, number[]>;
   };
+
+  state: {
+    blurredSource: Set<number>;
+    navSentId: number;
+    navParId: number;
+  };
 };
 
 export default function Translate() {
@@ -52,6 +58,11 @@ export default function Translate() {
   const [explainData, setExplainData] = useState<ExplainEntry | null>(null);
   const [defineData, setDefineData] = useState<DefineEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  // Cache translated / aligned pages
+  const [pages, setPages] = useState<string[]>([]);
+  const [pageId, setPageId] = useState<number>(0);
+  const pageCache = useRef<Map<number, Session>>(new Map());
+
   // -------------------------
   // UI state
   // -------------------------
@@ -60,15 +71,14 @@ export default function Translate() {
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
   const [showAligned, setShowAligned] = useState(false);
-  
   // Lock target/source when Popover is showing
   const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
   const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
   const [targetLocked, setTargetLocked] = useState(false);
-
   // Current sentence/paragraph for arrow navigation
   const [navSentId, setNavSentId] = useState<number>(-1);
   const [navParId, setNavParId] = useState<number>(-1);
+
   // -------------------------
   // Popover / interaction state
   // -------------------------
@@ -80,6 +90,7 @@ export default function Translate() {
   const [hoveredTargetIndex, setHoveredTargetIndex] = useState<number | null>(
     null
   );
+
   // -------------------------
   // Input files state
   // -------------------------
@@ -106,10 +117,81 @@ export default function Translate() {
   // -------------------------
   // Handlers
   // -------------------------
-  async function translate_and_align() {
+  async function startReadingSession() {
     if (!sourceText.trim() && !sourceFile) return;
 
-    const sourceToSend = sourceFile ? await sourceFile.text() : sourceText;
+    const fullText = sourceFile ? await sourceFile.text() : sourceText;
+
+    // Split full text into pages
+    const pages_res = await fetch("/api/split_pages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text: fullText }),
+    });
+    const pages_data = await pages_res.json();
+    const newPages = pages_data.pages;
+    setPages(pages_data.pages)
+    setPageId(0);
+
+    // Reset session state
+    pageCache.current.clear();
+    setSession(null);
+    setNavSentId(-1);
+    setNavParId(-1);
+    setExplainData(null);
+    setDefineData(null);
+
+    setTargetLocked(false);
+    setLockedSourceIndices([]);
+    setPopoverOpen(false);
+
+    // Translate and align source text
+    await loadPageSession(0, newPages);
+  }
+
+  async function loadPageSession(pid: number, pagesArg?: string[]) {
+    // immediately reset UI state before loading cache
+    setNavSentId(-1);
+    setNavParId(-1);
+    setHoveredSourceIndex(null);
+    setHoveredTargetIndex(null);
+    setTargetLocked(false);
+    setLockedTargetIndex(null);
+    setLockedSourceIndices([]);
+
+    // Take optional pagesArg to avoid async race conditions setting pages
+    const pagesLocal = pagesArg ?? pages;
+
+    // Check cache for page ID
+    const cachedSession = pageCache.current.get(pid);
+    if (cachedSession) {
+      setSession(cachedSession);
+      setBlurredSource(new Set(cachedSession.state.blurredSource));
+      setNavSentId(cachedSession.state.navSentId);
+      setNavParId(cachedSession.state.navParId);
+      setShowAligned(true);
+      setPageId(pid);
+      return;
+    }
+
+    // If page not cached, translate and align
+    const pageText = pagesLocal[pid] ?? "";
+    if (!pageText.trim()) return;
+    setPageId(pid);
+    
+    // Cache page's session
+    const sess = await translateAndAlign(pageText);
+    if (sess) {
+      pageCache.current.set(pid, sess);
+      setSession(sess);
+      setBlurredSource(new Set(sess.src.words.map((_, i) => i)));
+      setShowAligned(true);
+    }
+
+  }
+
+  async function translateAndAlign(text: string) {
+    if (!text.trim()) return;
 
     setTranslationLoading(true);
 
@@ -117,7 +199,7 @@ export default function Translate() {
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: sourceToSend }),
+      body: JSON.stringify({ source: text }),
     });
     const translate_data = await translate_res.json();
 
@@ -137,7 +219,7 @@ export default function Translate() {
     const align_data = await align_res.json();
 
     // Update session
-    setSession({
+    const sess: Session = {
       sourceText: source,
       targetText: target,
       src: {
@@ -159,23 +241,15 @@ export default function Translate() {
         srcToTgt: align_data.src_to_tgt,
         tgtToSrc: align_data.tgt_to_src,
       },
-    });
-
-    // Initialize source words to blurred
-    setBlurredSource(new Set(align_data.src_words.map((_: any, i: number) => i)));
+      state: {
+        blurredSource: new Set(align_data.src_words.map((_: string, i: number) => i)),
+        navSentId: -1,
+        navParId: -1,
+      }
+    };
 
     setTranslationLoading(false);
-    setShowAligned(true);
-  }
-
-  function translateAgain() {
-    setSourceText("");
-    setShowAligned(false);
-    setHoveredSourceIndex(null);
-    setHoveredTargetIndex(null);
-    setSession(null);
-    setExplainData(null);
-    setDefineData(null);
+    return sess;
   }
 
   async function handleTargetWordClick(i: number, el: HTMLElement) {
@@ -339,6 +413,39 @@ export default function Translate() {
   }
 
   // -------------------------
+  // Page navigation
+  // -------------------------
+  function updateCachedState(pid: number) {
+    if (!session) return;
+
+    const updated: Session = {
+      ...session,
+      state: {
+        blurredSource: new Set(blurredSource),
+        navSentId: navSentId,
+        navParId: navParId,
+      },
+    };
+
+    pageCache.current.set(pid, updated);
+    setSession(updated);
+  }
+
+  async function goPrevPage() {
+    const prev = pageId - 1;
+    if (prev < 0) return;
+    updateCachedState(pageId);
+    await loadPageSession(prev);
+  }
+
+  async function goNextPage() {
+    const next = pageId + 1;
+    if (next >= pages.length) return;
+    updateCachedState(pageId);
+    await loadPageSession(next);
+  }
+
+  // -------------------------
   // Text navigation
   // -------------------------
   // Go to previous sentence / paragraph
@@ -440,35 +547,43 @@ export default function Translate() {
 
     const onKeyDown = (e: KeyboardEvent) => {
       if (popoverOpen) return;
+
+      const isArrow =
+        e.key === "ArrowLeft" ||
+        e.key === "ArrowRight" ||
+        e.key === "ArrowUp" ||
+        e.key === "ArrowDown";
+
+      if (!isArrow) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      const ae = document.activeElement;
+      if (ae instanceof HTMLElement) ae.blur();
+
       switch (e.key) {
-        // Left: Previous Sentence
         case "ArrowLeft":
-          e.preventDefault();
           handlePrev("sentence");
           break;
-        // Right: Next Sentence
         case "ArrowRight":
-          e.preventDefault();
           handleNext("sentence");
           break;
-        // Up: Previous Paragraph
         case "ArrowUp":
-          e.preventDefault();
           handlePrev("paragraph");
           break;
-        // Down: Next Paragraph
         case "ArrowDown":
-          e.preventDefault();
           handleNext("paragraph");
-          break;
-
-        default:
           break;
       }
     };
 
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
+    window.addEventListener("keydown", onKeyDown, { capture: true });
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
+    };
   }, [
     showAligned,
     popoverOpen,
@@ -480,8 +595,8 @@ export default function Translate() {
   // -------------------------
   // Render
   // -------------------------
-  const PANE_H = "h-[80dvh]"
-  const PANE_DIV = `w-full ${PANE_H} px-36`
+  const PANE_H = "h-[80vh]"
+  const PANE_DIV = `w-full ${PANE_H} px-12`
 
   return (
     <div>
@@ -511,7 +626,7 @@ export default function Translate() {
             {/* Translate Button */}
             <div className="pt-6 shrink-0 flex justify-center">
               <Button
-                onClick={translate_and_align}
+                onClick={startReadingSession}
                 disabled={translationLoading}
                 className="
                   group
@@ -557,20 +672,39 @@ export default function Translate() {
                     <div className="px-4 py-2 pl-8">French</div>
                   </div>
 
-                  {/* Aligned Paragraph Grid: [English] | [French] */}
-                  <div className="relative flex-1 min-h-0">
-                    <div className="relative h-full overflow-y-auto no-scrollbar pb-8">
+                  {/* Aligned ParagraphGrid + Page Buttons */}
+                  <div className="relative flex flex-1 min-h-0">
+                    {/* Previous Page Button */}
+                    <div className="shrink-0 w-12 pr-4 border-r border-border/50 flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full opacity-60 hover:opacity-100"
+                        onClick={goPrevPage}
+                        aria-label="Previous page"
+                        disabled={pageId <= 0}
+                      >
+                        <ChevronLeft className="h-4 w-4" />
+                      </Button>
+                    </div>
+
+                    {/* ParagraphGrid: [English] | [French] */}
+                    <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
                       {translationLoading || !session ? (
-                        <div className="grid grid-cols-2">
-                          <div className="border-r-2 border-border p-4 pr-8">
-                            <TextSkeleton blurClassName="blur-sm" />
+                        <>
+                          <div className="pointer-events-none absolute inset-y-0 right-1/2 w-0.5 bg-border" />
+                          <div className="grid grid-cols-2">
+                            <div className="border-r-2 border-border p-4 pr-8">
+                              <TextSkeleton blurClassName="blur-sm" />
+                            </div>
+                            <div className="p-4 pl-8">
+                              <TextSkeleton />
+                            </div>
                           </div>
-                          <div className="p-4 pl-8">
-                            <TextSkeleton />
-                          </div>
-                        </div>                    
+                        </>
                       ) : (
-                        <ParagraphGrid 
+                        <ParagraphGrid
                           session={session}
                           blurMode={blurMode}
                           blurredSource={blurredSource}
@@ -590,6 +724,21 @@ export default function Translate() {
                         />
                       )}
                     </div>
+
+                    {/* Next Page Button */}
+                    <div className="shrink-0 w-12 pl-4 border-l border-border/50 flex items-center justify-center">
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="rounded-full opacity-60 hover:opacity-100"
+                        onClick={goNextPage}
+                        aria-label="Next page"
+                        disabled={pageId >= pages.length - 1}
+                      >
+                        <ChevronRight className="h-4 w-4" />
+                      </Button>
+                    </div>
                   </div>
 
                   {/* -------------------------
@@ -598,7 +747,7 @@ export default function Translate() {
                   {/* CONTROLS REGION (non-scrolling) */}
                   <div className="shrink-0 border-t border-border px-3 h-12 flex items-center">
                     <div className="flex w-full items-center justify-between">
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pt-4">
                         <Button
                           type="button"
                           variant="ghost"
@@ -622,7 +771,7 @@ export default function Translate() {
                         </Button>
                       </div>
 
-                      <div className="flex gap-2">
+                      <div className="flex gap-2 pt-4">
                         <Button
                           type="button"
                           variant="secondary"

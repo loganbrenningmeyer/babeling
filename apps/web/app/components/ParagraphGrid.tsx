@@ -3,7 +3,7 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-import { HoverText } from "./HoverText";
+import { HoverText } from "./HoverText/HoverText";
 import type { BlurMode } from "./BlurModeToggle";
 import type { Session } from "../translate/page";
 
