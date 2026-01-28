@@ -11,7 +11,18 @@ from pathlib import Path
 from .utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
-from babeling_nlp.segment import Segmenter
+from babeling_nlp.segmenter import Segmenter
+
+LANGS = {
+    "en": "English",
+    "fr": "French",
+    "es": "Spanish",
+    "it": "Italian",
+    "de": "German"
+}
+
+SRC_LANG = "en"
+TGT_LANG = "es"
 
 # -------------------------
 # Paths
@@ -24,9 +35,11 @@ CKPT_PATH = (
 PROMPTS_DIR = Path(__file__).parent / "prompts"
 
 
-def load_prompt(filename: str) -> str:
-    return (PROMPTS_DIR / filename).read_text(encoding="utf-8")
-
+def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
+    prompt = (PROMPTS_DIR / filename).read_text(encoding="utf-8")
+    prompt = prompt.replace("<source>", LANGS[src_lang]).replace("<src_lang>", src_lang)
+    prompt = prompt.replace("<target>", LANGS[tgt_lang]).replace("<tgt_lang>", tgt_lang)
+    return prompt
 
 # -------------------------
 # Load BinaryAlign model
@@ -37,8 +50,6 @@ aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
 # -------------------------
 # Create Segmenter
 # -------------------------
-SRC_LANG = "en"
-TGT_LANG = "fr"
 
 segmenter = Segmenter(SRC_LANG, TGT_LANG)
 
@@ -46,8 +57,8 @@ segmenter = Segmenter(SRC_LANG, TGT_LANG)
 # Prepare GeminiAPI / French dictionary
 # -------------------------
 print("Creating Translator...")
-system_translate = load_prompt("translate_en_fr.txt")
-system_explain = load_prompt("explain_en_fr.txt")
+system_translate = load_prompt("translate.txt", SRC_LANG, TGT_LANG)
+system_explain = load_prompt("explain.txt", SRC_LANG, TGT_LANG)
 
 gemini_api = GeminiAPI(system_translate=system_translate, system_explain=system_explain)
 

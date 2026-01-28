@@ -2,13 +2,22 @@ import re
 import spacy
 
 
+NLP_LANGS = {
+    "en": "en_core_web_sm",
+    "fr": "fr_core_news_sm",
+    "it": "it_core_news_sm",
+    "es": "es_core_news_sm",
+    "de": "de_core_news_sm"
+}
+
+
 class Segmenter:
     def __init__(self, src_lang: str, tgt_lang: str):
         self.src_lang = src_lang
         self.tgt_lang = tgt_lang
 
-        src_nlp = spacy.load("en_core_web_sm", exclude=["parser"])
-        tgt_nlp = spacy.load("fr_core_news_sm", exclude=["parser"])
+        src_nlp = spacy.load(NLP_LANGS[src_lang], exclude=["parser"])
+        tgt_nlp = spacy.load(NLP_LANGS[tgt_lang], exclude=["parser"])
         src_nlp.enable_pipe("senter")
         tgt_nlp.enable_pipe("senter")
 
