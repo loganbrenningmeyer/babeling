@@ -1,13 +1,14 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { text } = await req.json();
+  const { text, tgt_lang } = await req.json();
 
   const res = await fetch("http://localhost:8000/pronounce", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       text,
+      tgt_lang,
     }),
   });
 

@@ -17,6 +17,18 @@ import { ParagraphGrid } from "../components/ParagraphGrid";
 import { UploadSurface } from "../components/UploadSurface";
 
 
+const LANGS = [
+  { code: "en", label: "English" },
+  { code: "fr", label: "French" },
+  { code: "es", label: "Spanish" },
+  { code: "it", label: "Italian" },
+  { code: "de", label: "German" },
+];
+
+function getLangLabel(code: string) {
+  return LANGS.find((l) => l.code === code)?.label ?? code;
+}
+
 export type Session = {
   sourceText: string;
   targetText: string;
@@ -55,6 +67,8 @@ export default function Translate() {
   // Core state
   // -------------------------
   const [sourceText, setSourceText] = useState("");
+  const [srcLang, setSrcLang] = useState("en");
+  const [tgtLang, setTgtLang] = useState("fr");
   const [explainData, setExplainData] = useState<ExplainEntry | null>(null);
   const [defineData, setDefineData] = useState<DefineEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -199,7 +213,7 @@ export default function Translate() {
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: text }),
+      body: JSON.stringify({ source: text, src_lang: srcLang, tgt_lang: tgtLang }),
     });
     const translate_data = await translate_res.json();
 
@@ -214,6 +228,8 @@ export default function Translate() {
       body: JSON.stringify({
         source,
         target,
+        src_lang: srcLang,
+        tgt_lang: tgtLang,
       }),
     });
     const align_data = await align_res.json();
@@ -283,7 +299,7 @@ export default function Translate() {
     // -------------------------
     setExplanationLoading(true);
 
-    const res = await fetch("/api/explain", {
+    const res = await fetch("/api/define_and_explain", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -295,25 +311,22 @@ export default function Translate() {
         tgt_sent_ids: session.tgt.sentIds,
         tgt_to_src: session.align.tgtToSrc,
         tgt_idx: i,
+        src_lang: srcLang,
+        tgt_lang: tgtLang,
       }),
     });
     const data = await res.json();
 
     setExplainData({
-      explanation: data.explanation.explanation,
-      examples: data.explanation.examples,
+      explanation: data.explanation,
+      examples: data.examples,
     });
-    setDefineData(
-      data.definition
-        ? {
-            word: data.definition.word,
-            pos: data.definition.pos,
-            definition: data.definition.definition,
-            pronunciation: data.definition.pronunciation,
-            infinitive: data.definition.infinitive,
-          }
-        : null
-    );
+    setDefineData({
+      lemma: data.lemma,
+      pos: data.pos,
+      ipa: data.ipa,
+      gloss: data.gloss,
+    });
 
     setExplanationLoading(false);
   }
@@ -619,13 +632,81 @@ export default function Translate() {
       {!showAligned && !translationLoading ? (
         <div className={PANE_DIV}>
           <Pane className={`${PANE_H} flex flex-col min-h-0 bg-muted`}>
+            {/* -------------------------
+            //* Source / Target Selectors
+            //* ------------------------- */}
+            <div className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm mb-4">
+              <div className="flex items-center gap-4">
+                {/* Source Language Selector */}
+                <div className="flex-1">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
+                    Source
+                  </div>
+                  <select
+                    className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    value={srcLang}
+                    onChange={(e) => setSrcLang(e.target.value)}
+                    disabled={translationLoading}
+                  >
+                  {LANGS.map((lang) => {
+                    const isDisabled = lang.code === tgtLang;
+                    return (
+                      <option
+                        key={lang.code}
+                        value={lang.code}
+                        disabled={isDisabled}
+                        className={!isDisabled ? "font-semibold" : "font-normal"}
+                      >
+                        {lang.label}
+                      </option>
+                    );
+                  })}
+                  </select>
+                </div>
+
+                <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted text-lg font-semibold text-foreground shadow-sm">
+                  →
+                </div>
+
+                {/* Target Language Selector */}
+                <div className="flex-1">
+                  <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
+                    Target
+                  </div>
+                  <select
+                    className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    value={tgtLang}
+                    onChange={(e) => setTgtLang(e.target.value)}
+                    disabled={translationLoading}
+                  >
+                  {LANGS.map((lang) => {
+                    const isDisabled = lang.code === srcLang;
+                    return (
+                      <option
+                        key={lang.code}
+                        value={lang.code}
+                        disabled={isDisabled}
+                        className={!isDisabled ? "font-semibold" : "font-normal"}
+                      >
+                        {lang.label}
+                      </option>
+                    );
+                  })}
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            {/* -------------------------
+            //* Source Text Inputs
+            //* ------------------------- */}
             {/* Input Box */}
             <div className="flex-1 min-h-0">
               <AppTextarea
                 className="h-full min-h-0 overflow-y-auto"
                 value={sourceText}
                 onChange={(e) => setSourceText(e.target.value)}
-                placeholder="Type some English text..."
+                placeholder={`Type some ${getLangLabel(srcLang)} text...`}
               />
             </div>
             {/* Upload Card */}
@@ -636,11 +717,14 @@ export default function Translate() {
                 onFileChange={setSourceFile}
               />
             </div>
-            {/* Translate Button */}
+            
+            {/* -------------------------
+            //* Translate Button
+            //* ------------------------- */}
             <div className="pt-6 shrink-0 flex justify-center">
               <Button
                 onClick={startReadingSession}
-                disabled={translationLoading}
+                disabled={translationLoading || !srcLang || !tgtLang}
                 className="
                   group
                   relative
@@ -681,8 +765,12 @@ export default function Translate() {
                 <TextSurface className="relative h-full flex flex-col overflow-hidden">
                   {/* Headers */}
                   <div className="grid grid-cols-2 border-b-2 border-border font-medium text-muted-foreground">
-                    <div className="px-4 py-2 border-r-2 border-border">English</div>
-                    <div className="px-4 py-2 pl-8">French</div>
+                    <div className="px-4 py-2 border-r-2 border-border">
+                      {getLangLabel(srcLang)}
+                    </div>
+                    <div className="px-4 py-2 pl-8">
+                      {getLangLabel(tgtLang)}
+                    </div>
                   </div>
 
                   {/* Aligned ParagraphGrid + Page Buttons */}
@@ -845,7 +933,7 @@ export default function Translate() {
                 <ExplainSkeleton />
               ) : (
                 <div className="p-4 space-y-4">
-                  {defineData && <DefineCard data={defineData} />}
+                  {defineData && <DefineCard data={defineData} tgtLang={tgtLang} />}
                   <div className="h-px bg-border" />
                   {explainData && <ExplainCard data={explainData} />}
                 </div>

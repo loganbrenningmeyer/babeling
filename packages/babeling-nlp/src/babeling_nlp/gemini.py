@@ -5,13 +5,17 @@ import wave
 from google import genai
 from google.genai import types
 from pydantic import BaseModel
+from textwrap import dedent
 
 
 class ExplainExample(BaseModel):
-    fr: str
-    en: str
+    source: str
+    target: str
 
-class ExplanationOut(BaseModel):
+class ExplainDefineOut(BaseModel):
+    lemma: str
+    pos: str
+    gloss: str
     explanation: str
     examples: list[ExplainExample]
 
@@ -33,7 +37,7 @@ class GeminiAPI:
         self.system_translate = system_translate
         self.system_explain = system_explain
 
-    def translate_en_fr(self, source: str) -> str:
+    def translate(self, source: str) -> str:
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=source,
@@ -47,8 +51,9 @@ class GeminiAPI:
 
         return response.text.strip()
 
-    def explain_en_fr(
+    def define_and_explain(
         self,
+        candidates: list[dict],
         src_words: list[str],
         tgt_words: list[str],
         src_spaces: list[str],
@@ -58,9 +63,9 @@ class GeminiAPI:
         tgt_to_src: dict,
         tgt_idx: int,
     ) -> dict:
-        # ----------
+        # -------------------------
         # Add source / target markers
-        # ----------
+        # -------------------------
         src_mark_idxs = set(tgt_to_src.get(tgt_idx, []))
         tgt_mark_idxs = {tgt_idx}
 
@@ -75,18 +80,32 @@ class GeminiAPI:
         source = "".join(src_sent)
         target = "".join(tgt_sent)
 
-        # ----------
-        # Construct prompt
-        # ----------
-        prompt = f"[Source sentence]\n{source}\n\n[Target sentence]\n{target}"
+        # -------------------------
+        # Construct explanation / definition disambigutation prompt
+        # -------------------------
+        prompt = dedent(f"""
+            [Source sentence]
+            {source}
 
+            [Target sentence]
+            {target}
+
+            [Dictionary candidates (JSON)]
+            {json.dumps(candidates, ensure_ascii=False)}
+
+            Select the best candidate and return ONLY valid JSON following the system instructions.
+        """).strip()
+        
+        # -------------------------
+        # Query Gemini for explanation / definition disambiguation
+        # -------------------------
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=prompt,
             config=types.GenerateContentConfig(
                 system_instruction=self.system_explain,
                 response_mime_type="application/json",
-                response_schema=ExplanationOut,
+                response_schema=ExplainDefineOut,
                 temperature=0.1,
                 max_output_tokens=256,
                 thinking_config=types.ThinkingConfig(thinking_budget=0),
@@ -94,47 +113,14 @@ class GeminiAPI:
         )
 
         if getattr(response, "parsed", None):
-            return {
-                "explanation": response.parsed.explanation,
-                "examples": response.parsed.examples,
-            }
+            data = response.parsed.model_dump()
+        else:
+            data = json.loads(response.text)
 
-        data = json.loads(response.text)
-        return {"explanation": data["explanation"], "examples": data["examples"]}
-
-    def pronounce(self, text: str, num_attempts: int=10):
-        for attempt in range(num_attempts):
-            try:
-                response = self.client.models.generate_content(
-                    model="gemini-2.5-flash-preview-tts",
-                    contents=f"Prononce en français (France, fr-FR): {text}",
-                    config=types.GenerateContentConfig(
-                        response_modalities=["AUDIO"],
-                        speech_config=types.SpeechConfig(
-                            voice_config=types.VoiceConfig(
-                                prebuilt_voice_config=types.PrebuiltVoiceConfig(
-                                voice_name='Erinome',
-                                )
-                            )
-                        ),
-                    )
-                )
-
-                pcm = response.candidates[0].content.parts[0].inline_data.data
-
-                # -------------------------
-                # Wrap PCM frames into a WAV container
-                # -------------------------
-                buf = io.BytesIO()
-                with wave.open(buf, "wb") as wf:
-                    wf.setnchannels(1)
-                    wf.setsampwidth(2)
-                    wf.setframerate(24000)
-                    wf.writeframes(pcm)
-                print(f"[Success]: Attempt {attempt + 1} / {num_attempts}", flush=False)
-                return buf.getvalue()
-            except:
-                print(f"[Error]: Attempt {attempt + 1} / {num_attempts}", flush=False)
-                continue
-
-        raise RuntimeError(f"Gemini TTS returned no audio after {num_attempts} attempts.")
+        return {
+            "lemma": data.get("lemma"),
+            "pos": data.get("pos"),
+            "gloss": data.get("gloss"),
+            "explanation": data.get("explanation"),
+            "examples": data.get("examples")
+        }

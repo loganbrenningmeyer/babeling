@@ -9,7 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 
-export type ExplainExample = { fr: string; en: string };
+export type ExplainExample = { source: string; target: string };
 
 export type ExplainEntry = {
   explanation: string;
@@ -40,7 +40,7 @@ export function ExplainCard({
                         p: ({ children }) => <span>{children}</span>,
                       }}
                     >
-                      {ex.fr}
+                      {ex.target}
                     </ReactMarkdown>
                   </span>
                 </TooltipTrigger>
@@ -52,7 +52,7 @@ export function ExplainCard({
                       p: ({ children }) => <p className="m-0">{children}</p>,
                     }}
                   >
-                    {ex.en}
+                    {ex.source}
                   </ReactMarkdown>
                 </TooltipContent>
               </Tooltip>

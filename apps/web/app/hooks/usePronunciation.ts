@@ -47,7 +47,7 @@ export function usePronunciation() {
   // Play audio
   // -------------------------
   const play = useCallback(
-    async (text: string) => {
+    async (text: string, tgtLang?: string) => {
       setError(null);
       setLoading(true);
 
@@ -57,7 +57,7 @@ export function usePronunciation() {
         const res = await fetch("/api/pronounce", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text }),
+          body: JSON.stringify({ text, tgt_lang: tgtLang }),
         });
 
         if (!res.ok) {

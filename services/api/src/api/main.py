@@ -3,7 +3,7 @@ import json
 import base64
 import requests
 import spacy
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 from pathlib import Path
@@ -12,6 +12,11 @@ from .utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
 from babeling_nlp.segmenter import Segmenter
+from babeling_nlp.define import get_definition_candidates, get_ipa
+
+
+DEFAULT_SRC_LANG = "en"
+DEFAULT_TGT_LANG = "fr"
 
 LANGS = {
     "en": "English",
@@ -21,19 +26,12 @@ LANGS = {
     "de": "German"
 }
 
-SRC_LANG = "en"
-TGT_LANG = "es"
-
 # -------------------------
 # Paths
 # -------------------------
-REPO_ROOT = Path(__file__).resolve().parents[4]
-CKPT_PATH = (
-    REPO_ROOT / "artifacts" / "binaryalign" / "en-fr" / "model-finetune-step55000.ckpt"
-)
+ALIGN_MODEL_PATH = Path.home() / "projects" / "babeling" / "artifacts" / "binaryalign" / "en-all" / "model-pretrain-step50000.ckpt"
 
-PROMPTS_DIR = Path(__file__).parent / "prompts"
-
+PROMPTS_DIR = Path.home() / "projects" / "babeling" / "services" / "api" / "src" / "api" / "prompts"
 
 def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
     prompt = (PROMPTS_DIR / filename).read_text(encoding="utf-8")
@@ -44,31 +42,50 @@ def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
 # -------------------------
 # Load BinaryAlign model
 # -------------------------
-print("Loading Aligner...")
-aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
+print("Loading Aligner...", flush=False)
+aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=ALIGN_MODEL_PATH)
 
 # -------------------------
-# Create Segmenter
+# Create default Segmenter (used for split_pages)
 # -------------------------
-
-segmenter = Segmenter(SRC_LANG, TGT_LANG)
+print("Loading Default Segmenter...", flush=False)
+default_segmenter = Segmenter(DEFAULT_SRC_LANG, DEFAULT_TGT_LANG)
 
 # -------------------------
-# Prepare GeminiAPI / French dictionary
+# Gemini / Segmenter caches
 # -------------------------
-print("Creating Translator...")
-system_translate = load_prompt("translate.txt", SRC_LANG, TGT_LANG)
-system_explain = load_prompt("explain.txt", SRC_LANG, TGT_LANG)
+_segmenters: dict[tuple[str, str], Segmenter] = {}
+_gemini: dict[tuple[str, str], GeminiAPI] = {}
 
-gemini_api = GeminiAPI(system_translate=system_translate, system_explain=system_explain)
+def resolve_langs(src_lang: str | None, tgt_lang: str | None) -> tuple[str, str]:
+    src = src_lang or DEFAULT_SRC_LANG
+    tgt = tgt_lang or DEFAULT_TGT_LANG
 
-with open(REPO_ROOT / "french.jsonl", "r") as f:
-    french_dict = json.load(f)
+    if src not in LANGS:
+        raise HTTPException(status_code=400, detail=f"Unsupported source language: {src}")
+    if tgt not in LANGS:
+        raise HTTPException(status_code=400, detail=f"Unsupported target language: {tgt}")
+
+    return src, tgt
+
+def get_segmenter(src_lang: str, tgt_lang: str) -> Segmenter:
+    key = (src_lang, tgt_lang)
+    if key not in _segmenters:
+        _segmenters[key] = Segmenter(src_lang, tgt_lang)
+    return _segmenters[key]
+
+def get_gemini(src_lang: str, tgt_lang: str) -> GeminiAPI:
+    key = (src_lang, tgt_lang)
+    if key not in _gemini:
+        system_translate = load_prompt("translate.txt", src_lang, tgt_lang)
+        system_explain = load_prompt("explain.txt", src_lang, tgt_lang)
+        _gemini[key] = GeminiAPI(system_translate, system_explain)
+    return _gemini[key]
 
 # -------------------------
 # Initialize FastAPI app
 # -------------------------
-print("Initializing FastAPI...")
+print("Initializing FastAPI...", flush=False)
 app = FastAPI()
 
 
@@ -77,16 +94,20 @@ app = FastAPI()
 # =========================
 class TranslateRequest(BaseModel):
     source: str
+    src_lang: str | None = None
+    tgt_lang: str | None = None
 
 @app.post("/translate")
 def translate(req: TranslateRequest):
+    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
     # -------------------------
     # Normalize wrapped text / Mark linebreaks <LB>
     # -------------------------
     source = mark_linebreaks(req.source)
 
     # -- Translate
-    target = gemini_api.translate_en_fr(source)
+    gemini_api = get_gemini(src_lang, tgt_lang)
+    target = gemini_api.translate(source)
 
     # -------------------------
     # Replace <LB> markers with \n
@@ -103,6 +124,8 @@ def translate(req: TranslateRequest):
 class AlignRequest(BaseModel):
     source: str
     target: str
+    src_lang: str | None = None
+    tgt_lang: str | None = None
 
 
 @app.post("/align")
@@ -119,8 +142,10 @@ def align(req: AlignRequest):
     # -------------------------
     # Split source / target into paragraphs and sentences
     # -------------------------
-    src_par_sent_words = segmenter.split_par_sent_words(req.source, SRC_LANG)
-    tgt_par_sent_words = segmenter.split_par_sent_words(req.target, TGT_LANG)
+    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
+    segmenter = get_segmenter(src_lang, tgt_lang)
+    src_par_sent_words = segmenter.split_par_sent_words(req.source, src_lang)
+    tgt_par_sent_words = segmenter.split_par_sent_words(req.target, tgt_lang)
 
     # -------------------------
     # Align sentences
@@ -163,27 +188,9 @@ def align(req: AlignRequest):
 
 
 # =========================
-# Explain & Define (/explain)
+# Deefine & Explain (/define_and_explain)
 # =========================
-def define_fr(word: str):
-    definition = {
-        "word": word,
-        "pos": "",
-        "definition": "",
-        "pronunciation": "",
-        "infinitive": ""
-    }
-
-    try:
-        dict_entry: dict = french_dict[word.lower()]
-        for k in definition.keys() & dict_entry.keys():
-            definition[k] = dict_entry[k]
-    except Exception as e:
-        pass
-    
-    return definition
-
-class ExplainRequest(BaseModel):
+class DefineExplainRequest(BaseModel):
     src_words: list[str]
     tgt_words: list[str]
     src_spaces: list[str]
@@ -192,10 +199,21 @@ class ExplainRequest(BaseModel):
     tgt_sent_ids: list[int]
     tgt_to_src: dict[int, list[int]]
     tgt_idx: int
+    src_lang: str | None = None
+    tgt_lang: str | None = None
 
-@app.post("/explain")
-def explain(req: ExplainRequest):
-    explanation_data = gemini_api.explain_en_fr(
+@app.post("/define_and_explain")
+def explain(req: DefineExplainRequest):
+    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
+    # -------------------------
+    # Get definition candidate info
+    # -------------------------
+    tgt_word = req.tgt_words[req.tgt_idx]
+    candidates = get_definition_candidates(tgt_word, tgt_lang)
+
+    gemini_api = get_gemini(src_lang, tgt_lang)
+    data = gemini_api.define_and_explain(
+        candidates,
         req.src_words,
         req.tgt_words,
         req.src_spaces,
@@ -205,9 +223,11 @@ def explain(req: ExplainRequest):
         req.tgt_to_src,
         req.tgt_idx,
     )
-    definition_data = define_fr(req.tgt_words[req.tgt_idx])
 
-    return {"explanation": explanation_data, "definition": definition_data}
+    # -- Get IPA pronunciation using lemma/pos
+    data["ipa"] = get_ipa(data["lemma"], data["pos"], tgt_lang)
+
+    return data
 
 
 # =========================
@@ -215,10 +235,20 @@ def explain(req: ExplainRequest):
 # =========================
 class PronounceRequest(BaseModel):
     text: str
+    tgt_lang: str | None = None
 
 @app.post("/pronounce")
 def pronounce(req: PronounceRequest):
     INWORLD_API_KEY = os.environ.get("INWORLD_RUNTIME_BASE64_CREDENTIAL")
+
+    VOICES = {
+        "en": "Craig",
+        "fr": "Hélène",
+        "es": "Miguel",
+        "it": "Orietta",
+        "de": "Josef"
+    }
+
     url = "https://api.inworld.ai/tts/v1/voice"
 
     headers = {
@@ -226,10 +256,13 @@ def pronounce(req: PronounceRequest):
         "Content-Type": "application/json",
     }
 
+    _, tgt_lang = resolve_langs(DEFAULT_SRC_LANG, req.tgt_lang)
+
     payload = {
-        "text": req.text,
-        "voiceId": "Hélène",
-        "modelId": "inworld-tts-1.5-max"
+        "text": req.text + ".",
+        "voiceId": VOICES[tgt_lang],
+        "modelId": "inworld-tts-1.5-max",
+        "temperature": 0.1
     }
 
     response = requests.post(url, headers=headers, json=payload)
@@ -253,5 +286,5 @@ class SplitPagesRequest(BaseModel):
 
 @app.post("/split_pages")
 def split_pages(req: SplitPagesRequest):
-    pages = segmenter.split_pages(req.text)
+    pages = default_segmenter.split_pages(req.text)
     return {"pages": pages}

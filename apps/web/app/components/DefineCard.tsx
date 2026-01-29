@@ -4,33 +4,34 @@ import { cn } from "@/lib/utils";
 import { PronounceButton } from "./PronounceButton";
 
 export type DefineEntry = {
-  word: string;
+  lemma: string;
   pos: string;
-  definition: string;
-  pronunciation: string | null;
-  infinitive: string | null;
+  ipa: string;
+  gloss: string;
 };
 
 export function DefineCard({
   data,
+  tgtLang,
   className,
 }: {
   data: DefineEntry;
+  tgtLang?: string;
   className?: string;
 }) {
   return (
     <div className={cn("space-y-3", className)}>
       {/* Headword */}
       <div className="gap-2 inline-flex">
-        <div className="text-lg font-semibold">{data.word}</div>
-        <PronounceButton text={data.word} />
+        <div className="text-lg font-bold">{data.lemma}</div>
+        <PronounceButton text={data.lemma} tgtLang={tgtLang} />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
         {/* IPA Pronunciation / Audio */}
-        {data.pronunciation && (
-          <Badge variant="outline" className="h-6 inline-flex text-sm">
-            {data.pronunciation}
+        {data.ipa && (
+          <Badge variant="outline" className="h-6 inline-flex text-sm font-mono text-muted-foreground">
+            /{data.ipa}/
           </Badge>
         )}
 
@@ -38,21 +39,11 @@ export function DefineCard({
         {data.pos && (
           <Badge variant="secondary" className="h-6 inline-flex text-sm">{data.pos}</Badge>
         )}
-
-        {/* Infinitive */}
-        {data.infinitive && (
-          <span className="text-sm text-muted-foreground">
-            infinitive:{" "}
-            <span className="font-medium text-foreground">
-              {data.infinitive}
-            </span>
-          </span>
-        )}
       </div>
       
       {/* Definition body */}
       <p className="text-base leading-6">
-        {data.definition ? data.definition : "Definition unavailable."}
+        {data.gloss ? data.gloss : "Definition unavailable."}
       </p>
 
     </div>

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { source, target } = await req.json();
+    const { source, target, src_lang, tgt_lang } = await req.json();
 
     const res = await fetch("http://localhost:8000/align", {
         method: "POST",
@@ -9,6 +9,8 @@ export async function POST(req: Request) {
         body: JSON.stringify({ 
             source,
             target,
+            src_lang,
+            tgt_lang,
          }),
     });
 
