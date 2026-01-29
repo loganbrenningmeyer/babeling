@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
 import { DefineEntry, DefineCard } from "../components/DefineCard";
@@ -161,6 +161,13 @@ export default function Translate() {
 
     // Translate and align source text
     await loadPageSession(0, newPages);
+  }
+
+  function handleSwapLanguages() {
+    const nextSrc = tgtLang;
+    const nextTgt = srcLang;
+    setSrcLang(nextSrc);
+    setTgtLang(nextTgt);
   }
 
   async function loadPageSession(pid: number, pagesArg?: string[]) {
@@ -664,8 +671,18 @@ export default function Translate() {
                   </select>
                 </div>
 
-                <div className="hidden sm:flex h-11 w-11 items-center justify-center rounded-full border border-border/70 bg-muted text-lg font-semibold text-foreground shadow-sm">
-                  →
+                <div className="hidden sm:flex items-center justify-center">
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    size="icon"
+                    className="h-11 w-11 rounded-full border border-border/70 bg-muted text-foreground shadow-sm"
+                    onClick={handleSwapLanguages}
+                    aria-label="Swap source and target languages"
+                    disabled={translationLoading}
+                  >
+                    <ArrowLeftRight className="h-4 w-4" />
+                  </Button>
                 </div>
 
                 {/* Target Language Selector */}

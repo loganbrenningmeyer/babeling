@@ -29,9 +29,11 @@ LANGS = {
 # -------------------------
 # Paths
 # -------------------------
-ALIGN_MODEL_PATH = Path.home() / "projects" / "babeling" / "artifacts" / "binaryalign" / "en-all" / "model-pretrain-step50000.ckpt"
+REPO_DIR = Path.home() / "Documents" / "Github" / "babeling"
 
-PROMPTS_DIR = Path.home() / "projects" / "babeling" / "services" / "api" / "src" / "api" / "prompts"
+ALIGN_MODEL_PATH = REPO_DIR / "artifacts" / "binaryalign" / "en-all" / "model-pretrain-step50000.ckpt"
+
+PROMPTS_DIR = REPO_DIR / "services" / "api" / "src" / "api" / "prompts"
 
 def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
     prompt = (PROMPTS_DIR / filename).read_text(encoding="utf-8")
