@@ -29,6 +29,7 @@ Return ONLY valid JSON with exactly these keys:
     - "source": string
 
 Do not include any extra keys or text outside JSON.
+Do NOT escape markdown characters (no backslashes). Output markdown with literal **bold**.
 
 ────────────────────────────────
 GLOSS SELECTION RULES (STRICT)
