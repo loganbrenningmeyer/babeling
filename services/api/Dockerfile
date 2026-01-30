@@ -11,7 +11,6 @@ RUN apt-get update && apt-get install -y \
 COPY services/api ./services/api
 COPY packages/binaryalign ./packages/binaryalign
 COPY packages/babeling-nlp ./packages/babeling-nlp
-COPY data ./data
 
 ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1
