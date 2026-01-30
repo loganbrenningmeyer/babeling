@@ -134,7 +134,13 @@ export function HoverText({
   const clusters = buildClusters(words, spaces)
 
   return (
-    <p className={cn("whitespace-pre-wrap", disabled ? "pointer-events-none" : "", className)}>
+    <p 
+      className={cn(
+        "whitespace-pre-wrap font-reading", 
+        disabled ? "pointer-events-none" : "", 
+        className
+      )}
+    >
     {clusters.map((c) => {
       const baseIndex = c.anchorLocalIndex + indexOffset;
       const isHighlighted = highlightIndices.includes(baseIndex);

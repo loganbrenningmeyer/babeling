@@ -11,11 +11,7 @@ export function TextSurface({
     <div
       className={cn(
         `
-        rounded-md
-        p-4
-        font-sans leading-6
-        shadow
-        bg-background
+        font-ui leading-6
         `,
         className
       )}

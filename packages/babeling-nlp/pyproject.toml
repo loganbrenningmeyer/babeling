@@ -14,6 +14,8 @@ dependencies = [
   "transformers",
   "sentencepiece",
   "numpy",
+  "google-genai",
+  "spacy==3.8.0",
 ]
 
 [tool.setuptools]

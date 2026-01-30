@@ -638,7 +638,7 @@ export default function Translate() {
       //* ------------------------- */}
       {!showAligned && !translationLoading ? (
         <div className={PANE_DIV}>
-          <Pane className={`${PANE_H} flex flex-col min-h-0 bg-muted`}>
+          <Pane className={`${PANE_H} flex flex-col min-h-0 bg-muted font-ui`}>
             {/* -------------------------
             //* Source / Target Selectors
             //* ------------------------- */}
@@ -718,7 +718,7 @@ export default function Translate() {
             //* Source Text Inputs
             //* ------------------------- */}
             {/* Input Box */}
-            <div className="flex-1 min-h-0">
+            <div className="font-ui flex-1 min-h-0">
               <AppTextarea
                 className="h-full min-h-0 overflow-y-auto"
                 value={sourceText}
@@ -738,7 +738,7 @@ export default function Translate() {
             {/* -------------------------
             //* Translate Button
             //* ------------------------- */}
-            <div className="pt-6 shrink-0 flex justify-center">
+            <div className="font-ui pt-6 shrink-0 flex justify-center">
               <Button
                 onClick={startReadingSession}
                 disabled={translationLoading || !srcLang || !tgtLang}
@@ -776,51 +776,68 @@ export default function Translate() {
           //* Source / Target HoverText
           //* ------------------------- */}
           <div className={PANE_DIV}>
-            <Pane className={`${PANE_H} flex flex-col`}>
-              {/* Pane Body */}
+            <Pane className={`${PANE_H} flex flex-col p-0 shadow-2xl`} contentClassName="p-0">
               <div className="flex-1 min-h-0">
-                <TextSurface className="relative h-full flex flex-col overflow-hidden">
-                  {/* Headers */}
-                  <div className="grid grid-cols-2 border-b-2 border-border font-medium text-muted-foreground">
-                    <div className="px-4 py-2 border-r-2 border-border">
-                      {getLangLabel(srcLang)}
-                    </div>
-                    <div className="px-4 py-2 pl-8">
-                      {getLangLabel(tgtLang)}
-                    </div>
-                  </div>
-
-                  {/* Aligned ParagraphGrid + Page Buttons */}
-                  <div className="relative flex flex-1 min-h-0">
-                    {/* Previous Page Button */}
-                    <div className="shrink-0 w-12 pr-4 border-r border-border/50 flex items-center justify-center">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="rounded-full opacity-60 hover:opacity-100"
-                        onClick={goPrevPage}
-                        aria-label="Previous page"
-                        disabled={pageId <= 0}
+                {/* -------------------------
+                //* --------- [Title] ----------
+                //* [Source Text] | [Target Text]
+                //* ------------------------- */}
+                <TextSurface className="relative h-full flex flex-col overflow-hidden pt-0">
+                  {/* Title Header */}
+                  <div>
+                    {sourceFile ? (
+                      <div className="
+                      flex w-full justify-center
+                      pt-6 pb-5
+                      border-b 
+                      font-reading font-normal
+                      uppercase tracking-[0.12em] leading-none
+                      text-[18px] text-muted-foreground 
+                      "
                       >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
+                        {sourceFile.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ")}
+                      </div>
+                    ) : (
+                      <></>
+                    )}
+                  </div>
+                  <div className="relative flex-1 min-h-0 flex flex-col border-b">
+                    <div className="pointer-events-none absolute inset-y-0 left-1/2 w-0.25 bg-border" />
+
+                    {/* Source / Target Language Headers */}
+                    <div className="grid grid-cols-2 text-[18px] font-medium">
+                      <div className="px-6">
+                        <div className="pt-4">
+                          <span className="inline-flex flex-col">
+                            <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
+                            <span className="relative z-10 h-1 w-full bg-blue-300" />
+                          </span>
+                        </div>
+                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
+                      </div>
+
+                      <div className="px-6">
+                        <div className="pt-4">
+                          <span className="inline-flex flex-col">
+                            <span className="pb-2">{getLangLabel(tgtLang)}</span>
+                            <span className="relative z-10 h-1 w-full bg-orange-300" />
+                          </span>
+                        </div>
+                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
+                      </div>
                     </div>
 
-                    {/* ParagraphGrid: [English] | [French] */}
+                    {/* ParagraphGrid */}
                     <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
                       {translationLoading || !session ? (
-                        <>
-                          <div className="pointer-events-none absolute inset-y-0 right-1/2 w-0.5 bg-border" />
-                          <div className="grid grid-cols-2">
-                            <div className="border-r-2 border-border p-4 pr-8">
-                              <TextSkeleton blurClassName="blur-sm" />
-                            </div>
-                            <div className="p-4 pl-8">
-                              <TextSkeleton />
-                            </div>
+                        <div className="grid grid-cols-2">
+                          <div className="p-4 pr-8">
+                            <TextSkeleton blurClassName="blur-sm" />
                           </div>
-                        </>
+                          <div className="p-4 pl-8">
+                            <TextSkeleton />
+                          </div>
+                        </div>
                       ) : (
                         <ParagraphGrid
                           session={session}
@@ -839,75 +856,47 @@ export default function Translate() {
                           onTargetHover={handleTargetHover}
                           onTargetWordClick={handleTargetWordClick}
                           targetDisabled={popoverOpen}
+                          className="text-[18px] leading-[1.5]"
                         />
                       )}
                     </div>
-
-                    {/* Next Page Button */}
-                    <div className="shrink-0 w-12 pl-4 border-l border-border/50 flex items-center justify-center">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="rounded-full opacity-60 hover:opacity-100"
-                        onClick={goNextPage}
-                        aria-label="Next page"
-                        disabled={pageId >= pages.length - 1}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
-                    </div>
                   </div>
 
-                  {/* -------------------------
-                  //* Internal Traversal Buttons
-                  //* ------------------------- */}
-                  {/* CONTROLS REGION (non-scrolling) */}
-                  <div className="shrink-0 border-t border-border px-3 h-12 flex items-center">
-                    <div className="flex w-full items-center justify-between">
-                      <div className="flex gap-2 pt-4">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full opacity-60 hover:opacity-100"
-                          onClick={() => handlePrev("sentence")}
-                          aria-label="Previous sentence"
-                        >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-
+                  {/* BlurModeToggle / Page Navigation */}
+                  <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
+                    <div className="grid grid-cols-3 items-center">
+                      {/* Previous Page */}
+                      <div className="flex justify-start pl-3">
                         <Button
                           type="button"
                           variant="secondary"
                           size="icon"
-                          className="rounded-full opacity-60 hover:opacity-100"
-                          onClick={() => handlePrev("paragraph")}
-                          aria-label="Previous paragraph"
+                          className="rounded-full transition-colors hover:bg-foreground/10 hover:text-foreground"
+                          onClick={goPrevPage}
+                          aria-label="Previous page"
+                          disabled={pageId <= 0}
                         >
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
                       </div>
-
-                      <div className="flex gap-2 pt-4">
+                      {/* BlurModeToggle */}
+                      <div className="flex justify-center">
+                        <BlurModeToggle
+                          value={blurMode}
+                          onChange={setBlurMode}
+                          className="border shadow"
+                        />
+                      </div>
+                      {/* Next Page */}
+                      <div className="flex justify-end pr-3">
                         <Button
                           type="button"
                           variant="secondary"
                           size="icon"
-                          className="rounded-full opacity-60 hover:opacity-100"
-                          onClick={() => handleNext("paragraph")}
-                          aria-label="Next paragraph"
-                        >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="rounded-full opacity-60 hover:opacity-100"
-                          onClick={() => handleNext("sentence")}
-                          aria-label="Next sentence"
+                          className="rounded-full transition-colors hover:bg-foreground/10 hover:text-foreground"
+                          onClick={goNextPage}
+                          aria-label="Next page"
+                          disabled={pageId >= pages.length - 1}
                         >
                           <ChevronRight className="h-4 w-4" />
                         </Button>
@@ -915,15 +904,6 @@ export default function Translate() {
                     </div>
                   </div>
                 </TextSurface>
-              </div>
-
-              {/* Pane Footer */}
-              <div className="mt-6 shrink-0 flex justify-center">
-                <BlurModeToggle
-                  value={blurMode}
-                  onChange={setBlurMode}
-                  className="shadow border"
-                />
               </div>
             </Pane>
 

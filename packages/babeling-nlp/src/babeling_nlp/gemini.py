@@ -1,7 +1,5 @@
 import os
-import io
 import json
-import wave
 from google import genai
 from google.genai import types
 from pydantic import BaseModel

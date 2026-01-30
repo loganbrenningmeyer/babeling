@@ -13,7 +13,7 @@ export function AppTextarea({
         className={cn(
           `
           h-full w-full resize-none
-          !text-base font-sans leading-6
+          !text-base leading-6
           border-0 p-4
           focus-visible:ring-0 focus-visible:ring-offset-0
           whitespace-pre-wrap

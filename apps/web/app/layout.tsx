@@ -1,4 +1,18 @@
 import "./globals.css";
+import { Libre_Baskerville, Inter } from "next/font/google";
+
+const baskerville = Libre_Baskerville({
+  subsets: ["latin"],
+  weight: ["400", "700"],
+  display: "swap",
+  variable: "--font-reading",
+})
+
+const ui = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-ui",
+})
 
 export default function RootLayout({
   children,
@@ -6,8 +20,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-zinc-50 text-zinc-900">
+    <html lang="en" className={`${baskerville.variable} ${ui.variable}`}>
+      <body className="font-ui min-h-screen bg-zinc-50 text-zinc-900">
         <nav className="sticky top-0 border-b border-black/10 bg-white">
           <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
             <a className="font-semibold" href="/">Babeling</a>

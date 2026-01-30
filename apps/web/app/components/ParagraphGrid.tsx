@@ -88,9 +88,6 @@ export function ParagraphGrid({
 
   return (
     <div className={cn("relative min-h-full", className)}>
-      {/* Vertical Divider */}
-      <div className="pointer-events-none absolute inset-y-0 right-1/2 w-0.5 bg-border" />
-
       {parIds.map((parId, idx) => {
         const srcIdxs = session.src.parToWordIds[parId];
         const tgtIdxs = tgtParToWordIds[parId];
@@ -103,7 +100,7 @@ export function ParagraphGrid({
         return (
           <div key={parId} className="grid grid-cols-2">
             {/* Left: Source paragraph */}
-            <div className="p-4 pr-8">
+            <div className="my-4 mx-8 mr-10">
               <HoverText
                 variant="source"
                 words={srcSlice.words}
@@ -120,12 +117,12 @@ export function ParagraphGrid({
                   blurred: blurredSource,
                   setBlurred: setBlurredSource,
                 }}
-                className="text-lg"
+                className="text-muted-foreground"
               />
             </div>
 
             {/* Right: Target paragraph */}
-            <div className="p-4 pl-8">
+            <div className="my-4 mx-8">
               <HoverText
                 variant="target"
                 words={tgtSlice.words}
@@ -135,18 +132,17 @@ export function ParagraphGrid({
                 onHover={onTargetHover}
                 highlightIndices={targetHighlightIndices}
                 onWordClick={onTargetWordClick}
-                className="text-lg"
               />
             </div>
 
             {/* Row 2: aligned inset dividers (two separate lines) */}
             {idx < parIds.length - 1 && (
               <>
-                <div className="border-r border-border pl-4 pr-8">
-                  <div className="h-0.5 bg-border/40 mx-2" />
+                <div className="border-r border-border px-12">
+                  <div className="h-0.25 bg-border/60" />
                 </div>
-                <div className="px-4 pl-8">
-                  <div className="h-0.5 bg-border/40 mx-2" />
+                <div className="px-12">
+                  <div className="h-0.25 bg-border/60" />
                 </div>
               </>
             )}
