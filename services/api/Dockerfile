@@ -5,6 +5,8 @@ WORKDIR /app
 # System dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
+    curl \
+    ca-certificates \
  && rm -rf /var/lib/apt/lists/*
 
 # Copy API code
