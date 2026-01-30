@@ -137,7 +137,8 @@ export function HoverText({
     <p 
       className={cn(
         "whitespace-pre-wrap font-reading", 
-        disabled ? "pointer-events-none" : "", 
+        disabled ? "pointer-events-none" : "",
+        "select-none",
         className
       )}
     >
