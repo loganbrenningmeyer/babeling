@@ -3,7 +3,9 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
   const { text, tgt_lang } = await req.json();
 
-  const res = await fetch("http://localhost:8000/pronounce", {
+  const API_BASE_URL = process.env.BABELING_API_BASE_URL;
+
+  const res = await fetch(`${API_BASE_URL}/pronounce`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
