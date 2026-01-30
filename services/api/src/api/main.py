@@ -29,7 +29,7 @@ LANGS = {
 # -------------------------
 # Paths
 # -------------------------
-REPO_DIR = Path.home() / "Documents" / "Github" / "babeling"
+REPO_DIR = Path(os.environ.get("BABELING_ROOT"))
 
 ALIGN_MODEL_PATH = REPO_DIR / "artifacts" / "binaryalign" / "en-all" / "model-pretrain-step50000.ckpt"
 

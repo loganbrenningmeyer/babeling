@@ -1,3 +1,4 @@
+import os
 import json
 import sqlite3
 from sqlite3 import Cursor
@@ -44,7 +45,7 @@ senses = [
 ]
 """
 
-DB_PATH = Path.home() / "data" / "babeling" / "definitions.sqlite"
+DB_PATH = Path(os.environ.get("BABELING_ROOT")) / "data" / "definitions.sqlite"
 
 
 def get_lemmas(word: str, lang: str, cur: Cursor) -> list[str]:
