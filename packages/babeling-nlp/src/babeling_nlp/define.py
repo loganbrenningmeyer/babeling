@@ -45,7 +45,7 @@ senses = [
 ]
 """
 
-DB_PATH = Path(os.environ.get("BABELING_ROOT")) / "data" / "definitions.sqlite"
+DB_PATH = Path(os.environ.get("DEFINITIONS_DB_PATH"))
 
 
 def get_lemmas(word: str, lang: str, cur: Cursor) -> list[str]:

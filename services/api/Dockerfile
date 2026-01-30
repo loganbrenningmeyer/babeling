@@ -30,4 +30,6 @@ RUN pip install https://github.com/explosion/spacy-models/releases/download/en_c
  && pip install https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl
 
 # Start command
-CMD ["bash", "-lc", "uvicorn api.main:app --host 0.0.0.0 --port ${PORT}"]
+COPY services/api/scripts/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+CMD ["/entrypoint.sh"]
