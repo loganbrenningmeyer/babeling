@@ -29,7 +29,7 @@ LANGS = {
 # -------------------------
 # Paths
 # -------------------------
-CKPT_PATH = Path(os.environ.get("BINARYALIGN_CKPT_PATH"))
+CKPT_PATH = Path(os.environ.get("BINARYALIGN_CKPT_PATH", "/tmp/model.ckpt"))
 
 PROMPTS_DIR = Path("/app/services/api/prompts")
 
