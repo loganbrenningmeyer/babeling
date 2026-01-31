@@ -7,30 +7,49 @@ from api.utils import get_token_spaces
 
 app = modal.App("babeling-align")
 
-REPO_ROOT = Path(__file__).resolve().parents[4]
+REPO_ROOT = Path(__file__).resolve()
+while REPO_ROOT.name != "babeling" and REPO_ROOT.parent != REPO_ROOT:
+    REPO_ROOT = REPO_ROOT.parent
 
-image = (
-    modal.Image.debian_slim()
-    .pip_install(
-        "torch",
-        "transformers==4.57.3",
-        "sentencepiece",
-        "numpy",
-        "google-genai",
-        "spacy==3.8.0",
-        "fastapi[standard]",
-        "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
-        "https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl",
-        "https://github.com/explosion/spacy-models/releases/download/it_core_news_sm-3.8.0/it_core_news_sm-3.8.0-py3-none-any.whl",
-        "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl",
-        "https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl",
+image = modal.Image.debian_slim().pip_install(
+    "torch",
+    "transformers==4.57.3",
+    "sentencepiece",
+    "numpy",
+    "google-genai",
+    "spacy==3.8.0",
+    "fastapi[standard]",
+    "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.8.0/en_core_web_sm-3.8.0-py3-none-any.whl",
+    "https://github.com/explosion/spacy-models/releases/download/fr_core_news_sm-3.8.0/fr_core_news_sm-3.8.0-py3-none-any.whl",
+    "https://github.com/explosion/spacy-models/releases/download/it_core_news_sm-3.8.0/it_core_news_sm-3.8.0-py3-none-any.whl",
+    "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl",
+    "https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl",
+).env({"PYTHONPATH": "/app/packages/babeling-nlp/src:/app/packages/binaryalign/src:/app/services/api/src"})
+
+if (REPO_ROOT / "packages/babeling-nlp/src").is_dir():
+    image = image.add_local_dir(
+        str(REPO_ROOT / "packages/babeling-nlp/src"),
+        remote_path="/app/packages/babeling-nlp/src",
+        copy=True,
     )
-    .env({"PYTHONPATH": "/app/packages/babeling-nlp/src:/app/packages/binaryalign/src:/app/services/api/src"})
-    .add_local_dir(str(REPO_ROOT / "packages/babeling-nlp/src"), remote_path="/app/packages/babeling-nlp/src", copy=True)
-    .add_local_dir(str(REPO_ROOT / "packages/binaryalign/src"), remote_path="/app/packages/binaryalign/src", copy=True)
-    .add_local_dir(str(REPO_ROOT / "services/api/src"), remote_path="/app/services/api/src", copy=True)
-    .add_local_dir(str(REPO_ROOT / "artifacts/binaryalign/en-all"), remote_path="/model", copy=True)
-)
+if (REPO_ROOT / "packages/binaryalign/src").is_dir():
+    image = image.add_local_dir(
+        str(REPO_ROOT / "packages/binaryalign/src"),
+        remote_path="/app/packages/binaryalign/src",
+        copy=True,
+    )
+if (REPO_ROOT / "services/api/src").is_dir():
+    image = image.add_local_dir(
+        str(REPO_ROOT / "services/api/src"),
+        remote_path="/app/services/api/src",
+        copy=True,
+    )
+if (REPO_ROOT / "artifacts/binaryalign/en-all").is_dir():
+    image = image.add_local_dir(
+        str(REPO_ROOT / "artifacts/binaryalign/en-all"),
+        remote_path="/model",
+        copy=True,
+    )
 
 CKPT_PATH = "/model/model-pretrain-step50000.ckpt"
 
