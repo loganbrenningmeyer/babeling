@@ -830,11 +830,11 @@ export default function Translate() {
                     {/* ParagraphGrid */}
                     <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
                       {translationLoading || !session ? (
-                        <div className="grid grid-cols-2">
-                          <div className="p-4 pr-8">
+                        <div className="grid grid-cols-2 p-8 pt-4">
+                          <div className="pr-8">
                             <TextSkeleton blurClassName="blur-sm" />
                           </div>
-                          <div className="p-4 pl-8">
+                          <div className="pl-8">
                             <TextSkeleton />
                           </div>
                         </div>

@@ -8,7 +8,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from pathlib import Path
 
-from .utils import *
+from api.utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
 from babeling_nlp.segmenter import Segmenter
@@ -30,6 +30,7 @@ LANGS = {
 # Paths
 # -------------------------
 CKPT_PATH = Path(os.environ.get("BINARYALIGN_CKPT_PATH", "/tmp/model.ckpt"))
+MODAL_ALIGN_URL = os.environ.get("MODAL_ALIGN_URL")
 
 PROMPTS_DIR = Path("/app/services/api/prompts")
 
@@ -42,8 +43,8 @@ def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
 # -------------------------
 # Load BinaryAlign model
 # -------------------------
-print("Loading Aligner...", flush=False)
-aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
+# print("Loading Aligner...", flush=False)
+# aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
 
 # -------------------------
 # Create default Segmenter (used for split_pages)
@@ -128,17 +129,16 @@ class AlignRequest(BaseModel):
     tgt_lang: str | None = None
 
 
+import requests
+
+
+
 @app.post("/align")
 def align(req: AlignRequest):
-    """
-    
-    
-    Args:
-    
-    
-    Returns:
-    
-    """
+    if MODAL_ALIGN_URL:
+        r = requests.post(MODAL_ALIGN_URL, json=req.model_dump())
+        r.raise_for_status
+        return r.json()
     # -------------------------
     # Split source / target into paragraphs and sentences
     # -------------------------
