@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
+import { PageNavInfo } from "../components/PageNavInfo";
 import { DefineEntry, DefineCard } from "../components/DefineCard";
 import { ExplainEntry, ExplainCard } from "../components/ExplainCard";
 import { Pane } from "../components/Pane";
@@ -127,6 +128,7 @@ export default function Translate() {
     activeSourceIndex !== null
       ? (session?.align.srcToTgt[activeSourceIndex] ?? [])
       : [];
+  const canTranslate = sourceText.trim().length > 0 || !!sourceFile;
 
   // -------------------------
   // Handlers
@@ -647,7 +649,7 @@ export default function Translate() {
                 {/* Source Language Selector */}
                 <div className="flex-1">
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                    Source
+                    Original
                   </div>
                   <select
                     className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -676,7 +678,7 @@ export default function Translate() {
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-11 w-11 rounded-full border border-border/70 bg-muted text-foreground shadow-sm"
+                    className="h-11 w-11 rounded-full border border-border/70 bg-muted text-foreground shadow-sm transition-colors hover:bg-foreground/10 hover:text-foreground/90"
                     onClick={handleSwapLanguages}
                     aria-label="Swap source and target languages"
                     disabled={translationLoading}
@@ -688,7 +690,7 @@ export default function Translate() {
                 {/* Target Language Selector */}
                 <div className="flex-1">
                   <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                    Target
+                    Translation
                   </div>
                   <select
                     className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
@@ -738,10 +740,10 @@ export default function Translate() {
             {/* -------------------------
             //* Translate Button
             //* ------------------------- */}
-            <div className="font-ui pt-6 shrink-0 flex justify-center">
+            <div className="font-ui pt-6 shrink-0 flex flex-col items-center gap-2">
               <Button
                 onClick={startReadingSession}
-                disabled={translationLoading || !srcLang || !tgtLang}
+                disabled={translationLoading || !srcLang || !tgtLang || !canTranslate}
                 className="
                   group
                   relative
@@ -750,6 +752,8 @@ export default function Translate() {
                   transition
                   hover:shadow-md
                   hover:-translate-y-[1px]
+                  disabled:shadow-none
+                  disabled:translate-y-0
                 "
               >
                 <span className="relative">
@@ -766,6 +770,11 @@ export default function Translate() {
                   />
                 </span>
               </Button>
+              {!canTranslate && (
+                <div className="text-xs text-muted-foreground">
+                  Paste text or upload a file to translate.
+                </div>
+              )}
 
             </div>
           </Pane>
@@ -864,14 +873,17 @@ export default function Translate() {
 
                   {/* BlurModeToggle / Page Navigation */}
                   <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
-                    <div className="grid grid-cols-3 items-center">
-                      {/* Previous Page */}
-                      <div className="flex justify-start pl-3">
+                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center">
+                      {/* Left: Prev */}
+                      <div className="flex justify-start items-center pl-3">
                         <Button
                           type="button"
                           variant="secondary"
                           size="icon"
-                          className="rounded-full transition-colors hover:bg-foreground/10 hover:text-foreground"
+                          className="
+                            rounded-sm shadow-md border border-gray-300
+                            transition-colors hover:bg-foreground/10 hover:text-foreground
+                            "
                           onClick={goPrevPage}
                           aria-label="Previous page"
                           disabled={pageId <= 0}
@@ -879,7 +891,7 @@ export default function Translate() {
                           <ChevronLeft className="h-4 w-4" />
                         </Button>
                       </div>
-                      {/* BlurModeToggle */}
+                      {/* Left spacer: BlurModeToggle */}
                       <div className="flex justify-center">
                         <BlurModeToggle
                           value={blurMode}
@@ -887,13 +899,24 @@ export default function Translate() {
                           className="border shadow"
                         />
                       </div>
-                      {/* Next Page */}
+                      {/* Center: Page Tracker */}
+                      <div className="flex justify-center">
+                        <div className="rounded-full border px-3 py-1 text-sm font-semibold text-muted-foreground">
+                          Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
+                        </div>
+                      </div>
+                      {/* Right spacer: Page Navigation Helper */}
+                      <PageNavInfo className="border shadow"/>
+                      {/* Right: Next */}
                       <div className="flex justify-end pr-3">
                         <Button
                           type="button"
                           variant="secondary"
                           size="icon"
-                          className="rounded-full transition-colors hover:bg-foreground/10 hover:text-foreground"
+                          className="
+                            rounded-sm shadow-md border border-gray-300
+                            transition-colors hover:bg-foreground/10 hover:text-foreground
+                            "
                           onClick={goNextPage}
                           aria-label="Next page"
                           disabled={pageId >= pages.length - 1}

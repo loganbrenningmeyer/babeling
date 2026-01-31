@@ -30,9 +30,9 @@ LANGS = {
 # Paths
 # -------------------------
 CKPT_PATH = Path(os.environ.get("BINARYALIGN_CKPT_PATH", "/tmp/model.ckpt"))
-MODAL_ALIGN_URL = os.environ.get("MODAL_ALIGN_URL")
+MODAL_ALIGN_URL = os.environ.get("MODAL_ALIGN_URL") or os.environ.get("MODAL_ALIGN_DIR")
 
-PROMPTS_DIR = Path("/app/services/api/prompts")
+PROMPTS_DIR = Path(os.environ.get("BABELING_PROMPTS_DIR"))
 
 def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
     prompt = (PROMPTS_DIR / filename).read_text(encoding="utf-8")
@@ -44,6 +44,9 @@ def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
 # Load BinaryAlign model
 # -------------------------
 aligner = None
+if not MODAL_ALIGN_URL:
+    print("Loading Aligner...", flush=False)
+    aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
 
 # -------------------------
 # Create default Segmenter (used for split_pages)

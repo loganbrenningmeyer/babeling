@@ -16,6 +16,7 @@ image = modal.Image.debian_slim().pip_install(
     "transformers==4.57.3",
     "sentencepiece",
     "numpy",
+    "protobuf",
     "google-genai",
     "spacy==3.8.0",
     "fastapi[standard]",
@@ -24,6 +25,10 @@ image = modal.Image.debian_slim().pip_install(
     "https://github.com/explosion/spacy-models/releases/download/it_core_news_sm-3.8.0/it_core_news_sm-3.8.0-py3-none-any.whl",
     "https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-3.8.0/es_core_news_sm-3.8.0-py3-none-any.whl",
     "https://github.com/explosion/spacy-models/releases/download/de_core_news_sm-3.8.0/de_core_news_sm-3.8.0-py3-none-any.whl",
+).run_commands(
+    "python -c \"from transformers import AutoModel, AutoTokenizer; "
+    "AutoTokenizer.from_pretrained('microsoft/mdeberta-v3-base'); "
+    "AutoModel.from_pretrained('microsoft/mdeberta-v3-base')\""
 ).env({"PYTHONPATH": "/app/packages/babeling-nlp/src:/app/packages/binaryalign/src:/app/services/api/src"})
 
 if (REPO_ROOT / "packages/babeling-nlp/src").is_dir():
@@ -59,7 +64,7 @@ class AlignRequest(BaseModel):
     src_lang: str | None = None
     tgt_lang: str | None = None
 
-@app.cls(gpu="A10G", image=image)
+@app.cls(gpu="A10G", image=image, scaledown_window=10)
 class AlignService:
     @modal.enter()
     def load(self):
