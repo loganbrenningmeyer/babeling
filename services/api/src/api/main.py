@@ -243,7 +243,7 @@ def pronounce(req: PronounceRequest):
     INWORLD_API_KEY = os.environ.get("INWORLD_RUNTIME_BASE64_CREDENTIAL")
 
     VOICES = {
-        "en": "Craig",
+        "en": "Dennis",
         "fr": "Hélène",
         "es": "Miguel",
         "it": "Orietta",
