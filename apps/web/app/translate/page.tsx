@@ -4,18 +4,21 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
-import { BlurMode, BlurModeToggle } from "../components/BlurModeToggle";
-import { PageNavInfo } from "../components/PageNavInfo";
-import { DefineEntry, DefineCard } from "../components/DefineCard";
-import { ExplainEntry, ExplainCard } from "../components/ExplainCard";
-import { Pane } from "../components/Pane";
-import { AppTextarea } from "../components/AppTextarea";
-import { TextSurface } from "../components/TextSurface";
-import { AnchoredPopover } from "../components/AnchoredPopover";
-import { ExplainSkeleton } from "../components/ExplainSkeleton";
-import { TextSkeleton } from "../components/TextSkeleton";
-import { ParagraphGrid } from "../components/ParagraphGrid";
-import { UploadSurface } from "../components/UploadSurface";
+import { SourceBlurButton } from "@/app/components/SourceBlur/SourceBlurButton";
+import { BlurMode, BlurModeToggle } from "@/app/components/SourceBlur/BlurModeToggle";
+import { DefineEntry, DefineCard } from "@/app/components/DefineCard";
+import { ExplainEntry, ExplainCard } from "@/app/components/ExplainCard";
+import { Pane } from "@/app/components/Pane";
+import { AppTextarea } from "@/app/components/AppTextarea";
+import { TextSurface } from "@/app/components/TextSurface";
+import { AnchoredPopover } from "@/app/components/AnchoredPopover";
+import { ExplainSkeleton } from "@/app/components/ExplainSkeleton";
+import { TextSkeleton } from "@/app/components/TextSkeleton";
+import { ParagraphGrid } from "@/app/components/ParagraphGrid";
+import { UploadSurface } from "@/app/components/UploadSurface";
+import { HelpPopover } from "@/app/components/HelpInfo/HelpPopover";
+import { useSourceRevealNav } from "@/app/components/SourceBlur/useSourceRevealNav";
+import { SAMPLE_TEXTS_BY_LANG } from "@/app/translate/sampleTexts";
 
 
 const LANGS = [
@@ -26,7 +29,7 @@ const LANGS = [
   { code: "de", label: "German" },
 ];
 
-function getLangLabel(code: string) {
+export function getLangLabel(code: string) {
   return LANGS.find((l) => l.code === code)?.label ?? code;
 }
 
@@ -83,9 +86,13 @@ export default function Translate() {
   // -------------------------
   const [translationLoading, setTranslationLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
+  const [showAligned, setShowAligned] = useState(false);
+  // Blurred Source
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
-  const [showAligned, setShowAligned] = useState(false);
+  const [sourceBlurEnabled, setSourceBlurEnabled] = useState(false);
+  const emptyBlurredSource = useRef<Set<number>>(new Set());
+  const noopSetBlurredSource = (_: Set<number> | ((prev: Set<number>) => Set<number>)) => {};
   // Lock target/source when Popover is showing
   const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
   const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
@@ -110,10 +117,14 @@ export default function Translate() {
   // Input files state
   // -------------------------
   const [sourceFile, setSourceFile] = useState<File | null>(null);
+  const [sampleId, setSampleId] = useState("");
+  const [sampleLoading, setSampleLoading] = useState(false);
 
   // -------------------------
   // Derived values
   // -------------------------
+  const sampleOptions = SAMPLE_TEXTS_BY_LANG[srcLang] ?? [];
+  const selectedSample = sampleOptions.find((entry) => entry.id === sampleId) ?? null;
   const activeSourceIndex = popoverOpen ? null : hoveredSourceIndex;
   const activeTargetIndex = popoverOpen ? lockedTargetIndex : hoveredTargetIndex;
 
@@ -170,6 +181,29 @@ export default function Translate() {
     const nextTgt = srcLang;
     setSrcLang(nextSrc);
     setTgtLang(nextTgt);
+  }
+
+  async function handleSampleSelect(nextId: string) {
+    setSampleId(nextId);
+    if (!nextId) return;
+
+    const sample = sampleOptions.find((entry) => entry.id === nextId);
+    if (!sample) return;
+
+    setSampleLoading(true);
+    try {
+      const res = await fetch(
+        `/texts/${encodeURIComponent(srcLang)}/${encodeURIComponent(sample.filename)}`
+      );
+      if (!res.ok) throw new Error("Failed to load sample text");
+      const text = await res.text();
+      setSourceFile(null);
+      setSourceText(text);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setSampleLoading(false);
+    }
   }
 
   async function loadPageSession(pid: number, pagesArg?: string[]) {
@@ -291,11 +325,13 @@ export default function Translate() {
     setLockedSourceIndices(srcIdxs);
     setHoveredTargetIndex(i);
 
-    setBlurredSource(prev => {
-      const next = new Set(prev);
-      for (const idx of srcIdxs) next.delete(idx);
-      return next;
-    })
+    if (sourceBlurEnabled) {
+      setBlurredSource(prev => {
+        const next = new Set(prev);
+        for (const idx of srcIdxs) next.delete(idx);
+        return next;
+      })
+    }
 
     // -------------------------
     // Store target word idx / where it is
@@ -356,83 +392,16 @@ export default function Translate() {
   // -------------------------
   // Text blur helper functions
   // -------------------------
-  function revealWordIndices(idxs: number[]) {
-    setBlurredSource(prev => {
-      if (idxs.length === 0) return prev;
-      const next = new Set(prev);
-      for (const i of idxs) next.delete(i);
-      return next;
-    })
-  }
-
-  function revealSentence(sentId: number) {
-    if (!session) return;
-    const idxs = session.src.sentToWordIds[sentId];
-    revealWordIndices(idxs);
-  }
-
-  function revealParagraph(parId: number) {
-    if (!session) return;
-    const idxs = session.src.parToWordIds[parId];
-    revealWordIndices(idxs);
-  }
-
-  function hideWordIndices(idxs: number[]) {
-    setBlurredSource(prev => {
-      if (idxs.length === 0) return prev;
-      const next = new Set(prev);
-      for (const i of idxs) next.add(i);
-      return next;
-    })
-  }
-
-  function hideSentence(sentId: number) {
-    if (!session) return;
-    const idxs = session.src.sentToWordIds[sentId];
-    hideWordIndices(idxs);
-  }
-
-  function hideParagraph(parId: number) {
-    if (!session) return;
-    const idxs = session.src.parToWordIds[parId];
-    hideWordIndices(idxs);
-  }
-
-  function isParagraphFullyRevealed(parId: number) {
-    if (!session) return true;
-    const idxs = session.src.parToWordIds[parId] ?? [];
-    return idxs.every((i) => !blurredSource.has(i));
-  }
-
-  function isSentenceFullyRevealed(sentId: number) {
-    if (!session) return true;
-    const idxs = session.src.sentToWordIds[sentId] ?? [];
-    return idxs.every((i) => !blurredSource.has(i));
-  }
-
-  function getLastSentInPar(parId: number) {
-    if (!session) return 0;
-    const sents = session.src.parToSentIds[parId] ?? [];
-    return sents.length ? sents[sents.length - 1] : 0;
-  }
-
-  function getMaxParId() {
-    if (!session) return 0;
-    // safer than Object.keys length if ids are 0..N already:
-    return Math.max(...session.src.parIds);
-  }
-
-  function getMaxSentId() {
-    if (!session) return 0;
-    return Math.max(...session.src.sentIds);
-  }
-
-  function findNextBlurredSentence(start: number): number | null {
-    for (let s = Math.max(0, start); s <= getMaxSentId(); s++) {
-      if (!isSentenceFullyRevealed(s)) return s;
-    }
-    return null;
-  }
+  const { prev, next } = useSourceRevealNav({
+    session,
+    sourceBlurEnabled,
+    blurredSource,
+    setBlurredSource,
+    navSentId,
+    setNavSentId,
+    navParId,
+    setNavParId,
+  });
 
   // -------------------------
   // Page navigation
@@ -468,98 +437,11 @@ export default function Translate() {
   }
 
   // -------------------------
-  // Text navigation
+  // Sample selection
   // -------------------------
-  // Go to previous sentence / paragraph
-  const handlePrev = (mode: "sentence" | "paragraph") => {
-    if (!session) return;
-
-    // Sentence
-    if (mode === "sentence") {
-      if (navSentId === -1) return;
-      if (navSentId === 0) {
-        hideSentence(navSentId);
-        setNavSentId(-1);
-        setNavParId(-1);
-        return;
-      }
-
-      const prevSentId = navSentId > 0 ? navSentId - 1 : 0;
-
-      const curParId = session.src.sentToParIds[navSentId];
-      const prevParId = session.src.sentToParIds[prevSentId];
-
-      if (curParId !== prevParId) {
-        setNavParId(prevParId);
-      }
-      hideSentence(navSentId);
-      setNavSentId(prevSentId);
-      return;
-    }
-
-    // Paragraph
-    if (navParId === -1) return;
-    if (navParId === 0) {
-      hideParagraph(navParId);
-      setNavParId(-1);
-      setNavSentId(-1);
-      return;
-    }
-
-    const prevParId = navParId > 0 ? navParId - 1 : 0;
-    const lastSentIdInPrevPar = getLastSentInPar(prevParId);
-
-    hideParagraph(navParId);
-    setNavParId(prevParId);
-    setNavSentId(lastSentIdInPrevPar);
-  }
-
-  // Go to next sentence / paragraph
-  const handleNext = (mode: "sentence" | "paragraph") => {
-    if (!session) return;
-
-    // Sentence
-    if (mode === "sentence") {
-      const maxSentId = getMaxSentId();
-
-      if (navSentId < 0) {
-        setNavSentId(0);
-        setNavParId(session.src.sentToParIds[0]);
-        revealSentence(0);
-        return;
-      }
-
-      if (navSentId >= maxSentId) return;
-
-      const nextSentId = findNextBlurredSentence(navSentId);
-      if (nextSentId === null) return;
-
-      const nextParId = session.src.sentToParIds[nextSentId];
-      setNavParId(nextParId);
-      setNavSentId(nextSentId);
-      revealSentence(nextSentId);
-      return;
-    }
-
-    // Paragraph
-    const maxParId = getMaxParId();
-    const curParId = navParId < 0 ? 0 : navParId;
-
-    if (!isParagraphFullyRevealed(curParId)) {
-      revealParagraph(curParId);
-      setNavParId(curParId);
-      setNavSentId(getLastSentInPar(curParId));
-      return;
-    }
-
-    if (curParId >= maxParId) return;
-
-    const nextParId = curParId + 1;
-    revealParagraph(nextParId);
-    setNavParId(nextParId);
-    setNavSentId(getLastSentInPar(nextParId));
-    return;
-  }
+  useEffect(() => {
+    setSampleId("");
+  }, [srcLang]);
 
   // -------------------------
   // Arrow Key Navigation
@@ -600,16 +482,16 @@ export default function Translate() {
       // Sentence / Paragraph navigation
       switch (e.key) {
         case "ArrowLeft":
-          handlePrev("sentence");
+          prev("sentence");
           break;
         case "ArrowRight":
-          handleNext("sentence");
+          next("sentence");
           break;
         case "ArrowUp":
-          handlePrev("paragraph");
+          prev("paragraph");
           break;
         case "ArrowDown":
-          handleNext("paragraph");
+          next("paragraph");
           break;
       }
     };
@@ -622,8 +504,8 @@ export default function Translate() {
   }, [
     showAligned,
     popoverOpen,
-    handlePrev,
-    handleNext,
+    prev,
+    next,
   ]);
 
 
@@ -714,6 +596,30 @@ export default function Translate() {
                   </select>
                 </div>
               </div>
+
+              <div className="mt-4">
+                <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
+                  Sample text
+                </div>
+                <select
+                  className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  value={sampleId}
+                  onChange={(e) => handleSampleSelect(e.target.value)}
+                  disabled={translationLoading || sampleLoading || sampleOptions.length === 0}
+                >
+                  <option value="">Select a sample...</option>
+                  {sampleOptions.map((sample) => (
+                    <option key={sample.id} value={sample.id} className="font-semibold">
+                      {sample.label}
+                    </option>
+                  ))}
+                </select>
+                {sampleLoading && (
+                  <div className="pt-1 text-xs text-muted-foreground">
+                    Loading sample...
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* -------------------------
@@ -724,7 +630,10 @@ export default function Translate() {
               <AppTextarea
                 className="h-full min-h-0 overflow-y-auto"
                 value={sourceText}
-                onChange={(e) => setSourceText(e.target.value)}
+                onChange={(e) => {
+                  setSourceText(e.target.value);
+                  if (sampleId) setSampleId("");
+                }}
                 placeholder={`Type some ${getLangLabel(srcLang)} text...`}
               />
             </div>
@@ -733,7 +642,10 @@ export default function Translate() {
               <UploadSurface 
                 className="h-36"
                 file={sourceFile}
-                onFileChange={setSourceFile}
+                onFileChange={(file) => {
+                  setSourceFile(file);
+                  if (file) setSampleId("");
+                }}
               />
             </div>
             
@@ -806,6 +718,18 @@ export default function Translate() {
                       >
                         {sourceFile.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ")}
                       </div>
+                    ) : selectedSample ? (
+                      <div className="
+                      flex w-full justify-center
+                      pt-6 pb-5
+                      border-b 
+                      font-reading font-normal
+                      uppercase tracking-[0.12em] leading-none
+                      text-[18px] text-muted-foreground 
+                      "
+                      >
+                        {selectedSample.label}
+                      </div>
                     ) : (
                       <></>
                     )}
@@ -813,18 +737,30 @@ export default function Translate() {
                   <div className="relative flex-1 min-h-0 flex flex-col border-b">
                     <div className="pointer-events-none absolute inset-y-0 left-1/2 w-0.25 bg-border" />
 
-                    {/* Source / Target Language Headers */}
+                    {/* -------------------------
+                    //* Source / Target Headers
+                    //* ------------------------- */}
                     <div className="grid grid-cols-2 text-[18px] font-medium">
-                      <div className="px-6">
+                      {/* Source Header */}
+                      <div className="px-6 relative">
                         <div className="pt-4">
-                          <span className="inline-flex flex-col">
-                            <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
-                            <span className="relative z-10 h-1 w-full bg-blue-300" />
-                          </span>
+                          <div className="flex items-center">
+                            <span className="inline-flex flex-col">
+                              <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
+                              <span className="relative z-10 h-1 w-full bg-blue-300" />
+                            </span>
+                            <div className="absolute right-6 inset-y-0 flex items-center" >
+                              {/* Reveal/Hide Full Source Text */}
+                              <SourceBlurButton 
+                                value={sourceBlurEnabled}
+                                onChange={setSourceBlurEnabled}
+                              />
+                            </div>
+                          </div>
                         </div>
                         <div className="-mt-0.5 h-0.5 bg-foreground/10" />
                       </div>
-
+                      {/* Target Header */}
                       <div className="px-6">
                         <div className="pt-4">
                           <span className="inline-flex flex-col">
@@ -836,7 +772,9 @@ export default function Translate() {
                       </div>
                     </div>
 
-                    {/* ParagraphGrid */}
+                    {/* -------------------------
+                    //* ParagraphGrid
+                    //* ------------------------- */}
                     <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
                       {translationLoading || !session ? (
                         <div className="grid grid-cols-2 p-8 pt-4">
@@ -851,8 +789,8 @@ export default function Translate() {
                         <ParagraphGrid
                           session={session}
                           blurMode={blurMode}
-                          blurredSource={blurredSource}
-                          setBlurredSource={setBlurredSource}
+                          blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
+                          setBlurredSource={sourceBlurEnabled ? setBlurredSource : noopSetBlurredSource}
                           sourceHighlightIndices={[
                             ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
                             ...activeAlignedSource,
@@ -871,10 +809,12 @@ export default function Translate() {
                     </div>
                   </div>
 
-                  {/* BlurModeToggle / Page Navigation */}
+                  {/* -------------------------
+                  //* Bottom Utilities Widget
+                  //* ------------------------- */}
                   <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
-                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center">
-                      {/* Left: Prev */}
+                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-4">
+                      {/* Left: Previous Page */}
                       <div className="flex justify-start items-center pl-3">
                         <Button
                           type="button"
@@ -905,9 +845,9 @@ export default function Translate() {
                           Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
                         </div>
                       </div>
-                      {/* Right spacer: Page Navigation Helper */}
-                      <PageNavInfo className="border shadow"/>
-                      {/* Right: Next */}
+                      {/* Right spacer: Help Popover */}
+                      <HelpPopover />
+                      {/* Right: Next Page */}
                       <div className="flex justify-end pr-3">
                         <Button
                           type="button"

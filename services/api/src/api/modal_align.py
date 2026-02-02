@@ -64,7 +64,7 @@ class AlignRequest(BaseModel):
     src_lang: str | None = None
     tgt_lang: str | None = None
 
-@app.cls(gpu="A10G", image=image, scaledown_window=10)
+@app.cls(gpu="L40S", image=image, scaledown_window=10)
 class AlignService:
     @modal.enter()
     def load(self):

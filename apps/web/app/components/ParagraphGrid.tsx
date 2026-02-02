@@ -4,8 +4,8 @@ import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 import { HoverText } from "./HoverText/HoverText";
-import type { BlurMode } from "./BlurModeToggle";
-import type { Session } from "../translate/page";
+import type { BlurMode } from "./SourceBlur/BlurModeToggle";
+import type { Session } from "@/app/translate/page";
 
 type ParagraphGridProps = {
   session: Session;

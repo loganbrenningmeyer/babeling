@@ -1,6 +1,6 @@
 "use client";
 
-import { usePronunciation } from "../hooks/usePronunciation";
+import { usePronunciation } from "@/app/hooks/usePronunciation";
 
 export function PronounceButton({ 
   text,

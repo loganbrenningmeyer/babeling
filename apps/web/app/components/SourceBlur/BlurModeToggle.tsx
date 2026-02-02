@@ -1,7 +1,8 @@
-import { MousePointer2 } from "lucide-react";
-
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
+
+import { MousePointerClick } from "lucide-react";
+
 
 export type BlurMode = "word" | "sentence" | "paragraph";
 
@@ -22,8 +23,14 @@ export function BlurModeToggle({
       )}
     >
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-        <MousePointer2 className="h-3 w-3" />
-        <span>Click to toggle blur</span>
+        <MousePointerClick className="h-3 w-3" />
+        <span className="font-bold text-[10px]">
+          {`Toggle `}
+          <span className="bg-blue-500/20">
+            original text
+          </span>
+          {` visibility by`}
+        </span>
       </div>
       <ToggleGroup
         type="single"
