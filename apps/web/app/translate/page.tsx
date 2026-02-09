@@ -19,7 +19,7 @@ import { UploadSurface } from "@/app/components/UploadSurface";
 import { HelpPopover } from "@/app/components/HelpInfo/HelpPopover";
 import { useSourceRevealNav } from "@/app/components/SourceBlur/useSourceRevealNav";
 import { SAMPLE_TEXTS_BY_LANG } from "@/app/translate/sampleTexts";
-import { PronounceButton } from "../components/PronounceButton";
+import { PronounceButton } from "../components/Pronounce/PronounceButton";
 
 
 const LANGS = [
@@ -53,6 +53,7 @@ export type Session = {
     words: string[];
     spaces: string[];
     sentIds: number[];
+    parIds: number[];
   };
 
   align: {
@@ -296,6 +297,7 @@ export default function Translate() {
         words: align_data.tgt_words,
         spaces: align_data.tgt_spaces,
         sentIds: align_data.tgt_sent_ids,
+        parIds: align_data.tgt_par_ids,
       },
       align: {
         srcToTgt: align_data.src_to_tgt,
@@ -349,16 +351,17 @@ export default function Translate() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        src_lang: srcLang,
+        tgt_lang: tgtLang,
         src_words: session.src.words,
         tgt_words: session.tgt.words,
         src_spaces: session.src.spaces,
         tgt_spaces: session.tgt.spaces,
         src_sent_ids: session.src.sentIds,
         tgt_sent_ids: session.tgt.sentIds,
+        tgt_par_ids: session.tgt.parIds,
         tgt_to_src: session.align.tgtToSrc,
         tgt_idx: i,
-        src_lang: srcLang,
-        tgt_lang: tgtLang,
       }),
     });
     const data = await res.json();
@@ -370,6 +373,7 @@ export default function Translate() {
     setDefineData({
       word: data.word,
       sentence: data.sentence,
+      paragraph: data.paragraph,
       lemma: data.lemma,
       pos: data.pos,
       ipa_lemma: data.ipa_lemma,
@@ -734,7 +738,7 @@ export default function Translate() {
                       border-b 
                       font-reading font-normal
                       uppercase tracking-[0.12em] leading-none
-                      text-[18px] text-muted-foreground 
+                      text-[22px] text-muted-foreground 
                       "
                       >
                         {sourceFile.name.replace(/\.[^/.]+$/, "").replace(/[_-]+/g, " ")}
@@ -746,7 +750,7 @@ export default function Translate() {
                       border-b 
                       font-reading font-normal
                       uppercase tracking-[0.12em] leading-none
-                      text-[18px] text-muted-foreground 
+                      text-[22px] text-muted-foreground 
                       "
                       >
                         {selectedSample.label}
@@ -917,24 +921,29 @@ export default function Translate() {
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
-                <div className="p-4 space-y-4">
+                <div className="p-4 space-y-4 font-ui">
                   {/* Definition */}
                   {defineData && <DefineCard data={defineData} tgtLang={tgtLang} />}
                   <div className="h-px bg-border" />
                   {/* Explanation / Examples */}
                   {explainData && <ExplainCard data={explainData} />}
-                  {/* Sentence Pronunciation */}
+                  <div className="h-px w-full bg-border" />
+                  {/* Sentence / Paragraph Pronunciation */}
                   {defineData && (
-                    <div className="
-                      inline-flex 
-                      rounded-lg border border-border
-                      bg-muted/40 
-                      px-3 py-2
-                    ">
+                    <div className="flex w-full justify-between gap-2">
+                      {/* Sentence */}
                       <PronounceButton
                         text={defineData.sentence}
                         label="Listen to sentence"
                         tgtLang={tgtLang}
+                        iconClassName="h-4 w-4"
+                      />
+                      {/* Paragraph */}
+                      <PronounceButton
+                        text={defineData.paragraph}
+                        label="Listen to paragraph"
+                        tgtLang={tgtLang}
+                        iconClassName="h-4 w-4"
                       />
                     </div>
                   )}

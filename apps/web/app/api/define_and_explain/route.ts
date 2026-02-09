@@ -15,6 +15,7 @@ export async function POST(req: Request) {
       tgt_spaces: req_data.tgt_spaces,
       src_sent_ids: req_data.src_sent_ids,
       tgt_sent_ids: req_data.tgt_sent_ids,
+      tgt_par_ids: req_data.tgt_par_ids,
       tgt_to_src: req_data.tgt_to_src,
       tgt_idx: req_data.tgt_idx,
       src_lang: req_data.src_lang,
@@ -27,6 +28,7 @@ export async function POST(req: Request) {
   return NextResponse.json({
     word: res_data.word,
     sentence: res_data.sentence,
+    paragraph: res_data.paragraph,
     lemma: res_data.lemma,
     pos: res_data.pos,
     gloss: res_data.gloss,

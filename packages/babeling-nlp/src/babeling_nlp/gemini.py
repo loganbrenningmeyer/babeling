@@ -34,7 +34,7 @@ def mark_words(words, spaces, mark_idxs, tag) -> list[str]:
     return out
 
 
-def build_sentence(words: list[str], spaces: list[str], sent_ids: list[int], word_sent_id: int) -> str:
+def build_text(words: list[str], spaces: list[str], word_ids: list[int], word_id: int) -> str:
     """
     
     
@@ -46,7 +46,7 @@ def build_sentence(words: list[str], spaces: list[str], sent_ids: list[int], wor
     """
     out = []
     for i, (word, space) in enumerate(zip(words, spaces)):
-        if sent_ids[i] == word_sent_id:
+        if word_ids[i] == word_id:
             out.append(word + space)
     return "".join(out)
 
@@ -73,24 +73,30 @@ class GeminiAPI:
 
     def define_and_explain(
         self,
-        tgt_lang: str,
         candidates: list[dict],
+        tgt_lang: str,
         src_words: list[str],
         tgt_words: list[str],
         src_spaces: list[str],
         tgt_spaces: list[str],
         src_sent_ids: list[int],
         tgt_sent_ids: list[int],
+        tgt_par_ids: list[int],
         tgt_to_src: dict,
         tgt_idx: int,
     ) -> dict:
         # -------------------------
-        # Get full unmarked sentence / base word
+        # Get full unmarked sentence / paragraph
         # -------------------------
         tgt_word = tgt_words[tgt_idx]
         tgt_sent_id = tgt_sent_ids[tgt_idx]
+        tgt_par_id = tgt_par_ids[tgt_idx]
 
-        tgt_sentence = build_sentence(tgt_words, tgt_spaces, tgt_sent_ids, tgt_sent_id)
+        tgt_sentence = build_text(tgt_words, tgt_spaces, tgt_sent_ids, tgt_sent_id)
+        tgt_paragraph = build_text(tgt_words, tgt_spaces, tgt_par_ids, tgt_par_id)
+
+        print(f"tgt_sentence: {tgt_sentence}", flush=False)
+        print(f"tgt_paragraph: {tgt_paragraph}", flush=False)
 
         # -------------------------
         # Add source / target markers
@@ -161,6 +167,7 @@ class GeminiAPI:
         return {
             "word": tgt_word,
             "sentence": tgt_sentence,
+            "paragraph": tgt_paragraph,
             "lemma": data.get("lemma"),
             "pos": data.get("pos"),
             "gloss": data.get("gloss"),

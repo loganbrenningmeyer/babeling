@@ -64,16 +64,6 @@ default_segmenter = Segmenter(DEFAULT_SRC_LANG, DEFAULT_TGT_LANG)
 _segmenters: dict[tuple[str, str], Segmenter] = {}
 _gemini: dict[tuple[str, str], GeminiAPI] = {}
 
-def resolve_langs(src_lang: str | None, tgt_lang: str | None) -> tuple[str, str]:
-    src = src_lang or DEFAULT_SRC_LANG
-    tgt = tgt_lang or DEFAULT_TGT_LANG
-
-    if src not in LANGS:
-        raise HTTPException(status_code=400, detail=f"Unsupported source language: {src}")
-    if tgt not in LANGS:
-        raise HTTPException(status_code=400, detail=f"Unsupported target language: {tgt}")
-
-    return src, tgt
 
 def get_segmenter(src_lang: str, tgt_lang: str) -> Segmenter:
     key = (src_lang, tgt_lang)
@@ -106,14 +96,13 @@ class TranslateRequest(BaseModel):
 
 @app.post("/translate")
 def translate(req: TranslateRequest):
-    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
     # -------------------------
     # Normalize wrapped text / Mark linebreaks <LB>
     # -------------------------
     source = mark_linebreaks(req.source)
 
     # -- Translate
-    gemini_api = get_gemini(src_lang, tgt_lang)
+    gemini_api = get_gemini(req.src_lang, req.tgt_lang)
     target = gemini_api.translate(source)
 
     # -------------------------
@@ -137,6 +126,9 @@ class AlignRequest(BaseModel):
 
 @app.post("/align")
 def align(req: AlignRequest):
+    # -------------------------
+    # Load Model GPU if available, otherwise run locally
+    # -------------------------
     if MODAL_ALIGN_URL:
         r = requests.post(MODAL_ALIGN_URL, json=req.model_dump())
         r.raise_for_status()
@@ -144,13 +136,13 @@ def align(req: AlignRequest):
     global aligner
     if aligner is None:
         aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
+
     # -------------------------
     # Split source / target into paragraphs and sentences
     # -------------------------
-    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
-    segmenter = get_segmenter(src_lang, tgt_lang)
-    src_par_sent_words = segmenter.split_par_sent_words(req.source, src_lang)
-    tgt_par_sent_words = segmenter.split_par_sent_words(req.target, tgt_lang)
+    segmenter = get_segmenter(req.src_lang, req.tgt_lang)
+    src_par_sent_words = segmenter.split_par_sent_words(req.source, req.src_lang)
+    tgt_par_sent_words = segmenter.split_par_sent_words(req.target, req.tgt_lang)
 
     # -------------------------
     # Align sentences
@@ -166,7 +158,8 @@ def align(req: AlignRequest):
         src_par_ids,
         src_par_to_sent_ids,
         src_par_to_word_ids,
-        tgt_sent_ids
+        tgt_sent_ids,
+        tgt_par_ids,
     ) = aligner.align(src_par_sent_words, tgt_par_sent_words)
 
     # -------------------------
@@ -189,6 +182,7 @@ def align(req: AlignRequest):
         "src_par_to_sent_ids": src_par_to_sent_ids,
         "src_par_to_word_ids": src_par_to_word_ids,
         "tgt_sent_ids": tgt_sent_ids,
+        "tgt_par_ids": tgt_par_ids,
     }
 
 
@@ -202,35 +196,35 @@ class DefineExplainRequest(BaseModel):
     tgt_spaces: list[str]
     src_sent_ids: list[int]
     tgt_sent_ids: list[int]
+    tgt_par_ids: list[int]
     tgt_to_src: dict[int, list[int]]
     tgt_idx: int
-    src_lang: str | None = None
-    tgt_lang: str | None = None
+    src_lang: str
+    tgt_lang: str
 
 @app.post("/define_and_explain")
-def explain(req: DefineExplainRequest):
-    src_lang, tgt_lang = resolve_langs(req.src_lang, req.tgt_lang)
+def define_and_explain(req: DefineExplainRequest):
     # -------------------------
     # Get definition candidate info
     # -------------------------
     tgt_word = req.tgt_words[req.tgt_idx]
-    candidates = get_definition_candidates(tgt_word, tgt_lang)
+    candidates = get_definition_candidates(tgt_word, req.tgt_lang)
 
-    gemini_api = get_gemini(src_lang, tgt_lang)
-    data = gemini_api.define_and_explain(
-        tgt_lang,
+    gemini_api = get_gemini(req.src_lang, req.tgt_lang)
+
+    return gemini_api.define_and_explain(
         candidates,
+        req.tgt_lang,
         req.src_words,
         req.tgt_words,
         req.src_spaces,
         req.tgt_spaces,
         req.src_sent_ids,
         req.tgt_sent_ids,
+        req.tgt_par_ids,
         req.tgt_to_src,
         req.tgt_idx,
     )
-
-    return data
 
 
 # =========================
@@ -238,7 +232,7 @@ def explain(req: DefineExplainRequest):
 # =========================
 class PronounceRequest(BaseModel):
     text: str
-    tgt_lang: str | None = None
+    tgt_lang: str
 
 @app.post("/pronounce")
 def pronounce(req: PronounceRequest):
@@ -259,11 +253,9 @@ def pronounce(req: PronounceRequest):
         "Content-Type": "application/json",
     }
 
-    _, tgt_lang = resolve_langs(DEFAULT_SRC_LANG, req.tgt_lang)
-
     payload = {
         "text": str(req.text).strip(".") + ".",
-        "voiceId": VOICES[tgt_lang],
+        "voiceId": VOICES[req.tgt_lang],
         "modelId": "inworld-tts-1.5-max",
         "temperature": 0.01,
     }

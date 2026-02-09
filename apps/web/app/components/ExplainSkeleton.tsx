@@ -25,12 +25,15 @@ export function ExplainSkeleton({
   animateClassName = "bg-muted-foreground/20 animate-pulse",
 }: ExplainSkeletonProps) {
   return (
-    <div className={cn("space-y-8 p-4", containerClassName)}>
+    <div className={cn("space-y-4 p-4", containerClassName)}>
       {/* Definition */}
       <div className="space-y-4">
-        <div className={cn("h-4 w-1/4 rounded", animateClassName)} />
-        <div className={cn("h-3 w-1/3 rounded", animateClassName)} />
-        <div className={cn("h-3 w-5/6 rounded", animateClassName)} />
+        <div className="flex gap-2">
+          <div className={cn("h-4 w-1/6 rounded", animateClassName)} />
+          <div className={cn("h-3 w-1/8 rounded", animateClassName)} />
+        </div>
+        <div className={cn("h-3 w-1/8 rounded", animateClassName)} />
+        <div className={cn("h-4 w-full rounded", animateClassName)} />
       </div>
 
       <div className="h-px bg-border" />
@@ -48,6 +51,14 @@ export function ExplainSkeleton({
         <BulletSkeletonLine className={animateClassName} />
         <BulletSkeletonLine className={animateClassName} />
         <BulletSkeletonLine className={animateClassName} />
+      </div>
+
+      <div className="h-px bg-border" />
+
+      {/* Pronunciation Buttons */}
+      <div className="flex w-full justify-between gap-2">
+        <div className={cn("h-6 w-2/5 rounded", animateClassName)} />
+        <div className={cn("h-6 w-2/5 rounded", animateClassName)} />
       </div>
     </div>
   );

@@ -32,5 +32,6 @@ export async function POST(req: Request) {
         src_par_to_sent_ids: data.src_par_to_sent_ids,
         src_par_to_word_ids: data.src_par_to_word_ids,
         tgt_sent_ids: data.tgt_sent_ids,
+        tgt_par_ids: data.tgt_par_ids,
      });
 }

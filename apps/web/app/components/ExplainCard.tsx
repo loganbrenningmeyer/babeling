@@ -24,7 +24,7 @@ export function ExplainCard({
   className?: string;
 }) {
   return (
-    <div className={cn("prose prose-sm max-w-none", className)}>
+    <div className={cn("prose prose-sm max-w-none font-ui", className)}>
       <ReactMarkdown>{data.explanation}</ReactMarkdown>
       
       <TooltipProvider delayDuration={200}>
@@ -46,7 +46,7 @@ export function ExplainCard({
                 </TooltipTrigger>
 
                 {/* Popup English text on hover */}
-                <TooltipContent className="max-w-xs text-sm">
+                <TooltipContent className="max-w-xs text-sm font-ui">
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => <p className="m-0">{children}</p>,

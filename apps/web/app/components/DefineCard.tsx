@@ -1,11 +1,12 @@
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
-import { PronounceButton } from "./PronounceButton";
+import { PronounceButton } from "./Pronounce/PronounceButton";
 
 export type DefineEntry = {
   word: string;
   sentence: string;
+  paragraph: string;
   lemma: string;
   pos: string;
   ipa_lemma: string;
@@ -19,7 +20,7 @@ export function DefineCard({
   className,
 }: {
   data: DefineEntry;
-  tgtLang?: string;
+  tgtLang: string;
   className?: string;
 }) {
   const wordIsLemma = (data.word === data.lemma);
@@ -30,16 +31,16 @@ export function DefineCard({
         {/* -------------------------
         //* Left-Column: Clicked word (form)
         //* ------------------------- */}
-        <div className={`flex flex-col gap-2 pr-4 ${wordIsLemma ? "" : "border-r"}`}>
+        <div className={`flex flex-col items-start gap-2 pr-4 ${wordIsLemma ? "" : "border-r"}`}>
           {/* Word + Part of Speech */}
           <div className="flex items-center gap-2">
             {/* Clicked word */}
-            <div className="font-reading text-lg font-bold">{data.word}</div>
+            <div className="font-reading text-2xl font-bold">{data.word}</div>
             {/* Part of Speech */}
             {data.pos && (
               <Badge 
                 variant="secondary" 
-                className="h-6 inline-flex text-sm font-reading border border-border">
+                className="h-6 inline-flex text-md font-reading border border-border">
                   {data.pos}
               </Badge>
             )}
@@ -47,30 +48,29 @@ export function DefineCard({
 
           {/* IPA Pronunciation */}
           {data.ipa_form && (
-            <Badge 
-              variant="outline" 
-              className="h-6 inline-flex text-sm font-mono text-muted-foreground"
-            >
-                <PronounceButton
-                  text={data.word}
-                  label={data.ipa_form}
-                  tgtLang={tgtLang} 
-                />
-            </Badge>
+            <PronounceButton
+              text={data.word}
+              label={data.ipa_form}
+              tgtLang={tgtLang} 
+              className="h-8 text-md"
+              iconClassName="h-3 w-3"
+            />
           )}
+
+          {/* Definition */}
+          <p className="text-lg leading-6 font-reading pt-4">
+            {data.gloss ? data.gloss : "Definition unavailable."}
+          </p>
         </div>
         
         {/* -------------------------
-        * Right-Column: Sentence pronunciation
+        * Right-Column: Lemma
         * ------------------------- */}
-        <div className="flex flex-col gap-2">
-          {/* -------------------------
-          * Right-Column: Lemma (base form)
-          * ------------------------- */}
-          {!wordIsLemma && (
+        {!wordIsLemma && (
+          <div className="flex flex-col items-start gap-2">
             <div
               className="
-                h-full
+                h-full w-full
                 inline-flex flex-col
                 rounded-lg border
                 bg-muted/40
@@ -93,12 +93,12 @@ export function DefineCard({
               {/* Lemma + Part of Speech */}
               <div className="flex items-center gap-2">
                 {/* Lemma */}
-                <div className="text-sm font-reading font-medium text-muted-foreground">{data.lemma}</div>
+                <div className="text-md font-reading font-semibold text-muted-foreground">{data.lemma}</div>
                 {/* Part of Speech */}
                 {data.pos && (
                   <Badge 
                     variant="secondary" 
-                    className="h-6 inline-flex text-xs font-reading border border-border">
+                    className="h-6 inline-flex text-sm font-reading border border-border">
                       {data.pos}
                   </Badge>
                 )}
@@ -106,26 +106,18 @@ export function DefineCard({
 
               {/* IPA */}
               {data.ipa_lemma && (
-                <Badge
-                  variant="outline"
-                  className="h-6 text-xs font-mono text-muted-foreground"
-                >
-                  <PronounceButton
-                    text={data.lemma}
-                    label={data.ipa_lemma}
-                    tgtLang={tgtLang} 
-                  />
-                </Badge>
+                <PronounceButton
+                  text={data.lemma}
+                  label={data.ipa_lemma}
+                  tgtLang={tgtLang} 
+                  className="h-8 text-sm"
+                  iconClassName="h-3 w-3"
+                />
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
-
-      {/* Definition body */}
-      <p className="text-base leading-6">
-        {data.gloss ? data.gloss : "Definition unavailable."}
-      </p>
     </div>
   );
 }

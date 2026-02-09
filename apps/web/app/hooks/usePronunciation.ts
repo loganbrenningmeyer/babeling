@@ -7,6 +7,7 @@ export function usePronunciation() {
   const urlRef = useRef<string | null>(null);
 
   const [loading, setLoading] = useState(false);
+  const [playing, setPlaying] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
   // -------------------------
@@ -41,6 +42,7 @@ export function usePronunciation() {
   const stop = useCallback(() => {
     cleanup();
     setLoading(false);
+    setPlaying(false);
   }, [cleanup]);
 
   // -------------------------
@@ -50,6 +52,7 @@ export function usePronunciation() {
     async (text: string, tgtLang?: string) => {
       setError(null);
       setLoading(true);
+      setPlaying(false);
 
       try {
         cleanup();
@@ -73,6 +76,13 @@ export function usePronunciation() {
         const audio = new Audio(url);
         audioRef.current = audio;
 
+        // Track when audio is playing
+        audio.onplaying = () => {
+          setPlaying(true);
+          setLoading(false);
+        };
+
+        // Stop once ended, return errors
         audio.onended = () => stop();
         audio.onerror = (e) => {
           console.error("Audio error event:", e);
@@ -93,11 +103,14 @@ export function usePronunciation() {
         stop();
 
       } finally {
-        if (!audioRef.current) setLoading(false);
+        if (!audioRef.current) {
+          setLoading(false);
+          setPlaying(false);
+        }
       }
     },
     [cleanup, stop]
   );
 
-  return { play, stop, loading, error };
+  return { play, stop, loading, playing, error };
 }
