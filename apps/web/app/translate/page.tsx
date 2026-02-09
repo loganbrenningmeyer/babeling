@@ -824,7 +824,7 @@ export default function Translate() {
                           onTargetHover={handleTargetHover}
                           onTargetWordClick={handleTargetWordClick}
                           targetDisabled={popoverOpen}
-                          className="text-[18px] leading-[1.5]"
+                          className="text-[20px] leading-[1.5]"
                         />
                       )}
                     </div>

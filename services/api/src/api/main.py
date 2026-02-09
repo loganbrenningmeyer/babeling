@@ -13,7 +13,7 @@ from api.utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
 from babeling_nlp.segmenter import Segmenter
-from babeling_nlp.define import get_definition_candidates, get_lemma_ipa, get_form_ipa
+from babeling_nlp.define import get_definition_candidates
 
 from api.database.db import SessionLocal, engine
 from api.database.models import User
@@ -262,13 +262,10 @@ def pronounce(req: PronounceRequest):
     _, tgt_lang = resolve_langs(DEFAULT_SRC_LANG, req.tgt_lang)
 
     payload = {
-        "text": req.text,
+        "text": str(req.text).strip(".") + ".",
         "voiceId": VOICES[tgt_lang],
         "modelId": "inworld-tts-1.5-max",
         "temperature": 0.01,
-        "audioConfig": {
-            "speakingRate": 0.8
-        }
     }
 
     response = requests.post(url, headers=headers, json=payload)
@@ -294,8 +291,6 @@ class SplitPagesRequest(BaseModel):
 def split_pages(req: SplitPagesRequest):
     pages = default_segmenter.split_pages(req.text)
     return {"pages": pages}
-
-
 
 
 # =========================

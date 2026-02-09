@@ -11,7 +11,7 @@ export function TextSurface({
     <div
       className={cn(
         `
-        font-ui leading-6
+        leading-6
         `,
         className
       )}
