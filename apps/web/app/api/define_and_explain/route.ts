@@ -25,10 +25,13 @@ export async function POST(req: Request) {
   const res_data = await res.json();
 
   return NextResponse.json({
+    word: res_data.word,
+    sentence: res_data.sentence,
     lemma: res_data.lemma,
     pos: res_data.pos,
     gloss: res_data.gloss,
-    ipa: res_data.ipa,
+    ipa_lemma: res_data.ipa_lemma,
+    ipa_form: res_data.ipa_form,
     explanation: res_data.explanation,
     examples: res_data.examples,
   });

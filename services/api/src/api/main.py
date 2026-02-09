@@ -7,12 +7,16 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import Response
 from pydantic import BaseModel
 from pathlib import Path
+from sqlalchemy.orm import Session
 
 from api.utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
 from babeling_nlp.segmenter import Segmenter
-from babeling_nlp.define import get_definition_candidates, get_ipa
+from babeling_nlp.define import get_definition_candidates, get_lemma_ipa, get_form_ipa
+
+from api.database.db import SessionLocal, engine
+from api.database.models import User
 
 
 DEFAULT_SRC_LANG = "en"
@@ -214,6 +218,7 @@ def explain(req: DefineExplainRequest):
 
     gemini_api = get_gemini(src_lang, tgt_lang)
     data = gemini_api.define_and_explain(
+        tgt_lang,
         candidates,
         req.src_words,
         req.tgt_words,
@@ -224,9 +229,6 @@ def explain(req: DefineExplainRequest):
         req.tgt_to_src,
         req.tgt_idx,
     )
-
-    # -- Get IPA pronunciation using lemma/pos
-    data["ipa"] = get_ipa(data["lemma"], data["pos"], tgt_lang)
 
     return data
 
@@ -260,10 +262,13 @@ def pronounce(req: PronounceRequest):
     _, tgt_lang = resolve_langs(DEFAULT_SRC_LANG, req.tgt_lang)
 
     payload = {
-        "text": req.text + ".",
+        "text": req.text,
         "voiceId": VOICES[tgt_lang],
         "modelId": "inworld-tts-1.5-max",
-        "temperature": 0.1
+        "temperature": 0.01,
+        "audioConfig": {
+            "speakingRate": 0.8
+        }
     }
 
     response = requests.post(url, headers=headers, json=payload)
@@ -289,3 +294,57 @@ class SplitPagesRequest(BaseModel):
 def split_pages(req: SplitPagesRequest):
     pages = default_segmenter.split_pages(req.text)
     return {"pages": pages}
+
+
+
+
+# =========================
+# Database
+# =========================
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+@app.post("/users")
+def create_user(name: str):
+    db: Session = next(get_db())
+
+    user = User(name=name)
+    db.add(user)
+    db.commit()
+    db.refresh(user)
+
+    return {"id": user.id, "name": user.name}
+
+@app.get("/users")
+def list_users():
+    db: Session = next(get_db())
+    users = db.query(User).all()
+
+    return [{"id": u.id, "name": u.name} for u in users]
+
+@app.delete("/delete-user")
+def delete_alice(name: str):
+    db: Session = next(get_db())
+
+    user = db.query(User).filter(User.name == name).first()
+
+    db.delete(user)
+    db.commit()
+
+    return {"status": "deleted", "name": name}
+
+@app.delete("/delete-users-table")
+def delete_users_table():
+    from sqlalchemy import inspect
+    inspector = inspect(engine)
+
+    if "users" not in inspector.get_table_names():
+        raise HTTPException(status_code=404, detail="users table does not exist")
+
+    User.__table__.drop(bind=engine)
+
+    return {"status": "dropped", "table": "users"}

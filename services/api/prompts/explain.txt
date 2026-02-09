@@ -23,6 +23,8 @@ Return ONLY valid JSON with exactly these keys:
 - "lemma": string
 - "pos": string
 - "gloss": string
+- "ipa_form": string
+- "ipa_lemma": string
 - "explanation": string
 - "examples": array of 2–3 objects, each with:
     - "target": string
@@ -41,6 +43,19 @@ GLOSS SELECTION RULES (STRICT)
   - Write a concise dictionary-style gloss in <source>.
 - Do NOT invent meanings, merge glosses, or infer unstated senses.
 - Glosses are internal reference points only.
+
+────────────────────────────────
+IPA FORMAT RULES (STRICT)
+────────────────────────────────
+- Use phonemic IPA, not narrow phonetic transcription.
+- Always enclose IPA in forward slashes `/…/`.
+- Follow standard pronunciation conventions for the target language.
+- Do not include prosody, intonation, or non-phonemic detail.
+- Include stress marks only if standard for the language.
+- `ipa_lemma` = base (dictionary) form pronunciation.
+- `ipa_form` = pronunciation of the inflected form in context.
+- If pronunciation is uncertain, choose the most standard modern form.
+- Return a single IPA string per field.
 
 ────────────────────────────────
 EXPLANATION RULES (USER-FACING)

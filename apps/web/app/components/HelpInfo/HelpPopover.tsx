@@ -12,6 +12,7 @@ import { SourceNavInfo } from "./SourceNavInfo";
 import { SourceClickInfo } from "./SourceClickInfo";
 import { TargetClickInfo } from "./TargetClickInfo";
 import { PageNavInfo } from "./PageNavInfo";
+import { IPAClickInfo } from "./IPAClickInfo";
 
 export function HelpPopover() {
   const [open, setOpen] = React.useState(false);
@@ -62,6 +63,7 @@ export function HelpPopover() {
           <SourceNavInfo className="w-full" />
           <SourceClickInfo className="w-full" />
           <TargetClickInfo className="w-full" />
+          <IPAClickInfo className="w-full"/>
         </div>
       </PopoverContent>
     </Popover>

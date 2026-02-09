@@ -28,6 +28,5 @@ fetch_if_missing () {
 }
 
 fetch_if_missing "${DEFINITIONS_DB_URL:-}" "${DEFINITIONS_DB_PATH:-/mnt/data/definitions.sqlite}"
-fetch_if_missing "${BINARYALIGN_CKPT_URL:-}" "${BINARYALIGN_CKPT_PATH:-/tmp/model.ckpt}"
 
 exec uvicorn api.main:app --host 0.0.0.0 --port 8000

@@ -19,6 +19,7 @@ import { UploadSurface } from "@/app/components/UploadSurface";
 import { HelpPopover } from "@/app/components/HelpInfo/HelpPopover";
 import { useSourceRevealNav } from "@/app/components/SourceBlur/useSourceRevealNav";
 import { SAMPLE_TEXTS_BY_LANG } from "@/app/translate/sampleTexts";
+import { PronounceButton } from "../components/PronounceButton";
 
 
 const LANGS = [
@@ -367,9 +368,12 @@ export default function Translate() {
       examples: data.examples,
     });
     setDefineData({
+      word: data.word,
+      sentence: data.sentence,
       lemma: data.lemma,
       pos: data.pos,
-      ipa: data.ipa,
+      ipa_lemma: data.ipa_lemma,
+      ipa_form: data.ipa_form,
       gloss: data.gloss,
     });
 
@@ -534,7 +538,11 @@ export default function Translate() {
                     Original
                   </div>
                   <select
-                    className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="
+                      w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
+                      text-sm font-semibold 
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                    "
                     value={srcLang}
                     onChange={(e) => setSrcLang(e.target.value)}
                     disabled={translationLoading}
@@ -560,7 +568,11 @@ export default function Translate() {
                     type="button"
                     variant="secondary"
                     size="icon"
-                    className="h-11 w-11 rounded-full border border-border/70 bg-muted text-foreground shadow-sm transition-colors hover:bg-foreground/10 hover:text-foreground/90"
+                    className="
+                      h-11 w-11 rounded-full border border-border/70 bg-muted 
+                      text-foreground shadow-sm 
+                      transition-colors hover:bg-foreground/10 hover:text-foreground/90
+                    "
                     onClick={handleSwapLanguages}
                     aria-label="Swap source and target languages"
                     disabled={translationLoading}
@@ -575,7 +587,11 @@ export default function Translate() {
                     Translation
                   </div>
                   <select
-                    className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="
+                      w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
+                      text-sm font-semibold 
+                      focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                    "
                     value={tgtLang}
                     onChange={(e) => setTgtLang(e.target.value)}
                     disabled={translationLoading}
@@ -602,7 +618,11 @@ export default function Translate() {
                   Sample text
                 </div>
                 <select
-                  className="w-full h-10 rounded-lg border border-border bg-muted/40 px-3 text-sm font-semibold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  className="
+                    w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
+                    text-sm font-semibold 
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                  "
                   value={sampleId}
                   onChange={(e) => handleSampleSelect(e.target.value)}
                   disabled={translationLoading || sampleLoading || sampleOptions.length === 0}
@@ -662,13 +682,14 @@ export default function Translate() {
                   shadow
                   w-full h-12
                   transition
+                  hover:bg-primary
                   hover:shadow-md
                   hover:-translate-y-[1px]
                   disabled:shadow-none
                   disabled:translate-y-0
                 "
               >
-                <span className="relative">
+                <span className="relative font-semibold">
                   Translate
                   <span
                     className="
@@ -846,7 +867,11 @@ export default function Translate() {
                         </div>
                       </div>
                       {/* Right spacer: Help Popover */}
-                      <HelpPopover />
+                      <div className="flex justify-left pointer-events-none">
+                        <div className="pointer-events-auto">
+                          <HelpPopover />
+                        </div>
+                      </div>
                       {/* Right: Next Page */}
                       <div className="flex justify-end pr-3">
                         <Button
@@ -887,15 +912,32 @@ export default function Translate() {
                 }
               }}
               anchorEl={anchorEl}
-              className="min-w-[400px]"
+              className="w-[min(520px,92vw)]"
             >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
                 <div className="p-4 space-y-4">
+                  {/* Definition */}
                   {defineData && <DefineCard data={defineData} tgtLang={tgtLang} />}
                   <div className="h-px bg-border" />
+                  {/* Explanation / Examples */}
                   {explainData && <ExplainCard data={explainData} />}
+                  {/* Sentence Pronunciation */}
+                  {defineData && (
+                    <div className="
+                      inline-flex 
+                      rounded-lg border border-border
+                      bg-muted/40 
+                      px-3 py-2
+                    ">
+                      <PronounceButton
+                        text={defineData.sentence}
+                        label="Listen to sentence"
+                        tgtLang={tgtLang}
+                      />
+                    </div>
+                  )}
                 </div>
               )}
             </AnchoredPopover>

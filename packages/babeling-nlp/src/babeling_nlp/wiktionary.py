@@ -45,6 +45,21 @@ def init_db(db_path: Path):
     # -- Create lookup index for dict_forms by (lang, form)
     cur.execute("CREATE INDEX IF NOT EXISTS idx_forms_lang_form ON dict_forms(lang, form)")
 
+    # -- Optional: IPA/POS for form pages (surface forms)
+    cur.execute("""
+    CREATE TABLE IF NOT EXISTS dict_form_entries (
+        lang TEXT NOT NULL,
+        form TEXT NOT NULL,
+        lemma TEXT NOT NULL,
+        pos TEXT NOT NULL,
+        ipa TEXT,
+        PRIMARY KEY (lang, form, lemma, pos)
+    )
+    """)
+    cur.execute(
+        "CREATE INDEX IF NOT EXISTS idx_formentries_lang_form ON dict_form_entries(lang, form)"
+    )
+
     conn.commit()
     conn.close()
     print(f"Initialized: {db_path}")
@@ -125,6 +140,8 @@ def store_form(entry: dict, cur: Cursor):
     lang = entry["lang_code"]
     form = entry["word"].lower()
     lemmas = extract_form_lemmas(entry)
+    pos = (entry.get("pos") or "").strip()
+    ipa = extract_def_ipa(entry)
 
     for lemma in lemmas:
         cur.execute(
@@ -133,6 +150,14 @@ def store_form(entry: dict, cur: Cursor):
             VALUES (?, ?, ?)
             """,
             (lang, form, lemma)
+        )
+        # -- Optional: store surface-form IPA/POS if available
+        cur.execute(
+            """
+            INSERT OR REPLACE INTO dict_form_entries (lang, form, lemma, pos, ipa)
+            VALUES (?, ?, ?, ?, ?)
+            """,
+            (lang, form, lemma, pos, ipa)
         )
 
 
@@ -333,7 +358,7 @@ def parse_wiktionary(json_path: Path, db_path: Path, source_lang: str, batch_siz
 
 
 def main():
-    db_path = Path.home() / "data" / "babeling" / "definitions.sqlite"
+    db_path = Path.home() / "data" / "babeling" / "definitions_with_forms.sqlite"
 
     init_db(db_path)
 

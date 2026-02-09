@@ -1,5 +1,6 @@
 import os
 import json
+import re
 import sqlite3
 from sqlite3 import Cursor
 from pathlib import Path
@@ -127,7 +128,7 @@ def get_definition_candidates(word: str, lang: str) -> list[dict]:
     return candidates
 
 
-def get_ipa(lemma: str, pos: str, lang: str) -> str:
+def get_lemma_ipa(lemma: str, pos: str, lang: str) -> str:
     """
     
     """
@@ -143,4 +144,64 @@ def get_ipa(lemma: str, pos: str, lang: str) -> str:
         (lang, lemma, pos)
     )
     row = cur.fetchone()
-    return row[0] if row and row[0] else None    
+
+    if row and row[0]:
+        ipa = row[0]
+        return ipa if is_valid_ipa(ipa) else None
+    else:
+        return None
+
+
+def get_form_ipa(form: str, lang: str, lemma: str | None = None, pos: str | None = None) -> str | None:
+    """
+    Return IPA for a surface form if available in dict_form_entries.
+    If lemma/pos are provided, the lookup is constrained; otherwise returns
+    the first IPA found for the (lang, form).
+    """
+    conn = sqlite3.connect(DB_PATH)
+    cur = conn.cursor()
+
+    form = form.lower()
+
+    if lemma and pos:
+        cur.execute(
+            """
+            SELECT ipa
+            FROM dict_form_entries
+            WHERE lang=? AND form=? AND lemma=? AND pos=?
+            """,
+            (lang, form, lemma, pos)
+        )
+    else:
+        cur.execute(
+            """
+            SELECT ipa
+            FROM dict_form_entries
+            WHERE lang=? AND form=?
+            LIMIT 1
+            """,
+            (lang, form)
+        )
+
+    row = cur.fetchone()
+
+    if row and row[0]:
+        ipa = row[0]
+        return ipa if is_valid_ipa(ipa) else None
+    else:
+        return None
+
+
+IPA_LETTER_RE = re.compile(r"[a-zɑæʃʒŋœøɥɲ]", re.IGNORECASE)
+def is_valid_ipa(ipa: str) -> bool:
+    if not ipa:
+        return False
+
+    s = ipa.strip()
+
+    # Common placeholder / junk values
+    if s in {"...", ".", "-", "–", "—", "_"}:
+        return False
+
+    # Must contain at least one IPA letter
+    return bool(IPA_LETTER_RE.search(s))
