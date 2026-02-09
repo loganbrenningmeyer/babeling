@@ -46,7 +46,7 @@ export function ExplainCard({
                 </TooltipTrigger>
 
                 {/* Popup English text on hover */}
-                <TooltipContent className="max-w-xs text-sm font-ui">
+                <TooltipContent className="text-sm font-ui">
                   <ReactMarkdown
                     components={{
                       p: ({ children }) => <p className="m-0">{children}</p>,

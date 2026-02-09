@@ -79,7 +79,7 @@ class AlignService:
         (
             src_words, tgt_words, src_alignments, tgt_alignments, src_sent_ids,
             src_sent_to_par_ids, src_sent_to_word_ids, src_par_ids,
-            src_par_to_sent_ids, src_par_to_word_ids, tgt_sent_ids
+            src_par_to_sent_ids, src_par_to_word_ids, tgt_sent_ids, tgt_par_ids
         ) = self.aligner.align(src_par_sent_words, tgt_par_sent_words)
 
         return {
@@ -96,4 +96,5 @@ class AlignService:
             "src_par_to_sent_ids": src_par_to_sent_ids,
             "src_par_to_word_ids": src_par_to_word_ids,
             "tgt_sent_ids": tgt_sent_ids,
+            "tgt_par_ids": tgt_par_ids
         }
