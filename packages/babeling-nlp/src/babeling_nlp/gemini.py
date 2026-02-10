@@ -95,9 +95,6 @@ class GeminiAPI:
         tgt_sentence = build_text(tgt_words, tgt_spaces, tgt_sent_ids, tgt_sent_id)
         tgt_paragraph = build_text(tgt_words, tgt_spaces, tgt_par_ids, tgt_par_id)
 
-        print(f"tgt_sentence: {tgt_sentence}", flush=False)
-        print(f"tgt_paragraph: {tgt_paragraph}", flush=False)
-
         # -------------------------
         # Add source / target markers
         # -------------------------
@@ -157,9 +154,6 @@ class GeminiAPI:
         # -------------------------
         ipa_lemma = get_lemma_ipa(data["lemma"], data["pos"], tgt_lang)
         ipa_form = get_form_ipa(tgt_word, tgt_lang, data["lemma"], data["pos"])
-
-        print(f"dictionary IPA lemma: {ipa_lemma}", flush=False)
-        print(f"dictionary IPA form: {ipa_form}", flush=False)
 
         ipa_lemma = data["ipa_lemma"] if ipa_lemma is None else f"/{ipa_lemma}/"
         ipa_form = data["ipa_form"] if ipa_form is None else f"/{ipa_form}/"
