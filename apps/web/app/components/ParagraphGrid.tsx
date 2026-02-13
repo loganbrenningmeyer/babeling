@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 import { HoverText } from "./HoverText/HoverText";
 import type { BlurMode } from "./SourceBlur/BlurModeToggle";
-import type { Session } from "@/app/translate/page";
+import type { Session } from "@/types/session";
 
 type ParagraphGridProps = {
   session: Session;

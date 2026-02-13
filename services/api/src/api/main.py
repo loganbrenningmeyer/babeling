@@ -1,24 +1,49 @@
 import os
-import json
 import base64
 import requests
-import spacy
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, Depends
 from fastapi.responses import Response
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from pathlib import Path
+from sqlalchemy import select
 from sqlalchemy.orm import Session
+from datetime import datetime, timezone
 
+# -------------------------
+# Translation / Alignment / Definitions
+# -------------------------
 from api.utils import *
 from babeling_nlp.align import Aligner
 from babeling_nlp.gemini import GeminiAPI
 from babeling_nlp.segmenter import Segmenter
 from babeling_nlp.define import get_definition_candidates
 
-from api.database.db import SessionLocal, engine
-from api.database.models import User
+# -------------------------
+# Clerk / Database
+# -------------------------
+from api.database.db import get_db, engine, Base
+from api.database.models import AppUser
+from api.database.auth import get_current_clerk_user_id
 
 
+# =========================
+# Initialize FastAPI / CORS Middleware
+# =========================
+print("Initializing FastAPI...", flush=False)
+app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[os.environ["CORS_ORIGINS"]],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# =========================
+# Languages / Paths / URL Constants
+# =========================
 DEFAULT_SRC_LANG = "en"
 DEFAULT_TGT_LANG = "fr"
 
@@ -30,15 +55,18 @@ LANGS = {
     "de": "German"
 }
 
-# -------------------------
-# Paths
-# -------------------------
+# -- BinaryAlign model
 CKPT_PATH = Path(os.environ.get("BINARYALIGN_CKPT_PATH", "/tmp/model.ckpt"))
+# -- Modal GPU url
 MODAL_ALIGN_URL = os.environ.get("MODAL_ALIGN_URL") or os.environ.get("MODAL_ALIGN_DIR")
-
+# -- Gemini prompt files
 PROMPTS_DIR = Path(os.environ.get("BABELING_PROMPTS_DIR"))
 
+
 def load_prompt(filename: str, src_lang: str, tgt_lang: str) -> str:
+    """
+    Reads Gemini prompt .txt file and substitutes source / target languages for their tags
+    """
     prompt = (PROMPTS_DIR / filename).read_text(encoding="utf-8")
     prompt = prompt.replace("<source>", LANGS[src_lang]).replace("<src_lang>", src_lang)
     prompt = prompt.replace("<target>", LANGS[tgt_lang]).replace("<tgt_lang>", tgt_lang)
@@ -78,13 +106,6 @@ def get_gemini(src_lang: str, tgt_lang: str) -> GeminiAPI:
         system_explain = load_prompt("explain.txt", src_lang, tgt_lang)
         _gemini[key] = GeminiAPI(system_translate, system_explain)
     return _gemini[key]
-
-# -------------------------
-# Initialize FastAPI app
-# -------------------------
-print("Initializing FastAPI...", flush=False)
-app = FastAPI()
-
 
 # =========================
 # Translate (/translate)
@@ -286,52 +307,40 @@ def split_pages(req: SplitPagesRequest):
 
 
 # =========================
-# Database
+# Clerk Authentication
 # =========================
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
+@app.get("/me")
+def me(
+    clerk_user_id: str = Depends(get_current_clerk_user_id),
+    db: Session = Depends(get_db),
+):
+    # -------------------------
+    # Find existing user
+    # -------------------------
+    user = db.execute(
+        select(AppUser).where(AppUser.clerk_user_id == clerk_user_id)
+    ).scalar_one_or_none()
 
-@app.post("/users")
-def create_user(name: str):
-    db: Session = next(get_db())
+    # -------------------------
+    # Create user if missing
+    # -------------------------
+    if user is None:
+        user = AppUser(clerk_user_id=clerk_user_id)
+        db.add(user)
+        db.commit()
+        db.refresh(user)
 
-    user = User(name=name)
-    db.add(user)
-    db.commit()
-    db.refresh(user)
-
-    return {"id": user.id, "name": user.name}
-
-@app.get("/users")
-def list_users():
-    db: Session = next(get_db())
-    users = db.query(User).all()
-
-    return [{"id": u.id, "name": u.name} for u in users]
-
-@app.delete("/delete-user")
-def delete_alice(name: str):
-    db: Session = next(get_db())
-
-    user = db.query(User).filter(User.name == name).first()
-
-    db.delete(user)
+    # -------------------------
+    # Update user last_seen_at
+    # -------------------------
+    user.last_seen_at = datetime.now(timezone.utc)
     db.commit()
 
-    return {"status": "deleted", "name": name}
-
-@app.delete("/delete-users-table")
-def delete_users_table():
-    from sqlalchemy import inspect
-    inspector = inspect(engine)
-
-    if "users" not in inspector.get_table_names():
-        raise HTTPException(status_code=404, detail="users table does not exist")
-
-    User.__table__.drop(bind=engine)
-
-    return {"status": "dropped", "table": "users"}
+    # -------------------------
+    # Return app-level identity
+    # -------------------------
+    return {
+        "id": user.id,
+        "clerkUserId": user.clerk_user_id,
+        "lastSeenAt": user.last_seen_at.isoformat() if user.last_seen_at else None,
+    }

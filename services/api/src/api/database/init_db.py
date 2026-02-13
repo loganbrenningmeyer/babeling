@@ -1,5 +1,12 @@
-from api.database.db import engine
-from api.database.models import Base
+from api.database.db import engine, Base
+from api.database import models
 
-Base.metadata.create_all(bind=engine)
-print("Tables created")
+
+def create_database():
+    print("Creating database...")
+    Base.metadata.create_all(bind=engine)
+
+    print("Done.")
+
+if __name__ == "__main__":
+    create_database()

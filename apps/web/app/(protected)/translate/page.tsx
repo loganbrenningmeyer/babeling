@@ -4,6 +4,19 @@ import { useEffect, useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
+// -------------------------
+// User information provider
+// -------------------------
+import { useAppUser } from "@/components/AppUserProvider";
+
+// -------------------------
+// Translate Session information
+// -------------------------
+import type { Session } from "@/types/session";
+
+// -------------------------
+// UI Components
+// -------------------------
 import { SourceBlurButton } from "@/app/components/SourceBlur/SourceBlurButton";
 import { BlurMode, BlurModeToggle } from "@/app/components/SourceBlur/BlurModeToggle";
 import { DefineEntry, DefineCard } from "@/app/components/DefineCard";
@@ -18,8 +31,8 @@ import { ParagraphGrid } from "@/app/components/ParagraphGrid";
 import { UploadSurface } from "@/app/components/UploadSurface";
 import { HelpPopover } from "@/app/components/HelpInfo/HelpPopover";
 import { useSourceRevealNav } from "@/app/components/SourceBlur/useSourceRevealNav";
-import { SAMPLE_TEXTS_BY_LANG } from "@/app/translate/sampleTexts";
-import { PronounceButton } from "../components/Pronounce/PronounceButton";
+import { SAMPLE_TEXTS_BY_LANG } from "./sampleTexts";
+import { PronounceButton } from "@/app/components/Pronounce/PronounceButton";
 
 
 const LANGS = [
@@ -34,41 +47,20 @@ export function getLangLabel(code: string) {
   return LANGS.find((l) => l.code === code)?.label ?? code;
 }
 
-export type Session = {
-  sourceText: string;
-  targetText: string;
-
-  src: {
-    words: string[];
-    spaces: string[];
-    sentIds: number[];
-    sentToParIds: Record<number, number>;
-    sentToWordIds: Record<number, number[]>;
-    parIds: number[];
-    parToSentIds: Record<number, number[]>;
-    parToWordIds: Record<number, number[]>;
-  };
-
-  tgt: {
-    words: string[];
-    spaces: string[];
-    sentIds: number[];
-    parIds: number[];
-  };
-
-  align: {
-    srcToTgt: Record<number, number[]>;
-    tgtToSrc: Record<number, number[]>;
-  };
-
-  state: {
-    blurredSource: Set<number>;
-    navSentId: number;
-    navParId: number;
-  };
-};
 
 export default function Translate() {
+  // -------------------------
+  // Load user information
+  // -------------------------
+  const { user, loading, error } = useAppUser();
+
+  if (error) return <div className="p-6 text-sm text-red-600">Account error: {error}</div>;
+
+  return <TranslatePage />;
+}
+
+
+function TranslatePage() {
   // -------------------------
   // Core state
   // -------------------------

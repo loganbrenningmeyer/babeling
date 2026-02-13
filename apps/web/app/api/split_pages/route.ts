@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 export async function POST(req: Request) {
     const { text } = await req.json();
 
-    const API_BASE_URL = process.env.BABELING_API_BASE_URL;
+    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
     const res = await fetch(`${API_BASE_URL}/split_pages`, {
         method: "POST",

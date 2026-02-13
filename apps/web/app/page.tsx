@@ -94,6 +94,9 @@ export default function Home() {
                     <ArrowRight className="size-4" />
                   </Link>
                 </Button>
+                {/* -------------------------
+                //* Clerk /me test
+                //* ------------------------- */}
                 <Button asChild variant="outline" size="lg" className="border-zinc-300 bg-white/80">
                   <Link href="#how-it-works">See How It Works</Link>
                 </Button>

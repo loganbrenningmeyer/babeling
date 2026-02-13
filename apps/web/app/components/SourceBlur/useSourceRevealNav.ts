@@ -1,5 +1,5 @@
 import * as React from "react";
-import type { Session } from "@/app/translate/page";
+import type { Session } from "@/types/session"
 
 export function useSourceRevealNav(args: {
   session: Session | null;
