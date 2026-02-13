@@ -1,5 +1,5 @@
 from api.database.db import engine, Base
-from api.database import models
+import api.database.models
 
 
 def create_database():

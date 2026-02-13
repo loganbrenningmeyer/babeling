@@ -1,9 +1,18 @@
 from sqlalchemy import BigInteger, DateTime, Text, func
 from sqlalchemy.orm import Mapped, mapped_column
+
 from api.database.db import Base
 
 
 class AppUser(Base):
+    """
+    App user information
+    
+        id (BigInteger): App user ID
+        clerk_user_id (Text): User ID for Clerk authentication
+        created_at (DateTime): Time the user account was made
+        last_seen_at (DateTime): Time the user last logged in
+    """
     __tablename__ = "app_users"
 
     id: Mapped[int] = mapped_column(

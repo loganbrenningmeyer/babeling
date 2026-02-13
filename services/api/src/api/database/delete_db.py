@@ -1,5 +1,5 @@
 from api.database.db import engine, Base
-from api.database import models  # important: registers models
+import api.database.models
 
 def delete_database():
     print("Dropping all tables...")
