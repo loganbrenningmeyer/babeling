@@ -78,6 +78,13 @@ export default function RootLayout({
                 >
                   Translate
                 </Link>
+                
+                <Link
+                  className="rounded-md px-3 py-2 font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+                  href="/library"
+                >
+                  Library
+                </Link>
               </div>
 
               {/* -------------------------

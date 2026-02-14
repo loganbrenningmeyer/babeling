@@ -344,3 +344,10 @@ def me(
         "clerkUserId": user.clerk_user_id,
         "lastSeenAt": user.last_seen_at.isoformat() if user.last_seen_at else None,
     }
+
+
+# =========================
+# Save Document
+# =========================
+@app.post("/save_document")
+def save_document(req)

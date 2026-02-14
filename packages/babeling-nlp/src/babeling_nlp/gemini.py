@@ -34,7 +34,7 @@ def mark_words(words, spaces, mark_idxs, tag) -> list[str]:
     return out
 
 
-def build_text(words: list[str], spaces: list[str], word_ids: list[int], word_id: int) -> str:
+def extract_text_group(words: list[str], spaces: list[str], group_ids: list[int], group_id: int) -> str:
     """
     
     
@@ -46,7 +46,7 @@ def build_text(words: list[str], spaces: list[str], word_ids: list[int], word_id
     """
     out = []
     for i, (word, space) in enumerate(zip(words, spaces)):
-        if word_ids[i] == word_id:
+        if group_ids[i] == group_id:
             out.append(word + space)
     return "".join(out)
 
@@ -92,8 +92,8 @@ class GeminiAPI:
         tgt_sent_id = tgt_sent_ids[tgt_idx]
         tgt_par_id = tgt_par_ids[tgt_idx]
 
-        tgt_sentence = build_text(tgt_words, tgt_spaces, tgt_sent_ids, tgt_sent_id)
-        tgt_paragraph = build_text(tgt_words, tgt_spaces, tgt_par_ids, tgt_par_id)
+        tgt_sentence = extract_text_group(tgt_words, tgt_spaces, tgt_sent_ids, tgt_sent_id)
+        tgt_paragraph = extract_text_group(tgt_words, tgt_spaces, tgt_par_ids, tgt_par_id)
 
         # -------------------------
         # Add source / target markers
