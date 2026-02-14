@@ -1,24 +1,28 @@
 from sqlalchemy import BigInteger, Integer, DateTime, ForeignKey, Text, func
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
 from api.database.db import Base
 
 
-class Glossary(Base):
+class GlossaryItem(Base):
     """
     
     
     Parameters:
     
     """
-    __tablename__ = "glossaries"
+    __tablename__ = "glossary_items"
 
+    # -------------------------
+    # Glossary ID / App User ID
+    # -------------------------
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
+        autoincrement=True,
     )
-
     user_id: Mapped[int] = mapped_column(
         ForeignKey("app_users.id"),
         index=True,
@@ -34,11 +38,11 @@ class Glossary(Base):
     )
     pos: Mapped[str] = mapped_column(
         Text,
-        nullable=False,
+        nullable=True,
     )
     ipa: Mapped[str] = mapped_column(
         Text,
-        nullable=False,
+        nullable=True,
     )
 
     # -------------------------
@@ -55,6 +59,22 @@ class Glossary(Base):
     lemma_ipa: Mapped[str] = mapped_column(
         Text,
         nullable=True,
+    )
+
+    # -------------------------
+    # Definition (gloss) / Explanation / Examples
+    # -------------------------
+    gloss: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    explanation: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    examples: Mapped[list[dict]] = mapped_column(
+        JSONB,
+        nullable=False,
     )
 
     # -------------------------
@@ -91,5 +111,26 @@ class Glossary(Base):
     )
     word_id: Mapped[int] = mapped_column(
         Integer,
+        nullable=False,
+    )
+
+    # -------------------------
+    # Sentence / Paragraph of Clicked Word
+    # -------------------------
+    sentence: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    paragraph: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+
+    # -------------------------
+    # Glossary Item Save Time
+    # -------------------------
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True),
+        server_default=func.now(),
         nullable=False,
     )

@@ -14,6 +14,9 @@ class UserSettings(Base):
     """
     __tablename__ = "user_settings"
 
+    # -------------------------
+    # App User ID
+    # -------------------------
     user_id: Mapped[int] = mapped_column(
         ForeignKey("app_users.id"),
         primary_key=True,

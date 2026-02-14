@@ -14,22 +14,31 @@ class Document(Base):
     """
     __tablename__ = "documents"
 
+    # -------------------------
+    # Document ID / App User ID
+    # -------------------------
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
+        autoincrement=True,
     )
-
     user_id: Mapped[int] = mapped_column(
         ForeignKey("app_users.id"),
         index=True,
         nullable=False,
     )
 
-    content: Mapped[str] = mapped_column(
+    # -------------------------
+    # Raw Source Text
+    # -------------------------
+    source_text: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )
 
+    # -------------------------
+    # Document Save Time
+    # -------------------------
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         server_default=func.now(),

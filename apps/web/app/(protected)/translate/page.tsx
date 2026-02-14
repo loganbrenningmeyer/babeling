@@ -147,7 +147,11 @@ function TranslatePage() {
     const pages_res = await fetch("/api/split_pages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text: fullText }),
+      body: JSON.stringify({
+        src_lang: srcLang,
+        tgt_lang: tgtLang,
+        text: fullText 
+      }),
     });
     const pages_data = await pages_res.json();
     const newPages = pages_data.pages;
@@ -276,27 +280,31 @@ function TranslatePage() {
       sourceText: source,
       targetText: target,
       src: {
-        words: align_data.src_words,
-        spaces: align_data.src_spaces,
-        sentIds: align_data.src_sent_ids,
-        sentToParIds: align_data.src_sent_to_par_ids,
-        sentToWordIds: align_data.src_sent_to_word_ids,
-        parIds: align_data.src_par_ids,
-        parToSentIds: align_data.src_par_to_sent_ids,
-        parToWordIds: align_data.src_par_to_word_ids,
+        words: align_data.src.words,
+        spaces: align_data.src.spaces,
+        sentIds: align_data.src.sentIds,
+        parIds: align_data.src.parIds,
+        sentToParIds: align_data.src.sentToParIds,
+        sentToWordIds: align_data.src.sentToWordIds,
+        parToSentIds: align_data.src.parToSentIds,
+        parToWordIds: align_data.src.parToWordIds,
       },
       tgt: {
-        words: align_data.tgt_words,
-        spaces: align_data.tgt_spaces,
-        sentIds: align_data.tgt_sent_ids,
-        parIds: align_data.tgt_par_ids,
+        words: align_data.tgt.words,
+        spaces: align_data.tgt.spaces,
+        sentIds: align_data.tgt.sentIds,
+        parIds: align_data.tgt.parIds,
+        sentToParIds: align_data.tgt.sentToParIds,
+        sentToWordIds: align_data.tgt.sentToWordIds,
+        parToSentIds: align_data.tgt.parToSentIds,
+        parToWordIds: align_data.tgt.parToWordIds,
       },
       align: {
-        srcToTgt: align_data.src_to_tgt,
-        tgtToSrc: align_data.tgt_to_src,
+        srcToTgt: align_data.align.srcToTgt,
+        tgtToSrc: align_data.align.tgtToSrc,
       },
       state: {
-        blurredSource: new Set(align_data.src_words.map((_: string, i: number) => i)),
+        blurredSource: new Set(align_data.src.words.map((_: string, i: number) => i)),
         navSentId: -1,
         navParId: -1,
       }
@@ -339,38 +347,49 @@ function TranslatePage() {
     // -------------------------
     setExplanationLoading(true);
 
-    const res = await fetch("/api/define_and_explain", {
+    const res = await fetch("/api/annotate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        src_lang: srcLang,
-        tgt_lang: tgtLang,
-        src_words: session.src.words,
-        tgt_words: session.tgt.words,
-        src_spaces: session.src.spaces,
-        tgt_spaces: session.tgt.spaces,
-        src_sent_ids: session.src.sentIds,
-        tgt_sent_ids: session.tgt.sentIds,
-        tgt_par_ids: session.tgt.parIds,
-        tgt_to_src: session.align.tgtToSrc,
-        tgt_idx: i,
+        srcLang: srcLang,
+        tgtLang: tgtLang,
+        src: {
+          words: session.src.words,
+          spaces: session.src.spaces,
+          sentIds: session.src.sentIds,
+          parIds: session.src.parIds,
+        },
+        tgt: {
+          words: session.tgt.words,
+          spaces: session.tgt.spaces,
+          sentIds: session.tgt.sentIds,
+          parIds: session.tgt.parIds,
+        },
+        tgtToSrc: session.align.tgtToSrc,
+        tgtIdx: i,
       }),
     });
     const data = await res.json();
 
     setExplainData({
-      explanation: data.explanation,
-      examples: data.examples,
+      explanation: data.usage.explanation,
+      examples: data.usage.examples,
     });
     setDefineData({
-      word: data.word,
-      sentence: data.sentence,
-      paragraph: data.paragraph,
-      lemma: data.lemma,
-      pos: data.pos,
-      ipa_lemma: data.ipa_lemma,
-      ipa_form: data.ipa_form,
-      gloss: data.gloss,
+      form: data.definition.form,
+      posForm: data.definition.posForm,
+      ipaForm: data.definition.ipaForm,
+
+      lemma: data.definition.lemma,
+      posLemma: data.definition.posLemma,
+      ipaLemma: data.definition.ipaLemma,
+
+      gloss: data.definition.gloss,
+
+      srcSent: data.definition.srcSent,
+      srcPar: data.definition.srcPar,
+      tgtSent: data.definition.tgtSent,
+      tgtPar: data.definition.tgtPar,
     });
 
     setExplanationLoading(false);
@@ -925,14 +944,14 @@ function TranslatePage() {
                     <div className="flex w-full justify-between gap-2">
                       {/* Sentence */}
                       <PronounceButton
-                        text={defineData.sentence}
+                        text={defineData.tgtSent}
                         label="Listen to sentence"
                         tgtLang={tgtLang}
                         iconClassName="h-4 w-4"
                       />
                       {/* Paragraph */}
                       <PronounceButton
-                        text={defineData.paragraph}
+                        text={defineData.tgtPar}
                         label="Listen to paragraph"
                         tgtLang={tgtLang}
                         iconClassName="h-4 w-4"

@@ -1,9 +1,8 @@
 import modal
 from pathlib import Path
 from pydantic import BaseModel
-from babeling_nlp.align import Aligner
-from babeling_nlp.segmenter import Segmenter
-from api.utils import get_token_spaces
+from babeling_nlp.align import Aligner, AlignmentData
+from binaryalign.tokenization import Segmenter
 
 app = modal.App("babeling-align")
 
@@ -71,30 +70,22 @@ class AlignService:
         self.aligner = Aligner(model_name="microsoft/mdeberta-v3-base", ckpt_path=CKPT_PATH)
 
     @modal.fastapi_endpoint(method="POST")
-    def align(self, req: AlignRequest):
+    def align(self, req: AlignRequest) -> AlignmentData:
+        # -------------------------
+        # Load Segmenter 
+        # -------------------------
         segmenter = Segmenter(req.src_lang or "en", req.tgt_lang or "fr")
-        src_par_sent_words = segmenter.split_par_sent_words(req.source, req.src_lang or "en")
-        tgt_par_sent_words = segmenter.split_par_sent_words(req.target, req.tgt_lang or "fr")
 
-        (
-            src_words, tgt_words, src_alignments, tgt_alignments, src_sent_ids,
-            src_sent_to_par_ids, src_sent_to_word_ids, src_par_ids,
-            src_par_to_sent_ids, src_par_to_word_ids, tgt_sent_ids, tgt_par_ids
-        ) = self.aligner.align(src_par_sent_words, tgt_par_sent_words)
+        # -------------------------
+        # Align all corresponding source / target sentences
+        # -------------------------
+        out: AlignmentData = self.aligner.align(
+            source=req.source,
+            target=req.target,
+            src_lang=req.src_lang,
+            tgt_lang=req.tgt_lang,
+            segmenter=segmenter,
+            threshold=0.025,
+        )
 
-        return {
-            "src_words": src_words,
-            "tgt_words": tgt_words,
-            "src_to_tgt": src_alignments,
-            "tgt_to_src": tgt_alignments,
-            "src_spaces": get_token_spaces(req.source, src_words),
-            "tgt_spaces": get_token_spaces(req.target, tgt_words),
-            "src_sent_ids": src_sent_ids,
-            "src_sent_to_par_ids": src_sent_to_par_ids,
-            "src_sent_to_word_ids": src_sent_to_word_ids,
-            "src_par_ids": src_par_ids,
-            "src_par_to_sent_ids": src_par_to_sent_ids,
-            "src_par_to_word_ids": src_par_to_word_ids,
-            "tgt_sent_ids": tgt_sent_ids,
-            "tgt_par_ids": tgt_par_ids
-        }
+        return out

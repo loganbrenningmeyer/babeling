@@ -21,7 +21,8 @@ OUTPUT REQUIREMENTS
 ────────────────────────────────
 Return ONLY valid JSON with exactly these keys:
 - "lemma": string
-- "pos": string
+- "pos_lemma": string
+- "pos_form": string
 - "gloss": string
 - "ipa_form": string
 - "ipa_lemma": string
@@ -36,7 +37,11 @@ Do NOT escape markdown characters (no backslashes). Output markdown with literal
 ────────────────────────────────
 GLOSS SELECTION RULES (STRICT)
 ────────────────────────────────
-- You MUST choose the lemma and part of speech EXACTLY from the provided candidates.
+- You MUST choose the lemma and `pos_lemma` EXACTLY from the provided candidates.
+- `pos_form` is the part of speech of the clicked <TARGET> word as used in this sentence.
+- If <TARGET> is an inflected form of the chosen lemma, `pos_form` will often match `pos_lemma`.
+- If usage in context differs (e.g., conversion/nominalized/participle-like use), set `pos_form` to the contextual part of speech.
+- Keep both POS labels concise and standard for the target language (e.g., noun, verb, adjective, adverb, pronoun, determiner, preposition, conjunction, interjection, numeral, participle).
 - If a candidate gloss applies:
   - "gloss" MUST be the accurate <source> translation of the chosen candidate gloss.
 - If NO candidate gloss clearly applies:

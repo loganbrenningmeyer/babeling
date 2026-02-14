@@ -244,3 +244,32 @@ class Segmenter:
 
         # Re-join paragraphs with a single newline (already spaced by ParagraphGrid)
         return "\n\n".join(paras)
+    
+    def get_token_spaces(self, text: str, tokens: list[str]) -> list[str]:
+        """ 
+        Scans text left-to-right and for each token, captures the whitespace
+        immediately after it
+
+        Returns:
+            spaces (list[str]): List of trailing whitespaces (or "") for each token in text
+        """
+        i = 0
+        spaces = []
+
+        for token in tokens:
+            start = text.find(token, i)
+
+            if start == -1:
+                spaces.append("")
+                continue
+
+            end = start + len(token)
+
+            j = end
+            while j < len(text) and text[j].isspace():
+                j += 1
+
+            spaces.append(text[end:j])
+            i = j
+
+        return spaces

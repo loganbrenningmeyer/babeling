@@ -1,8 +1,8 @@
 import torch
 
-from binaryalign.tokenization import BinaryAlignTokenizer
+from binaryalign.tokenization import BinaryAlignTokenizer, Segmenter
 from binaryalign.models import BinaryAlignModel, BinaryAlignClassifier, load_backbone
-from binaryalign.inference.align import BinaryAlign
+from binaryalign.inference import BinaryAlign, AlignmentData
 
 
 class Aligner:
@@ -22,5 +22,22 @@ class Aligner:
 
         self.binaryalign = BinaryAlign(model, tokenizer)
 
-    def align(self, src_par_sent_words: str, tgt_par_sent_words: str, threshold: float=0.025):
-        return self.binaryalign.align_document_pair(src_par_sent_words, tgt_par_sent_words, threshold)
+    def align(
+        self, 
+        source: str,
+        target: str,
+        src_lang: str,
+        tgt_lang: str,
+        segmenter: Segmenter,
+        threshold: float=0.5,
+    ) -> AlignmentData:
+        """
+        
+        
+        Args:
+        
+        
+        Returns:
+        
+        """
+        return self.binaryalign.align_text_pair(source, target, src_lang, tgt_lang, segmenter, threshold)

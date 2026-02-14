@@ -4,14 +4,18 @@ import { cn } from "@/lib/utils";
 import { PronounceButton } from "./Pronounce/PronounceButton";
 
 export type DefineEntry = {
-  word: string;
-  sentence: string;
-  paragraph: string;
+  form: string;
+  posForm: string;
+  ipaForm: string;
   lemma: string;
-  pos: string;
-  ipa_lemma: string;
-  ipa_form: string;
+  posLemma: string;
+  ipaLemma: string;
   gloss: string;
+
+  srcSent: string;
+  srcPar: string;
+  tgtSent: string;
+  tgtPar: string;
 };
 
 export function DefineCard({
@@ -23,7 +27,7 @@ export function DefineCard({
   tgtLang: string;
   className?: string;
 }) {
-  const wordIsLemma = (data.word === data.lemma);
+  const wordIsLemma = (data.form === data.lemma);
 
   return (
     <div className={cn("space-y-3", className)}>
@@ -35,22 +39,22 @@ export function DefineCard({
           {/* Word + Part of Speech */}
           <div className="flex items-center gap-2">
             {/* Clicked word */}
-            <div className="font-reading text-2xl font-bold">{data.word}</div>
+            <div className="font-reading text-2xl font-bold">{data.form}</div>
             {/* Part of Speech */}
-            {data.pos && (
+            {data.posForm && (
               <Badge 
                 variant="secondary" 
                 className="h-6 inline-flex text-md font-reading border border-border">
-                  {data.pos}
+                  {data.posForm}
               </Badge>
             )}
           </div>
 
           {/* IPA Pronunciation */}
-          {data.ipa_form && (
+          {data.ipaForm && (
             <PronounceButton
-              text={data.word}
-              label={data.ipa_form}
+              text={data.form}
+              label={data.ipaForm}
               tgtLang={tgtLang} 
               className="h-8 text-md"
               iconClassName="h-3 w-3"
@@ -95,20 +99,20 @@ export function DefineCard({
                 {/* Lemma */}
                 <div className="text-md font-reading font-semibold text-muted-foreground">{data.lemma}</div>
                 {/* Part of Speech */}
-                {data.pos && (
+                {data.posLemma && (
                   <Badge 
                     variant="secondary" 
                     className="h-6 inline-flex text-sm font-reading border border-border">
-                      {data.pos}
+                      {data.posLemma}
                   </Badge>
                 )}
               </div>
 
               {/* IPA */}
-              {data.ipa_lemma && (
+              {data.ipaLemma && (
                 <PronounceButton
                   text={data.lemma}
-                  label={data.ipa_lemma}
+                  label={data.ipaLemma}
                   tgtLang={tgtLang} 
                   className="h-8 text-sm"
                   iconClassName="h-3 w-3"
