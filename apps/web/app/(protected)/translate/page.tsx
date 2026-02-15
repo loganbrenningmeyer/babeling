@@ -95,7 +95,7 @@ function TranslatePage() {
   const [translationLoading, setTranslationLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
   const [showAligned, setShowAligned] = useState(false);
-  // Blurred Source
+  // Blurred source
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
   const [sourceBlurEnabled, setSourceBlurEnabled] = useState(false);

@@ -7,6 +7,7 @@ from api.routes import (
     annotate,
     auth,
     documents,
+    library,
     pronounce,
     translate,
 )
@@ -31,6 +32,7 @@ app.add_middleware(
 app.include_router(align.router)
 app.include_router(annotate.router)
 app.include_router(auth.router)
+app.include_router(library.router)
 app.include_router(pronounce.router)
 app.include_router(documents.router)
 app.include_router(translate.router)

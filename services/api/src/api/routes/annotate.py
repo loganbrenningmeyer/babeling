@@ -13,7 +13,6 @@ from api.services.gemini import get_gemini
 
 router = APIRouter(prefix="/annotate", tags=["annotate"])
 
-
 @router.post("")
 def annotate(req: AnnotateRequest):
     # -------------------------
