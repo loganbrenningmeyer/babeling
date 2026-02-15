@@ -72,15 +72,20 @@ def annotate(req: AnnotateRequest):
 
     return AnnotateResponse(
         definition=AnnotateDefinitionData(
+            # -- Form: Clicked word
             form=definition_data["form"],
             pos_form=definition_data["pos_form"],
             ipa_form=definition_data["ipa_form"],
+            # -- Lemma
             lemma=definition_data["lemma"],
             pos_lemma=definition_data["pos_lemma"],
             ipa_lemma=definition_data["ipa_lemma"],
+            # -- Gloss: Definition
             gloss=definition_data["gloss"],
+            # -- Source Context
             src_sentence=src_sentence,
             src_paragraph=src_paragraph,
+            # -- Target Context
             tgt_sentence=tgt_sentence,
             tgt_paragraph=tgt_paragraph,
         ),

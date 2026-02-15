@@ -25,6 +25,6 @@ export async function POST(req: Request) {
     headers: {
       "Content-Type": "audio/wav",
       "Cache-Control": "no-store",
-    }
+    },
   });
 }

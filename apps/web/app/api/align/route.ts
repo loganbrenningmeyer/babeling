@@ -1,24 +1,25 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-    const { source, target, src_lang, tgt_lang } = await req.json();
+  const { source, target, src_lang, tgt_lang } = await req.json();
 
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
-    const res = await fetch(`${API_BASE_URL}/align`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-            source,
-            target,
-            src_lang,
-            tgt_lang,
-         }),
-    });
+  const res = await fetch(`${API_BASE_URL}/align`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      source,
+      target,
+      src_lang,
+      tgt_lang,
+    }),
+  });
 
-    const data = await res.json();
+  const data = await res.json();
 
-    return NextResponse.json({
+  return NextResponse.json(
+    {
       src: {
         words: data.src.words,
         spaces: data.src.spaces,
@@ -43,5 +44,7 @@ export async function POST(req: Request) {
         srcToTgt: data.align.src_to_tgt,
         tgtToSrc: data.align.tgt_to_src,
       },
-    });
+    },
+    { status: res.status }
+  );
 }

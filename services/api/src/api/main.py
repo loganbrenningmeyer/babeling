@@ -6,8 +6,8 @@ from api.routes import (
     align,
     annotate,
     auth,
+    documents,
     pronounce,
-    split_pages,
     translate,
 )
 
@@ -32,5 +32,5 @@ app.include_router(align.router)
 app.include_router(annotate.router)
 app.include_router(auth.router)
 app.include_router(pronounce.router)
-app.include_router(split_pages.router)
+app.include_router(documents.router)
 app.include_router(translate.router)

@@ -70,10 +70,24 @@ function TranslatePage() {
   const [explainData, setExplainData] = useState<ExplainEntry | null>(null);
   const [defineData, setDefineData] = useState<DefineEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+
   // Cache translated / aligned pages
   const [pages, setPages] = useState<string[]>([]);
   const [pageId, setPageId] = useState<number>(0);
   const pageCache = useRef<Map<number, Session>>(new Map());
+  
+  // -------------------------
+  // Database Information
+  // -------------------------
+  // Documents / DocumentPages
+  type SavedPage = {
+    id: number;
+    page_number: number;
+    source_text: string;
+  }
+
+  const [documentId, setDocumentId] = useState<number | null>(null);
+  const [pageDbIds, setPageDbIds] = useState<number[]>([]);
 
   // -------------------------
   // UI state
@@ -141,21 +155,26 @@ function TranslatePage() {
   async function startReadingSession() {
     if (!sourceText.trim() && !sourceFile) return;
 
-    const fullText = sourceFile ? await sourceFile.text() : sourceText;
+    const text = sourceFile ? await sourceFile.text() : sourceText;
 
-    // Split full text into pages
-    const pages_res = await fetch("/api/split_pages", {
+    // Split full text into pages / save to database
+    const res = await fetch("/api/documents", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         src_lang: srcLang,
         tgt_lang: tgtLang,
-        text: fullText 
+        text: text,
       }),
     });
-    const pages_data = await pages_res.json();
-    const newPages = pages_data.pages;
-    setPages(pages_data.pages)
+    const documentData = await res.json();
+
+    const savedPages: SavedPage[] = documentData.pages ?? [];
+    setDocumentId(documentData.document_id ?? []);
+    setPageDbIds(savedPages.map((p) => p.id));
+
+    const newPages = savedPages.map((p) => p.source_text);
+    setPages(newPages)
     setPageId(0);
 
     // Reset session state

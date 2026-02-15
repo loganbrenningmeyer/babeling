@@ -51,5 +51,5 @@ export async function POST(req: Request) {
       explanation: res_data.usage.explanation,
       examples: res_data.usage.examples,
     },
-  });
+  }, { status: res.status });
 }

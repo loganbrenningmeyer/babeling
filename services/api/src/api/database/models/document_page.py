@@ -6,9 +6,13 @@ from api.database.db import Base
 
 class DocumentPage(Base):
     """
+    Document source text page information
+
+        id (BigInteger): App user ID
+        document_id (ForeignKey): Page origin document ID
+        page_number (int): 1-indexed page number in document
+        source_text (str): Page's raw text in source language
     
-    
-    Parameters:
     
     """
     __tablename__ = "document_pages"
