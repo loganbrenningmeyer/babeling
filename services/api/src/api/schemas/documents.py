@@ -5,6 +5,7 @@ from pydantic import BaseModel
 # /api/documents
 # -------------------------
 class DocumentRequest(BaseModel):
+    title: str
     src_lang: str
     tgt_lang: str
     text: str
@@ -12,7 +13,7 @@ class DocumentRequest(BaseModel):
 class DocumentPageOut(BaseModel):
     id: int
     page_number: int
-    source_text: str
+    src_text: str
 
 class DocumentResponse(BaseModel):
     document_id: int

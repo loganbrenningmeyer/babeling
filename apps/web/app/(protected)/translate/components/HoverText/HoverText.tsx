@@ -2,7 +2,7 @@ import React from "react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { BlurMode } from "@/app/components/SourceBlur/BlurModeToggle";
+import { BlurMode } from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
 import { buildClusters } from "./clusterText";
 
 type IdToWords = Record<number, number[]>;

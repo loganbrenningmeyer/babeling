@@ -14,11 +14,11 @@ class Document(Base):
     """
     __tablename__ = "documents"
     __table_args__ = (
-        UniqueConstraint("user_id", "source_text_hash", name="uq_documents_user_text_hash"),
+        UniqueConstraint("user_id", "src_text_hash", name="uq_documents_user_text_hash"),
     )
 
     # -------------------------
-    # Document ID / App User ID
+    # Document ID / App User ID / Document Title
     # -------------------------
     id: Mapped[int] = mapped_column(
         BigInteger,
@@ -30,17 +30,26 @@ class Document(Base):
         index=True, 
         nullable=False,
     )
+    title: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+        server_default="'Untitled document'",
+    )
 
     # -------------------------
-    # Raw Source Text / Hash
+    # Raw Source Text / Hash / Source Language
     # -------------------------
-    source_text: Mapped[str] = mapped_column(
+    src_text: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )
-    source_text_hash: Mapped[str] = mapped_column(
+    src_text_hash: Mapped[str] = mapped_column(
         String(64),
         index=True,
+        nullable=False,
+    )
+    src_lang: Mapped[str] = mapped_column(
+        Text,
         nullable=False,
     )
 

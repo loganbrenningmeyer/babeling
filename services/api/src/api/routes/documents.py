@@ -63,7 +63,7 @@ def split_and_save(
     existing = db.execute(
         select(Document).where(
             Document.user_id == user.id,
-            Document.source_text_hash == text_hash,
+            Document.src_text_hash == text_hash,
         )
     ).scalar_one_or_none()
 
@@ -83,7 +83,7 @@ def split_and_save(
                 DocumentPageOut(
                     id=p.id,
                     page_number=p.page_number,
-                    source_text=p.source_text,
+                    src_text=p.src_text,
                 )
                 for p in existing_pages
             ]
@@ -102,8 +102,10 @@ def split_and_save(
             # -------------------------
             doc = Document(
                 user_id=user.id,
-                source_text=req.text,
-                source_text_hash=text_hash,
+                title=req.title,
+                src_text=req.text,
+                src_text_hash=text_hash,
+                src_lang=req.src_lang,
             )
             db.add(doc)
             db.flush()
@@ -117,7 +119,7 @@ def split_and_save(
                 row = DocumentPage(
                     document_id=doc.id,
                     page_number=i + 1,      # 1-indexed page number
-                    source_text=page,
+                    src_text=page,
                 )
                 page_rows.append(row)
 
@@ -135,7 +137,7 @@ def split_and_save(
             DocumentPageOut(
                 id=p.id,
                 page_number=p.page_number,
-                source_text=p.source_text,
+                src_text=p.src_text,
             )
             for p in page_rows
         ]

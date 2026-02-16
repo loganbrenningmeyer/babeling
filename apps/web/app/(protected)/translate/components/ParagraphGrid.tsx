@@ -3,8 +3,8 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
-import { HoverText } from "./HoverText/HoverText";
-import type { BlurMode } from "./SourceBlur/BlurModeToggle";
+import { HoverText } from "@/app/(protected)/translate/components/HoverText/HoverText";
+import type { BlurMode } from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
 import type { Session } from "@/types/session";
 
 type ParagraphGridProps = {

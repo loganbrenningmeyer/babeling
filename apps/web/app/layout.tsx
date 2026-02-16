@@ -1,8 +1,11 @@
 import "./globals.css";
-import { ClerkProvider, SignedIn, SignedOut, SignInButton, UserButton } from "@clerk/nextjs";
-import { Button } from "@/components/ui/button";
+import { ClerkProvider } from "@clerk/nextjs";
+import { UserMenu } from "@/components/UserMenu";
+
 import { Languages } from "lucide-react";
+import { Library } from "lucide-react";
 import { Manrope } from "next/font/google";
+
 import Link from "next/link";
 import localFont from "next/font/local";
 
@@ -48,7 +51,9 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${readingLocal.variable} ${ui.variable}`}>
       <body className="font-ui min-h-screen bg-zinc-50 text-zinc-900 antialiased">
-        <ClerkProvider>
+        <ClerkProvider
+          afterSignOutUrl="/"
+        >
           {/* -------------------------
           //* Nav Bar
           //* ------------------------- */}
@@ -65,48 +70,51 @@ export default function RootLayout({
               //* Home / Translate
               //* ------------------------- */}
               <div className="hidden items-center gap-2 text-sm sm:flex">
-                <Link
-                  className="rounded-md px-3 py-2 font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                  href="/"
-                >
-                  Home
-                </Link>
+                <div className="flex items-center justify-between">
+                  <Link
+                    className="
+                      group 
+                      inline-flex items-center gap-2
+                      rounded-md px-3 py-2
+                      font-medium text-zinc-600 
+                      transition-colors hover:bg-zinc-100 hover:text-zinc-900
+                    "
+                    href="/translate"
+                  >
+                    <span className="inline-flex items-center justify-center">
+                      <Languages className="size-4" />
+                    </span>
+                    Translate
+                  </Link>
+                </div>
                 
-                <Link
-                  className="rounded-md px-3 py-2 font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                  href="/translate"
-                >
-                  Translate
-                </Link>
-                
-                <Link
-                  className="rounded-md px-3 py-2 font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-                  href="/library"
-                >
-                  Library
-                </Link>
+                <div className="flex items-center justify-between">
+                  <Link
+                    className="
+                      group 
+                      inline-flex items-center gap-2
+                      rounded-md px-3 py-2
+                      font-medium text-zinc-600 
+                      transition-colors hover:bg-zinc-100 hover:text-zinc-900
+                    "
+                    href="/library"
+                  >
+                    <span className="inline-flex items-center justify-center">
+                      <Library className="size-4" />
+                    </span>
+                    Library
+                  </Link>
+                </div>
               </div>
 
               {/* -------------------------
               //* Sign-in / Sign-up / User Account
               //* ------------------------- */}
-              <div className="flex items-center gap-3">
-                <SignedOut>
-                  <SignInButton mode="modal">
-                    <Button size="sm" className="h-9 px-4">
-                      Sign In
-                    </Button>
-                  </SignInButton>
-                </SignedOut>
-
-                <SignedIn>
-                  <UserButton afterSignOutUrl="/" />
-                </SignedIn>
-              </div>
+              <UserMenu />
             </div>
           </nav>
 
-          <main className="w-full py-10 md:py-12">{children}</main>
+          <main className="w-full h-full">{children}</main>
         </ClerkProvider>
       </body>
     </html>

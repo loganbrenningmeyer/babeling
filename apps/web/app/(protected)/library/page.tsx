@@ -12,9 +12,10 @@ import type { LibraryDocument } from "@/types/library";
 // UI Components
 // -------------------------
 import { Pane } from "@/app/components/Pane";
-import { DocumentCard } from "@/app/components/Library/DocumentCard";
+import { LibrarySkeleton } from "@/app/(protected)/library/components/LibrarySkeleton";
+import { LibraryDataTable } from "@/app/(protected)/library/components/LibraryDataTable";
 
-export default function Library() {
+export default function LibraryTable() {
   // -------------------------
   // Load user information
   // -------------------------
@@ -47,31 +48,45 @@ export default function Library() {
     }
   }, []);
 
+  // -------------------------
+  // Refresh user library on new user
+  // -------------------------
   useEffect(() => {
     if (!user) return;
     loadUserLibrary();
   }, [user, loadUserLibrary]);
 
-  if (userLoading || loading) return <div className="px-12">Loading...</div>;
-  if (userError || error)
+  // -------------------------
+  // Library Loading Skeleton
+  // -------------------------
+  if (userLoading || loading) {
+    return (
+      <div className="w-full">
+        <Pane
+          title="Library"
+          className="min-h-[80vh]"
+          contentClassName="gap-4"
+        >
+          <LibrarySkeleton />
+        </Pane>
+      </div>
+    );
+  }
+
+  if (userError || error) {
     return <div className="px-12">Error: {userError ?? error}</div>;
+  }
 
   return (
-    <div className="w-full px-12">
-      <Pane title="Library" className="min-h-[80vh]" contentClassName="gap-4">
-        {docs.length === 0 ? (
-          <div className="rounded-xl border border-dashed bg-muted/40 p-8 text-sm text-muted-foreground">
-            No documents yet. Start a reading session to save your first
-            document.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-            {docs.map((doc) => (
-              <DocumentCard key={doc.id} doc={doc} />
-            ))}
-          </div>
-        )}
-      </Pane>
+    <div className="p-4">
+      {docs.length === 0 ? (
+        <div className="rounded-xl border border-dashed bg-muted/40 p-8 text-sm text-muted-foreground">
+          No documents yet. Start a reading session to save your first
+          document.
+        </div>
+      ) : (
+        <LibraryDataTable docs={docs} />
+      )}
     </div>
   );
 }

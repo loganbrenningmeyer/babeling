@@ -8,6 +8,7 @@ from api.routes import (
     auth,
     documents,
     library,
+    page_translations,
     pronounce,
     translate,
 )
@@ -33,6 +34,7 @@ app.include_router(align.router)
 app.include_router(annotate.router)
 app.include_router(auth.router)
 app.include_router(library.router)
+app.include_router(page_translations.router)
 app.include_router(pronounce.router)
 app.include_router(documents.router)
 app.include_router(translate.router)

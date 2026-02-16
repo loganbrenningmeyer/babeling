@@ -1,1 +1,1 @@
-from . import align, annotate, auth, documents, library, pronounce, translate
+from . import align, annotate, auth, documents, library, page_translations, pronounce, translate

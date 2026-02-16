@@ -11,7 +11,7 @@ class DocumentPage(Base):
         id (BigInteger): App user ID
         document_id (ForeignKey): Page origin document ID
         page_number (int): 1-indexed page number in document
-        source_text (str): Page's raw text in source language
+        src_text (str): Page's raw text in source language
     
     
     """
@@ -39,7 +39,7 @@ class DocumentPage(Base):
     # -------------------------
     # Page Source Text
     # -------------------------
-    source_text: Mapped[str] = mapped_column(
+    src_text: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )

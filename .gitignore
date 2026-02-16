@@ -10,3 +10,5 @@ Icon?
 .vscode/
 *.sqlite*
 testing/
+# React Component Preview
+previewConfig.json

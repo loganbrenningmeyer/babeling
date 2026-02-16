@@ -21,7 +21,7 @@ export async function POST(req: Request) {
   // -------------------------
   // Split document pages / save to database
   // -------------------------
-  const { src_lang, tgt_lang, text } = await req.json();
+  const { title, src_lang, tgt_lang, text } = await req.json();
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -32,6 +32,7 @@ export async function POST(req: Request) {
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({
+      title,
       src_lang,
       tgt_lang,
       text,
