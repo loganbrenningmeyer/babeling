@@ -856,7 +856,7 @@ function TranslatePage() {
           {/* -------------------------
           //* Source / Target HoverText
           //* ------------------------- */}
-          <div>
+          <Pane>
             <div className="flex-1 min-h-0">
               {/* -------------------------
               //* --------- [Title] ----------
@@ -1064,7 +1064,7 @@ function TranslatePage() {
                 </div>
               )}
             </AnchoredPopover>
-          </div>
+          </Pane>
         </>
       )}
     </div>
