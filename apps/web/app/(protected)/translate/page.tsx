@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeftRight, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
 
 // -------------------------
 // User information provider
@@ -110,7 +110,7 @@ function TranslatePage() {
   // Blurred source
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
-  const [sourceBlurEnabled, setSourceBlurEnabled] = useState(false);
+  const [sourceBlurEnabled, setSourceBlurEnabled] = useState(true);
   const emptyBlurredSource = useRef<Set<number>>(new Set());
   const noopSetBlurredSource = (_: Set<number> | ((prev: Set<number>) => Set<number>)) => {};
   // Lock target/source when Popover is showing
@@ -132,6 +132,7 @@ function TranslatePage() {
   const [hoveredTargetIndex, setHoveredTargetIndex] = useState<number | null>(
     null
   );
+  const [isBookmarked, setIsBookmarked] = useState(false);
 
   // -------------------------
   // Input files state
@@ -421,6 +422,7 @@ function TranslatePage() {
     if (!session) return;
     if (targetLocked) return;
     setTargetLocked(true);
+    setIsBookmarked(false);
 
     // -------------------------
     // Unblur aligned English words
@@ -961,7 +963,7 @@ function TranslatePage() {
                       border-b 
                       font-reading font-normal
                       uppercase tracking-[0.12em] leading-none
-                      text-[22px] text-muted-foreground 
+                      text-[28px] text-muted-foreground 
                       ">
                     {title}
                   </div>
@@ -971,7 +973,7 @@ function TranslatePage() {
                     {/* -------------------------
                     //* Source / Target Headers
                     //* ------------------------- */}
-                    <div className="grid grid-cols-2 text-[18px] font-medium">
+                    <div className="grid grid-cols-2 text-[20px] font-medium">
                       {/* Source Header */}
                       <div className="px-6 relative">
                         <div className="pt-4">
@@ -1034,7 +1036,7 @@ function TranslatePage() {
                         onTargetHover={handleTargetHover}
                         onTargetWordClick={handleTargetWordClick}
                         targetDisabled={popoverOpen}
-                        className="text-[20px] leading-[1.5]"
+                        className="text-[28px] leading-[1.5]"
                         />
                       )}
                     </div>
@@ -1119,15 +1121,33 @@ function TranslatePage() {
                   setLockedSourceIndices([]);
                   setHoveredTargetIndex(null);
                   setHoveredSourceIndex(null);
+                  setIsBookmarked(false);
                 }
               }}
               anchorEl={anchorEl}
-              className="w-[min(520px,92vw)]"
+              className="w-[min(520px,92vw)] overflow-visible"
               >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
-                <div className="p-4 space-y-4 font-ui">
+                <div className="relative p-4 space-y-4 font-ui">
+                  {/* Bookmark Glossary Item */}
+                  <button
+                    type="button"
+                    className="
+                      absolute -top-1.5 right-6 z-10
+                      p-0 text-muted-foreground transition-colors
+                      hover:text-foreground
+                      focus-visible:outline-none
+                    "
+                    aria-label="Save definition"
+                    title="Save definition"
+                    onClick={() => setIsBookmarked((prev) => !prev)}
+                  >
+                    <Bookmark
+                      className={`size-8 ${isBookmarked ? "fill-current text-foreground" : "fill-background text-muted-foreground"}`}
+                    />
+                  </button>
                   {/* Definition */}
                   {defineData && <DefineCard data={defineData} tgtLang={tgtLang} />}
                   <div className="h-px bg-border" />

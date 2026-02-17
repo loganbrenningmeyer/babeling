@@ -58,7 +58,7 @@ export default function RootLayout({
           //* Nav Bar
           //* ------------------------- */}
           <nav className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70">
-            <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4">
+            <div className="relative mx-auto flex h-16 max-w-6xl items-center px-4">
               <Link className="group inline-flex items-center gap-2.5" href="/">
                 <span className="inline-flex size-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
                   <Languages className="size-4" />
@@ -69,48 +69,45 @@ export default function RootLayout({
               {/* -------------------------
               //* Home / Translate
               //* ------------------------- */}
-              <div className="hidden items-center gap-2 text-sm sm:flex">
-                <div className="flex items-center justify-between">
-                  <Link
-                    className="
-                      group 
-                      inline-flex items-center gap-2
-                      rounded-md px-3 py-2
-                      font-medium text-zinc-600 
-                      transition-colors hover:bg-zinc-100 hover:text-zinc-900
-                    "
-                    href="/translate"
-                  >
-                    <span className="inline-flex items-center justify-center">
-                      <Languages className="size-4" />
-                    </span>
-                    Translate
-                  </Link>
-                </div>
-                
-                <div className="flex items-center justify-between">
-                  <Link
-                    className="
-                      group 
-                      inline-flex items-center gap-2
-                      rounded-md px-3 py-2
-                      font-medium text-zinc-600 
-                      transition-colors hover:bg-zinc-100 hover:text-zinc-900
-                    "
-                    href="/library"
-                  >
-                    <span className="inline-flex items-center justify-center">
-                      <Library className="size-4" />
-                    </span>
-                    Library
-                  </Link>
-                </div>
+              <div className="absolute left-1/2 hidden -translate-x-1/2 items-center gap-2 text-sm sm:flex">
+                <Link
+                  className="
+                    group 
+                    inline-flex items-center gap-2
+                    rounded-md px-3 py-2
+                    font-medium text-zinc-600 
+                    transition-colors hover:bg-zinc-100 hover:text-zinc-900
+                  "
+                  href="/translate"
+                >
+                  <span className="inline-flex items-center justify-center">
+                    <Languages className="size-4" />
+                  </span>
+                  Translate
+                </Link>
+                <Link
+                  className="
+                    group 
+                    inline-flex items-center gap-2
+                    rounded-md px-3 py-2
+                    font-medium text-zinc-600 
+                    transition-colors hover:bg-zinc-100 hover:text-zinc-900
+                  "
+                  href="/library"
+                >
+                  <span className="inline-flex items-center justify-center">
+                    <Library className="size-4" />
+                  </span>
+                  Library
+                </Link>
               </div>
 
               {/* -------------------------
               //* Sign-in / Sign-up / User Account
               //* ------------------------- */}
-              <UserMenu />
+              <div className="ml-auto">
+                <UserMenu />
+              </div>
             </div>
           </nav>
 

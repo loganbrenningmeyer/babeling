@@ -19,7 +19,7 @@ export function SourceBlurButton({
         variant="secondary"
         className={`
           h-8 rounded-full px-3 gap-2
-          text-[11px] font-semibold tracking-wide
+          text-[14px] font-semibold tracking-wide
           border shadow-sm transition-colors
           ${
             value

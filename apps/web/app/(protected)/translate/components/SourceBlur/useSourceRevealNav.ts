@@ -82,6 +82,12 @@ export function useSourceRevealNav(args: {
     return idxs.every((i) => !blurredSource.has(i));
   }, [session, blurredSource]);
 
+  const isParagraphPartiallyOrFullyRevealed = React.useCallback((parId: number) => {
+    if (!session) return false;
+    const idxs = session.src.parToWordIds[parId] ?? [];
+    return idxs.some((i) => !blurredSource.has(i));
+  }, [session, blurredSource]);
+
   const getLastSentInPar = React.useCallback((parId: number) => {
     if (!session) return 0;
     const sents = session.src.parToSentIds[parId] ?? [];
@@ -115,10 +121,10 @@ export function useSourceRevealNav(args: {
 
   const findLastRevealedParagraphBefore = React.useCallback((start: number) => {
     for (let p = Math.min(start, getMaxParId()); p >= 0; p--) {
-      if (isParagraphFullyRevealed(p)) return p;
+      if (isParagraphPartiallyOrFullyRevealed(p)) return p;
     }
     return null;
-  }, [getMaxParId, isParagraphFullyRevealed]);
+  }, [getMaxParId, isParagraphPartiallyOrFullyRevealed]);
 
   const findLastRevealedParagraph = React.useCallback(() => {
     return findLastRevealedParagraphBefore(getMaxParId());
