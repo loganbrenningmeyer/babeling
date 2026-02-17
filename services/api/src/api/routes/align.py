@@ -29,7 +29,9 @@ def align(req: AlignRequest) -> AlignResponse:
     # Load Aligner / Segmenter
     # -------------------------
     aligner = get_aligner()
-    segmenter = get_segmenter(req.src_lang, req.tgt_lang)
+
+    src_segmenter = get_segmenter(req.src_lang)
+    tgt_segmenter = get_segmenter(req.tgt_lang)
 
     # -------------------------
     # Align all corresponding source / target sentences
@@ -37,9 +39,8 @@ def align(req: AlignRequest) -> AlignResponse:
     res: AlignmentData = aligner.align(
         source=req.source,
         target=req.target,
-        src_lang=req.src_lang,
-        tgt_lang=req.tgt_lang,
-        segmenter=segmenter,
+        src_segmenter=src_segmenter,
+        tgt_segmenter=tgt_segmenter,
         threshold=0.025,
     )
 

@@ -1,17 +1,17 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select
-from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
-from api.database.db import get_db
 from api.auth.users import get_current_app_user
+from api.database.db import get_db
 from api.database.models import AppUser, Document, DocumentPage, PageTranslation
 from api.schemas.page_translations import (
+    LoadPageTranslationRequest,
+    SavePageTranslationRequest,
     PageTranslationOut,
-    PageTranslationRequest,
     PageTranslationResponse,
 )
-
 
 router = APIRouter(prefix="/page_translations", tags=["page_translations"])
 
@@ -50,11 +50,11 @@ def _assert_page_access(
 
 
 # -------------------------
-# /api/page_translations
-# -- Load page translation for source/target language pair
+# GET: /api/page_translations
+# -- Load saved page translation
 # -------------------------
 @router.get("")
-def get_page_translation(
+def load_page_translation(
     document_page_id: int = Query(...),
     src_lang: str = Query(...),
     tgt_lang: str = Query(...),
@@ -63,6 +63,9 @@ def get_page_translation(
 ) -> PageTranslationResponse:
     _assert_page_access(db, user, document_page_id)
 
+    # -------------------------
+    # Fetch page translation from database
+    # -------------------------
     row = db.execute(
         select(PageTranslation)
         .where(
@@ -71,26 +74,27 @@ def get_page_translation(
             PageTranslation.tgt_lang == tgt_lang,
         )
         .order_by(PageTranslation.id.desc())
-    ).scalars().first()
+    ).scalars().first()    
 
-    if row is None:
-        return PageTranslationResponse(page_translation=None)
-
-    return PageTranslationResponse(page_translation=_serialize_page_translation(row))
-
+    return PageTranslationResponse(
+        page_translation=_serialize_page_translation(row) if row else None
+    )
 
 # -------------------------
-# /api/page_translations
+# POST: /api/page_translations
 # -- Save page translation for source/target language pair
 # -------------------------
 @router.post("")
-def upsert_page_translation(
-    req: PageTranslationRequest,
+def save_page_translation(
+    req: SavePageTranslationRequest,
     db: Session = Depends(get_db),
     user: AppUser = Depends(get_current_app_user),
 ) -> PageTranslationResponse:
     _assert_page_access(db, user, req.document_page_id)
 
+    # -------------------------
+    # Check if page translation exists
+    # -------------------------
     row = db.execute(
         select(PageTranslation)
         .where(
@@ -102,6 +106,9 @@ def upsert_page_translation(
     ).scalars().first()
 
     try:
+        # -------------------------
+        # Save new page translation
+        # -------------------------
         if row is None:
             row = PageTranslation(
                 document_page_id=req.document_page_id,
@@ -112,13 +119,16 @@ def upsert_page_translation(
             )
             db.add(row)
             db.flush()
-        else:
-            row.translated_text = req.translated_text
-            row.alignment_data = req.alignment_data
-            db.flush()
+            db.commit()
+            db.refresh(row)
 
-        db.commit()
-        db.refresh(row)
+            return PageTranslationResponse(page_translation=_serialize_page_translation(row))
+        
+        # -------------------------
+        # Return existing page translation
+        # -------------------------
+        else:
+            return PageTranslationResponse(page_translation=_serialize_page_translation(row))
 
     except SQLAlchemyError as e:
         db.rollback()
@@ -127,4 +137,4 @@ def upsert_page_translation(
             detail=f"Failed to save page translation: {str(e)}",
         )
 
-    return PageTranslationResponse(page_translation=_serialize_page_translation(row))
+    

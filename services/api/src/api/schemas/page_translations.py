@@ -1,7 +1,13 @@
 from pydantic import BaseModel
 
 
-class PageTranslationRequest(BaseModel):
+class LoadPageTranslationRequest(BaseModel):
+    document_page_id: int
+    src_lang: str
+    tgt_lang: str    
+
+
+class SavePageTranslationRequest(BaseModel):
     document_page_id: int
     src_lang: str
     tgt_lang: str

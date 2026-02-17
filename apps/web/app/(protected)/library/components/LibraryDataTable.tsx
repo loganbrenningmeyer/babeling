@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { Fragment, useMemo, useState } from "react";
 import { ArrowUpDown } from "lucide-react";
 
@@ -24,7 +25,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
 
 // -------------------------
 // Library Sorting
@@ -69,11 +69,26 @@ function getPreview(text: string) {
 
 
 export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
+  // -------------------------
+  // API Router Usage
+  // -------------------------
+  const router = useRouter();
+
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [groupByLanguage, setGroupByLanguage] = useState(false);
 
+  // -------------------------
+  // Open saved Document on click
+  // -------------------------
+  function openDocument(documentId: number) {
+    router.push(`/translate?documentId=${documentId}`);
+  }
+
+  // -------------------------
+  // Toggle table sorting direction
+  // -------------------------
   function toggleSort(nextKey: SortKey) {
     if (sortKey === nextKey) {
       setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
@@ -143,7 +158,19 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
       LANG_BADGE_COLOR_BY_CODE[doc.src_lang] ?? "bg-muted text-muted-foreground";
 
     return (
-      <TableRow key={doc.id}>
+      <TableRow
+        key={doc.id}
+        role="button"
+        tabIndex={0}
+        className="cursor-pointer"
+        onClick={() => openDocument(doc.id)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            openDocument(doc.id);
+          }
+        }}
+      >
         <TableCell className="max-w-[16rem] whitespace-normal font-medium">
           {doc.title}
         </TableCell>
@@ -271,7 +298,8 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
             ) : groupByLanguage ? (
               groupedDocs.map(([srcLang, rows]) => (
                 <Fragment key={srcLang}>
-                  <TableRow className="bg-muted/30 hover:bg-muted/30">
+                  <TableRow 
+                    className="bg-muted/30 hover:bg-muted/30">
                     <TableCell colSpan={4} className="font-semibold">
                       {getLangLabel(srcLang)} ({rows.length})
                     </TableCell>

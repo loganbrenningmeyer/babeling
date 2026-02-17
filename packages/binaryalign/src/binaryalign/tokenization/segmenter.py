@@ -12,29 +12,22 @@ NLP_LANGS = {
 
 
 class Segmenter:
-    def __init__(self, src_lang: str, tgt_lang: str):
-        self.src_lang = src_lang
-        self.tgt_lang = tgt_lang
+    def __init__(self, lang: str):
+        # -------------------------
+        # Load spaCy NLP model
+        # -------------------------
+        self.nlp = spacy.load(NLP_LANGS[lang], exclude=["parser"])
+        self.nlp.enable_pipe("senter")
 
-        src_nlp = spacy.load(NLP_LANGS[src_lang], exclude=["parser"])
-        tgt_nlp = spacy.load(NLP_LANGS[tgt_lang], exclude=["parser"])
-        src_nlp.enable_pipe("senter")
-        tgt_nlp.enable_pipe("senter")
-
-        self.nlp = {
-            src_lang: src_nlp,
-            tgt_lang: tgt_nlp,
-        }
-
-    def split_words(self, text: str, lang: str) -> list[str]:
+    def split_words(self, text: str) -> list[str]:
         """ """
         # -- Break sentences into words
-        words = [t.text for t in self.nlp[lang](text)]
+        words = [t.text for t in self.nlp(text)]
         return words
 
-    def split_sents(self, text: str, lang: str) -> list[str]:
+    def split_sents(self, text: str) -> list[str]:
         """ """
-        doc = self.nlp[lang](text)
+        doc = self.nlp(text)
         sents = [s.text.strip() for s in doc.sents if s.text.strip()]
         return sents
     
@@ -170,7 +163,7 @@ class Segmenter:
 
         return par_sents
     
-    def split_par_sent_words(self, text: str, lang: str) -> list[list[list[str]]]:
+    def split_par_sent_words(self, text: str) -> list[list[list[str]]]:
         """ """
         par_sents = self.split_par_sents(text)
 
@@ -180,7 +173,7 @@ class Segmenter:
             # -- Split each sentence into words
             sent_words = []
             for sent in par:
-                words = self.split_words(sent, lang)
+                words = self.split_words(sent)
                 sent_words.append(words)
             # -- Store all split sentences in paragraph
             par_sent_words.append(sent_words)

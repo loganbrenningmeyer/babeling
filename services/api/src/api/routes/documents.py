@@ -12,7 +12,8 @@ from api.schemas.documents import (
     DocumentRequest,
     DocumentResponse,
     DocumentPageOut,
-    DocumentSplitResponse
+    DocumentSplitResponse,
+    DocumentLoadResponse,
 )
 
 
@@ -52,7 +53,7 @@ def split_and_save(
 ) -> DocumentResponse:
     """ """
     # -- Load Segmenter
-    segmenter = get_segmenter(req.src_lang, req.tgt_lang)
+    segmenter = get_segmenter(req.src_lang)
 
     # -------------------------
     # Normalize text / dedupe text by hash
@@ -141,4 +142,51 @@ def split_and_save(
             )
             for p in page_rows
         ]
+    )
+
+
+# -------------------------
+# /api/documents/[documentId]
+# -- Load a document and its translations
+# -------------------------
+@router.get("/{document_id}")
+def load_document(
+    document_id: int,
+    db: Session = Depends(get_db),
+    user: AppUser = Depends(get_current_app_user),
+) -> DocumentLoadResponse:
+    # -------------------------
+    # Get Document with matching ID from database
+    # -------------------------
+    doc = db.execute(
+        select(Document).where(
+            Document.id == document_id,
+            Document.user_id == user.id,
+        )
+    ).scalar_one_or_none()
+
+    if doc is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+    
+    # -------------------------
+    # Get DocumentPages
+    # -------------------------
+    pages = db.execute(
+        select(DocumentPage)
+        .where(DocumentPage.document_id == doc.id)
+        .order_by(DocumentPage.page_number.asc())
+    ).scalars().all()
+
+    return DocumentLoadResponse(
+        document_id=doc.id,
+        title=doc.title,
+        src_lang=doc.src_lang,
+        pages=[
+            DocumentPageOut(
+                id=p.id,
+                page_number=p.page_number,
+                src_text=p.src_text,
+            )
+            for p in pages
+        ],
     )

@@ -26,6 +26,7 @@ def get_current_clerk_user_id(authorization: str | None = Header(default=None)) 
             issuer=CLERK_ISSUER,
             audience=CLERK_AUDIENCE if CLERK_AUDIENCE else None,
             options={"require": ["exp", "iat", "iss", "sub"]},
+            leeway=60,
         )
     
     except Exception:

@@ -26,9 +26,8 @@ class Aligner:
         self, 
         source: str,
         target: str,
-        src_lang: str,
-        tgt_lang: str,
-        segmenter: Segmenter,
+        src_segmenter: Segmenter,
+        tgt_segmenter: Segmenter,
         threshold: float=0.5,
     ) -> AlignmentData:
         """
@@ -40,4 +39,10 @@ class Aligner:
         Returns:
         
         """
-        return self.binaryalign.align_text_pair(source, target, src_lang, tgt_lang, segmenter, threshold)
+        return self.binaryalign.align_text_pair(
+            source=source, 
+            target=target, 
+            src_segmenter=src_segmenter, 
+            tgt_segmenter=tgt_segmenter, 
+            threshold=threshold,
+        )

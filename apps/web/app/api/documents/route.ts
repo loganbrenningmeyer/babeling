@@ -1,29 +1,62 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getBackendToken, getApiBaseUrl } from "@/lib/sever-api";
 
+
+// -------------------------
+// GET: /api/documents/[documentId]
+// -- Load saved document
+// -------------------------
+export async function GET(req: Request) {
+  // -------------------------
+  // Get Clerk token / API url
+  // -------------------------
+  const authResult = await getBackendToken();
+  if ("error" in authResult) return authResult.error;
+
+  const baseUrlResult = getApiBaseUrl();
+  if ("error" in baseUrlResult) return baseUrlResult.error;
+
+  const { token } = authResult;
+  const { API_BASE_URL } = baseUrlResult;
+
+  // -------------------------
+  // Get saved Document by ID
+  // -------------------------
+  const url = new URL(req.url);
+  const documentId = url.searchParams.get("document_id");
+
+  const res = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+    method: "GET",
+    headers: { Authorization: `Bearer ${token}` },
+    cache: "no-store",
+  });
+
+  const data = await res.json();
+  
+  return NextResponse.json(data, { status: res.status }); 
+}
+
+// -------------------------
+// POST: /api/documents/
+// -- Save document to database
+// -------------------------
 export async function POST(req: Request) {
   // -------------------------
-  // Get Clerk user identification / token
+  // Get Clerk token / API url
   // -------------------------
-  const { userId, getToken } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authResult = await getBackendToken();
+  if ("error" in authResult) return authResult.error;
 
-  const token = await getToken({ template: "backend" });
-  if (!token) {
-    return NextResponse.json(
-      { error: "Missing backend token" },
-      { status: 401 }
-    );
-  }
+  const baseUrlResult = getApiBaseUrl();
+  if ("error" in baseUrlResult) return baseUrlResult.error;
+
+  const { token } = authResult;
+  const { API_BASE_URL } = baseUrlResult;
 
   // -------------------------
   // Split document pages / save to database
   // -------------------------
-  const { title, src_lang, tgt_lang, text } = await req.json();
-
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  const { title, src_lang, text } = await req.json();
 
   const res = await fetch(`${API_BASE_URL}/documents`, {
     method: "POST",
@@ -34,7 +67,6 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       title,
       src_lang,
-      tgt_lang,
       text,
     }),
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
@@ -14,6 +15,12 @@ import { useAppUser } from "@/components/AppUserProvider";
 // Translate Session information
 // -------------------------
 import type { Session } from "@/types/session";
+
+// -------------------------
+// API Calls
+// -------------------------
+import { getDocumentById } from "@/app/(protected)/translate/feature/api/documents";
+import { getPageTranslation, savePageTranslation } from "./feature/api/pageTranslations";
 
 // -------------------------
 // UI Components
@@ -40,6 +47,11 @@ import { PronounceButton } from "@/app/(protected)/translate/components/Pronounc
 // -------------------------
 import { SAMPLE_TEXTS_BY_LANG } from "./sampleTexts";
 import { LANGS, getLangLabel } from "@/types/langs";
+import type {
+  LoadedDocument,
+  SavedPage,
+  SavedPageTranslation,
+} from "@/app/(protected)/translate/feature/types";
 
 
 export default function Translate() {
@@ -55,6 +67,13 @@ export default function Translate() {
 
 
 function TranslatePage() {
+  // -------------------------
+  // Loading saved Documents
+  // -------------------------
+  const searchParams = useSearchParams();
+  const documentIdParam = searchParams.get("documentId");
+  const loadedDocumentIdRef = useRef<number | null>(null);
+
   // -------------------------
   // Core state
   // -------------------------
@@ -74,26 +93,6 @@ function TranslatePage() {
   // -------------------------
   // Database Information
   // -------------------------
-  // Documents / DocumentPages
-  type SavedPage = {
-    id: number;
-    page_number: number;
-    src_text: string;
-  }
-  type SavedPageTranslation = {
-    id: number;
-    document_page_id: number;
-    src_lang: string;
-    tgt_lang: string;
-    translated_text: string;
-    alignment_data: {
-      src: Session["src"];
-      tgt: Session["tgt"];
-      align: Session["align"];
-    };
-    created_at: string | null;
-  }
-
   const [documentId, setDocumentId] = useState<number | null>(null);
   const [pageDbIds, setPageDbIds] = useState<number[]>([]);
 
@@ -101,6 +100,7 @@ function TranslatePage() {
   // UI state
   // -------------------------
   const [translationLoading, setTranslationLoading] = useState(false);
+  const [documentLoading, setDocumentLoading] = useState(false);
   const [explanationLoading, setExplanationLoading] = useState(false);
   const [showAligned, setShowAligned] = useState(false);
   // Blurred source
@@ -172,7 +172,6 @@ function TranslatePage() {
       body: JSON.stringify({
         title: title,
         src_lang: srcLang,
-        tgt_lang: tgtLang,
         text: text,
       }),
     });
@@ -202,7 +201,7 @@ function TranslatePage() {
     setPopoverOpen(false);
 
     // Translate and align source text
-    await loadPageSession(0, newPages, newPageDbIds);
+    await loadPageSession(0, newPages, newPageDbIds, { srcLang, tgtLang });
   }
 
   function handleSwapLanguages() {
@@ -237,7 +236,12 @@ function TranslatePage() {
     }
   }
 
-  async function loadPageSession(pid: number, pagesArg?: string[], pageDbIdsArg?: number[]) {
+  async function loadPageSession(
+    pid: number,
+    pagesArg?: string[],
+    pageDbIdsArg?: number[],
+    langsArg?: { srcLang: string; tgtLang: string }
+  ) {
     // immediately reset UI state before loading cache
     setNavSentId(-1);
     setNavParId(-1);
@@ -250,6 +254,8 @@ function TranslatePage() {
     // Take optional pagesArg to avoid async race conditions setting pages
     const pagesLocal = pagesArg ?? pages;
     const pageDbIdsLocal = pageDbIdsArg ?? pageDbIds;
+    const srcLangLocal = langsArg?.srcLang ?? srcLang;
+    const tgtLangLocal = langsArg?.tgtLang ?? tgtLang;
 
     // Check cache for page ID
     const cachedSession = pageCache.current.get(pid);
@@ -273,20 +279,13 @@ function TranslatePage() {
     // -------------------------
     const pageDbId = pageDbIdsLocal[pid];
     if (pageDbId) {
-      const savedRes = await fetch("/api/page_translations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_page_id: pageDbId,
-          src_lang: srcLang,
-          tgt_lang: tgtLang,
-        }),
+      const savedPageTranslation = await getPageTranslation({
+        documentPageId: pageDbId,
+        srcLang: srcLangLocal,
+        tgtLang: tgtLangLocal,
       });
-      const savedData = await savedRes.json();
-      const savedPageTranslation: SavedPageTranslation | null =
-        savedData.page_translation ?? null;
 
-      if (savedRes.ok && savedPageTranslation) {
+      if (savedPageTranslation) {
         const sess: Session = {
           sourceText: pageText,
           targetText: savedPageTranslation.translated_text,
@@ -311,7 +310,7 @@ function TranslatePage() {
     }
     
     // Cache page's session
-    const sess = await translateAndAlign(pageText, pageDbId);
+    const sess = await translateAndAlign(pageText, pageDbId, srcLangLocal, tgtLangLocal);
     if (sess) {
       pageCache.current.set(pid, sess);
       setSession(sess);
@@ -321,16 +320,23 @@ function TranslatePage() {
 
   }
 
-  async function translateAndAlign(text: string, documentPageId?: number) {
+  async function translateAndAlign(
+    text: string,
+    documentPageId?: number,
+    srcLangArg?: string,
+    tgtLangArg?: string
+  ) {
     if (!text.trim()) return;
 
     setTranslationLoading(true);
+    const srcLangLocal = srcLangArg ?? srcLang;
+    const tgtLangLocal = tgtLangArg ?? tgtLang;
 
     // Translate
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: text, src_lang: srcLang, tgt_lang: tgtLang }),
+      body: JSON.stringify({ source: text, src_lang: srcLangLocal, tgt_lang: tgtLangLocal }),
     });
     const translate_data = await translate_res.json();
 
@@ -345,8 +351,8 @@ function TranslatePage() {
       body: JSON.stringify({
         source,
         target,
-        src_lang: srcLang,
-        tgt_lang: tgtLang,
+        src_lang: srcLangLocal,
+        tgt_lang: tgtLangLocal,
       }),
     });
     const align_data = await align_res.json();
@@ -390,20 +396,16 @@ function TranslatePage() {
     // Save translated page + alignment data
     // -------------------------
     if (documentPageId) {
-      await fetch("/api/page_translations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          document_page_id: documentPageId,
-          src_lang: srcLang,
-          tgt_lang: tgtLang,
-          translated_text: target,
-          alignment_data: {
-            src: sess.src,
-            tgt: sess.tgt,
-            align: sess.align,
-          },
-        }),
+      await savePageTranslation({
+        documentPageId: documentPageId,
+        srcLang: srcLangLocal,
+        tgtLang: tgtLangLocal,
+        translatedText: target,
+        alignmentData: {
+          src: sess.src,
+          tgt: sess.tgt,
+          align: sess.align,
+        }
       });
     }
 
@@ -559,6 +561,89 @@ function TranslatePage() {
     setSampleId("");
   }, [srcLang]);
 
+  // =========================================================================
+  // BIG CHANGE BLOCK: LOAD SAVED DOCUMENT FROM /translate?documentId=<id>
+  // =========================================================================
+  // This lets the library route to /translate with a documentId query param.
+  // When present, we:
+  // 1) fetch the saved document pages from /api/documents/[documentId]
+  // 2) hydrate translate page state
+  // 3) load the first page into the reader, including saved page translation
+  // =========================================================================
+  useEffect(() => {
+    if (!documentIdParam) return;
+    const parsedDocumentId = Number(documentIdParam);
+    if (!Number.isFinite(parsedDocumentId)) return;
+
+    if (loadedDocumentIdRef.current === parsedDocumentId) return;
+
+    let cancelled = false;
+
+    const loadSavedDocument = async () => {
+      setDocumentLoading(true);
+      try {
+        const data = await getDocumentById(parsedDocumentId);
+        if (cancelled) return;
+
+        const savedPages: SavedPage[] = data.pages ?? [];
+        const newPages = savedPages.map((p) => p.src_text);
+        const newPageDbIds = savedPages.map((p) => p.id);
+        const sourceTextFull = newPages.join("\n\n");
+
+        setDocumentId(data.document_id);
+        setTitle(data.title ?? "");
+        setSourceText(sourceTextFull);
+        setSourceFile(null);
+        setSampleId("");
+        setSrcLang(data.src_lang ?? "en");
+
+        setPages(newPages);
+        setPageDbIds(newPageDbIds);
+        setPageId(0);
+
+        // Jump directly into reader view for loaded library documents
+        if (newPages.length > 0) {
+          setShowAligned(true);
+        }
+
+        pageCache.current.clear();
+        setSession(null);
+        setNavSentId(-1);
+        setNavParId(-1);
+        setExplainData(null);
+        setDefineData(null);
+        setTargetLocked(false);
+        setLockedSourceIndices([]);
+        setPopoverOpen(false);
+
+        if (newPages.length === 0) {
+          setShowAligned(false);
+          return;
+        }
+
+        await loadPageSession(0, newPages, newPageDbIds, {
+          srcLang: data.src_lang ?? "en",
+          tgtLang,
+        });
+        loadedDocumentIdRef.current = parsedDocumentId;
+      } catch (err) {
+        loadedDocumentIdRef.current = null;
+        setShowAligned(false);
+        console.error("Failed to load saved document:", err);
+      } finally {
+        if (!cancelled) {
+          setDocumentLoading(false);
+        }
+      }
+    };
+
+    loadSavedDocument();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [documentIdParam, tgtLang]);
+
   // -------------------------
   // Arrow Key Navigation
   // -------------------------
@@ -633,8 +718,8 @@ function TranslatePage() {
       {/* -------------------------
       //* Source Text Input 
       //* ------------------------- */}
-      {!showAligned && !translationLoading ? (
-        <div>
+      {!showAligned && !translationLoading && !documentLoading ? (
+        <Pane className="h-[80vh]">
           {/* -------------------------
           //* Source / Target Selectors
           //* ------------------------- */}
@@ -850,83 +935,85 @@ function TranslatePage() {
             )}
 
           </div>
-        </div>
+        </Pane>
       ) : (
         <>
           {/* -------------------------
           //* Source / Target HoverText
           //* ------------------------- */}
-          <Pane>
-            <div className="flex-1 min-h-0">
-              {/* -------------------------
-              //* --------- [Title] ----------
-              //* [Source Text] | [Target Text]
-              //* ------------------------- */}
-              <TextSurface className="relative h-full flex flex-col overflow-hidden pt-0">
-                {/* Title Header */}
-                <div className="
-                    flex w-full justify-center
-                    pt-6 pb-5
-                    border-b 
-                    font-reading font-normal
-                    uppercase tracking-[0.12em] leading-none
-                    text-[22px] text-muted-foreground 
-                ">
-                  {title}
-                </div>
-                <div className="relative flex-1 min-h-0 flex flex-col border-b">
-                  <div className="pointer-events-none absolute inset-y-0 left-1/2 w-0.25 bg-border" />
+          <div>
+            <Pane className="h-[80vh] flex flex-col p-0 shadow-2xl" contentClassName="p-0">
 
-                  {/* -------------------------
-                  //* Source / Target Headers
-                  //* ------------------------- */}
-                  <div className="grid grid-cols-2 text-[18px] font-medium">
-                    {/* Source Header */}
-                    <div className="px-6 relative">
-                      <div className="pt-4">
-                        <div className="flex items-center">
-                          <span className="inline-flex flex-col">
-                            <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
-                            <span className="relative z-10 h-1 w-full bg-blue-300" />
-                          </span>
-                          <div className="absolute right-6 inset-y-0 flex items-center" >
-                            {/* Reveal/Hide Full Source Text */}
-                            <SourceBlurButton 
-                              value={sourceBlurEnabled}
-                              onChange={setSourceBlurEnabled}
-                            />
+              <div className="flex-1 min-h-0">
+                {/* -------------------------
+                //* --------- [Title] ----------
+                //* [Source Text] | [Target Text]
+                //* ------------------------- */}
+                <TextSurface className="relative h-full flex flex-col overflow-hidden pt-0">
+                  {/* Title Header */}
+                  <div className="
+                      flex w-full justify-center
+                      pt-6 pb-5
+                      border-b 
+                      font-reading font-normal
+                      uppercase tracking-[0.12em] leading-none
+                      text-[22px] text-muted-foreground 
+                      ">
+                    {title}
+                  </div>
+                  <div className="relative flex-1 min-h-0 flex flex-col border-b">
+                    <div className="pointer-events-none absolute inset-y-0 left-1/2 w-0.25 bg-border" />
+
+                    {/* -------------------------
+                    //* Source / Target Headers
+                    //* ------------------------- */}
+                    <div className="grid grid-cols-2 text-[18px] font-medium">
+                      {/* Source Header */}
+                      <div className="px-6 relative">
+                        <div className="pt-4">
+                          <div className="flex items-center">
+                            <span className="inline-flex flex-col">
+                              <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
+                              <span className="relative z-10 h-1 w-full bg-blue-300" />
+                            </span>
+                            <div className="absolute right-6 inset-y-0 flex items-center" >
+                              {/* Reveal/Hide Full Source Text */}
+                              <SourceBlurButton 
+                                value={sourceBlurEnabled}
+                                onChange={setSourceBlurEnabled}
+                                />
+                            </div>
                           </div>
                         </div>
+                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
                       </div>
-                      <div className="-mt-0.5 h-0.5 bg-foreground/10" />
-                    </div>
-                    {/* Target Header */}
-                    <div className="px-6">
-                      <div className="pt-4">
-                        <span className="inline-flex flex-col">
-                          <span className="pb-2">{getLangLabel(tgtLang)}</span>
-                          <span className="relative z-10 h-1 w-full bg-orange-300" />
-                        </span>
+                      {/* Target Header */}
+                      <div className="px-6">
+                        <div className="pt-4">
+                          <span className="inline-flex flex-col">
+                            <span className="pb-2">{getLangLabel(tgtLang)}</span>
+                            <span className="relative z-10 h-1 w-full bg-orange-300" />
+                          </span>
+                        </div>
+                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
                       </div>
-                      <div className="-mt-0.5 h-0.5 bg-foreground/10" />
                     </div>
-                  </div>
 
-                  {/* -------------------------
-                  //* ParagraphGrid
-                  //* ------------------------- */}
-                  <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
-                    {translationLoading || !session ? (
-                      <div className="grid grid-cols-2 p-8 pt-4">
-                        <div className="pr-8">
-                          <TextSkeleton blurClassName="blur-sm" />
+                    {/* -------------------------
+                    //* ParagraphGrid
+                    //* ------------------------- */}
+                    <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
+                      {translationLoading || !session ? (
+                        <div className="grid grid-cols-2 p-8 pt-4">
+                          <div className="pr-8">
+                            <TextSkeleton blurClassName="blur-sm" />
+                          </div>
+                          <div className="pl-8">
+                            <TextSkeleton />
+                          </div>
                         </div>
-                        <div className="pl-8">
-                          <TextSkeleton />
-                        </div>
-                      </div>
-                    ) : (
-                      <ParagraphGrid
+                      ) : (
+                        <ParagraphGrid
                         session={session}
                         blurMode={blurMode}
                         blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
@@ -944,74 +1031,75 @@ function TranslatePage() {
                         onTargetWordClick={handleTargetWordClick}
                         targetDisabled={popoverOpen}
                         className="text-[20px] leading-[1.5]"
-                      />
-                    )}
+                        />
+                      )}
+                    </div>
                   </div>
-                </div>
 
-                {/* -------------------------
-                //* Bottom Utilities Widget
-                //* ------------------------- */}
-                <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
-                  <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-4">
-                    {/* Left: Previous Page */}
-                    <div className="flex justify-start items-center pl-3">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="
+                  {/* -------------------------
+                  //* Bottom Utilities Widget
+                  //* ------------------------- */}
+                  <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
+                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-4">
+                      {/* Left: Previous Page */}
+                      <div className="flex justify-start items-center pl-3">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="
                           rounded-sm shadow-md border border-gray-300
                           transition-colors hover:bg-foreground/10 hover:text-foreground
                           "
-                        onClick={goPrevPage}
-                        aria-label="Previous page"
-                        disabled={pageId <= 0}
-                      >
-                        <ChevronLeft className="h-4 w-4" />
-                      </Button>
-                    </div>
-                    {/* Left spacer: BlurModeToggle */}
-                    <div className="flex justify-center">
-                      <BlurModeToggle
-                        value={blurMode}
-                        onChange={setBlurMode}
-                        className="border shadow"
-                      />
-                    </div>
-                    {/* Center: Page Tracker */}
-                    <div className="flex justify-center">
-                      <div className="rounded-full border px-3 py-1 text-sm font-semibold text-muted-foreground">
-                        Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
+                          onClick={goPrevPage}
+                          aria-label="Previous page"
+                          disabled={pageId <= 0}
+                          >
+                          <ChevronLeft className="h-4 w-4" />
+                        </Button>
                       </div>
-                    </div>
-                    {/* Right spacer: Help Popover */}
-                    <div className="flex justify-left pointer-events-none">
-                      <div className="pointer-events-auto">
-                        <HelpPopover />
+                      {/* Left spacer: BlurModeToggle */}
+                      <div className="flex justify-center">
+                        <BlurModeToggle
+                          value={blurMode}
+                          onChange={setBlurMode}
+                          className="border shadow"
+                          />
                       </div>
-                    </div>
-                    {/* Right: Next Page */}
-                    <div className="flex justify-end pr-3">
-                      <Button
-                        type="button"
-                        variant="secondary"
-                        size="icon"
-                        className="
+                      {/* Center: Page Tracker */}
+                      <div className="flex justify-center">
+                        <div className="rounded-full border px-3 py-1 text-sm font-semibold text-muted-foreground">
+                          Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
+                        </div>
+                      </div>
+                      {/* Right spacer: Help Popover */}
+                      <div className="flex justify-left pointer-events-none">
+                        <div className="pointer-events-auto">
+                          <HelpPopover />
+                        </div>
+                      </div>
+                      {/* Right: Next Page */}
+                      <div className="flex justify-end pr-3">
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          size="icon"
+                          className="
                           rounded-sm shadow-md border border-gray-300
                           transition-colors hover:bg-foreground/10 hover:text-foreground
                           "
-                        onClick={goNextPage}
-                        aria-label="Next page"
-                        disabled={pageId >= pages.length - 1}
-                      >
-                        <ChevronRight className="h-4 w-4" />
-                      </Button>
+                          onClick={goNextPage}
+                          aria-label="Next page"
+                          disabled={pageId >= pages.length - 1}
+                          >
+                          <ChevronRight className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   </div>
-                </div>
-              </TextSurface>
-            </div>
+                </TextSurface>
+              </div>
+            </Pane>
 
             {/* -------------------------
             /* Explain / Define Popover
@@ -1020,7 +1108,7 @@ function TranslatePage() {
               open={popoverOpen}
               onOpenChange={(open) => {
                 setPopoverOpen(open);
-
+                
                 if (!open) {
                   setTargetLocked(false);
                   setLockedTargetIndex(null);
@@ -1031,7 +1119,7 @@ function TranslatePage() {
               }}
               anchorEl={anchorEl}
               className="w-[min(520px,92vw)]"
-            >
+              >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
@@ -1051,20 +1139,20 @@ function TranslatePage() {
                         label="Listen to sentence"
                         tgtLang={tgtLang}
                         iconClassName="h-4 w-4"
-                      />
+                        />
                       {/* Paragraph */}
                       <PronounceButton
                         text={defineData.tgtPar}
                         label="Listen to paragraph"
                         tgtLang={tgtLang}
                         iconClassName="h-4 w-4"
-                      />
+                        />
                     </div>
                   )}
                 </div>
               )}
             </AnchoredPopover>
-          </Pane>
+          </div>
         </>
       )}
     </div>

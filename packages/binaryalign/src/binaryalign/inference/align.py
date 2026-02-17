@@ -124,9 +124,8 @@ class BinaryAlign:
         self,
         source: str,
         target: str,
-        src_lang: str,
-        tgt_lang: str,
-        segmenter: Segmenter,
+        src_segmenter: Segmenter,
+        tgt_segmenter: Segmenter,
         threshold: float = 0.5,
     ) -> AlignmentData:
         """
@@ -143,8 +142,8 @@ class BinaryAlign:
         # -------------------------
         # Segment source / target into pars -> sents -> words
         # -------------------------
-        src_par_sent_words = segmenter.split_par_sent_words(source, src_lang)
-        tgt_par_sent_words = segmenter.split_par_sent_words(target, tgt_lang)
+        src_par_sent_words = src_segmenter.split_par_sent_words(source)
+        tgt_par_sent_words = tgt_segmenter.split_par_sent_words(target)
 
         # -------------------------
         # Align sentence pairs / track word index offsets
@@ -227,8 +226,8 @@ class BinaryAlign:
         # -------------------------
         # Determine trailing whitespaces for source / target words
         # -------------------------
-        out.src.spaces = segmenter.get_token_spaces(source, out.src.words)
-        out.tgt.spaces = segmenter.get_token_spaces(target, out.tgt.words)
+        out.src.spaces = src_segmenter.get_token_spaces(source, out.src.words)
+        out.tgt.spaces = tgt_segmenter.get_token_spaces(target, out.tgt.words)
 
         # -------------------------
         # Convert defaultdicts to dicts

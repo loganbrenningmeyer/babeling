@@ -6,9 +6,8 @@ from pydantic import BaseModel
 # -------------------------
 class DocumentRequest(BaseModel):
     title: str
-    src_lang: str
-    tgt_lang: str
     text: str
+    src_lang: str
 
 class DocumentPageOut(BaseModel):
     id: int
@@ -25,3 +24,13 @@ class DocumentResponse(BaseModel):
 # -------------------------
 class DocumentSplitResponse(BaseModel):
     pages: list[str]
+
+
+# -------------------------
+# /api/documents/[documentId]
+# -------------------------
+class DocumentLoadResponse(BaseModel):
+    document_id: int
+    title: str
+    src_lang: str
+    pages: list[DocumentPageOut]
