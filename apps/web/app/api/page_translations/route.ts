@@ -30,6 +30,12 @@ export async function POST(req: Request) {
   } = await req.json();
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  if (!API_BASE_URL) {
+    return NextResponse.json(
+      { error: "NEXT_PUBLIC_API_URL is not set" },
+      { status: 500 }
+    );
+  }
 
   // -------------------------
   // Load page translation

@@ -16,6 +16,7 @@ import { UploadSurface } from "@/app/components/UploadSurface";
 import { AppTextarea } from "@/app/components/AppTextarea";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { setPendingTranslateInput } from "@/lib/translateInputBridge";
 
 // -------------------------
 // Language Info Variables / Functions
@@ -41,13 +42,14 @@ export default function Upload() {
   const [sourceFile, setSourceFile] = useState<File | null>(null);
   const [title, setTitle] = useState("");
   const [srcLang, setSrcLang] = useState("en");
+  const [tgtLang, setTgtLang] = useState("fr");
   const [extractedText, setExtractedText] = useState("");
   const [statusMessage, setStatusMessage] = useState(
     "Upload a .txt, .pdf, or .epub file to begin."
   );
   const [extractionState, setExtractionState] = useState<ExtractionState>("idle");
 
-  const canContinue = extractedText.trim().length > 0;
+  const canContinue = extractedText.trim().length > 0 && srcLang !== tgtLang;
 
   const fileType = useMemo(() => {
     if (!sourceFile) return "Unknown";
@@ -92,16 +94,13 @@ export default function Upload() {
   function handleContinue() {
     if (!canContinue) return;
 
-    // -------------------------
-    // Temporary local handoff until upload/extraction API is wired
-    // -------------------------
-    const uploadDraft = {
+    setPendingTranslateInput({
+      sourceText: extractedText,
       title,
       srcLang,
-      sourceText: extractedText,
-    };
+      tgtLang,
+    });
 
-    sessionStorage.setItem("upload_draft", JSON.stringify(uploadDraft));
     router.push("/translate");
   }
 
@@ -155,7 +154,38 @@ export default function Upload() {
                   onChange={(e) => setSrcLang(e.target.value)}
                 >
                   {LANGS.map((lang) => (
-                    <option key={lang.code} value={lang.code}>
+                    <option
+                      key={lang.code}
+                      value={lang.code}
+                      disabled={lang.code === tgtLang}
+                    >
+                      {lang.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
+              <div className="text-xs uppercase tracking-wide text-muted-foreground">
+                Target Language
+              </div>
+              <div className="pt-1">
+                <select
+                  className="
+                    w-full h-10 rounded-lg border border-border bg-muted/40 px-3
+                    text-sm font-semibold
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
+                  "
+                  value={tgtLang}
+                  onChange={(e) => setTgtLang(e.target.value)}
+                >
+                  {LANGS.map((lang) => (
+                    <option
+                      key={lang.code}
+                      value={lang.code}
+                      disabled={lang.code === srcLang}
+                    >
                       {lang.label}
                     </option>
                   ))}
@@ -199,16 +229,18 @@ export default function Upload() {
         </div>
 
         {/* -------------------------
-        //* Continue Action
+        //* Translate Action
         //* ------------------------- */}
         <div className="flex items-center justify-between rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
           <div className="text-sm text-muted-foreground">
-            {extractionState === "ready"
-              ? "Ready to continue to translate."
+            {extractionState === "ready" && srcLang !== tgtLang
+              ? "Ready to translate and open the reader."
+              : srcLang === tgtLang
+                ? "Choose different source and target languages."
               : "Upload and extract text before continuing."}
           </div>
           <Button onClick={handleContinue} disabled={!canContinue}>
-            Continue to Translate
+            Translate
           </Button>
         </div>
       </Pane>

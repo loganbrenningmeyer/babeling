@@ -4,4 +4,5 @@ export type LibraryDocument = {
   src_text: string;
   src_lang: string;
   created_at: string | null;
+  latest_tgt_lang?: string | null;
 };

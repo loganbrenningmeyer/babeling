@@ -68,7 +68,12 @@ function getPreview(text: string) {
 }
 
 
-export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
+type LibraryDataTableProps = {
+  docs: LibraryDocument[];
+  onOpenDocument?: (doc: LibraryDocument) => void;
+};
+
+export function LibraryDataTable({ docs, onOpenDocument }: LibraryDataTableProps) {
   const [query, setQuery] = useState("");
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
@@ -143,7 +148,20 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
       LANG_BADGE_COLOR_BY_CODE[doc.src_lang] ?? "bg-muted text-muted-foreground";
 
     return (
-      <TableRow key={doc.id}>
+      <TableRow
+        key={doc.id}
+        className="cursor-pointer hover:bg-muted/30"
+        onClick={() => onOpenDocument?.(doc)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            onOpenDocument?.(doc);
+          }
+        }}
+        tabIndex={0}
+        role="button"
+        aria-label={`Open ${doc.title}`}
+      >
         <TableCell className="max-w-[16rem] whitespace-normal font-medium">
           {doc.title}
         </TableCell>
@@ -217,7 +235,7 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
       </div>
 
       <div className="text-xs text-muted-foreground">
-        {filteredAndSortedDocs.length} Documents • Sorted by {sortLabel}
+        {filteredAndSortedDocs.length} Documents • Sorted by {sortLabel} • Click a row to open in reader
       </div>
 
       {/* -------------------------

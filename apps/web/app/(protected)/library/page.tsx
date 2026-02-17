@@ -1,12 +1,15 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 // -------------------------
 // User information provider
 // -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
 import type { LibraryDocument } from "@/types/library";
+import { LANGS } from "@/types/langs";
+import { setPendingTranslateInput } from "@/lib/translateInputBridge";
 
 // -------------------------
 // UI Components
@@ -20,6 +23,7 @@ export default function LibraryTable() {
   // Load user information
   // -------------------------
   const { user, loading: userLoading, error: userError } = useAppUser();
+  const router = useRouter();
 
   const [docs, setDocs] = useState<LibraryDocument[]>([]);
   const [loading, setLoading] = useState(false);
@@ -47,6 +51,51 @@ export default function LibraryTable() {
       setLoading(false);
     }
   }, []);
+
+  function getDefaultTargetLang(srcLang: string) {
+    return LANGS.find((lang) => lang.code !== srcLang)?.code ?? "fr";
+  }
+
+  async function openDocument(doc: LibraryDocument) {
+    if (!doc.src_text.trim()) return;
+
+    const tgtLang = doc.latest_tgt_lang ?? getDefaultTargetLang(doc.src_lang);
+
+    let pages: string[] | undefined = undefined;
+    let pageDbIds: number[] | undefined = undefined;
+
+    try {
+      const res = await fetch("/api/documents", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: doc.title,
+          src_lang: doc.src_lang,
+          tgt_lang: tgtLang,
+          text: doc.src_text,
+        }),
+      });
+      const data = await res.json();
+
+      if (res.ok) {
+        const savedPages = Array.isArray(data.pages) ? data.pages : [];
+        pages = savedPages.map((p: { src_text: string }) => p.src_text);
+        pageDbIds = savedPages.map((p: { id: number }) => p.id);
+      }
+    } catch (err) {
+      console.error("Failed to load saved pages", err);
+    }
+
+    setPendingTranslateInput({
+      sourceText: doc.src_text,
+      title: doc.title,
+      srcLang: doc.src_lang,
+      tgtLang,
+      pages,
+      pageDbIds,
+    });
+    router.push("/translate");
+  }
 
   // -------------------------
   // Refresh user library on new user
@@ -85,7 +134,7 @@ export default function LibraryTable() {
           document.
         </div>
       ) : (
-        <LibraryDataTable docs={docs} />
+        <LibraryDataTable docs={docs} onOpenDocument={openDocument} />
       )}
     </div>
   );

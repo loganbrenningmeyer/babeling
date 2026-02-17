@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // -------------------------
 // User information provider
@@ -18,9 +18,6 @@ import type { Session } from "@/types/session";
 // -------------------------
 // UI Components
 // -------------------------
-// Blocks
-import { Pane } from "@/app/components/Pane";
-import { AppTextarea } from "@/app/components/AppTextarea";
 import { TextSurface } from "@/app/components/TextSurface";
 import { AnchoredPopover } from "@/app/(protected)/translate/components/AnchoredPopover";
 import { SourceBlurButton } from "@/app/(protected)/translate/components/SourceBlur/SourceBlurButton";
@@ -30,23 +27,22 @@ import { ExplainEntry, ExplainCard } from "@/app/(protected)/translate/component
 import { ExplainSkeleton } from "@/app/(protected)/translate/components/ExplainSkeleton";
 import { TextSkeleton } from "@/app/(protected)/translate/components/TextSkeleton";
 import { ParagraphGrid } from "@/app/(protected)/translate/components/ParagraphGrid";
-import { UploadSurface } from "@/app/components/UploadSurface";
 import { HelpPopover } from "@/app/(protected)/translate/components/HelpInfo/HelpPopover";
 import { useSourceRevealNav } from "@/app/(protected)/translate/components/SourceBlur/useSourceRevealNav";
 import { PronounceButton } from "@/app/(protected)/translate/components/Pronounce/PronounceButton";
 
-// -------------------------
-// Language Info Variables / Functions
-// -------------------------
-import { SAMPLE_TEXTS_BY_LANG } from "./sampleTexts";
-import { LANGS, getLangLabel } from "@/types/langs";
+import { getLangLabel } from "@/types/langs";
+import {
+  takePendingTranslateInput,
+  type TranslateInputPayload,
+} from "@/lib/translateInputBridge";
 
 
 export default function Translate() {
   // -------------------------
   // Load user information
   // -------------------------
-  const { user, loading, error } = useAppUser();
+  const { error } = useAppUser();
 
   if (error) return <div className="p-6 text-sm text-red-600">Account error: {error}</div>;
 
@@ -55,6 +51,8 @@ export default function Translate() {
 
 
 function TranslatePage() {
+  const router = useRouter();
+
   // -------------------------
   // Core state
   // -------------------------
@@ -69,17 +67,10 @@ function TranslatePage() {
   // Cache translated / aligned pages
   const [pages, setPages] = useState<string[]>([]);
   const [pageId, setPageId] = useState<number>(0);
+  const [pageDbIds, setPageDbIds] = useState<number[]>([]);
   const pageCache = useRef<Map<number, Session>>(new Map());
-  
-  // -------------------------
-  // Database Information
-  // -------------------------
-  // Documents / DocumentPages
-  type SavedPage = {
-    id: number;
-    page_number: number;
-    src_text: string;
-  }
+  const inputBootstrapped = useRef(false);
+
   type SavedPageTranslation = {
     id: number;
     document_page_id: number;
@@ -92,10 +83,7 @@ function TranslatePage() {
       align: Session["align"];
     };
     created_at: string | null;
-  }
-
-  const [documentId, setDocumentId] = useState<number | null>(null);
-  const [pageDbIds, setPageDbIds] = useState<number[]>([]);
+  };
 
   // -------------------------
   // UI state
@@ -107,8 +95,8 @@ function TranslatePage() {
   const [blurMode, setBlurMode] = useState<BlurMode>("word");
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
   const [sourceBlurEnabled, setSourceBlurEnabled] = useState(false);
-  const emptyBlurredSource = useRef<Set<number>>(new Set());
-  const noopSetBlurredSource = (_: Set<number> | ((prev: Set<number>) => Set<number>)) => {};
+  const emptyBlurredSource = useMemo<Set<number>>(() => new Set(), []);
+  const noopSetBlurredSource: (next: Set<number> | ((prev: Set<number>) => Set<number>)) => void = () => {};
   // Lock target/source when Popover is showing
   const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
   const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
@@ -130,17 +118,8 @@ function TranslatePage() {
   );
 
   // -------------------------
-  // Input files state
-  // -------------------------
-  const [sourceFile, setSourceFile] = useState<File | null>(null);
-  const [sampleId, setSampleId] = useState("");
-  const [sampleLoading, setSampleLoading] = useState(false);
-
-  // -------------------------
   // Derived values
   // -------------------------
-  const sampleOptions = SAMPLE_TEXTS_BY_LANG[srcLang] ?? [];
-  const selectedSample = sampleOptions.find((entry) => entry.id === sampleId) ?? null;
   const activeSourceIndex = popoverOpen ? null : hoveredSourceIndex;
   const activeTargetIndex = popoverOpen ? lockedTargetIndex : hoveredTargetIndex;
 
@@ -155,38 +134,54 @@ function TranslatePage() {
     activeSourceIndex !== null
       ? (session?.align.srcToTgt[activeSourceIndex] ?? [])
       : [];
-  const canTranslate = sourceText.trim().length > 0 || !!sourceFile;
 
   // -------------------------
   // Handlers
   // -------------------------
-  async function startReadingSession() {
-    if (!sourceText.trim() && !sourceFile) return;
+  async function startReadingSession(args?: Partial<TranslateInputPayload>) {
+    const source = args?.sourceText ?? sourceText;
+    const sourceLang = args?.srcLang ?? srcLang;
+    const targetLang = args?.tgtLang ?? tgtLang;
+    const documentTitle = args?.title ?? title;
+    if (!source.trim()) return;
 
-    const text = sourceFile ? await sourceFile.text() : sourceText;
+    setTitle(documentTitle);
+    setSourceText(source);
+    setSrcLang(sourceLang);
+    setTgtLang(targetLang);
 
-    // Split full text into pages / save to database
-    const res = await fetch("/api/documents", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        title: title,
-        src_lang: srcLang,
-        tgt_lang: tgtLang,
-        text: text,
-      }),
-    });
-    const documentData = await res.json();
+    const incomingPages = args?.pages;
+    const incomingPageDbIds = args?.pageDbIds;
+    const hasSavedPages =
+      Array.isArray(incomingPages) &&
+      incomingPages.length > 0 &&
+      Array.isArray(incomingPageDbIds) &&
+      incomingPageDbIds.length === incomingPages.length;
 
-    // Get saved pages / update database ids if found
-    const savedPages: SavedPage[] = documentData.pages ?? [];
-    const newPageDbIds = savedPages.map((p) => p.id);
-    setDocumentId(documentData.document_id ?? []);
+    let newPages: string[] = [];
+    let newPageDbIds: number[] = [];
+
+    if (hasSavedPages) {
+      newPages = incomingPages ?? [];
+      newPageDbIds = incomingPageDbIds ?? [];
+    } else {
+      const splitRes = await fetch("/api/split_pages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: documentTitle,
+          src_lang: sourceLang,
+          tgt_lang: targetLang,
+          text: source,
+        }),
+      });
+      const splitData = await splitRes.json();
+      const splitPages = Array.isArray(splitData.pages) ? splitData.pages : [];
+      newPages = splitPages.length > 0 ? splitPages : [source];
+    }
+
+    setPages(newPages);
     setPageDbIds(newPageDbIds);
-
-    // Load list of pages source text
-    const newPages = savedPages.map((p) => p.src_text);
-    setPages(newPages)
     setPageId(0);
 
     // Reset session state
@@ -202,42 +197,16 @@ function TranslatePage() {
     setPopoverOpen(false);
 
     // Translate and align source text
-    await loadPageSession(0, newPages, newPageDbIds);
+    await loadPageSession(0, newPages, newPageDbIds, sourceLang, targetLang);
   }
 
-  function handleSwapLanguages() {
-    const nextSrc = tgtLang;
-    const nextTgt = srcLang;
-    setSrcLang(nextSrc);
-    setTgtLang(nextTgt);
-  }
-
-  async function handleSampleSelect(nextId: string) {
-    setSampleId(nextId);
-    if (!nextId) return;
-
-    const sample = sampleOptions.find((entry) => entry.id === nextId);
-    if (!sample) return;
-    setTitle(sample.label);
-
-    setSampleLoading(true);
-    try {
-      const res = await fetch(
-        `/texts/${encodeURIComponent(srcLang)}/${encodeURIComponent(sample.filename)}`
-      );
-      if (!res.ok) throw new Error("Failed to load sample text");
-      const text = await res.text();
-      setSourceFile(null);
-      setSourceText(text);
-      setTitle(sample.label);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setSampleLoading(false);
-    }
-  }
-
-  async function loadPageSession(pid: number, pagesArg?: string[], pageDbIdsArg?: number[]) {
+  async function loadPageSession(
+    pid: number,
+    pagesArg?: string[],
+    pageDbIdsArg?: number[],
+    srcLangArg?: string,
+    tgtLangArg?: string
+  ) {
     // immediately reset UI state before loading cache
     setNavSentId(-1);
     setNavParId(-1);
@@ -250,6 +219,8 @@ function TranslatePage() {
     // Take optional pagesArg to avoid async race conditions setting pages
     const pagesLocal = pagesArg ?? pages;
     const pageDbIdsLocal = pageDbIdsArg ?? pageDbIds;
+    const sourceLang = srcLangArg ?? srcLang;
+    const targetLang = tgtLangArg ?? tgtLang;
 
     // Check cache for page ID
     const cachedSession = pageCache.current.get(pid);
@@ -268,9 +239,6 @@ function TranslatePage() {
     if (!pageText.trim()) return;
     setPageId(pid);
 
-    // -------------------------
-    // Load saved translation/alignment for this page and language pair
-    // -------------------------
     const pageDbId = pageDbIdsLocal[pid];
     if (pageDbId) {
       const savedRes = await fetch("/api/page_translations", {
@@ -278,8 +246,8 @@ function TranslatePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           document_page_id: pageDbId,
-          src_lang: srcLang,
-          tgt_lang: tgtLang,
+          src_lang: sourceLang,
+          tgt_lang: targetLang,
         }),
       });
       const savedData = await savedRes.json();
@@ -311,7 +279,7 @@ function TranslatePage() {
     }
     
     // Cache page's session
-    const sess = await translateAndAlign(pageText, pageDbId);
+    const sess = await translateAndAlign(pageText, pageDbId, sourceLang, targetLang);
     if (sess) {
       pageCache.current.set(pid, sess);
       setSession(sess);
@@ -321,94 +289,101 @@ function TranslatePage() {
 
   }
 
-  async function translateAndAlign(text: string, documentPageId?: number) {
+  async function translateAndAlign(
+    text: string,
+    documentPageId?: number,
+    srcLangArg?: string,
+    tgtLangArg?: string
+  ) {
     if (!text.trim()) return;
 
     setTranslationLoading(true);
+    const sourceLang = srcLangArg ?? srcLang;
+    const targetLang = tgtLangArg ?? tgtLang;
 
-    // Translate
-    const translate_res = await fetch("/api/translate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: text, src_lang: srcLang, tgt_lang: tgtLang }),
-    });
-    const translate_data = await translate_res.json();
-
-    // Update normalized source text / get translated target
-    const source = translate_data.source;
-    const target = translate_data.target;
-
-    // Align
-    const align_res = await fetch("/api/align", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        source,
-        target,
-        src_lang: srcLang,
-        tgt_lang: tgtLang,
-      }),
-    });
-    const align_data = await align_res.json();
-
-    // Update session
-    const sess: Session = {
-      sourceText: source,
-      targetText: target,
-      src: {
-        words: align_data.src.words,
-        spaces: align_data.src.spaces,
-        sentIds: align_data.src.sentIds,
-        parIds: align_data.src.parIds,
-        sentToParIds: align_data.src.sentToParIds,
-        sentToWordIds: align_data.src.sentToWordIds,
-        parToSentIds: align_data.src.parToSentIds,
-        parToWordIds: align_data.src.parToWordIds,
-      },
-      tgt: {
-        words: align_data.tgt.words,
-        spaces: align_data.tgt.spaces,
-        sentIds: align_data.tgt.sentIds,
-        parIds: align_data.tgt.parIds,
-        sentToParIds: align_data.tgt.sentToParIds,
-        sentToWordIds: align_data.tgt.sentToWordIds,
-        parToSentIds: align_data.tgt.parToSentIds,
-        parToWordIds: align_data.tgt.parToWordIds,
-      },
-      align: {
-        srcToTgt: align_data.align.srcToTgt,
-        tgtToSrc: align_data.align.tgtToSrc,
-      },
-      state: {
-        blurredSource: new Set(align_data.src.words.map((_: string, i: number) => i)),
-        navSentId: -1,
-        navParId: -1,
-      }
-    };
-
-    // -------------------------
-    // Save translated page + alignment data
-    // -------------------------
-    if (documentPageId) {
-      await fetch("/api/page_translations", {
+    try {
+      const translate_res = await fetch("/api/translate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          document_page_id: documentPageId,
-          src_lang: srcLang,
-          tgt_lang: tgtLang,
-          translated_text: target,
-          alignment_data: {
-            src: sess.src,
-            tgt: sess.tgt,
-            align: sess.align,
-          },
+          source: text,
+          src_lang: sourceLang,
+          tgt_lang: targetLang,
         }),
       });
-    }
+      const translate_data = await translate_res.json();
 
-    setTranslationLoading(false);
-    return sess;
+      const source = translate_data.source;
+      const target = translate_data.target;
+
+      const align_res = await fetch("/api/align", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          source,
+          target,
+          src_lang: sourceLang,
+          tgt_lang: targetLang,
+        }),
+      });
+      const align_data = await align_res.json();
+
+      const sess: Session = {
+        sourceText: source,
+        targetText: target,
+        src: {
+          words: align_data.src.words,
+          spaces: align_data.src.spaces,
+          sentIds: align_data.src.sentIds,
+          parIds: align_data.src.parIds,
+          sentToParIds: align_data.src.sentToParIds,
+          sentToWordIds: align_data.src.sentToWordIds,
+          parToSentIds: align_data.src.parToSentIds,
+          parToWordIds: align_data.src.parToWordIds,
+        },
+        tgt: {
+          words: align_data.tgt.words,
+          spaces: align_data.tgt.spaces,
+          sentIds: align_data.tgt.sentIds,
+          parIds: align_data.tgt.parIds,
+          sentToParIds: align_data.tgt.sentToParIds,
+          sentToWordIds: align_data.tgt.sentToWordIds,
+          parToSentIds: align_data.tgt.parToSentIds,
+          parToWordIds: align_data.tgt.parToWordIds,
+        },
+        align: {
+          srcToTgt: align_data.align.srcToTgt,
+          tgtToSrc: align_data.align.tgtToSrc,
+        },
+        state: {
+          blurredSource: new Set(align_data.src.words.map((_: string, i: number) => i)),
+          navSentId: -1,
+          navParId: -1,
+        }
+      };
+
+      if (documentPageId) {
+        await fetch("/api/page_translations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            document_page_id: documentPageId,
+            src_lang: sourceLang,
+            tgt_lang: targetLang,
+            translated_text: target,
+            alignment_data: {
+              src: sess.src,
+              tgt: sess.tgt,
+              align: sess.align,
+            },
+          }),
+        });
+      }
+
+      return sess;
+    } finally {
+      setTranslationLoading(false);
+    }
   }
 
   async function handleTargetWordClick(i: number, el: HTMLElement) {
@@ -553,11 +528,30 @@ function TranslatePage() {
   }
 
   // -------------------------
-  // Sample selection
+  // Input handoff from upload page
   // -------------------------
   useEffect(() => {
-    setSampleId("");
-  }, [srcLang]);
+    if (inputBootstrapped.current) return;
+    inputBootstrapped.current = true;
+
+    const pending = takePendingTranslateInput();
+    if (!pending || !pending.sourceText.trim()) {
+      router.replace("/upload");
+      return;
+    }
+
+    void startReadingSession({
+      sourceText: pending.sourceText,
+      title: pending.title,
+      srcLang: pending.srcLang,
+      tgtLang: pending.tgtLang,
+      pages: pending.pages,
+      pageDbIds: pending.pageDbIds,
+    }).catch((err) => {
+      console.error("Failed to start translation session", err);
+      router.replace("/upload");
+    });
+  }, [router, startReadingSession]);
 
   // -------------------------
   // Arrow Key Navigation
@@ -615,13 +609,15 @@ function TranslatePage() {
     window.addEventListener("keydown", onKeyDown, { capture: true });
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
+      window.removeEventListener("keydown", onKeyDown, { capture: true });
     };
   }, [
     showAligned,
     popoverOpen,
     prev,
     next,
+    goPrevPage,
+    goNextPage,
   ]);
 
 
@@ -630,229 +626,7 @@ function TranslatePage() {
   // -------------------------
   return (
     <div className="p-4">
-      {/* -------------------------
-      //* Source Text Input 
-      //* ------------------------- */}
-      {!showAligned && !translationLoading ? (
-        <div>
-          {/* -------------------------
-          //* Source / Target Selectors
-          //* ------------------------- */}
-          <div className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm mb-3">
-            <div className="flex items-center gap-4">
-              {/* -------------------------
-              * Source Language Selector
-              * ------------------------- */}
-              <div className="flex-1">
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                  Original
-                </div>
-                <select
-                  className="
-                    w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
-                    text-sm font-semibold 
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                  "
-                  value={srcLang}
-                  onChange={(e) => setSrcLang(e.target.value)}
-                  disabled={translationLoading}
-                >
-                {LANGS.map((lang) => {
-                  const isDisabled = lang.code === tgtLang;
-                  return (
-                    <option
-                      key={lang.code}
-                      value={lang.code}
-                      disabled={isDisabled}
-                      className={!isDisabled ? "font-semibold" : "font-normal"}
-                    >
-                      {lang.label}
-                    </option>
-                  );
-                })}
-                </select>
-              </div>
-
-              {/* -------------------------
-              * Swap Source / Target
-              * ------------------------- */}
-              <div className="hidden sm:flex items-center justify-center">
-                <Button
-                  type="button"
-                  variant="secondary"
-                  size="icon"
-                  className="
-                    h-11 w-11 rounded-full border border-border/70 bg-muted 
-                    text-foreground shadow-sm 
-                    transition-colors hover:bg-foreground/10 hover:text-foreground/90
-                  "
-                  onClick={handleSwapLanguages}
-                  aria-label="Swap source and target languages"
-                  disabled={translationLoading}
-                >
-                  <ArrowLeftRight className="h-4 w-4" />
-                </Button>
-              </div>
-
-              {/* -------------------------
-              * Target Language Selector
-              * ------------------------- */}
-              <div className="flex-1">
-                <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                  Translation
-                </div>
-                <select
-                  className="
-                    w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
-                    text-sm font-semibold 
-                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                  "
-                  value={tgtLang}
-                  onChange={(e) => setTgtLang(e.target.value)}
-                  disabled={translationLoading}
-                >
-                {LANGS.map((lang) => {
-                  const isDisabled = lang.code === srcLang;
-                  return (
-                    <option
-                      key={lang.code}
-                      value={lang.code}
-                      disabled={isDisabled}
-                      className={!isDisabled ? "font-semibold" : "font-normal"}
-                    >
-                      {lang.label}
-                    </option>
-                  );
-                })}
-                </select>
-              </div>
-            </div>
-
-            {/* -------------------------
-            * Sample Text
-            * ------------------------- */}
-            <div className="mt-4">
-              <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                Sample text
-              </div>
-              <select
-                className="
-                  w-full h-10 rounded-lg border border-border bg-muted/40 px-3 
-                  text-sm font-semibold 
-                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
-                "
-                value={sampleId}
-                onChange={(e) => handleSampleSelect(e.target.value)}
-                disabled={translationLoading || sampleLoading || sampleOptions.length === 0}
-              >
-                <option value="">Select a sample...</option>
-                {sampleOptions.map((sample) => (
-                  <option key={sample.id} value={sample.id} className="font-semibold">
-                    {sample.label}
-                  </option>
-                ))}
-              </select>
-              {sampleLoading && (
-                <div className="pt-1 text-xs text-muted-foreground">
-                  Loading sample...
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* -------------------------
-          //* Source Text Inputs
-          //* ------------------------- */}
-          {/* Document Title */}
-          <div className="font-ui shrink-0 rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
-            <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-muted-foreground">Title:</span>
-              <Input
-                id="document-title"
-                value={title}
-                onChange={(e) => {
-                  setTitle(e.target.value);
-                }}
-                placeholder="Untitled document"
-              />
-            </div>
-          </div>
-          {/* Input Box */}
-          <div className="mt-3 font-ui flex-1 min-h-0">
-            <AppTextarea
-              className="h-full min-h-0 overflow-y-auto"
-              value={sourceText}
-              onChange={(e) => {
-                setSourceText(e.target.value);
-                if (sampleId) setSampleId("");
-              }}
-              placeholder={`Type some ${getLangLabel(srcLang)} text...`}
-            />
-          </div>
-          {/* Upload Card */}
-          <div className="mt-3 shrink-0">
-            <UploadSurface 
-              className="h-36"
-              file={sourceFile}
-              onFileChange={async (file) => {
-                setSourceFile(file);
-                if (!file) return;
-
-                setSampleId("");
-                setTitle(file.name.replace(/\.[^/.]+$/, ""));
-
-                if (file.name.toLowerCase().endsWith(".txt")) {
-                  const text = await file.text();
-                  setSourceText(text);
-                }
-              }}
-            />
-          </div>
-          
-          {/* -------------------------
-          //* Translate Button
-          //* ------------------------- */}
-          <div className="font-ui pt-6 shrink-0 flex flex-col items-center gap-2">
-            <Button
-              onClick={startReadingSession}
-              disabled={translationLoading || !srcLang || !tgtLang || !canTranslate}
-              className="
-                group
-                relative
-                shadow
-                w-full h-12
-                transition
-                hover:bg-primary
-                hover:shadow-md
-                hover:-translate-y-[1px]
-                disabled:shadow-none
-                disabled:translate-y-0
-              "
-            >
-              <span className="relative font-semibold">
-                Translate
-                <span
-                  className="
-                    absolute left-0 -bottom-1
-                    h-[2px] w-full
-                    bg-current
-                    origin-left scale-x-0
-                    transition-transform duration-300
-                    group-hover:scale-x-100
-                  "
-                />
-              </span>
-            </Button>
-            {!canTranslate && (
-              <div className="text-xs text-muted-foreground">
-                Paste text or upload a file to translate.
-              </div>
-            )}
-
-          </div>
-        </div>
-      ) : (
-        <>
+      <>
           {/* -------------------------
           //* Source / Target HoverText
           //* ------------------------- */}
@@ -929,7 +703,7 @@ function TranslatePage() {
                       <ParagraphGrid
                         session={session}
                         blurMode={blurMode}
-                        blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
+                        blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource}
                         setBlurredSource={sourceBlurEnabled ? setBlurredSource : noopSetBlurredSource}
                         sourceHighlightIndices={[
                           ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
@@ -1065,8 +839,7 @@ function TranslatePage() {
               )}
             </AnchoredPopover>
           </div>
-        </>
-      )}
+      </>
     </div>
   );
 }

@@ -89,7 +89,7 @@ export default function Home() {
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
                 <Button asChild size="lg" className="gap-2 bg-zinc-900 text-white hover:bg-zinc-800">
-                  <Link href="/translate">
+                  <Link href="/upload">
                     Start Reading
                     <ArrowRight className="size-4" />
                   </Link>
@@ -216,7 +216,7 @@ export default function Home() {
               </div>
               <div className="flex flex-col gap-3 md:items-end">
                 <Button asChild size="lg" className="w-full gap-2 md:w-auto">
-                  <Link href="/translate">
+                  <Link href="/upload">
                     Open Translator
                     <ArrowRight className="size-4" />
                   </Link>

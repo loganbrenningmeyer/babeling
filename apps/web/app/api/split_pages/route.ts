@@ -2,9 +2,6 @@ import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
 export async function POST(req: Request) {
-  // -------------------------
-  // Get Clerk user identification / token
-  // -------------------------
   const { userId, getToken } = await auth();
   if (!userId) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -18,20 +15,10 @@ export async function POST(req: Request) {
     );
   }
 
-  // -------------------------
-  // Split document pages / save to database
-  // -------------------------
   const { title, src_lang, tgt_lang, text } = await req.json();
-
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-  if (!API_BASE_URL) {
-    return NextResponse.json(
-      { error: "NEXT_PUBLIC_API_URL is not set" },
-      { status: 500 }
-    );
-  }
 
-  const res = await fetch(`${API_BASE_URL}/documents`, {
+  const res = await fetch(`${API_BASE_URL}/documents/split`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -46,6 +33,5 @@ export async function POST(req: Request) {
   });
 
   const data = await res.json();
-
   return NextResponse.json(data, { status: res.status });
 }
