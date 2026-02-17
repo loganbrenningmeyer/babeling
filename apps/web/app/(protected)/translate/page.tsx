@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +62,11 @@ export default function Translate() {
 
   if (error) return <div className="p-6 text-sm text-red-600">Account error: {error}</div>;
 
-  return <TranslatePage />;
+  return (
+    <Suspense fallback={<TextSkeleton />}>
+      <TranslatePage />
+    </Suspense>
+  );
 }
 
 
