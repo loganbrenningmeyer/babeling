@@ -12,6 +12,7 @@ export default {
       fontFamily: {
         reading: ["var(--font-reading)", "Georgia", "ui-serif"],
         ui: ["var(--font-ui)", "ui-sans-serif", "system-ui"],
+        logo: ["var(--font-logo)", "Georgia", "ui-serif"],
       },
     },
   },

@@ -16,16 +16,14 @@ export function SourceBlurButton({
     <div className={cn(className)}>
       <Button
         type="button"
-        variant="secondary"
+        variant="ghost"
         className={`
           h-8 rounded-full px-3 gap-2
           text-[14px] font-semibold tracking-wide
-          border shadow-sm transition-colors
-          ${
-            value
-              ? "border-border/60 bg-muted/60 text-foreground/80 hover:bg-muted"
-              : "border-foreground/60 bg-foreground/80 text-background hover:bg-foreground/90"
-          }
+          border border-border/200
+          text-foreground/60
+          hover:bg-muted
+          transition-colors
         `}
         onClick={() => onChange(!value)}
         aria-pressed={value}  

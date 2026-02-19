@@ -80,7 +80,11 @@ export default function LibraryTable() {
   return (
     <div className="p-4">
       {docs.length === 0 ? (
-        <div className="rounded-xl border border-dashed bg-muted/40 p-8 text-sm text-muted-foreground">
+        <div className="
+          rounded-xl 
+          border border-dashed bg-muted/40 p-8 
+          font-ui text-sm text-muted-foreground
+        ">
           No documents yet. Start a reading session to save your first
           document.
         </div>

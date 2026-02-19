@@ -3,12 +3,26 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { UserMenu } from "@/components/UserMenu";
 
 import { Languages } from "lucide-react";
-import { Library } from "lucide-react";
-import { Manrope } from "next/font/google";
+import { Book } from "lucide-react";
+import { Manrope, DM_Sans, DM_Serif_Display } from "next/font/google";
 
 import Link from "next/link";
 import localFont from "next/font/local";
 
+
+// -------------------------
+// Logo Font
+// -------------------------
+const logo = DM_Serif_Display({
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+  variable: "--font-logo",
+})
+
+// -------------------------
+// Reading Text Font
+// -------------------------
 export const readingLocal = localFont({
   src: [
     {
@@ -36,7 +50,10 @@ export const readingLocal = localFont({
   variable: "--font-reading",
 });
 
-const ui = Manrope({
+// -------------------------
+// General UI Font
+// -------------------------
+const ui = DM_Sans({
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
@@ -49,7 +66,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${readingLocal.variable} ${ui.variable}`}>
+    <html lang="en" className={`${logo.variable} ${readingLocal.variable} ${ui.variable}`}>
       <body className="font-ui min-h-screen bg-zinc-50 text-zinc-900 antialiased">
         <ClerkProvider
           afterSignOutUrl="/"
@@ -58,12 +75,22 @@ export default function RootLayout({
           //* Nav Bar
           //* ------------------------- */}
           <nav className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70">
-            <div className="relative mx-auto flex h-16 max-w-6xl items-center px-4">
-              <Link className="group inline-flex items-center gap-2.5" href="/">
-                <span className="inline-flex size-8 items-center justify-center rounded-lg bg-zinc-900 text-white">
-                  <Languages className="size-4" />
+            <div className="relative flex h-16 w-full items-center px-4">
+              <Link className="group inline-flex items-center gap-2" href="/">
+                <span
+                  className="
+                    inline-flex h-8 w-8 items-center justify-center
+                    rounded-lg bg-zinc-900 text-white
+                    shadow-sm
+                  "
+                  aria-hidden="true"
+                >
+                  <Languages className="h-4 w-4" />
                 </span>
-                <span className="font-semibold tracking-tight text-zinc-900">Babeling</span>
+
+                <span className="font-logo text-[24px] font-semibold leading-none tracking-tight text-zinc-900">
+                  Babeling
+                </span>
               </Link>
 
               {/* -------------------------
@@ -75,7 +102,7 @@ export default function RootLayout({
                     group 
                     inline-flex items-center gap-2
                     rounded-md px-3 py-2
-                    font-medium text-zinc-600 
+                    font-ui font-medium text-zinc-600 
                     transition-colors hover:bg-zinc-100 hover:text-zinc-900
                   "
                   href="/translate"
@@ -90,13 +117,13 @@ export default function RootLayout({
                     group 
                     inline-flex items-center gap-2
                     rounded-md px-3 py-2
-                    font-medium text-zinc-600 
+                    font-ui font-medium text-zinc-600 
                     transition-colors hover:bg-zinc-100 hover:text-zinc-900
                   "
                   href="/library"
                 >
                   <span className="inline-flex items-center justify-center">
-                    <Library className="size-4" />
+                    <Book className="size-4" />
                   </span>
                   Library
                 </Link>

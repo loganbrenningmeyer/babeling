@@ -193,7 +193,7 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 font-ui">
       {/* -------------------------
       //* Table Controls
       //* ------------------------- */}

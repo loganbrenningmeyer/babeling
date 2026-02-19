@@ -10,6 +10,7 @@ export type LoadedDocument = {
   document_id: number;
   title: string;
   src_lang: string;
+  tgt_lang: string;
   pages: SavedPage[];
 };
 

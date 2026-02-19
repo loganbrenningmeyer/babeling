@@ -1,0 +1,1428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babeling – Try It Live</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #141412;
+  --surface: #1c1c19;
+  --surface-2: #242420;
+  --border: rgba(255,255,255,0.08);
+  --border-bright: rgba(255,255,255,0.16);
+  --text-primary: #f0ede6;
+  --text-secondary: #a09d96;
+  --text-muted: #5a5850;
+  --blue: #4f8ef7;
+  --blue-dim: rgba(79,142,247,0.18);
+  --blue-glow: rgba(79,142,247,0.08);
+  --orange: #f07840;
+  --orange-dim: rgba(240,120,64,0.18);
+  --orange-glow: rgba(240,120,64,0.06);
+  --gold: #c9a84c;
+  --radius: 14px;
+  --radius-sm: 8px;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0 0 80px;
+  overflow-x: hidden;
+}
+
+/* =====================
+   SECTION WRAPPER
+===================== */
+.demo-section {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 24px;
+  margin: 0 auto;
+}
+
+/* =====================
+   HEADER
+===================== */
+.demo-header {
+  text-align: center;
+  padding: 72px 0 48px;
+  animation: fadeUp 0.6s ease both;
+}
+
+.demo-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.2);
+  border-radius: 20px;
+  padding: 5px 14px;
+  margin-bottom: 22px;
+}
+
+.demo-eyebrow::before {
+  content: '';
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--gold);
+  animation: pulse 2s ease infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.7); }
+}
+
+.demo-headline {
+  font-family: 'Lora', serif;
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text-primary);
+  margin-bottom: 18px;
+  letter-spacing: -0.02em;
+}
+
+.demo-headline em {
+  font-style: italic;
+  color: var(--blue);
+}
+
+.demo-subhead {
+  font-size: 17px;
+  font-weight: 300;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 520px;
+  margin: 0 auto 14px;
+}
+
+.demo-hint-main {
+  font-size: 14px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* =====================
+   LANGUAGE SELECTOR BAR
+===================== */
+.lang-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+  animation: fadeUp 0.6s 0.1s ease both;
+  flex-wrap: wrap;
+}
+
+.lang-bar-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-right: 4px;
+}
+
+.lang-pill {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-pill:hover { border-color: var(--border-bright); color: var(--text-primary); }
+
+.lang-pill.active-src {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-glow);
+}
+
+.lang-pill.active-tgt {
+  border-color: var(--orange);
+  color: var(--orange);
+  background: var(--orange-glow);
+}
+
+.lang-arrow {
+  font-size: 14px;
+  color: var(--text-muted);
+  padding: 0 2px;
+}
+
+/* =====================
+   MAIN READER DEMO
+===================== */
+.reader-demo {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.03),
+    0 24px 80px rgba(0,0,0,0.5),
+    0 8px 24px rgba(0,0,0,0.3);
+  animation: fadeUp 0.7s 0.15s ease both;
+  position: relative;
+}
+
+/* Subtle gradient top edge */
+.reader-demo::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(79,142,247,0.4), rgba(240,120,64,0.4), transparent);
+}
+
+/* DEMO TOP BAR */
+.demo-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.demo-topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.traffic-lights {
+  display: flex;
+  gap: 5px;
+}
+
+.tl {
+  width: 10px; height: 10px; border-radius: 50%;
+  opacity: 0.5;
+}
+
+.tl-r { background: #ff5f56; }
+.tl-y { background: #ffbd2e; }
+.tl-g { background: #27c93f; }
+
+.demo-topbar-title {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.demo-topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.col-badge {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.col-badge.src {
+  background: var(--blue-dim);
+  color: var(--blue);
+}
+
+.col-badge.tgt {
+  background: var(--orange-dim);
+  color: var(--orange);
+}
+
+.badge-arrow {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+/* COLUMNS */
+.reader-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 380px;
+}
+
+.reader-col {
+  padding: 32px 36px 32px;
+  overflow: hidden;
+}
+
+.reader-col.col-src {
+  border-right: 1px solid var(--border);
+  position: relative;
+}
+
+/* The text */
+.reader-text {
+  font-family: 'Lora', serif;
+  font-size: 16px;
+  line-height: 1.85;
+  color: var(--text-primary);
+  font-weight: 400;
+}
+
+.reader-text p { margin-bottom: 22px; }
+.reader-text p:last-child { margin-bottom: 0; }
+
+/* SOURCE blur */
+.src-text-wrap {
+  transition: filter 0.4s ease;
+}
+
+.src-text-wrap.blurred {
+  filter: blur(6px);
+}
+
+.src-text-wrap.blurred:hover {
+  filter: blur(0px);
+}
+
+/* =====================
+   WORD TOKENS
+===================== */
+.w {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 1px 2px;
+  margin: 0 -2px;
+  transition: background 0.12s, color 0.12s;
+  position: relative;
+}
+
+.w:hover {
+  background: rgba(255,255,255,0.06);
+}
+
+/* Alignment active states */
+.w.lit-src {
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-radius: 4px;
+}
+
+.w.lit-tgt {
+  background: var(--orange-dim);
+  color: var(--orange);
+  border-radius: 4px;
+}
+
+/* Soft glow on aligned words */
+.w.lit-src { box-shadow: 0 0 10px rgba(79,142,247,0.2); }
+.w.lit-tgt { box-shadow: 0 0 10px rgba(240,120,64,0.2); }
+
+/* Connection line canvas */
+#connectionCanvas {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* =====================
+   WORD POPUP
+===================== */
+.word-popup {
+  position: fixed;
+  width: 300px;
+  background: #1e1e1b;
+  border: 1px solid var(--border-bright);
+  border-radius: var(--radius);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.04),
+    0 20px 60px rgba(0,0,0,0.6),
+    0 4px 16px rgba(0,0,0,0.4);
+  padding: 0;
+  z-index: 1000;
+  display: none;
+  overflow: hidden;
+}
+
+.popup-top {
+  padding: 16px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-word-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.popup-word {
+  font-family: 'Lora', serif;
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--orange);
+  letter-spacing: -0.01em;
+}
+
+.popup-bookmark {
+  width: 22px; height: 22px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+  flex-shrink: 0;
+}
+
+.popup-bookmark:hover { color: var(--gold); }
+
+.popup-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.popup-pos {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--orange);
+  opacity: 0.8;
+}
+
+.popup-ipa {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+.popup-audio-icon {
+  width: 14px; height: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.15s;
+}
+
+.popup-audio-icon:hover { color: var(--blue); }
+
+.popup-body {
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--border);
+}
+
+.popup-def {
+  font-size: 13px;
+  line-height: 1.65;
+  color: var(--text-secondary);
+  font-weight: 300;
+  margin-bottom: 10px;
+}
+
+.popup-def strong {
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.popup-examples {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.popup-example {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-style: italic;
+  padding-left: 10px;
+  border-left: 2px solid var(--border);
+  line-height: 1.5;
+}
+
+.popup-example em { color: var(--orange); font-style: normal; }
+
+.popup-bottom {
+  padding: 10px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.popup-base-form {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.popup-base-word {
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.popup-listen-btns {
+  display: flex;
+  gap: 5px;
+}
+
+.popup-listen-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 9px;
+  border-radius: 20px;
+  border: 1px solid var(--border);
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.popup-listen-btn:hover {
+  border-color: var(--border-bright);
+  color: var(--text-primary);
+  background: rgba(255,255,255,0.04);
+}
+
+/* =====================
+   BOTTOM CONTROLS
+===================== */
+.demo-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 20px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.controls-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.blur-label {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.blur-group {
+  display: flex;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 2px;
+}
+
+.blur-btn {
+  font-size: 12px;
+  font-weight: 500;
+  padding: 5px 11px;
+  border-radius: 5px;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  transition: all 0.15s;
+}
+
+.blur-btn:hover { color: var(--text-primary); }
+
+.blur-btn.active {
+  background: var(--surface);
+  color: var(--text-primary);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+
+.controls-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.demo-hint-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--text-muted);
+  background: rgba(79,142,247,0.08);
+  border: 1px solid rgba(79,142,247,0.15);
+  border-radius: 20px;
+  padding: 5px 12px;
+  transition: opacity 0.4s;
+}
+
+.demo-hint-chip.faded { opacity: 0; pointer-events: none; }
+
+.hint-dot {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: pulse 1.8s ease infinite;
+}
+
+/* =====================
+   FEATURE CALLOUTS (below reader)
+===================== */
+.feature-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+  animation: fadeUp 0.7s 0.3s ease both;
+}
+
+.feature-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 18px 20px;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.feature-card.f1::before { background: linear-gradient(90deg, var(--blue), transparent); }
+.feature-card.f2::before { background: linear-gradient(90deg, var(--orange), transparent); }
+.feature-card.f3::before { background: linear-gradient(90deg, var(--gold), transparent); }
+
+.feature-card:hover {
+  border-color: var(--border-bright);
+  transform: translateY(-2px);
+}
+
+.feature-card:hover::before { opacity: 1; }
+
+.feature-icon {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 12px;
+  font-size: 16px;
+}
+
+.f1 .feature-icon { background: var(--blue-dim); color: var(--blue); }
+.f2 .feature-icon { background: var(--orange-dim); color: var(--orange); }
+.f3 .feature-icon { background: rgba(201,168,76,0.12); color: var(--gold); }
+
+.feature-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 5px;
+}
+
+.feature-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.55;
+  font-weight: 300;
+}
+
+/* =====================
+   CTA
+===================== */
+.cta-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  margin-top: 48px;
+  animation: fadeUp 0.7s 0.4s ease both;
+}
+
+.cta-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 15px 36px;
+  background: var(--text-primary);
+  color: var(--bg);
+  border: none;
+  border-radius: var(--radius);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  box-shadow: 0 4px 20px rgba(240,237,230,0.12);
+  letter-spacing: -0.01em;
+}
+
+.cta-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(240,237,230,0.18);
+}
+
+.cta-arrow { transition: transform 0.2s; }
+.cta-btn:hover .cta-arrow { transform: translateX(4px); }
+
+.cta-sub {
+  font-size: 13px;
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.cta-sub-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.cta-check {
+  color: var(--gold);
+}
+
+/* =====================
+   ANIMATIONS
+===================== */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes popIn {
+  0% { opacity: 0; transform: scale(0.94) translateY(6px); }
+  60% { transform: scale(1.02) translateY(-1px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+.word-popup.visible {
+  animation: popIn 0.2s ease both;
+}
+
+/* =====================
+   ALIGNMENT PULSE ANIMATION
+   (auto-demo on load)
+===================== */
+@keyframes glowPulse {
+  0% { opacity: 0; }
+  30% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Guided spotlight */
+.guided-arrow {
+  position: absolute;
+  pointer-events: none;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.4s;
+}
+
+.guided-arrow.hidden { opacity: 0; }
+
+.arrow-label {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--blue);
+  background: rgba(79,142,247,0.1);
+  border: 1px solid rgba(79,142,247,0.2);
+  border-radius: 20px;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.arrow-line {
+  width: 1px;
+  height: 20px;
+  background: linear-gradient(180deg, rgba(79,142,247,0.6), transparent);
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .reader-cols { grid-template-columns: 1fr; }
+  .reader-col.col-src { border-right: none; border-bottom: 1px solid var(--border); }
+  .feature-row { grid-template-columns: 1fr; }
+  .reader-col { padding: 24px 20px; }
+  .demo-controls { flex-direction: column; align-items: flex-start; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="demo-section">
+  <div class="demo-header">
+    <div class="demo-eyebrow">Live interactive demo</div>
+    <h2 class="demo-headline">See how meaning <em>actually</em> moves<br>between languages</h2>
+    <p class="demo-subhead">Hover any word. Watch it light up in both languages simultaneously. This is what reading between languages feels like.</p>
+  </div>
+
+  <!-- LANGUAGE SELECTOR -->
+  <div class="lang-bar" id="langBar">
+    <span class="lang-bar-label">Reading</span>
+    <div class="lang-pill active-src" id="srcPill">EN English</div>
+    <span class="lang-arrow">→</span>
+    <div class="lang-pill active-tgt" id="tgtPill" style="border-color:var(--orange);color:var(--orange);background:var(--orange-glow)">FR French</div>
+    <span class="lang-bar-label" style="margin-left:12px">Try another:</span>
+    <div class="lang-pill" data-src="EN" data-tgt="ES" data-label-src="English" data-label-tgt="Spanish">EN → ES</div>
+    <div class="lang-pill" data-src="EN" data-tgt="DE" data-label-src="English" data-label-tgt="German">EN → DE</div>
+    <div class="lang-pill" data-src="FR" data-tgt="EN" data-label-src="French" data-label-tgt="English">FR → EN</div>
+  </div>
+
+  <!-- READER DEMO -->
+  <div class="reader-demo" id="readerDemo">
+
+    <!-- TOP BAR -->
+    <div class="demo-topbar">
+      <div class="demo-topbar-left">
+        <div class="traffic-lights">
+          <div class="tl tl-r"></div>
+          <div class="tl tl-y"></div>
+          <div class="tl tl-g"></div>
+        </div>
+        <span class="demo-topbar-title" id="topbarTitle">The Little Prince · Antoine de Saint-Exupéry</span>
+      </div>
+      <div class="demo-topbar-right">
+        <span class="col-badge src" id="srcBadge">EN</span>
+        <span class="badge-arrow">→</span>
+        <span class="col-badge tgt" id="tgtBadge">FR</span>
+      </div>
+    </div>
+
+    <!-- COLUMNS -->
+    <div class="reader-cols" style="position:relative">
+      <canvas id="connectionCanvas"></canvas>
+
+      <!-- SOURCE -->
+      <div class="reader-col col-src" id="colSrc">
+        <!-- Guided hint arrow -->
+        <div class="guided-arrow" id="guidedArrow" style="top:50px; right:24px;">
+          <div class="arrow-label">← hover any word</div>
+          <div class="arrow-line"></div>
+        </div>
+
+        <div class="reader-text">
+          <div class="src-text-wrap" id="srcTextWrap">
+            <!-- Injected by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- TARGET -->
+      <div class="reader-col col-tgt" id="colTgt">
+        <div class="reader-text" id="tgtTextEl">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTROLS -->
+    <div class="demo-controls">
+      <div class="controls-left">
+        <span class="blur-label">Source blur</span>
+        <div class="blur-group">
+          <button class="blur-btn active" data-blur="word">Word</button>
+          <button class="blur-btn" data-blur="sentence">Sentence</button>
+          <button class="blur-btn" data-blur="paragraph">Paragraph</button>
+          <button class="blur-btn" data-blur="off">Off</button>
+        </div>
+      </div>
+      <div class="controls-right">
+        <div class="demo-hint-chip" id="hintChip">
+          <div class="hint-dot"></div>
+          <span id="hintText">Hover a word in either column to see alignment</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURE CALLOUTS -->
+  <div class="feature-row">
+    <div class="feature-card f1">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      </div>
+      <div class="feature-name">Precise word alignment</div>
+      <div class="feature-desc">Every token mapped deterministically — not guessed. See exactly how structure shifts between languages.</div>
+    </div>
+    <div class="feature-card f2">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      </div>
+      <div class="feature-name">Deep dictionary + grammar</div>
+      <div class="feature-desc">Click any word for IPA, part of speech, base form, contextual definition, and example sentences.</div>
+    </div>
+    <div class="feature-card f3">
+      <div class="feature-icon">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="feature-name">Progressive blur reading</div>
+      <div class="feature-desc">Hide the source text by word, sentence, or paragraph. Test comprehension as you read — not after.</div>
+    </div>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-row">
+    <button class="cta-btn">
+      Start reading free
+      <svg class="cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+    </button>
+    <div class="cta-sub">
+      <span class="cta-sub-item"><span class="cta-check">✓</span> No credit card</span>
+      <span class="cta-sub-item"><span class="cta-check">✓</span> Upload any text</span>
+      <span class="cta-sub-item"><span class="cta-check">✓</span> 40+ languages</span>
+    </div>
+  </div>
+</div>
+
+<!-- WORD POPUP -->
+<div class="word-popup" id="wordPopup">
+  <div class="popup-top">
+    <div class="popup-word-row">
+      <span class="popup-word" id="popWord">—</span>
+      <svg class="popup-bookmark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+    </div>
+    <div class="popup-meta-row">
+      <span class="popup-pos" id="popPos">—</span>
+      <span class="popup-ipa" id="popIpa">—</span>
+      <svg class="popup-audio-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+    </div>
+  </div>
+  <div class="popup-body">
+    <div class="popup-def" id="popDef">—</div>
+    <div class="popup-examples" id="popExamples"></div>
+  </div>
+  <div class="popup-bottom">
+    <div class="popup-base-form">
+      Base: <span class="popup-base-word" id="popBase">—</span>
+    </div>
+    <div class="popup-listen-btns">
+      <button class="popup-listen-btn">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Sentence
+      </button>
+      <button class="popup-listen-btn">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+        Paragraph
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// =====================
+// DATA
+// =====================
+const TEXTS = {
+  'EN-FR': {
+    title: "The Little Prince · Antoine de Saint-Exupéry",
+    pairs: [
+      {
+        src: [
+          {id:'s1', words: ['Once','when','I','was','six','years','old','I','saw','a','magnificent','picture','in','a','book']},
+          {id:'s2', words: ['It','was','a','picture','of','a','boa','constrictor','in','the','act','of','swallowing','an','animal']},
+          {id:'s3', words: ['I','showed','my','masterpiece','to','the','grown-ups','and','asked','whether','the','drawing','frightened','them']},
+        ],
+        tgt: [
+          {id:'t1', words: ['Lorsque','j\'avais','six','ans','j\'ai','vu','une','magnifique','image','dans','un','livre']},
+          {id:'t2', words: ['C\'était','une','image','d\'un','boa','constrictor','en','train','d\'avaler','un','animal']},
+          {id:'t3', words: ['J\'ai','montré','mon','chef-d\'œuvre','aux','grandes','personnes','et','leur','ai','demandé','si','le','dessin','leur','faisait','peur']},
+        ],
+        alignments: {
+          'Once': ['Lorsque'], 'six': ['six'], 'years': ['ans'], 'old': ['ans'],
+          'magnificent': ['magnifique'], 'picture': ['image','image'],
+          'book': ['livre'], 'boa': ['boa'], 'constrictor': ['constrictor'],
+          'swallowing': ['d\'avaler'], 'animal': ['animal'],
+          'showed': ['montré'], 'masterpiece': ['chef-d\'œuvre'],
+          'grown-ups': ['grandes','personnes'], 'asked': ['demandé'],
+          'drawing': ['dessin'], 'frightened': ['faisait','peur'],
+        }
+      }
+    ]
+  },
+  'EN-ES': {
+    title: "Don Quixote · Miguel de Cervantes",
+    pairs: [
+      {
+        src: [
+          {id:'s1', words: ['In','a','village','of','La','Mancha','the','name','of','which','I','have','no','desire','to','recall']},
+          {id:'s2', words: ['there','lived','not','long','since','one','of','those','gentlemen','that','keep','a','lance','in','the','lance-rack']},
+          {id:'s3', words: ['a','lean','hack','and','a','greyhound','for','coursing']},
+        ],
+        tgt: [
+          {id:'t1', words: ['En','un','lugar','de','la','Mancha','de','cuyo','nombre','no','quiero','acordarme']},
+          {id:'t2', words: ['no','ha','mucho','tiempo','que','vivía','un','hidalgo','de','los','de','lanza','en','astillero']},
+          {id:'t3', words: ['rocín','flaco','y','galgo','corredor']},
+        ],
+        alignments: {
+          'village': ['lugar'], 'La': ['la'], 'Mancha': ['Mancha'],
+          'name': ['nombre'], 'recall': ['acordarme'],
+          'lived': ['vivía'], 'long': ['mucho'], 'since': ['tiempo'],
+          'gentlemen': ['hidalgo'], 'lance': ['lanza','astillero'],
+          'lean': ['flaco'], 'hack': ['rocín'],
+          'greyhound': ['galgo'], 'coursing': ['corredor'],
+        }
+      }
+    ]
+  },
+  'EN-DE': {
+    title: "The Trial · Franz Kafka",
+    pairs: [
+      {
+        src: [
+          {id:'s1', words: ['Someone','must','have','slandered','Josef','K','for','one','morning','without','having','done','anything','wrong','he','was','arrested']},
+          {id:'s2', words: ['His','landlady','Frau','Grubach','had','already','prepared','breakfast','for','him']},
+          {id:'s3', words: ['but','this','time','she','did','not','come','in','herself']},
+        ],
+        tgt: [
+          {id:'t1', words: ['Jemand','musste','Josef','K','verleumdet','haben','denn','ohne','dass','er','etwas','Böses','getan','hätte','wurde','er','eines','Morgens','verhaftet']},
+          {id:'t2', words: ['Die','Köchin','der','Frau','Grubach','seiner','Zimmervermieterin','pflegte','ihm','das','Frühstück','zu','bringen']},
+          {id:'t3', words: ['aber','diesmal','kam','sie','nicht']},
+        ],
+        alignments: {
+          'Someone': ['Jemand'], 'slandered': ['verleumdet'],
+          'Josef': ['Josef'], 'K': ['K'],
+          'morning': ['Morgens'], 'wrong': ['Böses'],
+          'arrested': ['verhaftet'], 'landlady': ['Zimmervermieterin'],
+          'Frau': ['Frau'], 'Grubach': ['Grubach'],
+          'breakfast': ['Frühstück'], 'prepared': ['bringen'],
+          'but': ['aber'], 'time': ['diesmal'],
+          'come': ['kam'], 'herself': ['sie'],
+        }
+      }
+    ]
+  },
+  'FR-EN': {
+    title: "Le Petit Prince · Antoine de Saint-Exupéry",
+    pairs: [
+      {
+        src: [
+          {id:'s1', words: ['Lorsque','j\'avais','six','ans','j\'ai','vu','une','magnifique','image','dans','un','livre']},
+          {id:'s2', words: ['Il','était','dit','que','les','boas','avalent','leur','proie','tout','entière']},
+          {id:'s3', words: ['J\'ai','montré','mon','chef-d\'œuvre','aux','grandes','personnes']},
+        ],
+        tgt: [
+          {id:'t1', words: ['When','I','was','six','years','old','I','saw','a','magnificent','picture','in','a','book']},
+          {id:'t2', words: ['It','said','that','boa','constrictors','swallow','their','prey','whole']},
+          {id:'t3', words: ['I','showed','my','masterpiece','to','the','grown-ups']},
+        ],
+        alignments: {
+          'Lorsque': ['When'], 'six': ['six'], 'ans': ['years','old'],
+          'magnifique': ['magnificent'], 'image': ['picture'],
+          'livre': ['book'], 'boas': ['boa','constrictors'],
+          'avalent': ['swallow'], 'proie': ['prey'],
+          'entière': ['whole'], 'montré': ['showed'],
+          'chef-d\'œuvre': ['masterpiece'], 'grandes': ['grown-ups'],
+          'personnes': ['grown-ups'],
+        }
+      }
+    ]
+  }
+};
+
+const WORD_DATA = {
+  // French words
+  'Lorsque': { pos: 'conjunction', ipa: '/lɔʁsk/', def: 'Temporal conjunction meaning "when" or "at the time that." Used to introduce clauses indicating a point in time.', examples: [['Lorsque','je','suis','arrivé','il','faisait','nuit.']], base: 'lorsque' },
+  'magnifique': { pos: 'adjective', ipa: '/maɲifik/', def: 'Meaning "magnificent" or "splendid." Invariable in form when placed before the noun.', examples: [['Un','magnifique','coucher','de','soleil.']], base: 'magnifique' },
+  'constrictor': { pos: 'noun', ipa: '/kɔ̃stʁiktɔʁ/', def: 'From Latin <strong>constringere</strong>. Refers to a snake that kills by coiling around its prey.', examples: [['Le','boa','constrictor','avale','sa','proie','entière.']], base: 'constrictor' },
+  'avalent': { pos: 'verb', ipa: '/avalɑ̃/', def: 'Third person plural present of <strong>avaler</strong> — to swallow. Here indicating the habitual action of boa constrictors.', examples: [['Les','serpents','avalent','leur','proie','sans','la','mâcher.']], base: 'avaler' },
+  'montré': { pos: 'verb', ipa: '/mɔ̃tʁe/', def: 'Past participle of <strong>montrer</strong> — to show, to display. Used here as the main verb of a passé composé construction.', examples: [['Il','m\'a','montré','sa','collection.']], base: 'montrer' },
+  'chef-d\'œuvre': { pos: 'noun', ipa: '/ʃɛf.dœvʁ/', def: 'Compound noun meaning "masterpiece." Literally "chief work." Plural: <strong>chefs-d\'œuvre</strong>.', examples: [['Ce','tableau','est','un','véritable','chef-d\'œuvre.']], base: 'chef-d\'œuvre' },
+  // German
+  'verleumdet': { pos: 'verb', ipa: '/fɛɐ̯ˈlɔɪ̯mdɪt/', def: 'Past participle of <strong>verleumden</strong> — to slander, to defame. Indicates false accusations made about someone.', examples: [['Er','wurde','öffentlich','verleumdet.']], base: 'verleumden' },
+  'verhaftet': { pos: 'verb', ipa: '/fɛɐ̯ˈhaftɪt/', def: 'Past participle of <strong>verhaften</strong> — to arrest. Here used in passive construction: <em>wurde verhaftet</em> = "was arrested."', examples: [['Der','Verdächtige','wurde','verhaftet.']], base: 'verhaften' },
+  'Zimmervermieterin': { pos: 'noun', ipa: '/ˈtsɪmɐfɛɐ̯ˌmiːtəʁɪn/', def: 'Compound noun: <strong>Zimmer</strong> (room) + <strong>vermieten</strong> (to rent out) + <strong>-erin</strong> (feminine agent suffix). Meaning: female landlady or room-letter.', examples: [['Meine','Zimmervermieterin','ist','sehr','nett.']], base: 'Zimmer·vermieterin' },
+  // Spanish
+  'acordarme': { pos: 'verb', ipa: '/akoɾˈðaɾme/', def: 'Reflexive infinitive of <strong>acordar</strong> — to remember, to recall. The <em>-me</em> suffix makes it reflexive: "to remember myself/to recall."', examples: [['No','quiero','acordarme','de','ese','día.']], base: 'acordar' },
+  'hidalgo': { pos: 'noun', ipa: '/iˈðalɡo/', def: 'A member of the lower Spanish nobility. From <em>hijo de algo</em> ("son of something"). Hidalgos had noble status but often modest means.', examples: [['Era','un','hidalgo','honrado','de','La','Mancha.']], base: 'hidalgo' },
+  'vivía': { pos: 'verb', ipa: '/biˈβia/', def: 'Third person singular imperfect of <strong>vivir</strong> — to live. The imperfect tense conveys habitual or ongoing past action.', examples: [['Antes','vivía','en','un','pueblo','pequeño.']], base: 'vivir' },
+  // English (for FR→EN)
+  'magnificent': { pos: 'adjective', ipa: '/mæɡˈnɪfɪsənt/', def: 'Impressively beautiful or elaborate. From Latin <strong>magnificus</strong>. Often used to describe scenes, works, or achievements of exceptional quality.', examples: [['The', 'view', 'from', 'the', 'summit', 'was', 'magnificent.']], base: 'magnificent' },
+  'masterpiece': { pos: 'noun', ipa: '/ˈmɑːstəpiːs/', def: 'A work of outstanding artistry or skill; the most outstanding piece of a person\'s work. Used here ironically, as the drawing was misunderstood.', examples: [['The', 'Mona', 'Lisa', 'is', 'considered', 'a', 'masterpiece.']], base: 'masterpiece' },
+};
+
+// =====================
+// STATE
+// =====================
+let currentLang = 'EN-FR';
+let activeWord = null;
+let blurMode = 'word';
+let interacted = false;
+let autoRunning = false;
+
+// =====================
+// RENDER TEXT
+// =====================
+function getTextData() {
+  return TEXTS[currentLang]?.pairs[0];
+}
+
+function renderText() {
+  const data = getTextData();
+  if (!data) return;
+
+  const srcWrap = document.getElementById('srcTextWrap');
+  const tgtEl = document.getElementById('tgtTextEl');
+
+  srcWrap.innerHTML = data.src.map(sent =>
+    `<p>${sent.words.map(w =>
+      `<span class="w" data-word="${w}" data-col="src" data-sent="${sent.id}">${w}</span> `
+    ).join('')}</p>`
+  ).join('');
+
+  tgtEl.innerHTML = data.tgt.map(sent =>
+    `<p>${sent.words.map(w =>
+      `<span class="w" data-word="${w}" data-col="tgt" data-sent="${sent.id}">${w}</span> `
+    ).join('')}</p>`
+  ).join('');
+
+  applyBlur();
+  attachWordListeners();
+}
+
+// =====================
+// BLUR
+// =====================
+function applyBlur() {
+  const wrap = document.getElementById('srcTextWrap');
+  if (blurMode === 'off') {
+    wrap.classList.remove('blurred');
+    wrap.style.filter = '';
+  } else {
+    wrap.classList.add('blurred');
+  }
+}
+
+// =====================
+// WORD LISTENERS
+// =====================
+function attachWordListeners() {
+  document.querySelectorAll('.w').forEach(el => {
+    el.addEventListener('mouseenter', () => onWordHover(el));
+    el.addEventListener('click', (e) => onWordClick(e, el));
+    el.addEventListener('mouseleave', () => {
+      if (activeWord !== el.dataset.word) clearHighlights();
+    });
+  });
+}
+
+function onWordHover(el) {
+  const word = el.dataset.word;
+  highlightAlignment(word);
+
+  if (!interacted) {
+    interacted = true;
+    document.getElementById('guidedArrow').classList.add('hidden');
+    updateHint('click-for-definition');
+  }
+}
+
+function onWordClick(e, el) {
+  e.stopPropagation();
+  activeWord = el.dataset.word;
+  showPopup(e, el.dataset.word);
+  updateHint('try-blur');
+}
+
+function highlightAlignment(word) {
+  clearHighlights();
+  const data = getTextData();
+  if (!data) return;
+
+  // Find all src and tgt tokens matching this word or its alignment
+  const alignedTgt = data.alignments[word] || [];
+  const isFromTgt = data.tgt.some(s => s.words.includes(word));
+
+  document.querySelectorAll('.w').forEach(el => {
+    const w = el.dataset.word;
+    const col = el.dataset.col;
+
+    if (col === 'src' && (w === word || (isFromTgt && alignedTgt.includes(w)))) {
+      el.classList.add('lit-src');
+    }
+    if (col === 'tgt') {
+      if (w === word) { el.classList.add('lit-tgt'); }
+      else if (!isFromTgt && alignedTgt.includes(w)) { el.classList.add('lit-tgt'); }
+      // Reverse: if hovering tgt, find src aligned
+      if (isFromTgt) {
+        const revAligned = Object.entries(data.alignments)
+          .filter(([k, v]) => v.includes(word))
+          .map(([k]) => k);
+        revAligned.forEach(srcW => {
+          document.querySelectorAll(`.w[data-col="src"][data-word="${srcW}"]`)
+            .forEach(e => e.classList.add('lit-src'));
+        });
+      }
+    }
+  });
+
+  // Also ensure the hovered word itself is highlighted
+  document.querySelectorAll(`.w[data-word="${word}"]`).forEach(el => {
+    if (el.dataset.col === 'src') el.classList.add('lit-src');
+    if (el.dataset.col === 'tgt') el.classList.add('lit-tgt');
+  });
+
+  drawConnectionLine(word, alignedTgt);
+}
+
+function clearHighlights() {
+  document.querySelectorAll('.w').forEach(el => {
+    el.classList.remove('lit-src', 'lit-tgt');
+  });
+  clearCanvas();
+}
+
+// =====================
+// CONNECTION LINE
+// =====================
+function drawConnectionLine(srcWord, tgtWords) {
+  const canvas = document.getElementById('connectionCanvas');
+  const ctx = canvas.getContext('2d');
+  const container = canvas.parentElement;
+
+  canvas.width = container.offsetWidth;
+  canvas.height = container.offsetHeight;
+
+  const srcEls = [...document.querySelectorAll(`.w[data-col="src"][data-word="${srcWord}"]`)];
+  const tgtEls = tgtWords.flatMap(w => [...document.querySelectorAll(`.w[data-col="tgt"][data-word="${w}"]`)]);
+
+  if (!srcEls.length || !tgtEls.length) return;
+
+  const containerRect = container.getBoundingClientRect();
+
+  srcEls.forEach(srcEl => {
+    const sRect = srcEl.getBoundingClientRect();
+    const sx = sRect.right - containerRect.left;
+    const sy = sRect.top + sRect.height / 2 - containerRect.top;
+
+    tgtEls.forEach(tgtEl => {
+      const tRect = tgtEl.getBoundingClientRect();
+      const tx = tRect.left - containerRect.left;
+      const ty = tRect.top + tRect.height / 2 - containerRect.top;
+
+      const grad = ctx.createLinearGradient(sx, sy, tx, ty);
+      grad.addColorStop(0, 'rgba(79,142,247,0.5)');
+      grad.addColorStop(1, 'rgba(240,120,64,0.5)');
+
+      ctx.beginPath();
+      ctx.moveTo(sx, sy);
+      const cpx = (sx + tx) / 2;
+      ctx.bezierCurveTo(cpx, sy, cpx, ty, tx, ty);
+      ctx.strokeStyle = grad;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    });
+  });
+}
+
+function clearCanvas() {
+  const canvas = document.getElementById('connectionCanvas');
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+}
+
+// =====================
+// POPUP
+// =====================
+function showPopup(e, word) {
+  const popup = document.getElementById('wordPopup');
+  const data = WORD_DATA[word];
+
+  if (!data) { hidePopup(); return; }
+
+  document.getElementById('popWord').textContent = word;
+  document.getElementById('popPos').textContent = data.pos;
+  document.getElementById('popIpa').textContent = data.ipa;
+  document.getElementById('popDef').innerHTML = data.def;
+  document.getElementById('popBase').textContent = data.base;
+
+  const exEl = document.getElementById('popExamples');
+  exEl.innerHTML = (data.examples || []).map(ex =>
+    `<div class="popup-example">${ex.map((w,i) => {
+      const target = ex.join(' ').includes(word) && w === word
+        ? `<em>${w}</em>` : w;
+      return target;
+    }).join(' ')}</div>`
+  ).join('');
+
+  popup.style.display = 'block';
+  popup.classList.add('visible');
+
+  // Position
+  const rect = e.target ? e.target.getBoundingClientRect() : { left: e.clientX, top: e.clientY, width: 0, height: 0 };
+  let left = rect.left + rect.width / 2 - 150;
+  let top = rect.top - popup.offsetHeight - 12;
+
+  if (left < 8) left = 8;
+  if (left + 300 > window.innerWidth - 8) left = window.innerWidth - 308;
+  if (top < 8) top = rect.bottom + 8;
+
+  popup.style.left = left + 'px';
+  popup.style.top = top + 'px';
+}
+
+function hidePopup() {
+  const popup = document.getElementById('wordPopup');
+  popup.style.display = 'none';
+  popup.classList.remove('visible');
+  activeWord = null;
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.word-popup') && !e.target.closest('.w')) {
+    hidePopup();
+    clearHighlights();
+  }
+});
+
+// =====================
+// HINT SYSTEM
+// =====================
+const hints = {
+  'hover-word': 'Hover a word in either column to see alignment',
+  'click-for-definition': 'Great! Now click a highlighted word for its full definition',
+  'try-blur': 'Try the blur controls below to test your comprehension',
+  'done': 'You\'ve discovered the core Babeling experience ✦',
+};
+
+let hintStage = 'hover-word';
+
+function updateHint(stage) {
+  hintStage = stage;
+  const chip = document.getElementById('hintChip');
+  const text = document.getElementById('hintText');
+  chip.classList.add('faded');
+  setTimeout(() => {
+    text.textContent = hints[stage] || '';
+    chip.classList.remove('faded');
+    if (stage === 'done') {
+      setTimeout(() => chip.classList.add('faded'), 3000);
+    }
+  }, 300);
+}
+
+// =====================
+// BLUR TOGGLES
+// =====================
+document.querySelectorAll('.blur-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.blur-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    blurMode = btn.dataset.blur;
+    applyBlur();
+    if (hintStage === 'try-blur') updateHint('done');
+  });
+});
+
+// =====================
+// LANGUAGE SWITCHER
+// =====================
+document.querySelectorAll('.lang-pill[data-src]').forEach(pill => {
+  pill.addEventListener('click', () => {
+    const key = `${pill.dataset.src}-${pill.dataset.tgt}`;
+    if (!TEXTS[key]) return;
+    currentLang = key;
+    document.getElementById('srcBadge').textContent = pill.dataset.src;
+    document.getElementById('tgtBadge').textContent = pill.dataset.tgt;
+    document.getElementById('srcPill').textContent = `${pill.dataset.src} ${pill.dataset['label-src']}`;
+    document.getElementById('tgtPill').textContent = `${pill.dataset.tgt} ${pill.dataset['label-tgt']}`;
+    document.getElementById('topbarTitle').textContent = TEXTS[key].title;
+    interacted = false;
+    hintStage = 'hover-word';
+    updateHint('hover-word');
+    document.getElementById('guidedArrow').classList.remove('hidden');
+    hidePopup();
+    clearHighlights();
+    renderText();
+  });
+});
+
+// =====================
+// AUTO-DEMO
+// Briefly pulses a word on load to draw attention
+// =====================
+function runAutoDemo() {
+  if (interacted) return;
+  autoRunning = true;
+
+  const pairs = [
+    { word: 'magnificent', delay: 1200 },
+    { word: 'magnifique',  delay: 2400 },
+    { word: 'boa',         delay: 3600 },
+    { word: 'animal',      delay: 4800 },
+  ];
+
+  pairs.forEach(({ word, delay }) => {
+    setTimeout(() => {
+      if (interacted) return;
+      highlightAlignment(word);
+      setTimeout(() => {
+        if (!interacted) clearHighlights();
+      }, 900);
+    }, delay);
+  });
+
+  setTimeout(() => { autoRunning = false; }, 6000);
+}
+
+// =====================
+// RESIZE: redraw canvas
+// =====================
+window.addEventListener('resize', () => {
+  if (activeWord) highlightAlignment(activeWord);
+});
+
+// =====================
+// INIT
+// =====================
+renderText();
+setTimeout(runAutoDemo, 800);
+</script>
+</body>
+</html>

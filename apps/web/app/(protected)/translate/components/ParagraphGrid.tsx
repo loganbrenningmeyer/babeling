@@ -122,7 +122,7 @@ export function ParagraphGrid({
             </div>
 
             {/* Right: Target paragraph */}
-            <div className="my-4 mx-8">
+            <div className="my-4 mr-8 ml-12">
               <HoverText
                 variant="target"
                 words={tgtSlice.words}

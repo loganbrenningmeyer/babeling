@@ -1,0 +1,1055 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babeling – New Text</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5df;
+    --border-focus: #2a2a2a;
+    --text-primary: #1a1a18;
+    --text-secondary: #7a7870;
+    --text-muted: #b0ada6;
+    --accent-blue: #2563eb;
+    --accent-orange: #ea580c;
+    --accent-blue-soft: #eff6ff;
+    --accent-orange-soft: #fff7ed;
+    --pill-bg: #f0ede8;
+    --pill-text: #5a5750;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.07), 0 1px 4px rgba(0,0,0,0.04);
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    background: rgba(247,246,243,0.85);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 18px;
+    color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .nav-logo-icon {
+    width: 28px;
+    height: 28px;
+    background: var(--text-primary);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 13px;
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .nav-link {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .nav-link:hover { background: var(--pill-bg); color: var(--text-primary); }
+  .nav-link.active { color: var(--text-primary); background: var(--pill-bg); }
+
+  .nav-avatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--accent-blue);
+    color: white;
+    font-size: 13px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  /* MAIN */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 860px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  .page-header {
+    margin-bottom: 36px;
+  }
+
+  .page-header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 32px;
+    font-weight: 400;
+    letter-spacing: -0.3px;
+    color: var(--text-primary);
+    margin-bottom: 6px;
+  }
+
+  .page-header p {
+    font-size: 15px;
+    color: var(--text-secondary);
+    font-weight: 300;
+  }
+
+  /* LANGUAGE ROW */
+  .language-row {
+    display: grid;
+    grid-template-columns: 1fr 48px 1fr;
+    gap: 0;
+    align-items: center;
+    margin-bottom: 24px;
+  }
+
+  .lang-select-wrap {
+    position: relative;
+  }
+
+  .lang-select-wrap label {
+    display: block;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .lang-select {
+    width: 100%;
+    appearance: none;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 40px 12px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    box-shadow: var(--shadow-sm);
+  }
+
+  .lang-select:focus {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+  }
+
+  .lang-select-arrow {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    pointer-events: none;
+    color: var(--text-muted);
+  }
+
+  .lang-swap-btn {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding-bottom: 2px;
+    height: 100%;
+  }
+
+  .swap-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1px;
+  }
+
+  .swap-btn:hover {
+    border-color: var(--border-focus);
+    color: var(--text-primary);
+    transform: rotate(180deg);
+  }
+
+  /* INPUT AREA */
+  .input-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 20px;
+  }
+
+  .input-card:focus-within {
+    border-color: #c8c5bf;
+    box-shadow: var(--shadow-md);
+  }
+
+  /* TABS */
+  .input-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    padding: 0 4px;
+    gap: 2px;
+    background: var(--bg);
+  }
+
+  .input-tab {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .input-tab:hover { color: var(--text-secondary); }
+
+  .input-tab.active {
+    color: var(--text-primary);
+    border-bottom-color: var(--text-primary);
+  }
+
+  /* TEXT INPUT PANEL */
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .text-panel {
+    position: relative;
+  }
+
+  .text-area-wrap {
+    position: relative;
+  }
+
+  textarea {
+    width: 100%;
+    min-height: 280px;
+    padding: 20px 24px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-primary);
+    background: transparent;
+    border: none;
+    resize: none;
+    outline: none;
+    font-weight: 300;
+  }
+
+  textarea::placeholder { color: var(--text-muted); }
+
+  .textarea-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px 14px;
+    border-top: 1px solid var(--border);
+  }
+
+  .char-count {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .sample-texts {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .sample-label {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .sample-pill {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--pill-text);
+    background: var(--pill-bg);
+    border: none;
+    border-radius: 20px;
+    padding: 4px 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .sample-pill:hover {
+    background: #e5e2dc;
+    color: var(--text-primary);
+  }
+
+  /* UPLOAD PANEL */
+  .upload-panel {
+    padding: 20px;
+  }
+
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: var(--radius-sm);
+    padding: 52px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    background: var(--bg);
+  }
+
+  .drop-zone:hover, .drop-zone.drag-over {
+    border-color: var(--text-secondary);
+    background: #f0ede8;
+  }
+
+  .drop-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-secondary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .drop-title {
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text-primary);
+  }
+
+  .drop-subtitle {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: -6px;
+  }
+
+  .drop-formats {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+
+  .format-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 2px 7px;
+    letter-spacing: 0.03em;
+  }
+
+  .browse-btn {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--accent-blue);
+    background: var(--accent-blue-soft);
+    border: none;
+    border-radius: 20px;
+    padding: 7px 16px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .browse-btn:hover { background: #dbeafe; }
+
+  /* URL panel */
+  .url-panel { padding: 20px; }
+
+  .url-input-wrap {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .url-input {
+    flex: 1;
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 11px 16px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-primary);
+    background: var(--bg);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+
+  .url-input:focus { border-color: var(--border-focus); }
+  .url-input::placeholder { color: var(--text-muted); }
+
+  .url-fetch-btn {
+    padding: 11px 18px;
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: opacity 0.15s;
+  }
+
+  .url-fetch-btn:hover { opacity: 0.85; }
+
+  .url-note {
+    margin-top: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* OPTIONS ROW */
+  .options-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .option-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .option-label {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 400;
+    white-space: nowrap;
+  }
+
+  .toggle-row {
+    display: flex;
+    background: var(--pill-bg);
+    border-radius: 8px;
+    padding: 3px;
+    gap: 2px;
+  }
+
+  .toggle-opt {
+    font-size: 13px;
+    font-weight: 500;
+    padding: 5px 12px;
+    border-radius: 6px;
+    border: none;
+    background: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+
+  .toggle-opt.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  .divider-dot {
+    width: 3px;
+    height: 3px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+
+  /* SUBMIT */
+  .submit-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .submit-meta {
+    font-size: 13px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .submit-meta svg { flex-shrink: 0; }
+
+  .translate-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 13px 28px;
+    background: var(--text-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    white-space: nowrap;
+  }
+
+  .translate-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.18);
+  }
+
+  .translate-btn:active { transform: translateY(0); }
+
+  .btn-arrow {
+    transition: transform 0.2s;
+  }
+
+  .translate-btn:hover .btn-arrow { transform: translateX(3px); }
+
+  /* COST ESTIMATE */
+  .cost-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: var(--pill-bg);
+    border-radius: 20px;
+    padding: 4px 10px;
+  }
+
+  /* RECENTLY USED */
+  .recent-section {
+    margin-top: 48px;
+  }
+
+  .recent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .recent-title {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .view-all {
+    font-size: 13px;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.15s;
+  }
+
+  .view-all:hover { color: var(--text-primary); }
+
+  .recent-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .recent-card {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-decoration: none;
+    display: block;
+  }
+
+  .recent-card:hover {
+    border-color: #c8c5bf;
+    box-shadow: var(--shadow-md);
+    transform: translateY(-1px);
+  }
+
+  .recent-card-langs {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-bottom: 10px;
+  }
+
+  .lang-tag {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    padding: 2px 7px;
+    border-radius: 4px;
+  }
+
+  .lang-tag.source {
+    background: var(--accent-blue-soft);
+    color: var(--accent-blue);
+  }
+
+  .lang-tag.target {
+    background: var(--accent-orange-soft);
+    color: var(--accent-orange);
+  }
+
+  .lang-arrow {
+    color: var(--text-muted);
+    font-size: 12px;
+  }
+
+  .recent-card-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .recent-card-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .recent-card-meta span::after {
+    content: '·';
+    margin-left: 8px;
+    color: var(--border);
+  }
+
+  .recent-card-meta span:last-child::after { content: ''; }
+
+  /* Loading state */
+  .translate-btn.loading {
+    pointer-events: none;
+    opacity: 0.8;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+
+  .translate-btn.loading .spinner { display: block; }
+  .translate-btn.loading .btn-label { display: none; }
+  .translate-btn.loading .btn-arrow { display: none; }
+
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+
+  /* Fade in */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  main > * {
+    animation: fadeUp 0.35s ease both;
+  }
+
+  main > *:nth-child(1) { animation-delay: 0.02s; }
+  main > *:nth-child(2) { animation-delay: 0.07s; }
+  main > *:nth-child(3) { animation-delay: 0.12s; }
+  main > *:nth-child(4) { animation-delay: 0.17s; }
+  main > *:nth-child(5) { animation-delay: 0.22s; }
+  main > *:nth-child(6) { animation-delay: 0.27s; }
+
+  @media (max-width: 640px) {
+    main { padding: 28px 16px 60px; }
+    .language-row { grid-template-columns: 1fr 40px 1fr; }
+    .recent-grid { grid-template-columns: 1fr; }
+    .submit-row { flex-direction: column; align-items: stretch; }
+    .translate-btn { justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <div class="nav-logo-icon">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/>
+      </svg>
+    </div>
+    Babeling
+  </a>
+  <div class="nav-links">
+    <a class="nav-link active" href="#">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+      Translate
+    </a>
+    <a class="nav-link" href="#">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Library
+    </a>
+  </div>
+  <div class="nav-avatar">L</div>
+</nav>
+
+<main>
+
+  <div class="page-header">
+    <h1>New reading</h1>
+    <p>Paste text, upload a file, or fetch from a URL to begin.</p>
+  </div>
+
+  <!-- LANGUAGE SELECTION -->
+  <div class="language-row">
+    <div class="lang-select-wrap">
+      <label>Source language</label>
+      <div style="position:relative">
+        <select class="lang-select" id="sourceLang">
+          <option>English</option>
+          <option>French</option>
+          <option>Spanish</option>
+          <option>German</option>
+          <option>Italian</option>
+          <option>Portuguese</option>
+          <option>Japanese</option>
+          <option>Mandarin</option>
+          <option>Russian</option>
+          <option>Arabic</option>
+        </select>
+        <span class="lang-select-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </div>
+    </div>
+
+    <div class="lang-swap-btn">
+      <button class="swap-btn" id="swapBtn" title="Swap languages">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+      </button>
+    </div>
+
+    <div class="lang-select-wrap">
+      <label>Target language</label>
+      <div style="position:relative">
+        <select class="lang-select" id="targetLang">
+          <option>French</option>
+          <option>Spanish</option>
+          <option>German</option>
+          <option>Italian</option>
+          <option>Portuguese</option>
+          <option>Japanese</option>
+          <option>Mandarin</option>
+          <option>Russian</option>
+          <option>Arabic</option>
+          <option>English</option>
+        </select>
+        <span class="lang-select-arrow">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- INPUT CARD -->
+  <div class="input-card">
+    <div class="input-tabs">
+      <button class="input-tab active" data-panel="text">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="17" y1="10" x2="3" y2="10"/><line x1="21" y1="6" x2="3" y2="6"/><line x1="21" y1="14" x2="3" y2="14"/><line x1="17" y1="18" x2="3" y2="18"/></svg>
+        Paste text
+      </button>
+      <button class="input-tab" data-panel="upload">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Upload file
+      </button>
+      <button class="input-tab" data-panel="url">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        From URL
+      </button>
+    </div>
+
+    <!-- TEXT PANEL -->
+    <div class="panel text-panel active" id="panel-text">
+      <textarea id="mainTextarea" placeholder="Paste or type your text here…" spellcheck="false"></textarea>
+      <div class="textarea-footer">
+        <span class="char-count" id="charCount">0 characters</span>
+        <div class="sample-texts">
+          <span class="sample-label">Try a sample:</span>
+          <button class="sample-pill" data-sample="littleprince">The Little Prince</button>
+          <button class="sample-pill" data-sample="kafka">Kafka</button>
+          <button class="sample-pill" data-sample="news">Le Monde</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- UPLOAD PANEL -->
+    <div class="panel upload-panel" id="panel-upload">
+      <div class="drop-zone" id="dropZone">
+        <div class="drop-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        </div>
+        <div class="drop-title">Drop your file here</div>
+        <div class="drop-subtitle">or</div>
+        <button class="browse-btn">Browse files</button>
+        <div class="drop-formats">
+          <span class="format-tag">TXT</span>
+          <span class="format-tag">PDF</span>
+          <span class="format-tag">EPUB</span>
+          <span class="format-tag">DOCX</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- URL PANEL -->
+    <div class="panel url-panel" id="panel-url">
+      <div class="url-input-wrap">
+        <input class="url-input" type="url" placeholder="https://www.lemonde.fr/article…" />
+        <button class="url-fetch-btn">Fetch text</button>
+      </div>
+      <p class="url-note">Works with most news articles and blog posts. Some paywalled content may not be accessible.</p>
+    </div>
+  </div>
+
+  <!-- OPTIONS -->
+  <div class="options-row">
+    <div class="option-group">
+      <span class="option-label">Blur mode</span>
+      <div class="toggle-row">
+        <button class="toggle-opt active" data-group="blur" data-val="word">Word</button>
+        <button class="toggle-opt" data-group="blur" data-val="sentence">Sentence</button>
+        <button class="toggle-opt" data-group="blur" data-val="paragraph">Paragraph</button>
+        <button class="toggle-opt" data-group="blur" data-val="off">Off</button>
+      </div>
+    </div>
+    <div class="divider-dot"></div>
+    <div class="option-group">
+      <span class="option-label">Start at</span>
+      <div class="toggle-row">
+        <button class="toggle-opt active" data-group="start" data-val="beginning">Beginning</button>
+        <button class="toggle-opt" data-group="start" data-val="bookmark">Last position</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUBMIT -->
+  <div class="submit-row">
+    <div class="submit-meta">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Alignment usually takes 10–20 seconds
+    </div>
+    <button class="translate-btn" id="translateBtn">
+      <span class="btn-label">Start reading</span>
+      <svg class="btn-arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+      <div class="spinner"></div>
+    </button>
+  </div>
+
+  <!-- RECENT -->
+  <div class="recent-section">
+    <div class="recent-header">
+      <span class="recent-title">Recent</span>
+      <a class="view-all" href="#">View library →</a>
+    </div>
+    <div class="recent-grid">
+      <a class="recent-card" href="#">
+        <div class="recent-card-langs">
+          <span class="lang-tag source">EN</span>
+          <span class="lang-arrow">→</span>
+          <span class="lang-tag target">FR</span>
+        </div>
+        <div class="recent-card-title">The Little Prince</div>
+        <div class="recent-card-meta">
+          <span>p. 12 / 35</span>
+          <span>2 days ago</span>
+        </div>
+      </a>
+      <a class="recent-card" href="#">
+        <div class="recent-card-langs">
+          <span class="lang-tag source">EN</span>
+          <span class="lang-arrow">→</span>
+          <span class="lang-tag target">ES</span>
+        </div>
+        <div class="recent-card-title">Don Quixote – Chapter 1</div>
+        <div class="recent-card-meta">
+          <span>p. 3 / 8</span>
+          <span>5 days ago</span>
+        </div>
+      </a>
+      <a class="recent-card" href="#">
+        <div class="recent-card-langs">
+          <span class="lang-tag source">FR</span>
+          <span class="lang-arrow">→</span>
+          <span class="lang-tag target">EN</span>
+        </div>
+        <div class="recent-card-title">Le Monde – Tech article</div>
+        <div class="recent-card-meta">
+          <span>Complete</span>
+          <span>1 week ago</span>
+        </div>
+      </a>
+    </div>
+  </div>
+
+</main>
+
+<script>
+  // TABS
+  document.querySelectorAll('.input-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('panel-' + tab.dataset.panel).classList.add('active');
+    });
+  });
+
+  // TOGGLES
+  document.querySelectorAll('.toggle-opt').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const group = btn.dataset.group;
+      document.querySelectorAll(`.toggle-opt[data-group="${group}"]`).forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // CHAR COUNT
+  const textarea = document.getElementById('mainTextarea');
+  const charCount = document.getElementById('charCount');
+  textarea.addEventListener('input', () => {
+    const len = textarea.value.length;
+    charCount.textContent = len.toLocaleString() + ' character' + (len !== 1 ? 's' : '');
+  });
+
+  // SAMPLE TEXTS
+  const samples = {
+    littleprince: `Once when I was six years old I saw a magnificent picture in a book, called True Stories from Nature, about the primeval forest. It was a picture of a boa constrictor in the act of swallowing an animal.`,
+    kafka: `Someone must have slandered Josef K., for one morning, without having done anything wrong, he was arrested.`,
+    news: `Les dirigeants européens se sont réunis à Bruxelles pour discuter des nouvelles mesures économiques face à l'inflation persistante qui touche les ménages du continent.`
+  };
+
+  document.querySelectorAll('.sample-pill').forEach(pill => {
+    pill.addEventListener('click', () => {
+      textarea.value = samples[pill.dataset.sample] || '';
+      textarea.dispatchEvent(new Event('input'));
+      // Switch to text tab if not already
+      document.querySelectorAll('.input-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-panel="text"]').classList.add('active');
+      document.getElementById('panel-text').classList.add('active');
+    });
+  });
+
+  // SWAP LANGUAGES
+  const swapBtn = document.getElementById('swapBtn');
+  const sourceLang = document.getElementById('sourceLang');
+  const targetLang = document.getElementById('targetLang');
+  swapBtn.addEventListener('click', () => {
+    const tmp = sourceLang.value;
+    // Find matching option in target
+    const targetOption = [...targetLang.options].find(o => o.value === tmp);
+    const sourceOption = [...sourceLang.options].find(o => o.value === targetLang.value);
+    if (targetOption) targetLang.value = tmp;
+    if (sourceOption) sourceLang.value = targetLang.value;
+    // Simpler swap
+    const sv = sourceLang.value;
+    const tv = targetLang.value;
+    sourceLang.value = tv;
+    targetLang.value = sv;
+  });
+
+  // DRAG AND DROP
+  const dropZone = document.getElementById('dropZone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); });
+
+  // TRANSLATE BUTTON
+  const translateBtn = document.getElementById('translateBtn');
+  translateBtn.addEventListener('click', () => {
+    translateBtn.classList.add('loading');
+    setTimeout(() => translateBtn.classList.remove('loading'), 3000);
+  });
+</script>
+</body>
+</html>

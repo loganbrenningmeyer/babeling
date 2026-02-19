@@ -12,3 +12,5 @@ Icon?
 testing/
 # React Component Preview
 previewConfig.json
+scripts/init_db.sh
+scripts/delete_table.sh

@@ -1,0 +1,1166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babeling – The Little Prince</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f7f6f3;
+    --surface: #ffffff;
+    --border: #e8e5df;
+    --text-primary: #1a1a18;
+    --text-secondary: #7a7870;
+    --text-muted: #b0ada6;
+    --accent-blue: #2563eb;
+    --accent-orange: #ea580c;
+    --accent-blue-soft: #eff6ff;
+    --accent-orange-soft: #fff7ed;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 16px rgba(0,0,0,0.08), 0 1px 4px rgba(0,0,0,0.04);
+    --shadow-lg: 0 12px 40px rgba(0,0,0,0.12), 0 4px 12px rgba(0,0,0,0.06);
+    --radius: 12px;
+    --radius-sm: 8px;
+    --toc-width: 300px;
+    --nav-height: 56px;
+    --bottom-bar: 56px;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* NAV */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    height: var(--nav-height);
+    background: rgba(247,246,243,0.92);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 0;
+    z-index: 200;
+    gap: 12px;
+  }
+
+  .nav-left { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+
+  .nav-logo {
+    display: flex; align-items: center; gap: 7px;
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px; color: var(--text-primary);
+    text-decoration: none;
+  }
+
+  .nav-logo-icon {
+    width: 26px; height: 26px;
+    background: var(--text-primary);
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 12px; flex-shrink: 0;
+  }
+
+  .nav-divider {
+    width: 1px; height: 18px;
+    background: var(--border);
+  }
+
+  /* TOC TRIGGER */
+  .toc-trigger {
+    display: flex; align-items: center; gap: 7px;
+    padding: 6px 12px 6px 8px;
+    border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    color: var(--text-secondary);
+    font-size: 13px; font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+    box-shadow: var(--shadow-sm);
+    font-family: 'DM Sans', sans-serif;
+    white-space: nowrap;
+  }
+
+  .toc-trigger:hover { border-color: #c8c5bf; color: var(--text-primary); }
+  .toc-trigger.active { border-color: var(--text-primary); color: var(--text-primary); background: var(--bg); }
+
+  .toc-trigger-icon { color: var(--text-muted); transition: color 0.15s; }
+  .toc-trigger:hover .toc-trigger-icon,
+  .toc-trigger.active .toc-trigger-icon { color: var(--text-primary); }
+
+  /* NAV CENTER — book title + progress */
+  .nav-center {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .nav-book-title {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 280px;
+  }
+
+  .nav-progress-track {
+    width: 120px;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .nav-progress-fill {
+    height: 100%;
+    background: var(--accent-blue);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  /* NAV RIGHT */
+  .nav-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  .nav-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px;
+    border-radius: var(--radius-sm);
+    border: none; background: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px; font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer; transition: all 0.15s;
+  }
+
+  .nav-btn:hover { background: #eeece8; color: var(--text-primary); }
+
+  .nav-avatar {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: var(--accent-blue); color: white;
+    font-size: 12px; font-weight: 500;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+  }
+
+  /* =====================
+     LAYOUT
+  ===================== */
+  .layout {
+    display: flex;
+    flex: 1;
+    position: relative;
+    height: calc(100vh - var(--nav-height) - var(--bottom-bar));
+    overflow: hidden;
+  }
+
+  /* =====================
+     TABLE OF CONTENTS PANEL
+  ===================== */
+  .toc-panel {
+    width: var(--toc-width);
+    flex-shrink: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(calc(-1 * var(--toc-width)));
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: absolute;
+    top: 0; left: 0; bottom: 0;
+    z-index: 150;
+    box-shadow: none;
+  }
+
+  .toc-panel.open {
+    transform: translateX(0);
+    box-shadow: var(--shadow-lg);
+  }
+
+  .toc-header {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .toc-header-top {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .toc-title-text {
+    font-size: 12px; font-weight: 500;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .toc-close {
+    width: 26px; height: 26px; border-radius: 6px;
+    border: none; background: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted); transition: all 0.15s;
+  }
+
+  .toc-close:hover { background: var(--bg); color: var(--text-primary); }
+
+  .toc-book-info {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+
+  .toc-book-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 17px; color: var(--text-primary);
+  }
+
+  .toc-book-meta {
+    font-size: 12px; color: var(--text-muted);
+    display: flex; align-items: center; gap: 6px;
+  }
+
+  .lang-badge {
+    font-size: 11px; font-weight: 600;
+    padding: 1px 6px; border-radius: 4px;
+  }
+
+  .lang-badge.src { background: var(--accent-blue-soft); color: var(--accent-blue); }
+  .lang-badge.tgt { background: var(--accent-orange-soft); color: var(--accent-orange); }
+
+  /* PROGRESS SUMMARY */
+  .toc-progress {
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+
+  .toc-progress-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+
+  .toc-progress-label {
+    font-size: 12px; color: var(--text-secondary); font-weight: 400;
+  }
+
+  .toc-progress-val {
+    font-size: 12px; font-weight: 500; color: var(--text-primary);
+  }
+
+  .toc-progress-track {
+    width: 100%; height: 4px;
+    background: var(--border); border-radius: 2px; overflow: hidden;
+  }
+
+  .toc-progress-fill {
+    height: 100%; background: var(--accent-blue);
+    border-radius: 2px; transition: width 0.4s ease;
+  }
+
+  /* JUMP TO PAGE */
+  .toc-jump {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+    display: flex; gap: 8px; align-items: center;
+  }
+
+  .jump-label {
+    font-size: 13px; color: var(--text-secondary);
+    white-space: nowrap;
+  }
+
+  .jump-input {
+    width: 64px; padding: 6px 10px;
+    border: 1.5px solid var(--border); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--text-primary); background: var(--bg);
+    outline: none; text-align: center;
+    transition: border-color 0.15s;
+  }
+
+  .jump-input:focus { border-color: var(--text-primary); }
+
+  .jump-of { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+
+  .jump-go {
+    margin-left: auto;
+    padding: 6px 14px; border-radius: var(--radius-sm);
+    border: none; background: var(--text-primary); color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    cursor: pointer; transition: opacity 0.15s;
+  }
+
+  .jump-go:hover { opacity: 0.8; }
+
+  /* CHAPTER LIST */
+  .toc-chapters {
+    flex: 1; overflow-y: auto;
+    padding: 8px 0;
+  }
+
+  .toc-chapters::-webkit-scrollbar { width: 4px; }
+  .toc-chapters::-webkit-scrollbar-track { background: transparent; }
+  .toc-chapters::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .chapter-item {
+    display: flex; align-items: baseline;
+    gap: 10px;
+    padding: 9px 20px;
+    cursor: pointer;
+    transition: background 0.12s;
+    border-left: 2px solid transparent;
+    position: relative;
+  }
+
+  .chapter-item:hover { background: var(--bg); }
+
+  .chapter-item.current {
+    background: var(--accent-blue-soft);
+    border-left-color: var(--accent-blue);
+  }
+
+  .chapter-item.read { opacity: 0.6; }
+
+  .chapter-num {
+    font-size: 11px; font-weight: 600;
+    color: var(--text-muted); width: 20px; flex-shrink: 0;
+    text-align: right;
+  }
+
+  .chapter-item.current .chapter-num { color: var(--accent-blue); }
+
+  .chapter-info { flex: 1; min-width: 0; }
+
+  .chapter-name {
+    font-size: 13px; font-weight: 500;
+    color: var(--text-primary);
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    line-height: 1.3;
+  }
+
+  .chapter-item.current .chapter-name { color: var(--accent-blue); }
+
+  .chapter-pages {
+    font-size: 11px; color: var(--text-muted); margin-top: 1px;
+  }
+
+  .chapter-check {
+    width: 14px; height: 14px; flex-shrink: 0;
+    color: var(--text-muted);
+  }
+
+  .chapter-item.current .chapter-check { color: var(--accent-blue); }
+
+  /* =====================
+     READER AREA
+  ===================== */
+  .reader-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: margin-left 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    position: relative;
+  }
+
+  .reader-wrap.shifted { margin-left: var(--toc-width); }
+
+  .reader-title {
+    text-align: center;
+    padding: 22px 24px 0;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--text-muted);
+    flex-shrink: 0;
+  }
+
+  .reader-columns {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0;
+    overflow: hidden;
+  }
+
+  .col {
+    padding: 24px 40px 24px;
+    overflow-y: auto;
+    position: relative;
+  }
+
+  .col::-webkit-scrollbar { width: 4px; }
+  .col::-webkit-scrollbar-track { background: transparent; }
+  .col::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+  .col-source { border-right: 1px solid var(--border); }
+
+  .col-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+    flex-shrink: 0;
+  }
+
+  .col-lang-label {
+    font-size: 13px; font-weight: 500;
+    color: var(--text-primary);
+    padding-bottom: 3px;
+    border-bottom: 2px solid var(--accent-blue);
+  }
+
+  .col-source .col-lang-label { border-bottom-color: var(--text-muted); }
+  .col-target .col-lang-label { border-bottom-color: var(--accent-orange); }
+
+  .show-original-btn {
+    display: flex; align-items: center; gap: 5px;
+    padding: 5px 10px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: transparent;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.15s;
+  }
+
+  .show-original-btn:hover { border-color: #c8c5bf; color: var(--text-primary); }
+
+  .reader-text p {
+    font-size: 16px; line-height: 1.8;
+    color: var(--text-primary); font-weight: 300;
+    margin-bottom: 20px;
+  }
+
+  .reader-text p:last-child { margin-bottom: 0; }
+
+  /* Blur effect */
+  .blurred { filter: blur(5px); transition: filter 0.2s; user-select: none; }
+  .blurred:hover { filter: blur(0); }
+
+  /* Word highlight demo */
+  .word-hover {
+    cursor: pointer; border-radius: 2px;
+    transition: background 0.1s;
+    padding: 0 1px;
+  }
+
+  .word-hover:hover { background: rgba(37,99,235,0.08); }
+  .word-hover.highlighted-src { background: rgba(37,99,235,0.15); color: var(--accent-blue); border-radius: 3px; }
+  .word-hover.highlighted-tgt { background: rgba(234,88,12,0.12); color: var(--accent-orange); border-radius: 3px; }
+
+  /* =====================
+     BOTTOM BAR
+  ===================== */
+  .bottom-bar {
+    height: var(--bottom-bar);
+    background: rgba(247,246,243,0.95);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    gap: 12px;
+    position: sticky;
+    bottom: 0;
+    z-index: 100;
+  }
+
+  /* PREV/NEXT */
+  .nav-page-btn {
+    display: flex; align-items: center; gap: 6px;
+    padding: 8px 14px; border-radius: var(--radius-sm);
+    border: 1.5px solid var(--border); background: var(--surface);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer;
+    transition: all 0.15s; box-shadow: var(--shadow-sm);
+  }
+
+  .nav-page-btn:hover:not(:disabled) {
+    border-color: #c8c5bf; color: var(--text-primary);
+    transform: translateY(-1px); box-shadow: var(--shadow-md);
+  }
+
+  .nav-page-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* CENTER CONTROLS */
+  .bottom-center {
+    display: flex; align-items: center; gap: 14px;
+  }
+
+  /* PAGE INDICATOR — clickable */
+  .page-indicator {
+    display: flex; align-items: center; gap: 8px;
+    cursor: pointer;
+    padding: 5px 8px; border-radius: var(--radius-sm);
+    transition: background 0.15s;
+  }
+
+  .page-indicator:hover { background: #eeece8; }
+
+  .page-indicator-text {
+    font-size: 13px; font-weight: 500; color: var(--text-primary);
+    white-space: nowrap;
+  }
+
+  .page-indicator-sub {
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  /* INLINE PAGE JUMP (appears on click) */
+  .page-jump-wrap {
+    display: none;
+    align-items: center; gap: 6px;
+  }
+
+  .page-jump-wrap.visible { display: flex; }
+
+  .page-jump-input {
+    width: 52px; padding: 5px 8px;
+    border: 1.5px solid var(--text-primary); border-radius: var(--radius-sm);
+    font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+    color: var(--text-primary); background: var(--surface);
+    outline: none; text-align: center;
+  }
+
+  .page-jump-confirm {
+    padding: 5px 10px; border-radius: var(--radius-sm);
+    border: none; background: var(--text-primary); color: white;
+    font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+    cursor: pointer;
+  }
+
+  .page-jump-cancel {
+    padding: 5px; border: none; background: none;
+    color: var(--text-muted); cursor: pointer; font-size: 12px;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* SCRUBBER */
+  .page-scrubber-wrap {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .scrubber-label { font-size: 11px; color: var(--text-muted); }
+
+  input[type="range"].scrubber {
+    -webkit-appearance: none;
+    width: 140px; height: 4px;
+    background: var(--border); border-radius: 2px;
+    outline: none; cursor: pointer;
+  }
+
+  input[type="range"].scrubber::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--text-primary);
+    cursor: pointer;
+    box-shadow: var(--shadow-sm);
+    transition: transform 0.1s;
+  }
+
+  input[type="range"].scrubber::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+  }
+
+  /* BLUR TOGGLES */
+  .blur-toggle-group {
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .blur-label {
+    font-size: 12px; color: var(--text-muted);
+    white-space: nowrap;
+  }
+
+  .blur-toggles {
+    display: flex; background: #eeece8;
+    border-radius: 7px; padding: 2px; gap: 1px;
+  }
+
+  .blur-opt {
+    font-size: 12px; font-weight: 500;
+    padding: 4px 10px; border-radius: 5px;
+    border: none; background: none;
+    color: var(--text-muted); cursor: pointer;
+    font-family: 'DM Sans', sans-serif; transition: all 0.12s;
+  }
+
+  .blur-opt.active {
+    background: var(--surface);
+    color: var(--text-primary);
+    box-shadow: var(--shadow-sm);
+  }
+
+  /* =====================
+     PAGE MINI-MAP TOOLTIP
+     (shows on scrubber hover)
+  ===================== */
+  .scrubber-tooltip {
+    position: absolute;
+    bottom: calc(var(--bottom-bar) + 10px);
+    left: 50%; transform: translateX(-50%);
+    background: var(--text-primary);
+    color: white;
+    font-size: 12px; font-weight: 500;
+    padding: 5px 10px; border-radius: 6px;
+    white-space: nowrap; pointer-events: none;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 300;
+  }
+
+  .scrubber-tooltip.visible { opacity: 1; }
+  .scrubber-tooltip::after {
+    content: '';
+    position: absolute; top: 100%; left: 50%; transform: translateX(-50%);
+    border: 4px solid transparent;
+    border-top-color: var(--text-primary);
+  }
+
+  /* WORD POPUP (simplified) */
+  .word-popup {
+    position: fixed;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-lg);
+    padding: 16px;
+    width: 280px;
+    z-index: 500;
+    display: none;
+    animation: popIn 0.15s ease;
+  }
+
+  @keyframes popIn {
+    from { opacity: 0; transform: scale(0.96) translateY(4px); }
+    to { opacity: 1; transform: scale(1) translateY(0); }
+  }
+
+  .popup-word {
+    font-size: 18px; font-weight: 500;
+    color: var(--text-primary); margin-bottom: 2px;
+  }
+
+  .popup-meta {
+    display: flex; align-items: center; gap: 6px; margin-bottom: 10px;
+  }
+
+  .popup-pos {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.05em;
+    color: var(--accent-orange); text-transform: uppercase;
+  }
+
+  .popup-ipa {
+    font-size: 12px; color: var(--text-muted);
+  }
+
+  .popup-def {
+    font-size: 13px; line-height: 1.6;
+    color: var(--text-secondary); margin-bottom: 10px;
+    font-weight: 300;
+  }
+
+  .popup-base {
+    font-size: 12px; color: var(--text-muted);
+    padding-top: 8px; border-top: 1px solid var(--border);
+    display: flex; gap: 6px; align-items: center;
+  }
+
+  .popup-base strong { color: var(--text-secondary); font-weight: 500; }
+
+  .popup-audio-row {
+    display: flex; gap: 6px; margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border);
+  }
+
+  .popup-audio-btn {
+    display: flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 20px;
+    border: 1.5px solid var(--border); background: none;
+    font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 500;
+    color: var(--text-secondary); cursor: pointer; transition: all 0.12s;
+  }
+
+  .popup-audio-btn:hover { border-color: #c8c5bf; color: var(--text-primary); }
+
+  .overlay {
+    position: fixed; inset: 0;
+    z-index: 140;
+    display: none;
+  }
+
+  .overlay.visible { display: block; }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-left">
+    <a class="nav-logo" href="#">
+      <div class="nav-logo-icon">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+      </div>
+      Babeling
+    </a>
+    <div class="nav-divider"></div>
+    <button class="toc-trigger" id="tocTrigger">
+      <svg class="toc-trigger-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
+      Contents
+    </button>
+  </div>
+
+  <div class="nav-center">
+    <span class="nav-book-title">The Little Prince</span>
+    <div class="nav-progress-track">
+      <div class="nav-progress-fill" id="navProgressFill" style="width: 3%"></div>
+    </div>
+  </div>
+
+  <div class="nav-right">
+    <button class="nav-btn">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      Library
+    </button>
+    <div class="nav-avatar">L</div>
+  </div>
+</nav>
+
+<!-- OVERLAY (closes TOC on outside click) -->
+<div class="overlay" id="overlay"></div>
+
+<div class="layout">
+  <!-- TABLE OF CONTENTS -->
+  <aside class="toc-panel" id="tocPanel">
+    <div class="toc-header">
+      <div class="toc-header-top">
+        <span class="toc-title-text">Table of contents</span>
+        <button class="toc-close" id="tocClose">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="toc-book-info">
+        <div class="toc-book-name">The Little Prince</div>
+        <div class="toc-book-meta">
+          <span class="lang-badge src">EN</span>
+          <span>→</span>
+          <span class="lang-badge tgt">FR</span>
+          <span style="color:var(--border)">·</span>
+          <span>Antoine de Saint-Exupéry</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toc-progress">
+      <div class="toc-progress-row">
+        <span class="toc-progress-label">Reading progress</span>
+        <span class="toc-progress-val" id="tocProgressVal">Page 1 of 35</span>
+      </div>
+      <div class="toc-progress-track">
+        <div class="toc-progress-fill" id="tocProgressFill" style="width: 3%"></div>
+      </div>
+    </div>
+
+    <div class="toc-jump">
+      <span class="jump-label">Go to page</span>
+      <input class="jump-input" type="number" id="tocJumpInput" min="1" max="35" placeholder="1">
+      <span class="jump-of">/ 35</span>
+      <button class="jump-go" id="tocJumpGo">Go</button>
+    </div>
+
+    <div class="toc-chapters" id="tocChapters">
+      <!-- Generated by JS -->
+    </div>
+  </aside>
+
+  <!-- READER -->
+  <div class="reader-wrap" id="readerWrap">
+    <div class="reader-title" id="readerTitle">THE LITTLE PRINCE</div>
+
+    <div class="reader-columns">
+      <!-- SOURCE COLUMN -->
+      <div class="col col-source">
+        <div class="col-header">
+          <span class="col-lang-label">English</span>
+          <button class="show-original-btn" id="showOriginalBtn">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            Show original
+          </button>
+        </div>
+        <div class="reader-text" id="sourceText">
+          <!-- content set by JS -->
+        </div>
+      </div>
+
+      <!-- TARGET COLUMN -->
+      <div class="col col-target">
+        <div class="col-header">
+          <span class="col-lang-label">French</span>
+        </div>
+        <div class="reader-text" id="targetText">
+          <!-- content set by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BOTTOM BAR -->
+<div class="bottom-bar">
+  <button class="nav-page-btn" id="prevBtn" disabled>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+    Previous
+  </button>
+
+  <div class="bottom-center">
+    <!-- Scrubber -->
+    <div class="page-scrubber-wrap">
+      <input type="range" class="scrubber" id="pageScrubber" min="1" max="35" value="1">
+    </div>
+
+    <!-- Page indicator / inline jump -->
+    <div class="page-indicator" id="pageIndicator" title="Click to jump to page">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
+      <span class="page-indicator-text" id="pageIndicatorText">Page 1</span>
+      <span class="page-indicator-sub" id="pageIndicatorSub">/ 35</span>
+    </div>
+
+    <div class="page-jump-wrap" id="pageJumpWrap">
+      <input class="page-jump-input" type="number" id="pageJumpInput" min="1" max="35" value="1">
+      <span style="font-size:12px;color:var(--text-muted)">/ 35</span>
+      <button class="page-jump-confirm" id="pageJumpConfirm">Go</button>
+      <button class="page-jump-cancel" id="pageJumpCancel">✕</button>
+    </div>
+
+    <!-- Blur toggles -->
+    <div class="blur-toggle-group">
+      <span class="blur-label">Blur</span>
+      <div class="blur-toggles">
+        <button class="blur-opt active" data-blur="word">Word</button>
+        <button class="blur-opt" data-blur="sentence">Sentence</button>
+        <button class="blur-opt" data-blur="paragraph">Paragraph</button>
+        <button class="blur-opt" data-blur="off">Off</button>
+      </div>
+    </div>
+  </div>
+
+  <button class="nav-page-btn" id="nextBtn">
+    Next
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+  </button>
+</div>
+
+<!-- Scrubber tooltip -->
+<div class="scrubber-tooltip" id="scrubberTooltip"></div>
+
+<!-- Word popup -->
+<div class="word-popup" id="wordPopup">
+  <div class="popup-word" id="popupWord">Vécues</div>
+  <div class="popup-meta">
+    <span class="popup-pos">adjective</span>
+    <span class="popup-ipa">/ve.ky/</span>
+  </div>
+  <div class="popup-def" id="popupDef">Pertaining to subjective experience or real-life events. Feminine plural form of <strong>vécu</strong>, agreeing with <strong>histoires</strong>.</div>
+  <div class="popup-base">Base form: <strong>vécu</strong> &nbsp;·&nbsp; adjective</div>
+  <div class="popup-audio-row">
+    <button class="popup-audio-btn">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      Word
+    </button>
+    <button class="popup-audio-btn">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      Sentence
+    </button>
+    <button class="popup-audio-btn">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+      Paragraph
+    </button>
+  </div>
+</div>
+
+<script>
+const TOTAL_PAGES = 35;
+
+// Chapter data
+const chapters = [
+  { num: 1,  name: "The Boa Constrictor Drawing",     startPage: 1,  endPage: 2,  done: false },
+  { num: 2,  name: "Meeting the Little Prince",        startPage: 3,  endPage: 4,  done: false },
+  { num: 3,  name: "The Asteroid B-612",               startPage: 5,  endPage: 6,  done: false },
+  { num: 4,  name: "The Baobab Trees",                 startPage: 7,  endPage: 8,  done: false },
+  { num: 5,  name: "The Rose",                         startPage: 9,  endPage: 11, done: false },
+  { num: 6,  name: "The King",                         startPage: 12, endPage: 14, done: false },
+  { num: 7,  name: "The Conceited Man",                startPage: 15, endPage: 16, done: false },
+  { num: 8,  name: "The Drunkard",                     startPage: 17, endPage: 18, done: false },
+  { num: 9,  name: "The Businessman",                  startPage: 19, endPage: 21, done: false },
+  { num: 10, name: "The Lamplighter",                  startPage: 22, endPage: 23, done: false },
+  { num: 11, name: "The Geographer",                   startPage: 24, endPage: 26, done: false },
+  { num: 12, name: "Earth – The Snake",                startPage: 27, endPage: 28, done: false },
+  { num: 13, name: "The Desert Flower",                startPage: 29, endPage: 29, done: false },
+  { num: 14, name: "The Echo",                         startPage: 30, endPage: 30, done: false },
+  { num: 15, name: "The Fox",                          startPage: 31, endPage: 33, done: false },
+  { num: 16, name: "The Railway Switchman",            startPage: 34, endPage: 34, done: false },
+  { num: 17, name: "The Merchant & The Well",         startPage: 35, endPage: 35, done: false },
+];
+
+// Page text content (abbreviated for demo)
+const pageContent = {
+  source: [
+    `<p>Once when I was six years old I saw a magnificent picture in a book, called True Stories from Nature, about the primeval forest. It was a picture of a boa constrictor in the act of swallowing an animal.</p>
+     <p>In the book it said: "Boa constrictors swallow their prey whole, without chewing it. After that they are not able to move, and they sleep through the six months that they need for digestion." I pondered deeply, then, over the adventures of the jungle.</p>
+     <p>I showed my masterpiece to the grown-ups, and asked them whether the drawing frightened them. But they answered: "Frighten? Why should anyone be frightened by a hat?"</p>`,
+    `<p>So then I chose another profession, and learned to pilot airplanes. I have flown a little over all parts of the world; and it is true that geography has been very useful to me.</p>
+     <p>Thus I lived my life alone, without anyone that I could really talk to, until I had an accident with my plane in the Desert of Sahara, six years ago.</p>
+     <p>Something was broken in my engine. And as I had with me neither a mechanic nor any passengers, I set myself to attempt the difficult repairs all alone.</p>`,
+  ],
+  target: [
+    `<p>Lorsque j'avais six ans, j'ai vu une fois une magnifique image dans un livre, intitulé <span class="word-hover highlighted-tgt" data-word="Vécues" data-def="Pertaining to real-life experience. Feminine plural of vécu." data-pos="adjective" data-ipa="/ve.ky/">Histoires Vécues</span> de la Nature, concernant la forêt vierge. C'était une image d'un boa constrictor en train d'avaler un animal. Voici une copie du dessin.</p>
+     <p>Dans le livre, il était dit : « Les boas constrictors avalent leur proie tout entière, sans la mâcher. Après cela, ils ne sont plus capables de bouger, et ils dorment pendant les six mois dont ils ont besoin pour la digestion. » J'ai alors profondément réfléchi aux aventures de la jungle.</p>
+     <p>J'ai montré mon chef-d'œuvre aux grandes personnes, et je leur ai demandé si le dessin leur faisait peur. Mais elles ont répondu : « Peur ? Pourquoi quiconque aurait-il peur d'un chapeau ? »</p>`,
+    `<p>Alors j'ai choisi une autre carrière, et j'ai appris à piloter des avions. J'ai volé un peu partout dans le monde ; et il est vrai que la géographie m'a été très utile.</p>
+     <p>J'ai ainsi vécu ma vie seul, sans personne avec qui pouvoir vraiment parler, jusqu'à ce que j'aie eu une panne dans le désert du Sahara, il y a six ans.</p>
+     <p>Quelque chose s'était cassé dans mon moteur. Et comme je n'avais avec moi ni mécanicien ni passagers, je me suis apprêté à tenter, seul, cette réparation difficile.</p>`,
+  ]
+};
+
+let currentPage = 1;
+let blurMode = 'word';
+let tocOpen = false;
+let jumpVisible = false;
+
+// ---- RENDER CHAPTERS ----
+function renderChapters() {
+  const container = document.getElementById('tocChapters');
+  container.innerHTML = chapters.map(ch => {
+    const isCurrent = currentPage >= ch.startPage && currentPage <= ch.endPage;
+    const isDone = currentPage > ch.endPage;
+    return `
+      <div class="chapter-item ${isCurrent ? 'current' : ''} ${isDone ? 'read' : ''}"
+           data-page="${ch.startPage}" onclick="goToPage(${ch.startPage}); closeToc();">
+        <span class="chapter-num">${ch.num}</span>
+        <div class="chapter-info">
+          <div class="chapter-name">${ch.name}</div>
+          <div class="chapter-pages">pp. ${ch.startPage}–${ch.endPage}</div>
+        </div>
+        <svg class="chapter-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          ${isCurrent
+            ? '<circle cx="12" cy="12" r="4" fill="currentColor" stroke="none"/>'
+            : isDone
+              ? '<polyline points="20 6 9 17 4 12"/>'
+              : '<circle cx="12" cy="12" r="9" stroke-dasharray="2 4"/>'}
+        </svg>
+      </div>`;
+  }).join('');
+}
+
+// ---- RENDER PAGE ----
+function renderPage() {
+  const idx = Math.min(currentPage - 1, pageContent.source.length - 1);
+  const src = pageContent.source[idx % pageContent.source.length];
+  const tgt = pageContent.target[idx % pageContent.target.length];
+
+  const sourceEl = document.getElementById('sourceText');
+  const targetEl = document.getElementById('targetText');
+
+  // Apply blur to source
+  if (blurMode !== 'off') {
+    sourceEl.innerHTML = `<div class="blurred">${src}</div>`;
+  } else {
+    sourceEl.innerHTML = src;
+  }
+
+  targetEl.innerHTML = tgt;
+
+  // Attach word popup listeners
+  document.querySelectorAll('.word-hover').forEach(el => {
+    el.addEventListener('click', (e) => {
+      showWordPopup(e, el.dataset.word, el.dataset.def, el.dataset.pos, el.dataset.ipa);
+    });
+  });
+
+  updateUI();
+}
+
+function updateUI() {
+  const pct = ((currentPage - 1) / (TOTAL_PAGES - 1)) * 100;
+
+  document.getElementById('navProgressFill').style.width = pct + '%';
+  document.getElementById('tocProgressFill').style.width = pct + '%';
+  document.getElementById('tocProgressVal').textContent = `Page ${currentPage} of ${TOTAL_PAGES}`;
+  document.getElementById('pageIndicatorText').textContent = `Page ${currentPage}`;
+  document.getElementById('pageScrubber').value = currentPage;
+
+  document.getElementById('prevBtn').disabled = currentPage <= 1;
+  document.getElementById('nextBtn').disabled = currentPage >= TOTAL_PAGES;
+
+  // Chapter title in nav
+  const ch = chapters.find(c => currentPage >= c.startPage && currentPage <= c.endPage);
+  document.getElementById('readerTitle').textContent = ch ? ch.name.toUpperCase() : 'THE LITTLE PRINCE';
+
+  renderChapters();
+}
+
+function goToPage(page) {
+  currentPage = Math.max(1, Math.min(TOTAL_PAGES, page));
+  renderPage();
+  // Scroll reader to top
+  document.querySelectorAll('.col').forEach(c => c.scrollTop = 0);
+}
+
+// ---- TOC ----
+function openToc() {
+  tocOpen = true;
+  document.getElementById('tocPanel').classList.add('open');
+  document.getElementById('tocTrigger').classList.add('active');
+  document.getElementById('overlay').classList.add('visible');
+  // Don't shift layout — overlay panel style
+}
+
+function closeToc() {
+  tocOpen = false;
+  document.getElementById('tocPanel').classList.remove('open');
+  document.getElementById('tocTrigger').classList.remove('active');
+  document.getElementById('overlay').classList.remove('visible');
+}
+
+document.getElementById('tocTrigger').addEventListener('click', () => tocOpen ? closeToc() : openToc());
+document.getElementById('tocClose').addEventListener('click', closeToc);
+document.getElementById('overlay').addEventListener('click', closeToc);
+
+// TOC jump
+document.getElementById('tocJumpGo').addEventListener('click', () => {
+  const val = parseInt(document.getElementById('tocJumpInput').value);
+  if (val >= 1 && val <= TOTAL_PAGES) { goToPage(val); closeToc(); }
+});
+
+document.getElementById('tocJumpInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('tocJumpGo').click();
+});
+
+// ---- PREV / NEXT ----
+document.getElementById('prevBtn').addEventListener('click', () => goToPage(currentPage - 1));
+document.getElementById('nextBtn').addEventListener('click', () => goToPage(currentPage + 1));
+
+// Keyboard navigation
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT') return;
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') goToPage(currentPage + 1);
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') goToPage(currentPage - 1);
+});
+
+// ---- SCRUBBER ----
+const scrubber = document.getElementById('pageScrubber');
+const tooltip = document.getElementById('scrubberTooltip');
+
+scrubber.addEventListener('input', () => {
+  const val = parseInt(scrubber.value);
+  const ch = chapters.find(c => val >= c.startPage && c.endPage >= val);
+  tooltip.textContent = `Page ${val}${ch ? ' · ' + ch.name : ''}`;
+  tooltip.classList.add('visible');
+  // Position tooltip above scrubber
+  const rect = scrubber.getBoundingClientRect();
+  const pct = (val - 1) / (TOTAL_PAGES - 1);
+  tooltip.style.left = (rect.left + pct * rect.width) + 'px';
+  tooltip.style.bottom = (window.innerHeight - rect.top + 10) + 'px';
+  tooltip.style.transform = 'translateX(-50%)';
+});
+
+scrubber.addEventListener('change', () => {
+  goToPage(parseInt(scrubber.value));
+  tooltip.classList.remove('visible');
+});
+
+scrubber.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+
+// ---- INLINE PAGE JUMP ----
+document.getElementById('pageIndicator').addEventListener('click', () => {
+  jumpVisible = true;
+  document.getElementById('pageIndicator').style.display = 'none';
+  document.getElementById('pageJumpWrap').classList.add('visible');
+  document.getElementById('pageJumpInput').value = currentPage;
+  document.getElementById('pageJumpInput').focus();
+  document.getElementById('pageJumpInput').select();
+});
+
+function hideJump() {
+  jumpVisible = false;
+  document.getElementById('pageJumpWrap').classList.remove('visible');
+  document.getElementById('pageIndicator').style.display = '';
+}
+
+document.getElementById('pageJumpConfirm').addEventListener('click', () => {
+  const val = parseInt(document.getElementById('pageJumpInput').value);
+  if (val >= 1 && val <= TOTAL_PAGES) goToPage(val);
+  hideJump();
+});
+
+document.getElementById('pageJumpCancel').addEventListener('click', hideJump);
+
+document.getElementById('pageJumpInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') document.getElementById('pageJumpConfirm').click();
+  if (e.key === 'Escape') hideJump();
+});
+
+// ---- BLUR TOGGLES ----
+document.querySelectorAll('.blur-opt').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.blur-opt').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    blurMode = btn.dataset.blur;
+    renderPage();
+  });
+});
+
+// ---- SHOW/HIDE ORIGINAL ----
+let sourceVisible = false;
+document.getElementById('showOriginalBtn').addEventListener('click', () => {
+  sourceVisible = !sourceVisible;
+  const btn = document.getElementById('showOriginalBtn');
+  if (sourceVisible) {
+    blurMode = 'off';
+    document.querySelectorAll('.blur-opt').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-blur="off"]').classList.add('active');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg> Hide original`;
+  } else {
+    blurMode = 'word';
+    document.querySelectorAll('.blur-opt').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-blur="word"]').classList.add('active');
+    btn.innerHTML = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Show original`;
+  }
+  renderPage();
+});
+
+// ---- WORD POPUP ----
+function showWordPopup(e, word, def, pos, ipa) {
+  const popup = document.getElementById('wordPopup');
+  document.getElementById('popupWord').textContent = word || 'Vécues';
+  document.getElementById('popupDef').textContent = def || 'Definition here.';
+  popup.style.display = 'block';
+  const x = Math.min(e.clientX, window.innerWidth - 300);
+  const y = e.clientY - popup.offsetHeight - 10;
+  popup.style.left = x + 'px';
+  popup.style.top = Math.max(10, y) + 'px';
+}
+
+document.addEventListener('click', e => {
+  const popup = document.getElementById('wordPopup');
+  if (!e.target.closest('.word-hover') && !e.target.closest('.word-popup')) {
+    popup.style.display = 'none';
+  }
+});
+
+// ---- INIT ----
+renderPage();
+</script>
+</body>
+</html>

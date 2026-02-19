@@ -4,7 +4,7 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { ArrowLeftRight, Bookmark, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
 // -------------------------
 // User information provider
@@ -30,17 +30,18 @@ import { Pane } from "@/app/components/Pane";
 import { AppTextarea } from "@/app/components/AppTextarea";
 import { TextSurface } from "@/app/components/TextSurface";
 import { AnchoredPopover } from "@/app/(protected)/translate/components/AnchoredPopover";
+import {
+  AnnotateCard,
+  type DefineEntry,
+  type ExplainEntry,
+} from "@/app/(protected)/translate/components/AnnotateCard";
 import { SourceBlurButton } from "@/app/(protected)/translate/components/SourceBlur/SourceBlurButton";
 import { BlurMode, BlurModeToggle } from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
-import { DefineEntry, DefineCard } from "@/app/(protected)/translate/components/DefineCard";
-import { ExplainEntry, ExplainCard } from "@/app/(protected)/translate/components/ExplainCard";
 import { ExplainSkeleton } from "@/app/(protected)/translate/components/ExplainSkeleton";
 import { TextSkeleton } from "@/app/(protected)/translate/components/TextSkeleton";
 import { ParagraphGrid } from "@/app/(protected)/translate/components/ParagraphGrid";
 import { UploadSurface } from "@/app/components/UploadSurface";
-import { HelpPopover } from "@/app/(protected)/translate/components/HelpInfo/HelpPopover";
 import { useSourceRevealNav } from "@/app/(protected)/translate/components/SourceBlur/useSourceRevealNav";
-import { PronounceButton } from "@/app/(protected)/translate/components/Pronounce/PronounceButton";
 
 // -------------------------
 // Language Info Variables / Functions
@@ -120,6 +121,8 @@ function TranslatePage() {
   // Current sentence/paragraph for arrow navigation
   const [navSentId, setNavSentId] = useState<number>(-1);
   const [navParId, setNavParId] = useState<number>(-1);
+  // Single loading flag for reader loading state
+  const readerLoading = documentLoading || translationLoading || !session;
 
   // -------------------------
   // Popover / interaction state
@@ -587,6 +590,19 @@ function TranslatePage() {
 
     const loadSavedDocument = async () => {
       setDocumentLoading(true);
+
+      // Clear immediately so UI shows loading state w/ no defaults
+      setShowAligned(true);
+      pageCache.current.clear();
+      setSession(null);
+      setNavSentId(-1);
+      setNavParId(-1);
+      setExplainData(null);
+      setDefineData(null);
+      setTargetLocked(false);
+      setLockedSourceIndices([]);
+      setPopoverOpen(false);
+
       try {
         const data = await getDocumentById(parsedDocumentId);
         if (cancelled) return;
@@ -601,26 +617,16 @@ function TranslatePage() {
         setSourceText(sourceTextFull);
         setSourceFile(null);
         setSampleId("");
-        setSrcLang(data.src_lang ?? "en");
+        
+        // Load source / target languages
+        const loadedSrcLang = data.src_lang;
+        const loadedTgtLang = data.tgt_lang;
+        setSrcLang(loadedSrcLang);
+        setTgtLang(loadedTgtLang);
 
         setPages(newPages);
         setPageDbIds(newPageDbIds);
         setPageId(0);
-
-        // Jump directly into reader view for loaded library documents
-        if (newPages.length > 0) {
-          setShowAligned(true);
-        }
-
-        pageCache.current.clear();
-        setSession(null);
-        setNavSentId(-1);
-        setNavParId(-1);
-        setExplainData(null);
-        setDefineData(null);
-        setTargetLocked(false);
-        setLockedSourceIndices([]);
-        setPopoverOpen(false);
 
         if (newPages.length === 0) {
           setShowAligned(false);
@@ -628,8 +634,8 @@ function TranslatePage() {
         }
 
         await loadPageSession(0, newPages, newPageDbIds, {
-          srcLang: data.src_lang ?? "en",
-          tgtLang,
+          srcLang: loadedSrcLang,
+          tgtLang: loadedTgtLang,
         });
         loadedDocumentIdRef.current = parsedDocumentId;
       } catch (err) {
@@ -648,7 +654,7 @@ function TranslatePage() {
     return () => {
       cancelled = true;
     };
-  }, [documentIdParam, tgtLang]);
+  }, [documentIdParam]);
 
   // -------------------------
   // Arrow Key Navigation
@@ -720,7 +726,7 @@ function TranslatePage() {
   // Render
   // -------------------------
   return (
-    <div className="p-4">
+    <div className="p-4 font-ui">
       {/* -------------------------
       //* Source Text Input 
       //* ------------------------- */}
@@ -855,7 +861,7 @@ function TranslatePage() {
           //* Source Text Inputs
           //* ------------------------- */}
           {/* Document Title */}
-          <div className="font-ui shrink-0 rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
+          <div className="shrink-0 rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
             <div className="flex items-center gap-3">
               <span className="text-sm font-semibold text-muted-foreground">Title:</span>
               <Input
@@ -869,7 +875,7 @@ function TranslatePage() {
             </div>
           </div>
           {/* Input Box */}
-          <div className="mt-3 font-ui flex-1 min-h-0">
+          <div className="mt-3 flex-1 min-h-0">
             <AppTextarea
               className="h-full min-h-0 overflow-y-auto"
               value={sourceText}
@@ -903,7 +909,7 @@ function TranslatePage() {
           {/* -------------------------
           //* Translate Button
           //* ------------------------- */}
-          <div className="font-ui pt-6 shrink-0 flex flex-col items-center gap-2">
+          <div className="pt-6 shrink-0 flex flex-col items-center gap-2">
             <Button
               onClick={startReadingSession}
               disabled={translationLoading || !srcLang || !tgtLang || !canTranslate}
@@ -947,165 +953,132 @@ function TranslatePage() {
           {/* -------------------------
           //* Source / Target HoverText
           //* ------------------------- */}
-          <div>
-            <Pane className="h-[80vh] flex flex-col p-0 shadow-2xl" contentClassName="p-0">
+          <div className="h-[calc(100dvh-4rem-2rem)] flex flex-col overflow-hidden">
+            <div className="shrink-0 pb-4 text-center text-[20px] tracking-[0.12em] text-muted-foreground">
+              {title}
+            </div>
+            
+            <TextSurface className="flex-1 min-h-0 flex flex-col overflow-hidden">
+              <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden border-b">
+                <div className="pointer-events-none absolute inset-y-0 left-1/2 w-px bg-border/70" />
 
-              <div className="flex-1 min-h-0">
                 {/* -------------------------
-                //* --------- [Title] ----------
-                //* [Source Text] | [Target Text]
+                //* Source / Target Headers
                 //* ------------------------- */}
-                <TextSurface className="relative h-full flex flex-col overflow-hidden pt-0">
-                  {/* Title Header */}
-                  <div className="
-                      flex w-full justify-center
-                      pt-6 pb-5
-                      border-b 
-                      font-reading font-normal
-                      uppercase tracking-[0.12em] leading-none
-                      text-[28px] text-muted-foreground 
-                      ">
-                    {title}
-                  </div>
-                  <div className="relative flex-1 min-h-0 flex flex-col border-b">
-                    <div className="pointer-events-none absolute inset-y-0 left-1/2 w-0.25 bg-border" />
-
-                    {/* -------------------------
-                    //* Source / Target Headers
-                    //* ------------------------- */}
-                    <div className="grid grid-cols-2 text-[20px] font-medium">
-                      {/* Source Header */}
-                      <div className="px-6 relative">
-                        <div className="pt-4">
-                          <div className="flex items-center">
-                            <span className="inline-flex flex-col">
-                              <span className="pb-2 text-muted-foreground">{getLangLabel(srcLang)}</span>
-                              <span className="relative z-10 h-1 w-full bg-blue-300" />
+                <div className="
+                  shrink-0 grid grid-cols-2 border-b
+                  text-[18px] font-medium
+                  leading-none text-foreground/90
+                ">
+                  <div className="px-8 pt-4 pb-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        {readerLoading ? (
+                          <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted" />
+                        ) : (
+                          <div className="inline-flex flex-col">
+                            <span>
+                              {getLangLabel(srcLang)}
                             </span>
-                            <div className="absolute right-6 inset-y-0 flex items-center" >
-                              {/* Reveal/Hide Full Source Text */}
-                              <SourceBlurButton 
-                                value={sourceBlurEnabled}
-                                onChange={setSourceBlurEnabled}
-                                />
-                            </div>
+                            <span className="mt-2 h-0.5 w-full bg-blue-300" />
                           </div>
-                        </div>
-                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
+                        )}
                       </div>
-                      {/* Target Header */}
-                      <div className="px-6">
-                        <div className="pt-4">
-                          <span className="inline-flex flex-col">
-                            <span className="pb-2">{getLangLabel(tgtLang)}</span>
-                            <span className="relative z-10 h-1 w-full bg-orange-300" />
-                          </span>
-                        </div>
-                        <div className="-mt-0.5 h-0.5 bg-foreground/10" />
-                      </div>
-                    </div>
-
-                    {/* -------------------------
-                    //* ParagraphGrid
-                    //* ------------------------- */}
-                    <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
-                      {translationLoading || !session ? (
-                        <div className="grid grid-cols-2 p-8 pt-4">
-                          <div className="pr-8">
-                            <TextSkeleton blurClassName="blur-sm" />
-                          </div>
-                          <div className="pl-8">
-                            <TextSkeleton />
-                          </div>
-                        </div>
-                      ) : (
-                        <ParagraphGrid
-                        session={session}
-                        blurMode={blurMode}
-                        blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
-                        setBlurredSource={sourceBlurEnabled ? setBlurredSource : noopSetBlurredSource}
-                        sourceHighlightIndices={[
-                          ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
-                          ...activeAlignedSource,
-                        ]}
-                        targetHighlightIndices={[
-                          ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
-                          ...activeAlignedTarget,
-                        ]}
-                        onSourceHover={handleSourceHover}
-                        onTargetHover={handleTargetHover}
-                        onTargetWordClick={handleTargetWordClick}
-                        targetDisabled={popoverOpen}
-                        className="text-[28px] leading-[1.5]"
-                        />
-                      )}
+                      <SourceBlurButton value={sourceBlurEnabled} onChange={setSourceBlurEnabled} />
                     </div>
                   </div>
 
-                  {/* -------------------------
-                  //* Bottom Utilities Widget
-                  //* ------------------------- */}
-                  <div className="m-4 pointer-events-auto rounded-2xl border bg-background/95 py-4 shadow-lg backdrop-blur">
-                    <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-4">
-                      {/* Left: Previous Page */}
-                      <div className="flex justify-start items-center pl-3">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon"
-                          className="
-                          rounded-sm shadow-md border border-gray-300
-                          transition-colors hover:bg-foreground/10 hover:text-foreground
-                          "
-                          onClick={goPrevPage}
-                          aria-label="Previous page"
-                          disabled={pageId <= 0}
-                          >
-                          <ChevronLeft className="h-4 w-4" />
-                        </Button>
-                      </div>
-                      {/* Left spacer: BlurModeToggle */}
-                      <div className="flex justify-center">
-                        <BlurModeToggle
-                          value={blurMode}
-                          onChange={setBlurMode}
-                          className="border shadow"
-                          />
-                      </div>
-                      {/* Center: Page Tracker */}
-                      <div className="flex justify-center">
-                        <div className="rounded-full border px-3 py-1 text-sm font-semibold text-muted-foreground">
-                          Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
-                        </div>
-                      </div>
-                      {/* Right spacer: Help Popover */}
-                      <div className="flex justify-left pointer-events-none">
-                        <div className="pointer-events-auto">
-                          <HelpPopover />
-                        </div>
-                      </div>
-                      {/* Right: Next Page */}
-                      <div className="flex justify-end pr-3">
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="icon"
-                          className="
-                          rounded-sm shadow-md border border-gray-300
-                          transition-colors hover:bg-foreground/10 hover:text-foreground
-                          "
-                          onClick={goNextPage}
-                          aria-label="Next page"
-                          disabled={pageId >= pages.length - 1}
-                          >
-                          <ChevronRight className="h-4 w-4" />
-                        </Button>
-                      </div>
+                  <div className="pl-12 pt-4 pb-3">
+                      <div>
+                        {readerLoading ? (
+                          <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted" />
+                        ) : (
+                          <div className="inline-flex flex-col">
+                            <span>
+                              {getLangLabel(tgtLang)}
+                            </span>
+                            <span className="mt-2 h-0.5 w-full bg-orange-300" />
+                          </div>
+                        )}
                     </div>
                   </div>
-                </TextSurface>
+                </div>
+
+                {/* -------------------------
+                //* ParagraphGrid
+                //* ------------------------- */}
+                <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar pb-8">
+                  {readerLoading ? (
+                    <div className="grid grid-cols-2 p-8 pt-4">
+                      <div className="pr-8">
+                        <TextSkeleton blurClassName="blur-sm" />
+                      </div>
+                      <div className="pl-8">
+                        <TextSkeleton />
+                      </div>
+                    </div>
+                  ) : (
+                    <ParagraphGrid
+                      session={session}
+                      blurMode={blurMode}
+                      blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
+                      setBlurredSource={sourceBlurEnabled ? setBlurredSource : noopSetBlurredSource}
+                      sourceHighlightIndices={[
+                        ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
+                        ...activeAlignedSource,
+                      ]}
+                      targetHighlightIndices={[
+                        ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
+                        ...activeAlignedTarget,
+                      ]}
+                      onSourceHover={handleSourceHover}
+                      onTargetHover={handleTargetHover}
+                      onTargetWordClick={handleTargetWordClick}
+                      targetDisabled={popoverOpen}
+                      className="text-[24px] leading-[1.5]"
+                    />
+                  )}
+                </div>
               </div>
-            </Pane>
+
+              <div className="shrink-0 border-t px-4 py-3">
+                <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-3">
+                  <div className="flex justify-start">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-md border border-border/60"
+                      onClick={goPrevPage}
+                      aria-label="Previous page"
+                      disabled={pageId <= 0}
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                    </Button>
+                  </div>
+                  <div className="flex justify-center">
+                    <BlurModeToggle value={blurMode} onChange={setBlurMode} />
+                  </div>
+                  <div className="flex justify-center text-sm text-muted-foreground">
+                    Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
+                  </div>
+                  <div />
+                  <div className="flex justify-end">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="h-9 w-9 rounded-md border border-border/60"
+                      onClick={goNextPage}
+                      aria-label="Next page"
+                      disabled={pageId >= pages.length - 1}
+                    >
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </TextSurface>
 
             {/* -------------------------
             /* Explain / Define Popover
@@ -1130,50 +1103,13 @@ function TranslatePage() {
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (
-                <div className="relative p-4 space-y-4 font-ui">
-                  {/* Bookmark Glossary Item */}
-                  <button
-                    type="button"
-                    className="
-                      absolute -top-1.5 right-6 z-10
-                      p-0 text-muted-foreground transition-colors
-                      hover:text-foreground
-                      focus-visible:outline-none
-                    "
-                    aria-label="Save definition"
-                    title="Save definition"
-                    onClick={() => setIsBookmarked((prev) => !prev)}
-                  >
-                    <Bookmark
-                      className={`size-8 ${isBookmarked ? "fill-current text-foreground" : "fill-background text-muted-foreground"}`}
-                    />
-                  </button>
-                  {/* Definition */}
-                  {defineData && <DefineCard data={defineData} tgtLang={tgtLang} />}
-                  <div className="h-px bg-border" />
-                  {/* Explanation / Examples */}
-                  {explainData && <ExplainCard data={explainData} />}
-                  <div className="h-px w-full bg-border" />
-                  {/* Sentence / Paragraph Pronunciation */}
-                  {defineData && (
-                    <div className="flex w-full justify-between gap-2">
-                      {/* Sentence */}
-                      <PronounceButton
-                        text={defineData.tgtSent}
-                        label="Listen to sentence"
-                        tgtLang={tgtLang}
-                        iconClassName="h-4 w-4"
-                        />
-                      {/* Paragraph */}
-                      <PronounceButton
-                        text={defineData.tgtPar}
-                        label="Listen to paragraph"
-                        tgtLang={tgtLang}
-                        iconClassName="h-4 w-4"
-                        />
-                    </div>
-                  )}
-                </div>
+                <AnnotateCard
+                  defineData={defineData}
+                  explainData={explainData}
+                  tgtLang={tgtLang}
+                  isBookmarked={isBookmarked}
+                  onToggleBookmark={() => setIsBookmarked((prev) => !prev)}
+                />
               )}
             </AnchoredPopover>
           </div>
