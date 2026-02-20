@@ -49,8 +49,6 @@ export function AnnotateCard({
   onToggleBookmark?: () => void;
   className?: string;
 }) {
-  const wordIsLemma = defineData ? defineData.form.toLowerCase() === defineData.lemma.toLowerCase() : true;
-
   return (
     <div className={cn("relative p-4 space-y-4", className)}>
       {/* -------------------------
@@ -65,14 +63,14 @@ export function AnnotateCard({
           onClick={onToggleBookmark}
         >
           <Bookmark
-            strokeWidth={1.25}
+            strokeWidth={1}
             className={cn(
               "size-10 origin-top transition-all duration-200 ease-out",
               // make sure BOTH stroke and fill animate
               "[transition-color,fill,stroke,transform]",
               isBookmarked
-                ? "text-rose-800 fill-rose-800 scale-y-120"
-                : "text-rose-800 fill-white scale-y-95 translate-y-0 hover:text-foreground"
+                ? "text-rose-900 fill-rose-900 scale-y-120"
+                : "text-foreground fill-white scale-y-95 translate-y-0 hover:text-foreground"
             )}
           />
         </button>
@@ -164,26 +162,24 @@ export function AnnotateCard({
           <div className="h-px w-full bg-border" />
 
           <div className="flex w-full items-center justify-between gap-3">
-            {!wordIsLemma && (
-              <div className="flex flex-col gap-2">
-                <div className="inline-flex items-baseline gap-1.5">
-                  <span className="text-sm text-muted-foreground">Base form:</span>
-                  <div className="text-md font-reading font-semibold text-muted-foreground">
-                    {defineData.lemma}
-                  </div>
+            <div className="flex flex-col gap-2">
+              <div className="inline-flex items-baseline gap-1.5">
+                <span className="text-sm text-muted-foreground">Base form:</span>
+                <div className="text-md font-reading font-semibold text-muted-foreground">
+                  {defineData.lemma}
                 </div>
-
-                {defineData.ipaLemma && (
-                  <PronounceButton
-                    text={defineData.lemma}
-                    label={defineData.ipaLemma}
-                    tgtLang={tgtLang}
-                    className="h-6 text-sm"
-                    iconClassName="h-3 w-3"
-                  />
-                )}
               </div>
-            )}
+
+              {defineData.ipaLemma && (
+                <PronounceButton
+                  text={defineData.lemma}
+                  label={defineData.ipaLemma}
+                  tgtLang={tgtLang}
+                  className="h-6 text-sm"
+                  iconClassName="h-3 w-3"
+                />
+              )}
+            </div>
 
             <div className="flex items-center gap-2">
               <PronounceButton

@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babeling – Mobile Reader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:         #f0ede7;
+  --surface:    #ffffff;
+  --surface-2:  #f7f6f2;
+  --border:     #e4e1da;
+  --text-1:     #1a1916;
+  --text-2:     #6b6860;
+  --text-3:     #a8a49c;
+  --blue:       #2563eb;
+  --blue-soft:  #eff6ff;
+  --orange:     #d4531a;
+  --orange-soft:#fff4ee;
+  --green:      #16a34a;
+  --green-soft: #f0fdf4;
+  --peek-bg:    #f0f4ff;
+  --peek-border:rgba(37,99,235,0.15);
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 20px 60px;
+}
+
+/* ── HEADER ── */
+.page-header {
+  text-align: center;
+  margin-bottom: 40px;
+  animation: fadeUp .5s ease both;
+}
+
+.eyebrow {
+  font-size: 11px; font-weight: 600;
+  letter-spacing: .12em; text-transform: uppercase;
+  color: var(--text-3); margin-bottom: 10px;
+}
+
+.page-header h1 {
+  font-family: 'Lora', serif;
+  font-size: 28px; font-weight: 400;
+  color: var(--text-1); margin-bottom: 10px;
+  letter-spacing: -.02em;
+}
+
+.page-header p {
+  font-size: 15px; font-weight: 300;
+  color: var(--text-2); max-width: 480px;
+  margin: 0 auto; line-height: 1.6;
+}
+
+/* ── LAYOUT: phone + annotation side-by-side ── */
+.demo-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 48px;
+  justify-content: center;
+  flex-wrap: wrap;
+  animation: fadeUp .5s .08s ease both;
+}
+
+/* ── PHONE FRAME ── */
+.phone-outer {
+  position: relative;
+  flex-shrink: 0;
+}
+
+.phone-frame {
+  width: 375px;
+  height: 780px;
+  background: #0f0e0c;
+  border-radius: 50px;
+  padding: 12px;
+  box-shadow:
+    0 0 0 1px #3a3830,
+    0 40px 100px rgba(0,0,0,0.35),
+    0 12px 30px rgba(0,0,0,0.2),
+    inset 0 0 0 1px rgba(255,255,255,0.04);
+  position: relative;
+}
+
+/* Side buttons */
+.phone-frame::before {
+  content: '';
+  position: absolute;
+  left: -3px; top: 120px;
+  width: 3px; height: 36px;
+  background: #2a2826; border-radius: 2px 0 0 2px;
+  box-shadow: 0 48px 0 #2a2826, 0 90px 0 #2a2826;
+}
+.phone-frame::after {
+  content: '';
+  position: absolute;
+  right: -3px; top: 150px;
+  width: 3px; height: 60px;
+  background: #2a2826; border-radius: 0 2px 2px 0;
+}
+
+.phone-screen {
+  width: 100%;
+  height: 100%;
+  background: var(--surface);
+  border-radius: 40px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+/* Dynamic island */
+.dynamic-island {
+  position: absolute;
+  top: 12px; left: 50%; transform: translateX(-50%);
+  width: 120px; height: 34px;
+  background: #0f0e0c;
+  border-radius: 20px;
+  z-index: 100;
+}
+
+/* Status bar */
+.status-bar {
+  height: 54px;
+  display: flex; align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 24px 8px;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 10;
+}
+
+.status-time {
+  font-size: 15px; font-weight: 600;
+  color: var(--text-1); letter-spacing: -.01em;
+}
+
+.status-icons {
+  display: flex; align-items: center; gap: 6px;
+  color: var(--text-1);
+}
+
+/* ── MOBILE NAV ── */
+.mobile-nav {
+  display: flex; align-items: center;
+  justify-content: space-between;
+  padding: 8px 20px 10px;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(8px);
+}
+
+.mnav-back {
+  display: flex; align-items: center; gap: 4px;
+  color: var(--blue); font-size: 15px; font-weight: 500;
+  cursor: pointer;
+}
+
+.mnav-center {
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+}
+
+.mnav-title {
+  font-size: 13px; font-weight: 600; color: var(--text-1);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 160px;
+}
+
+.mnav-sub {
+  font-size: 11px; color: var(--text-3); font-weight: 400;
+}
+
+.mnav-right {
+  display: flex; align-items: center; gap: 12px;
+}
+
+.mnav-icon-btn {
+  color: var(--text-2); cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; border-radius: 8px;
+  transition: background .12s;
+}
+.mnav-icon-btn:active { background: var(--surface-2); }
+
+/* ── LANG TAB SWITCHER ── */
+.lang-switcher {
+  display: flex; align-items: center;
+  padding: 8px 16px;
+  gap: 6px;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border);
+}
+
+.lang-tab-pill {
+  flex: 1; display: flex; align-items: center; justify-content: center;
+  gap: 5px; padding: 7px 10px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: all .18s;
+  border: none; background: none;
+  font-family: 'DM Sans', sans-serif;
+  color: var(--text-3);
+}
+
+.lang-tab-pill.active {
+  background: var(--surface);
+  color: var(--text-1);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 0 0 1px var(--border);
+}
+
+.lang-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+.ld-blue   { background: var(--blue); }
+.ld-orange { background: var(--orange); }
+
+.lang-switcher-arrow {
+  font-size: 14px; color: var(--text-3); flex-shrink: 0;
+  padding: 0 2px;
+}
+
+/* ── PROGRESS BAR ── */
+.read-progress {
+  height: 3px; background: var(--border); flex-shrink: 0;
+  position: relative;
+}
+.read-progress-fill {
+  position: absolute; top: 0; left: 0; bottom: 0;
+  background: linear-gradient(90deg, var(--blue), var(--orange));
+  border-radius: 0 2px 2px 0;
+  transition: width .4s ease;
+}
+
+/* ── SCROLL AREA ── */
+.reader-scroll {
+  flex: 1; overflow-y: auto; overflow-x: hidden;
+  padding: 20px 20px 24px;
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: smooth;
+}
+
+.reader-scroll::-webkit-scrollbar { display: none; }
+
+/* ── TEXT CONTENT ── */
+.reader-content { display: flex; flex-direction: column; gap: 0; }
+
+/* Each paragraph block */
+.para-block {
+  position: relative;
+  margin-bottom: 4px;
+}
+
+/* Target paragraph (primary reading surface) */
+.para-target {
+  font-family: 'Lora', serif;
+  font-size: 17px; line-height: 1.82;
+  color: var(--text-1); font-weight: 400;
+  padding: 14px 0 10px;
+  border-bottom: 1px solid transparent;
+  transition: color .15s;
+  cursor: default;
+}
+
+/* Peek button */
+.peek-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 4px 0 12px;
+  border: none; background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500;
+  color: var(--text-3); cursor: pointer;
+  transition: color .12s;
+  width: 100%;
+}
+
+.peek-btn:active { color: var(--blue); }
+
+.peek-icon {
+  width: 16px; height: 16px; border-radius: 4px;
+  background: var(--border);
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); transition: all .15s;
+  flex-shrink: 0;
+}
+
+.peek-btn.open .peek-icon {
+  background: var(--blue-soft); color: var(--blue);
+  transform: rotate(180deg);
+}
+.peek-btn.open { color: var(--blue); }
+
+/* Source reveal block */
+.para-source {
+  font-family: 'Lora', serif;
+  font-size: 14.5px; line-height: 1.75;
+  color: var(--blue); font-weight: 400;
+  font-style: italic;
+  background: var(--peek-bg);
+  border: 1px solid var(--peek-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+  display: none;
+  animation: slideDown .2s ease both;
+  position: relative;
+}
+
+.para-source::before {
+  content: '';
+  position: absolute; top: -6px; left: 20px;
+  width: 10px; height: 10px;
+  background: var(--peek-bg);
+  border-top: 1px solid var(--peek-border);
+  border-left: 1px solid var(--peek-border);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+
+.para-source.open { display: block; }
+
+/* Blurred variant */
+.para-source.blurred {
+  filter: blur(5px);
+  user-select: none;
+  cursor: pointer;
+}
+
+.para-source.blurred:active { filter: blur(0); }
+
+/* Para divider */
+.para-divider {
+  height: 1px; background: var(--border);
+  margin: 2px 0 4px;
+  opacity: .5;
+}
+
+/* ── WORD HIGHLIGHT ── */
+.w {
+  cursor: pointer;
+  border-radius: 3px;
+  padding: 0 1px; margin: 0 -1px;
+  transition: background .1s;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.w:active, .w.tapped { background: rgba(37,99,235,.12); color: var(--blue); }
+
+/* ── BOTTOM SHEET POPUP ── */
+.bottom-sheet-overlay {
+  position: absolute; inset: 0;
+  background: rgba(0,0,0,.3);
+  z-index: 80; display: none;
+  backdrop-filter: blur(2px);
+}
+.bottom-sheet-overlay.open { display: block; animation: fadein .15s ease; }
+
+.word-sheet {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  background: var(--surface);
+  border-radius: 24px 24px 0 0;
+  z-index: 90;
+  display: none;
+  box-shadow: 0 -8px 40px rgba(0,0,0,.15);
+  overflow: hidden;
+}
+
+.word-sheet.open {
+  display: block;
+  animation: slideUp .25s cubic-bezier(.25,.46,.45,.94) both;
+}
+
+.sheet-handle {
+  width: 36px; height: 4px; border-radius: 2px;
+  background: var(--border);
+  margin: 12px auto 0;
+}
+
+.sheet-top {
+  padding: 14px 20px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sheet-word {
+  font-family: 'Lora', serif;
+  font-size: 24px; font-weight: 500;
+  color: var(--orange); margin-bottom: 3px;
+}
+
+.sheet-meta {
+  display: flex; align-items: center; gap: 8px;
+}
+
+.sheet-pos {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: .07em; text-transform: uppercase;
+  color: var(--orange); opacity: .8;
+}
+
+.sheet-ipa {
+  font-size: 13px; color: var(--text-3); font-style: italic;
+}
+
+.sheet-body {
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+}
+
+.sheet-def {
+  font-size: 14px; line-height: 1.65;
+  color: var(--text-2); font-weight: 300;
+  margin-bottom: 10px;
+}
+
+.sheet-def strong { color: var(--text-1); font-weight: 500; }
+
+.sheet-example {
+  font-size: 13px; color: var(--text-3); font-style: italic;
+  padding-left: 10px;
+  border-left: 2px solid var(--border); line-height: 1.55;
+}
+
+.sheet-example em { color: var(--orange); font-style: normal; }
+
+.sheet-footer {
+  padding: 12px 20px 24px;
+  display: flex; align-items: center; gap: 8px;
+}
+
+.sheet-base {
+  font-size: 12px; color: var(--text-3);
+  flex: 1;
+}
+.sheet-base strong { color: var(--text-2); font-weight: 500; }
+
+.sheet-audio-btns { display: flex; gap: 6px; }
+
+.sheet-audio-btn {
+  display: flex; align-items: center; gap: 4px;
+  padding: 6px 12px; border-radius: 20px;
+  border: 1.5px solid var(--border); background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.sheet-audio-btn:active { background: var(--surface-2); }
+
+/* ── BOTTOM NAV BAR ── */
+.bottom-bar {
+  flex-shrink: 0;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: blur(10px);
+  border-top: 1px solid var(--border);
+  padding: 10px 16px 20px;
+  display: flex; align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  z-index: 60;
+}
+
+.page-nav-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 40px; height: 40px; border-radius: 12px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-2); cursor: pointer;
+  transition: all .15s; flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+.page-nav-btn:active { background: var(--surface-2); }
+.page-nav-btn:disabled { opacity: .3; }
+
+.bottom-center {
+  flex: 1; display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+}
+
+.page-indicator-tap {
+  font-size: 13px; font-weight: 500; color: var(--text-2);
+  cursor: pointer; padding: 4px 10px; border-radius: 8px;
+  transition: background .12s;
+  -webkit-tap-highlight-color: transparent;
+}
+.page-indicator-tap:active { background: var(--surface-2); }
+
+.blur-toggle-row {
+  display: flex; background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 2px; gap: 1px;
+}
+
+.blur-tog {
+  font-size: 11px; font-weight: 500;
+  padding: 4px 8px; border-radius: 6px;
+  border: none; background: none; color: var(--text-3);
+  cursor: pointer; font-family: 'DM Sans', sans-serif;
+  transition: all .13s; -webkit-tap-highlight-color: transparent;
+}
+
+.blur-tog.active {
+  background: var(--surface); color: var(--text-1);
+  box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+
+/* ── SWIPE HINT ── */
+.swipe-hint {
+  position: absolute;
+  bottom: 90px; left: 50%; transform: translateX(-50%);
+  background: rgba(26,25,22,.75);
+  color: white; font-size: 12px; font-weight: 500;
+  padding: 6px 14px; border-radius: 20px;
+  white-space: nowrap; pointer-events: none;
+  animation: fadeInOut 2.5s 1.5s ease both;
+  z-index: 70;
+}
+
+@keyframes fadeInOut {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  20%  { opacity: 1; transform: translateX(-50%) translateY(0); }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ── ANNOTATION PANEL (right of phone) ── */
+.annotations {
+  max-width: 280px; flex-shrink: 0;
+  display: flex; flex-direction: column; gap: 20px;
+  padding-top: 60px;
+  animation: fadeUp .5s .18s ease both;
+}
+
+.anno {
+  display: flex; gap: 12px; align-items: flex-start;
+  position: relative;
+}
+
+.anno-line {
+  width: 2px; background: var(--border);
+  border-radius: 1px; flex-shrink: 0;
+  min-height: 40px; margin-top: 4px;
+}
+
+.anno-dot {
+  position: absolute; left: -4px; top: 6px;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--surface); border: 2px solid;
+  flex-shrink: 0;
+}
+
+.anno.a-blue .anno-dot  { border-color: var(--blue); background: var(--blue-soft); }
+.anno.a-orange .anno-dot { border-color: var(--orange); background: var(--orange-soft); }
+.anno.a-green .anno-dot  { border-color: var(--green); background: var(--green-soft); }
+.anno.a-gray .anno-dot   { border-color: var(--text-3); background: var(--surface); }
+
+.anno-body { flex: 1; }
+
+.anno-tag {
+  display: inline-block;
+  font-size: 10px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase;
+  padding: 2px 7px; border-radius: 4px; margin-bottom: 5px;
+}
+
+.anno.a-blue   .anno-tag { background: var(--blue-soft); color: var(--blue); }
+.anno.a-orange .anno-tag { background: var(--orange-soft); color: var(--orange); }
+.anno.a-green  .anno-tag { background: var(--green-soft); color: var(--green); }
+.anno.a-gray   .anno-tag { background: var(--surface-2); color: var(--text-3); border: 1px solid var(--border); }
+
+.anno-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 3px; }
+.anno-desc  { font-size: 12px; color: var(--text-2); line-height: 1.55; font-weight: 300; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp   { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+@keyframes fadein   { from{opacity:0} to{opacity:1} }
+@keyframes slideUp  { from{transform:translateY(100%)} to{transform:translateY(0)} }
+@keyframes slideDown{ from{opacity:0;transform:translateY(-6px)} to{opacity:1;transform:translateY(0)} }
+
+/* ── CONTEXT NOTE BELOW ── */
+.context-note {
+  margin-top: 40px;
+  max-width: 720px; width: 100%;
+  animation: fadeUp .5s .25s ease both;
+}
+
+.context-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 12px;
+}
+
+.context-card {
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 12px; padding: 16px 18px;
+}
+
+.cc-icon {
+  width: 28px; height: 28px; border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 10px; font-size: 15px;
+}
+
+.cc-blue   { background: var(--blue-soft); color: var(--blue); }
+.cc-orange { background: var(--orange-soft); color: var(--orange); }
+.cc-green  { background: var(--green-soft); color: var(--green); }
+
+.cc-title { font-size: 13px; font-weight: 500; color: var(--text-1); margin-bottom: 4px; }
+.cc-desc  { font-size: 12px; color: var(--text-2); line-height: 1.5; font-weight: 300; }
+
+@media (max-width: 740px) {
+  .demo-layout { flex-direction: column; align-items: center; }
+  .annotations { max-width: 375px; padding-top: 0; flex-direction: row; flex-wrap: wrap; }
+  .anno { flex: 1; min-width: 160px; }
+  .context-grid { grid-template-columns: 1fr; }
+  .phone-frame { width: 340px; height: 710px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="page-header">
+  <div class="eyebrow">Mobile UI concept</div>
+  <h1>Babeling on mobile</h1>
+  <p>Single-column reading with inline source reveal — tap any paragraph's peek button to check the original, tap any word for a full definition sheet from the bottom.</p>
+</div>
+
+<!-- DEMO LAYOUT -->
+<div class="demo-layout">
+
+  <!-- PHONE -->
+  <div class="phone-outer">
+    <div class="phone-frame">
+      <div class="phone-screen" id="phoneScreen">
+
+        <!-- Dynamic island -->
+        <div class="dynamic-island"></div>
+
+        <!-- Status bar -->
+        <div class="status-bar">
+          <span class="status-time">9:41</span>
+          <div class="status-icons">
+            <!-- Signal -->
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><rect x="0" y="7" width="3" height="5" rx="1" opacity=".3"/><rect x="4.5" y="5" width="3" height="7" rx="1" opacity=".3"/><rect x="9" y="2.5" width="3" height="9.5" rx="1" opacity=".6"/><rect x="13.5" y="0" width="2.5" height="12" rx="1"/></svg>
+            <!-- Wifi -->
+            <svg width="16" height="12" viewBox="0 0 16 12" fill="currentColor"><path d="M8 10a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z"/><path d="M1.7 5.8C3.4 4 5.6 3 8 3s4.6 1 6.3 2.8l1.4-1.6A10 10 0 0 0 8 1 10 10 0 0 0 .3 4.2l1.4 1.6z" opacity=".4"/><path d="M4.2 7.9C5.3 6.7 6.6 6 8 6s2.7.7 3.8 1.9l1.4-1.6A7 7 0 0 0 8 4a7 7 0 0 0-5.2 2.3l1.4 1.6z" opacity=".7"/></svg>
+            <!-- Battery -->
+            <svg width="25" height="12" viewBox="0 0 25 12"><rect x="0" y="1" width="22" height="10" rx="3" stroke="currentColor" stroke-width="1" fill="none" opacity=".35"/><rect x="1.5" y="2.5" width="17" height="7" rx="2" fill="currentColor"/><path d="M23 4v4a2 2 0 0 0 0-4z" fill="currentColor" opacity=".4"/></svg>
+          </div>
+        </div>
+
+        <!-- Mobile nav -->
+        <div class="mobile-nav">
+          <div class="mnav-back">
+            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="8 2 2 8 8 14"/></svg>
+            Library
+          </div>
+          <div class="mnav-center">
+            <div class="mnav-title">The Little Prince</div>
+            <div class="mnav-sub">p. 12 of 35</div>
+          </div>
+          <div class="mnav-right">
+            <div class="mnav-icon-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div class="mnav-icon-btn">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Language tab switcher -->
+        <div class="lang-switcher">
+          <button class="lang-tab-pill active" id="tabFr" onclick="switchTab('tgt')">
+            <div class="lang-dot ld-orange"></div>
+            French
+          </button>
+          <span class="lang-switcher-arrow">⇄</span>
+          <button class="lang-tab-pill" id="tabEn" onclick="switchTab('src')">
+            <div class="lang-dot ld-blue"></div>
+            English
+          </button>
+        </div>
+
+        <!-- Progress -->
+        <div class="read-progress">
+          <div class="read-progress-fill" id="progressFill" style="width:34%"></div>
+        </div>
+
+        <!-- SCROLL AREA -->
+        <div class="reader-scroll" id="readerScroll">
+          <div class="reader-content" id="readerContent">
+            <!-- injected by JS -->
+          </div>
+        </div>
+
+        <!-- Swipe hint -->
+        <div class="swipe-hint" id="swipeHint">← swipe to turn page →</div>
+
+        <!-- Bottom bar -->
+        <div class="bottom-bar">
+          <button class="page-nav-btn" id="prevBtn" disabled onclick="changePage(-1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+          </button>
+
+          <div class="bottom-center">
+            <div class="page-indicator-tap" id="pageIndicator" onclick="cycleBlur()">
+              Page 1 / 35
+            </div>
+            <div class="blur-toggle-row">
+              <button class="blur-tog active" data-blur="word"      onclick="setBlur(this)">Word</button>
+              <button class="blur-tog"        data-blur="sentence"  onclick="setBlur(this)">Sentence</button>
+              <button class="blur-tog"        data-blur="paragraph" onclick="setBlur(this)">Para</button>
+              <button class="blur-tog"        data-blur="off"       onclick="setBlur(this)">Off</button>
+            </div>
+          </div>
+
+          <button class="page-nav-btn" id="nextBtn" onclick="changePage(1)">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </button>
+        </div>
+
+        <!-- BOTTOM SHEET OVERLAY -->
+        <div class="bottom-sheet-overlay" id="sheetOverlay" onclick="closeSheet()"></div>
+
+        <!-- WORD BOTTOM SHEET -->
+        <div class="word-sheet" id="wordSheet">
+          <div class="sheet-handle"></div>
+          <div class="sheet-top">
+            <div class="sheet-word" id="sheetWord">—</div>
+            <div class="sheet-meta">
+              <span class="sheet-pos" id="sheetPos">—</span>
+              <span class="sheet-ipa" id="sheetIpa">—</span>
+            </div>
+          </div>
+          <div class="sheet-body">
+            <div class="sheet-def" id="sheetDef">—</div>
+            <div class="sheet-example" id="sheetExample"></div>
+          </div>
+          <div class="sheet-footer">
+            <div class="sheet-base">Base: <strong id="sheetBase">—</strong></div>
+            <div class="sheet-audio-btns">
+              <button class="sheet-audio-btn" onclick="closeSheet()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                Word
+              </button>
+              <button class="sheet-audio-btn" onclick="closeSheet()">
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>
+                Sentence
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div><!-- /phone-screen -->
+    </div><!-- /phone-frame -->
+  </div><!-- /phone-outer -->
+
+  <!-- ANNOTATIONS -->
+  <div class="annotations">
+    <div class="anno a-blue">
+      <div class="anno-line">
+        <div class="anno-dot"></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-tag">Primary surface</div>
+        <div class="anno-title">Target language fills the screen</div>
+        <div class="anno-desc">The translation is what you read. Source is always one tap away — never in the way.</div>
+      </div>
+    </div>
+    <div class="anno a-orange">
+      <div class="anno-line">
+        <div class="anno-dot"></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-tag">Paragraph peek</div>
+        <div class="anno-title">Inline source reveal per paragraph</div>
+        <div class="anno-desc">Tap the peek button beneath any paragraph to pull up the original inline — without losing your place.</div>
+      </div>
+    </div>
+    <div class="anno a-blue">
+      <div class="anno-line">
+        <div class="anno-dot"></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-tag">Word tap</div>
+        <div class="anno-title">Definition sheet from the bottom</div>
+        <div class="anno-desc">Tap any word to get IPA, part of speech, contextual definition, and audio — in a thumb-friendly bottom sheet.</div>
+      </div>
+    </div>
+    <div class="anno a-green">
+      <div class="anno-line">
+        <div class="anno-dot"></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-tag">Tab switcher</div>
+        <div class="anno-title">Full-column language flip</div>
+        <div class="anno-desc">Switch between French-first and English-first reading in one tap. Useful for different study modes.</div>
+      </div>
+    </div>
+    <div class="anno a-gray">
+      <div class="anno-line">
+        <div class="anno-dot"></div>
+      </div>
+      <div class="anno-body">
+        <div class="anno-tag">Navigation</div>
+        <div class="anno-title">Swipe or tap to turn pages</div>
+        <div class="anno-desc">Left/right swipe for pages. Blur mode toggle and page counter live in the persistent bottom bar.</div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /demo-layout -->
+
+<!-- CONTEXT NOTE -->
+<div class="context-note">
+  <div class="context-grid">
+    <div class="context-card">
+      <div class="cc-icon cc-blue">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </div>
+      <div class="cc-title">Why not vertical stack?</div>
+      <div class="cc-desc">Stacking source and target vertically means constant scrolling up and down to compare. Peek-per-paragraph keeps comparison local and instant.</div>
+    </div>
+    <div class="context-card">
+      <div class="cc-icon cc-orange">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+      </div>
+      <div class="cc-title">Blur still works</div>
+      <div class="cc-desc">The blur mode applies to the peeked source text — so word/sentence/paragraph blur carries over naturally to mobile without any redesign.</div>
+    </div>
+    <div class="context-card">
+      <div class="cc-icon cc-green">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <div class="cc-title">One shared codebase</div>
+      <div class="cc-desc">The reader component detects viewport width. Below 640px it switches to the mobile layout. No separate app needed — responsive CSS handles it.</div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────
+const PAGES = [
+  {
+    tgt: [
+      { id:'p1', text: ['Lorsque', 'j\'avais', 'six', 'ans,', 'j\'ai', 'vu', 'une', 'fois', 'une', 'magnifique', 'image', 'dans', 'un', 'livre,', 'intitulé', 'Histoires', 'Vécues', 'de', 'la', 'Nature,', 'concernant', 'la', 'forêt', 'vierge.'] },
+      { id:'p2', text: ['C\'était', 'une', 'image', 'd\'un', 'boa', 'constrictor', 'en', 'train', 'd\'avaler', 'un', 'animal.', 'Voici', 'une', 'copie', 'du', 'dessin.'] },
+      { id:'p3', text: ['Dans', 'le', 'livre,', 'il', 'était', 'dit', ':', '«', 'Les', 'boas', 'constrictors', 'avalent', 'leur', 'proie', 'tout', 'entière,', 'sans', 'la', 'mâcher.', 'Après', 'cela,', 'ils', 'ne', 'sont', 'plus', 'capables', 'de', 'bouger.', '»'] },
+    ],
+    src: [
+      'Once when I was six years old I saw a magnificent picture in a book, called True Stories from Nature, about the primeval forest.',
+      'It was a picture of a boa constrictor in the act of swallowing an animal. Here is a copy of the drawing.',
+      'In the book it said: "Boa constrictors swallow their prey whole, without chewing it. After that they are not able to move, and they sleep through the six months that they need for digestion."',
+    ]
+  },
+  {
+    tgt: [
+      { id:'p4', text: ['J\'ai', 'alors', 'profondément', 'réfléchi', 'aux', 'aventures', 'de', 'la', 'jungle.', 'Et', 'après', 'quelques', 'travaux', 'avec', 'un', 'crayon', 'de', 'couleur,', 'j\'ai', 'réussi', 'à', 'faire', 'mon', 'premier', 'dessin.'] },
+      { id:'p5', text: ['J\'ai', 'montré', 'mon', 'chef-d\'œuvre', 'aux', 'grandes', 'personnes', 'et', 'je', 'leur', 'ai', 'demandé', 'si', 'le', 'dessin', 'leur', 'faisait', 'peur.'] },
+      { id:'p6', text: ['Mais', 'elles', 'ont', 'répondu', ':', '«', 'Peur', '?', 'Pourquoi', 'quiconque', 'aurait-il', 'peur', 'd\'un', 'chapeau', '?', '»'] },
+    ],
+    src: [
+      'I pondered deeply, then, over the adventures of the jungle. And after some work with a coloured pencil I succeeded in making my first drawing. My Drawing Number One.',
+      'I showed my masterpiece to the grown-ups, and asked them whether the drawing frightened them.',
+      'But they answered: "Frighten? Why should anyone be frightened by a hat?"',
+    ]
+  }
+];
+
+const WORD_DATA = {
+  'magnifique':   { pos:'adjective', ipa:'/maɲifik/',   def:'Splendid, magnificent — used here to describe the illustration that sparked the narrator\'s imagination.', example:['Un', 'magnifique', 'coucher', 'de', 'soleil.'], base:'magnifique' },
+  'Vécues':       { pos:'adjective', ipa:'/ve.ky/',     def:'Feminine plural of <strong>vécu</strong> — meaning "lived" or "real-life." Modifies <strong>Histoires</strong>: true stories from lived experience.', example:['Des', 'histoires', '<em>vécues</em>', 'et', 'authentiques.'], base:'vécu' },
+  'constrictor':  { pos:'noun',      ipa:'/kɔ̃stʁiktɔʁ/', def:'A snake that kills by coiling. From Latin <strong>constringere</strong> — to bind tightly.', example:['Le', 'boa', '<em>constrictor</em>', 'avale', 'sa', 'proie.'], base:'constrictor' },
+  'avalent':      { pos:'verb',      ipa:'/avalɑ̃/',    def:'Third person plural present of <strong>avaler</strong> — to swallow. Describes the habitual action of boa constrictors.', example:['Les', 'serpents', '<em>avalent</em>', 'leur', 'proie', 'entière.'], base:'avaler' },
+  'montré':       { pos:'verb',      ipa:'/mɔ̃tʁe/',   def:'Past participle of <strong>montrer</strong> — to show. Used here in passé composé construction.', example:['Il', 'm\'a', '<em>montré</em>', 'sa', 'collection.'], base:'montrer' },
+  'chef-d\'œuvre':{ pos:'noun',      ipa:'/ʃɛf.dœvʁ/', def:'Masterpiece. Literally "chief work." Used ironically — the narrator\'s childish drawing that the grown-ups misread.', example:['Ce', 'tableau', 'est', 'un', '<em>chef-d\'œuvre</em>.'], base:'chef-d\'œuvre' },
+  'profondément': { pos:'adverb',    ipa:'/pʁɔfɔ̃demɑ̃/', def:'Deeply, profoundly. Modifies <strong>réfléchi</strong> — he pondered deeply over the adventures.', example:['Elle', 'réfléchit', '<em>profondément</em>', 'avant', 'de', 'répondre.'], base:'profond' },
+  'grandes':      { pos:'adjective', ipa:'/ɡʁɑ̃d/',    def:'Here used figuratively — <strong>grandes personnes</strong> means "grown-ups," literally "big people." A recurring ironic phrase throughout the book.', example:['Les', '<em>grandes</em>', 'personnes', 'ne', 'comprennent', 'jamais', 'rien.'], base:'grand' },
+};
+
+// ── STATE ─────────────────────────────────────────────────────
+let currentPage = 0;
+let blurMode = 'word';
+let activeTab = 'tgt'; // 'tgt' or 'src'
+const TOTAL = 35;
+
+// ── RENDER ────────────────────────────────────────────────────
+function renderPage() {
+  const page = PAGES[Math.min(currentPage, PAGES.length-1)];
+  const content = document.getElementById('readerContent');
+
+  if (activeTab === 'src') {
+    // Full source column mode
+    content.innerHTML = page.src.map((text, i) => `
+      <div class="para-block">
+        <div class="para-target" style="color:var(--blue);font-style:italic">${text}</div>
+        <div class="para-divider"></div>
+      </div>`).join('');
+    return;
+  }
+
+  content.innerHTML = page.tgt.map((para, i) => {
+    const words = para.text.map(w => {
+      const clean = w.replace(/[,.'«»:?!]/g,'');
+      const hasData = WORD_DATA[clean] || WORD_DATA[w];
+      return hasData
+        ? `<span class="w" onclick="openSheet('${clean||w}')">${w}</span>`
+        : w;
+    }).join(' ');
+
+    const srcText = page.src[i] || '';
+    const blurClass = blurMode !== 'off' ? 'blurred' : '';
+
+    return `
+      <div class="para-block" id="block-${i}">
+        <div class="para-target">${words}</div>
+        <button class="peek-btn" onclick="togglePeek(${i}, this)">
+          <div class="peek-icon">
+            <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+          Show original
+        </button>
+        <div class="para-source ${blurClass}" id="src-${i}">${srcText}</div>
+        <div class="para-divider"></div>
+      </div>`;
+  }).join('');
+
+  updateNavbar();
+}
+
+function updateNavbar() {
+  const realPage = currentPage * 2 + 1;
+  document.getElementById('pageIndicator').textContent = `Page ${Math.min(realPage, TOTAL)} / ${TOTAL}`;
+  document.querySelector('.mnav-sub').textContent = `p. ${Math.min(realPage, TOTAL)} of ${TOTAL}`;
+  document.getElementById('prevBtn').disabled = currentPage <= 0;
+  document.getElementById('nextBtn').disabled = currentPage >= PAGES.length - 1;
+  const pct = (currentPage / Math.max(PAGES.length - 1, 1)) * 100;
+  document.getElementById('progressFill').style.width = pct + '%';
+}
+
+// ── PEEK ─────────────────────────────────────────────────────
+function togglePeek(idx, btn) {
+  const src = document.getElementById('src-' + idx);
+  const isOpen = btn.classList.contains('open');
+  btn.classList.toggle('open');
+  btn.querySelector('span') && (btn.querySelector('span').textContent = isOpen ? 'Show original' : 'Hide original');
+  // Update button text node
+  const textNode = [...btn.childNodes].find(n => n.nodeType === 3);
+  if (textNode) textNode.textContent = isOpen ? 'Show original' : ' Hide original';
+  src.classList.toggle('open');
+}
+
+// ── TAB SWITCH ────────────────────────────────────────────────
+function switchTab(tab) {
+  activeTab = tab;
+  document.getElementById('tabFr').classList.toggle('active', tab === 'tgt');
+  document.getElementById('tabEn').classList.toggle('active', tab === 'src');
+  renderPage();
+}
+
+// ── BLUR ─────────────────────────────────────────────────────
+function setBlur(btn) {
+  document.querySelectorAll('.blur-tog').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  blurMode = btn.dataset.blur;
+  // Update open peek panels
+  document.querySelectorAll('.para-source').forEach(el => {
+    el.classList.toggle('blurred', blurMode !== 'off');
+  });
+}
+
+function cycleBlur() {
+  // Tap page indicator to cycle blur modes
+  const modes = ['word','sentence','paragraph','off'];
+  const idx = modes.indexOf(blurMode);
+  blurMode = modes[(idx+1) % modes.length];
+  document.querySelectorAll('.blur-tog').forEach(b => {
+    b.classList.toggle('active', b.dataset.blur === blurMode);
+  });
+  document.querySelectorAll('.para-source').forEach(el => {
+    el.classList.toggle('blurred', blurMode !== 'off');
+  });
+}
+
+// ── PAGE NAV ─────────────────────────────────────────────────
+function changePage(dir) {
+  const next = currentPage + dir;
+  if (next < 0 || next >= PAGES.length) return;
+  currentPage = next;
+  renderPage();
+  document.getElementById('readerScroll').scrollTop = 0;
+}
+
+// ── WORD SHEET ───────────────────────────────────────────────
+function openSheet(word) {
+  const data = WORD_DATA[word];
+  if (!data) return;
+
+  document.getElementById('sheetWord').textContent = word;
+  document.getElementById('sheetPos').textContent = data.pos;
+  document.getElementById('sheetIpa').textContent = data.ipa;
+  document.getElementById('sheetDef').innerHTML = data.def;
+  document.getElementById('sheetBase').textContent = data.base;
+
+  if (data.example) {
+    document.getElementById('sheetExample').innerHTML = data.example.map(w =>
+      w.startsWith('<em>') ? w : w
+    ).join(' ');
+  }
+
+  document.getElementById('sheetOverlay').classList.add('open');
+  document.getElementById('wordSheet').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheetOverlay').classList.remove('open');
+  document.getElementById('wordSheet').classList.remove('open');
+}
+
+// ── SWIPE ────────────────────────────────────────────────────
+let touchStartX = 0;
+const screen = document.getElementById('phoneScreen');
+
+screen.addEventListener('touchstart', e => { touchStartX = e.touches[0].clientX; }, { passive:true });
+screen.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchStartX;
+  if (Math.abs(dx) > 50) changePage(dx < 0 ? 1 : -1);
+}, { passive:true });
+
+// Also keyboard for desktop
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight') changePage(1);
+  if (e.key === 'ArrowLeft')  changePage(-1);
+  if (e.key === 'Escape')     closeSheet();
+});
+
+// ── INIT ─────────────────────────────────────────────────────
+renderPage();
+
+// Hide swipe hint after animation
+setTimeout(() => {
+  const h = document.getElementById('swipeHint');
+  if (h) h.remove();
+}, 5000);
+</script>
+</body>
+</html>

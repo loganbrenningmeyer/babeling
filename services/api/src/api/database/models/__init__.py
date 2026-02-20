@@ -3,7 +3,7 @@ from .document import Document
 from .document_page import DocumentPage
 from .glossary_item import GlossaryItem
 from .page_translation import PageTranslation
-from .user_settings import UserSettings
+from .user_preferences import UserPreferences
 
 __all__ = [
     "AppUser",
@@ -11,5 +11,5 @@ __all__ = [
     "DocumentPage",
     "GlossaryItem",
     "PageTranslation",
-    "UserSettings",
+    "UserPreferences",
 ]

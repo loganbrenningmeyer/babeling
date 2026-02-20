@@ -3,10 +3,10 @@ import { getBackendToken, getApiBaseUrl } from "@/lib/sever-api";
 
 
 // -------------------------
-// GET: /api/documents/[documentId]
-// -- Load saved document
+// GET: /api/user_preferences
+// -- Fetch user preferences or defaults if not saved
 // -------------------------
-export async function GET(req: Request) {
+export async function GET() {
   // -------------------------
   // Get Clerk token / API url
   // -------------------------
@@ -20,26 +20,26 @@ export async function GET(req: Request) {
   const { API_BASE_URL } = baseUrlResult;
 
   // -------------------------
-  // Get saved Document by ID
+  // Return saved user preferences
   // -------------------------
-  const url = new URL(req.url);
-  const documentId = url.searchParams.get("document_id");
-
-  const res = await fetch(`${API_BASE_URL}/documents/${documentId}`, {
+  const res = await fetch(`${API_BASE_URL}/user_preferences`, {
     method: "GET",
-    headers: { Authorization: `Bearer ${token}` },
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
     cache: "no-store",
   });
 
   const data = await res.json();
-  return NextResponse.json(data, { status: res.status }); 
+  return NextResponse.json(data, { status: res.status });
 }
 
+
 // -------------------------
-// POST: /api/documents/
-// -- Save document to database
+// PATCH: /api/user_preferences
+// -- Update/return user preferences or return defaults if not saved
 // -------------------------
-export async function POST(req: Request) {
+export async function PATCH(req: Request) {
   // -------------------------
   // Get Clerk token / API url
   // -------------------------
@@ -53,24 +53,19 @@ export async function POST(req: Request) {
   const { API_BASE_URL } = baseUrlResult;
 
   // -------------------------
-  // Split document pages / save to database
+  // Update user preferences / return
   // -------------------------
-  const { title, src_lang, text } = await req.json();
+  const body = await req.json();
 
-  const res = await fetch(`${API_BASE_URL}/documents`, {
-    method: "POST",
+  const res = await fetch(`${API_BASE_URL}/user_preferences`, {
+    method: "PATCH",
     headers: {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({
-      title,
-      src_lang,
-      text,
-    }),
+    body: JSON.stringify(body),
   });
 
   const data = await res.json();
-
   return NextResponse.json(data, { status: res.status });
 }

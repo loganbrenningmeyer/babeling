@@ -10,6 +10,7 @@ import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 // User information provider
 // -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
+import { useUserPreferences } from "@/components/UserPreferencesProvider";
 
 // -------------------------
 // Translate Session information
@@ -53,6 +54,7 @@ import type {
   SavedPage,
   SavedPageTranslation,
 } from "@/app/(protected)/translate/feature/types";
+import { useUser } from "@clerk/nextjs";
 
 
 export default function Translate() {
@@ -80,12 +82,32 @@ function TranslatePage() {
   const loadedDocumentIdRef = useRef<number | null>(null);
 
   // -------------------------
+  // User preferences (languages / theme)
+  // -------------------------
+  const {
+    srcLang: prefSrcLang,
+    tgtLang: prefTgtLang,
+    setSrcLang: setPrefSrcLang,
+    setTgtLang: setPrefTgtLang,
+    uiLang,
+    setUiLang,
+    theme,
+    setTheme,
+    loading: prefsLoading,
+  } = useUserPreferences();
+
+  const [localSrcLang, setLocalSrcLang] = useState<string | null>(null);
+  const [localTgtLang, setLocalTgtLang] = useState<string | null>(null);
+
+  // Set default effective source / target languages
+  const srcLang = localSrcLang ?? prefSrcLang ?? "en";
+  const tgtLang = localTgtLang ?? prefTgtLang ?? "es";
+
+  // -------------------------
   // Core state
   // -------------------------
   const [sourceText, setSourceText] = useState("");
   const [title, setTitle] = useState("");
-  const [srcLang, setSrcLang] = useState("en");
-  const [tgtLang, setTgtLang] = useState("fr");
   const [explainData, setExplainData] = useState<ExplainEntry | null>(null);
   const [defineData, setDefineData] = useState<DefineEntry | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -215,8 +237,8 @@ function TranslatePage() {
   function handleSwapLanguages() {
     const nextSrc = tgtLang;
     const nextTgt = srcLang;
-    setSrcLang(nextSrc);
-    setTgtLang(nextTgt);
+    setLocalSrcLang(nextSrc);
+    setLocalTgtLang(nextTgt);
   }
 
   async function handleSampleSelect(nextId: string) {
@@ -621,8 +643,8 @@ function TranslatePage() {
         // Load source / target languages
         const loadedSrcLang = data.src_lang;
         const loadedTgtLang = data.tgt_lang;
-        setSrcLang(loadedSrcLang);
-        setTgtLang(loadedTgtLang);
+        setLocalSrcLang(loadedSrcLang);
+        setLocalTgtLang(loadedTgtLang);
 
         setPages(newPages);
         setPageDbIds(newPageDbIds);
@@ -751,7 +773,7 @@ function TranslatePage() {
                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                   "
                   value={srcLang}
-                  onChange={(e) => setSrcLang(e.target.value)}
+                  onChange={(e) => setLocalSrcLang(e.target.value)}
                   disabled={translationLoading}
                 >
                 {LANGS.map((lang) => {
@@ -805,7 +827,7 @@ function TranslatePage() {
                     focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
                   "
                   value={tgtLang}
-                  onChange={(e) => setTgtLang(e.target.value)}
+                  onChange={(e) => setLocalTgtLang(e.target.value)}
                   disabled={translationLoading}
                 >
                 {LANGS.map((lang) => {

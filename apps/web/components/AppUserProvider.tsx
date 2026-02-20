@@ -33,7 +33,7 @@ export function AppUserProvider( { children }: { children: React.ReactNode }) {
   const { isSignedIn, getToken } = useAuth();
 
   const [user, setUser] = useState<AppUser | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // -------------------------

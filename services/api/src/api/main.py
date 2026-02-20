@@ -11,6 +11,7 @@ from api.routes import (
     page_translations,
     pronounce,
     translate,
+    user_preferences,
 )
 
 # -------------------------
@@ -38,3 +39,4 @@ app.include_router(page_translations.router)
 app.include_router(pronounce.router)
 app.include_router(documents.router)
 app.include_router(translate.router)
+app.include_router(user_preferences.router)
