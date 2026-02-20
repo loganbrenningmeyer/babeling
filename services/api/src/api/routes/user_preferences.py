@@ -25,9 +25,6 @@ def _get_or_create_prefs(db: Session, user_id: int) -> UserPreferences:
     if row is None:
         row = UserPreferences(
             user_id=user_id,
-            preferred_src_lang="en",
-            preferred_tgt_lang="es",
-            preferred_ui_lang="en",
         )
         db.add(row)
         db.commit()
