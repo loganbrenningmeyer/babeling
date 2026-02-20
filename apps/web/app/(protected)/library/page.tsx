@@ -61,14 +61,8 @@ export default function LibraryTable() {
   // -------------------------
   if (userLoading || loading) {
     return (
-      <div className="w-full">
-        <Pane
-          title="Library"
-          className="min-h-[80vh]"
-          contentClassName="gap-4"
-        >
-          <LibrarySkeleton />
-        </Pane>
+      <div className="p-4">
+        <LibrarySkeleton />
       </div>
     );
   }

@@ -1,35 +1,34 @@
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { cn } from "@/lib/utils";
-
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { MousePointerClick } from "lucide-react";
 
+import { messages, UiLang } from "@/app/i18n/messages";
 
 export type BlurMode = "word" | "sentence" | "paragraph";
+
+type blurModeMessages = (typeof messages)[UiLang]["reader"]["blurModeToggle"]
 
 export function BlurModeToggle({
   value,
   onChange,
-  className = "",
+  msgs,
 }: {
   value: BlurMode;
   onChange: (v: BlurMode) => void;
-  className?: string;
+  msgs: blurModeMessages;
 }) {
   return (
-    <div
-      className={cn(
-        "flex flex-col items-center overflow-hidden rounded-xl border border-border/70 bg-muted/40 shadow-sm",
-        className
-      )}
-    >
+    <div className="
+      flex flex-col items-center 
+      overflow-hidden rounded-xl border border-border/70 
+      bg-muted/40 shadow-sm
+    ">
       <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
         <MousePointerClick className="h-3 w-3" />
         <span className="font-bold text-[10px]">
-          {`Toggle `}
-          <span className="bg-blue-500/20">
-            original text
-          </span>
-          {` visibility by`}
+          {msgs.header.prefix}{" "}
+          <span className="bg-blue-500/20">{msgs.header.highlight}</span>
+          {" "}{msgs.header.suffix}
         </span>
       </div>
       <ToggleGroup
@@ -45,19 +44,19 @@ export function BlurModeToggle({
           value="word"
           className="w-full !rounded-none border-r border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
         >
-          Word
+          {msgs.word}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="sentence"
           className="w-full !rounded-none border-r border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
         >
-          Sentence
+          {msgs.sentence}
         </ToggleGroupItem>
         <ToggleGroupItem
           value="paragraph"
           className="w-full !rounded-none px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
         >
-          Paragraph
+          {msgs.paragraph}
         </ToggleGroupItem>
       </ToggleGroup>
     </div>

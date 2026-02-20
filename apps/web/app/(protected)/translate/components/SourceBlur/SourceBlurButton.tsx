@@ -6,14 +6,16 @@ import { Eye, EyeOff } from "lucide-react";
 export function SourceBlurButton({
   value,
   onChange,
-  className,
+  showLabel,
+  hideLabel,
 }: {
   value: boolean,
   onChange: (v: boolean) => void;
-  className?: string;
+  showLabel: string;
+  hideLabel: string
 }) {
   return (
-    <div className={cn(className)}>
+    <div>
       <Button
         type="button"
         variant="ghost"
@@ -33,7 +35,7 @@ export function SourceBlurButton({
         ) : (
           <EyeOff className="h-3.5 w-3.5" />
         )}
-        {value ? "Show original" : "Hide original"}
+        {value ? showLabel : hideLabel}
       </Button>
     </div>
   )

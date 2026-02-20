@@ -10,12 +10,14 @@ type UploadSurfaceProps = {
   className?: string;
   file: File | null;
   onFileChange: (file: File | null) => void;
+  text: string;
 }
 
 export function UploadSurface({ 
   className,
   file,
   onFileChange,
+  text,
 }: UploadSurfaceProps) {
 
   function handleFiles(files: FileList | null) {
@@ -52,7 +54,7 @@ export function UploadSurface({
                 file.name
               ) : (
                 <span>
-                  Drag & drop files here, or click to browse
+                  {text}
                 </span>
               )}
             </span>

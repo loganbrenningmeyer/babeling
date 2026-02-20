@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { PronounceButton } from "./Pronounce/PronounceButton";
+import { useMessages } from "@/app/hooks/useMessages";
 
 export type DefineEntry = {
   form: string;
@@ -49,6 +50,11 @@ export function AnnotateCard({
   onToggleBookmark?: () => void;
   className?: string;
 }) {
+  // -------------------------
+  // Use UI language text
+  // -------------------------
+  const m = useMessages();
+
   return (
     <div className={cn("relative p-4 space-y-4", className)}>
       {/* -------------------------
@@ -58,8 +64,8 @@ export function AnnotateCard({
         <button
           type="button"
           className="absolute -top-2.25 right-8 z-10 p-0 focus-visible:outline-none"
-          aria-label="Save definition"
-          title="Save definition"
+          aria-label={m.reader.annotationCard.saveDefinition}
+          title={m.reader.annotationCard.saveDefinition}
           onClick={onToggleBookmark}
         >
           <Bookmark
@@ -106,7 +112,7 @@ export function AnnotateCard({
           )}
 
           <p className="text-lg leading-6 font-reading pt-4">
-            {defineData.gloss ? defineData.gloss : "Definition unavailable."}
+            {defineData.gloss ? defineData.gloss : m.reader.annotationCard.defUnavailable}
           </p>
         </div>
       )}
@@ -164,7 +170,9 @@ export function AnnotateCard({
           <div className="flex w-full items-center justify-between gap-3">
             <div className="flex flex-col gap-2">
               <div className="inline-flex items-baseline gap-1.5">
-                <span className="text-sm text-muted-foreground">Base form:</span>
+                <span className="text-sm text-muted-foreground">
+                  {m.reader.annotationCard.baseForm}:
+                </span>
                 <div className="text-md font-reading font-semibold text-muted-foreground">
                   {defineData.lemma}
                 </div>
@@ -184,13 +192,13 @@ export function AnnotateCard({
             <div className="flex items-center gap-2">
               <PronounceButton
                 text={defineData.tgtSent}
-                label="Sentence"
+                label={m.reader.annotationCard.sentence}
                 tgtLang={tgtLang}
                 iconClassName="h-4 w-4"
               />
               <PronounceButton
                 text={defineData.tgtPar}
-                label="Paragraph"
+                label={m.reader.annotationCard.paragraph}
                 tgtLang={tgtLang}
                 iconClassName="h-4 w-4"
               />

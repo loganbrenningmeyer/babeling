@@ -6,7 +6,7 @@ import { ArrowUpDown } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import type { LibraryDocument } from "@/types/library";
-import { getLangLabel, LANG_BADGE_COLOR_BY_CODE } from "@/types/langs";
+import { LANG_BADGE_COLOR_BY_CODE } from "@/types/langs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,6 +25,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+
+import { useMessages } from "@/app/hooks/useMessages";
+import { getLangLabel } from "@/app/i18n/messages";
 
 // -------------------------
 // Library Sorting
@@ -70,6 +73,11 @@ function getPreview(text: string) {
 
 export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
   // -------------------------
+  // Use UI language messages from user preferences
+  // -------------------------
+  const m = useMessages();
+
+  // -------------------------
   // API Router Usage
   // -------------------------
   const router = useRouter();
@@ -111,7 +119,7 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
       return (
         doc.title.toLowerCase().includes(needle) ||
         doc.src_text.toLowerCase().includes(needle) ||
-        getLangLabel(doc.src_lang).toLowerCase().includes(needle)
+        getLangLabel(doc.src_lang, m.langs).toLowerCase().includes(needle)
       );
     });
 
@@ -122,8 +130,8 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
         return sortDir === "asc" ? aTime - bTime : bTime - aTime;
       }
 
-      const aValue = sortKey === "title" ? a.title : getLangLabel(a.src_lang);
-      const bValue = sortKey === "title" ? b.title : getLangLabel(b.src_lang);
+      const aValue = sortKey === "title" ? a.title : getLangLabel(a.src_lang, m.langs);
+      const bValue = sortKey === "title" ? b.title : getLangLabel(b.src_lang, m.langs);
       const result = aValue.localeCompare(bValue);
 
       return sortDir === "asc" ? result : -result;
@@ -181,7 +189,7 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
               langColorClass
             )}
           >
-            {getLangLabel(doc.src_lang)}
+            {getLangLabel(doc.src_lang, m.langs)}
           </span>
         </TableCell>
         <TableCell>{formatDate(doc.created_at)}</TableCell>
@@ -301,7 +309,7 @@ export function LibraryDataTable({ docs }: { docs: LibraryDocument[] }) {
                   <TableRow 
                     className="bg-muted/30 hover:bg-muted/30">
                     <TableCell colSpan={4} className="font-semibold">
-                      {getLangLabel(srcLang)} ({rows.length})
+                      {getLangLabel(srcLang, m.langs)} ({rows.length})
                     </TableCell>
                   </TableRow>
                   {rows.map((doc) => renderDataRow(doc))}

@@ -56,7 +56,7 @@ def annotate(req: AnnotateRequest):
     tgt_word = req.tgt.words[req.tgt_idx]
     candidates = get_definition_candidates(tgt_word, req.tgt_lang)
 
-    gemini_api = get_gemini(req.src_lang, req.tgt_lang)
+    gemini_api = get_gemini(req.src_lang, req.tgt_lang, req.ui_lang)
 
     res = gemini_api.annotate(
         candidates=candidates,

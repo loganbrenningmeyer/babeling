@@ -6,26 +6,45 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ArrowLeftRight, ChevronLeft, ChevronRight } from "lucide-react";
 
-// -------------------------
-// User information provider
-// -------------------------
+// =========================
+// ( User Information Providers )
+// -- 
+// =========================
 import { useAppUser } from "@/components/AppUserProvider";
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
 
-// -------------------------
-// Translate Session information
-// -------------------------
+// =========================
+// ( UI Language helpers )
+// ---- ( useMessages.ts )
+// useMessages(): Hook to access messages dict for preferred UI language
+// ---- ( messages.ts )
+// UiLang: Type for supported UI languages (e.g., "en", "es", "fr", ...)
+// getUiLangsMap(): Returns a map lang code -> label given the UI language code 
+// isUiLang(): Checks if a string is a supported UI language
+// =========================
+import { useMessages } from "@/app/hooks/useMessages";
+import { getLangLabel, getUiLangsMap, toUiLang } from "@/app/i18n/messages";
+
+// =========================
+// ( Translate Session Information )
+// -- 
+// =========================
 import type { Session } from "@/types/session";
 
-// -------------------------
-// API Calls
-// -------------------------
+// =========================
+// ( API Calls )
+// -- 
+// =========================
 import { getDocumentById } from "@/app/(protected)/translate/feature/api/documents";
-import { getPageTranslation, savePageTranslation } from "./feature/api/pageTranslations";
+import {
+  getPageTranslation,
+  savePageTranslation,
+} from "./feature/api/pageTranslations";
 
-// -------------------------
-// UI Components
-// -------------------------
+// =========================
+// ( UI Components )
+// -- 
+// =========================
 // Blocks
 import { Pane } from "@/app/components/Pane";
 import { AppTextarea } from "@/app/components/AppTextarea";
@@ -37,33 +56,42 @@ import {
   type ExplainEntry,
 } from "@/app/(protected)/translate/components/AnnotateCard";
 import { SourceBlurButton } from "@/app/(protected)/translate/components/SourceBlur/SourceBlurButton";
-import { BlurMode, BlurModeToggle } from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
+import {
+  BlurMode,
+  BlurModeToggle,
+} from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
 import { ExplainSkeleton } from "@/app/(protected)/translate/components/ExplainSkeleton";
 import { TextSkeleton } from "@/app/(protected)/translate/components/TextSkeleton";
 import { ParagraphGrid } from "@/app/(protected)/translate/components/ParagraphGrid";
 import { UploadSurface } from "@/app/components/UploadSurface";
 import { useSourceRevealNav } from "@/app/(protected)/translate/components/SourceBlur/useSourceRevealNav";
+import { HelpPopover } from "@/app/(protected)/translate/components/HelpInfo/HelpPopover";
 
-// -------------------------
-// Language Info Variables / Functions
-// -------------------------
+// =========================
+// ( Language Info Variables / Functions )
+// -- 
+// =========================
 import { SAMPLE_TEXTS_BY_LANG } from "./sampleTexts";
-import { LANGS, getLangLabel } from "@/types/langs";
-import type {
-  LoadedDocument,
-  SavedPage,
-  SavedPageTranslation,
-} from "@/app/(protected)/translate/feature/types";
-import { useUser } from "@clerk/nextjs";
+import type { SavedPage } from "@/app/(protected)/translate/feature/types";
 
 
+/**************************
+ * `Translate()`
+ * -- 
+ * 
+ * @param 
+ * @returns 
+ **************************/
 export default function Translate() {
   // -------------------------
   // Load user information
   // -------------------------
   const { user, loading, error } = useAppUser();
 
-  if (error) return <div className="p-6 text-sm text-red-600">Account error: {error}</div>;
+  if (error)
+    return (
+      <div className="p-6 text-sm text-red-600">Account error: {error}</div>
+    );
 
   return (
     <Suspense fallback={<TextSkeleton />}>
@@ -73,6 +101,13 @@ export default function Translate() {
 }
 
 
+/**************************
+ * `TranslatePage()`
+ * -- 
+ * 
+ * @param 
+ * @returns 
+ **************************/
 function TranslatePage() {
   // -------------------------
   // Loading saved Documents
@@ -89,19 +124,35 @@ function TranslatePage() {
     tgtLang: prefTgtLang,
     setSrcLang: setPrefSrcLang,
     setTgtLang: setPrefTgtLang,
-    uiLang,
+    uiLang: prefUiLang,
     setUiLang,
     theme,
     setTheme,
     loading: prefsLoading,
   } = useUserPreferences();
 
+  // -------------------------
+  // Use UI language messages from user preferences
+  // -------------------------
+  const m = useMessages();
+
+  // -------------------------
+  // Set source / target language codes & labels
+  // -------------------------
   const [localSrcLang, setLocalSrcLang] = useState<string | null>(null);
   const [localTgtLang, setLocalTgtLang] = useState<string | null>(null);
 
-  // Set default effective source / target languages
   const srcLang = localSrcLang ?? prefSrcLang ?? "en";
   const tgtLang = localTgtLang ?? prefTgtLang ?? "es";
+
+  const srcLabel = getLangLabel(srcLang, m.langs);
+  const tgtLabel = getLangLabel(tgtLang, m.langs);
+
+ // -------------------------
+ // Ensure UI lang is supported (-> UiLang type)
+ // -------------------------
+  const uiLang = toUiLang(prefUiLang);
+  const UI_LANGS_MAP = getUiLangsMap(uiLang) // e.g., UI_LANGS_MAP["en"] = "English"
 
   // -------------------------
   // Core state
@@ -116,7 +167,7 @@ function TranslatePage() {
   const [pages, setPages] = useState<string[]>([]);
   const [pageId, setPageId] = useState<number>(0);
   const pageCache = useRef<Map<number, Session>>(new Map());
-  
+
   // -------------------------
   // Database Information
   // -------------------------
@@ -135,9 +186,13 @@ function TranslatePage() {
   const [blurredSource, setBlurredSource] = useState<Set<number>>(new Set());
   const [sourceBlurEnabled, setSourceBlurEnabled] = useState(true);
   const emptyBlurredSource = useRef<Set<number>>(new Set());
-  const noopSetBlurredSource = (_: Set<number> | ((prev: Set<number>) => Set<number>)) => {};
+  const noopSetBlurredSource = (
+    _: Set<number> | ((prev: Set<number>) => Set<number>)
+  ) => {};
   // Lock target/source when Popover is showing
-  const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(null);
+  const [lockedTargetIndex, setLockedTargetIndex] = useState<number | null>(
+    null
+  );
   const [lockedSourceIndices, setLockedSourceIndices] = useState<number[]>([]);
   const [targetLocked, setTargetLocked] = useState(false);
   // Current sentence/paragraph for arrow navigation
@@ -170,26 +225,32 @@ function TranslatePage() {
   // Derived values
   // -------------------------
   const sampleOptions = SAMPLE_TEXTS_BY_LANG[srcLang] ?? [];
-  const selectedSample = sampleOptions.find((entry) => entry.id === sampleId) ?? null;
+  const selectedSample =
+    sampleOptions.find((entry) => entry.id === sampleId) ?? null;
   const activeSourceIndex = popoverOpen ? null : hoveredSourceIndex;
-  const activeTargetIndex = popoverOpen ? lockedTargetIndex : hoveredTargetIndex;
+  const activeTargetIndex = popoverOpen
+    ? lockedTargetIndex
+    : hoveredTargetIndex;
 
-  const activeAlignedSource =
-    popoverOpen
-      ? lockedSourceIndices
-      : hoveredTargetIndex !== null
-        ? (session?.align.tgtToSrc[hoveredTargetIndex] ?? [])
-        : [];
-    
+  const activeAlignedSource = popoverOpen
+    ? lockedSourceIndices
+    : hoveredTargetIndex !== null
+      ? (session?.align.tgtToSrc[hoveredTargetIndex] ?? [])
+      : [];
+
   const activeAlignedTarget =
     activeSourceIndex !== null
       ? (session?.align.srcToTgt[activeSourceIndex] ?? [])
       : [];
   const canTranslate = sourceText.trim().length > 0 || !!sourceFile;
 
-  // -------------------------
-  // Handlers
-  // -------------------------
+  /**************************
+   * `startReadingSession()`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   async function startReadingSession() {
     if (!sourceText.trim() && !sourceFile) return;
 
@@ -215,7 +276,7 @@ function TranslatePage() {
 
     // Load list of pages source text
     const newPages = savedPages.map((p) => p.src_text);
-    setPages(newPages)
+    setPages(newPages);
     setPageId(0);
 
     // Reset session state
@@ -234,6 +295,13 @@ function TranslatePage() {
     await loadPageSession(0, newPages, newPageDbIds, { srcLang, tgtLang });
   }
 
+  /**************************
+   * `handleSwapLanguages()`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   function handleSwapLanguages() {
     const nextSrc = tgtLang;
     const nextTgt = srcLang;
@@ -266,6 +334,14 @@ function TranslatePage() {
     }
   }
 
+  
+  /**************************
+   * `loadPageSession()`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   async function loadPageSession(
     pid: number,
     pagesArg?: string[],
@@ -338,18 +414,29 @@ function TranslatePage() {
         return;
       }
     }
-    
+
     // Cache page's session
-    const sess = await translateAndAlign(pageText, pageDbId, srcLangLocal, tgtLangLocal);
+    const sess = await translateAndAlign(
+      pageText,
+      pageDbId,
+      srcLangLocal,
+      tgtLangLocal
+    );
     if (sess) {
       pageCache.current.set(pid, sess);
       setSession(sess);
       setBlurredSource(new Set(sess.src.words.map((_, i) => i)));
       setShowAligned(true);
     }
-
   }
 
+  /**************************
+   * `translateAndAlign()`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   async function translateAndAlign(
     text: string,
     documentPageId?: number,
@@ -362,11 +449,31 @@ function TranslatePage() {
     const srcLangLocal = srcLangArg ?? srcLang;
     const tgtLangLocal = tgtLangArg ?? tgtLang;
 
-    // Translate
+    // -------------------------
+    // If language prefs are null (first translation), update
+    // -------------------------
+    if (!prefSrcLang && !prefTgtLang) {
+      void fetch("/api/user_preferences", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          preferred_src_lang: srcLangLocal,
+          preferred_tgt_lang: tgtLangLocal,
+        }),
+      });
+    }
+
+    // -------------------------
+    // Translate: /api/translate
+    // -------------------------
     const translate_res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ source: text, src_lang: srcLangLocal, tgt_lang: tgtLangLocal }),
+      body: JSON.stringify({
+        source: text,
+        src_lang: srcLangLocal,
+        tgt_lang: tgtLangLocal,
+      }),
     });
     const translate_data = await translate_res.json();
 
@@ -416,10 +523,12 @@ function TranslatePage() {
         tgtToSrc: align_data.align.tgtToSrc,
       },
       state: {
-        blurredSource: new Set(align_data.src.words.map((_: string, i: number) => i)),
+        blurredSource: new Set(
+          align_data.src.words.map((_: string, i: number) => i)
+        ),
         navSentId: -1,
         navParId: -1,
-      }
+      },
     };
 
     // -------------------------
@@ -435,7 +544,7 @@ function TranslatePage() {
           src: sess.src,
           tgt: sess.tgt,
           align: sess.align,
-        }
+        },
       });
     }
 
@@ -443,6 +552,14 @@ function TranslatePage() {
     return sess;
   }
 
+
+  /**************************
+   * `handleTargetWordClick`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   async function handleTargetWordClick(i: number, el: HTMLElement) {
     if (!session) return;
     if (targetLocked) return;
@@ -459,11 +576,11 @@ function TranslatePage() {
     setHoveredTargetIndex(i);
 
     if (sourceBlurEnabled) {
-      setBlurredSource(prev => {
+      setBlurredSource((prev) => {
         const next = new Set(prev);
         for (const idx of srcIdxs) next.delete(idx);
         return next;
-      })
+      });
     }
 
     // -------------------------
@@ -483,6 +600,7 @@ function TranslatePage() {
       body: JSON.stringify({
         srcLang: srcLang,
         tgtLang: tgtLang,
+        uiLang: uiLang,
         src: {
           words: session.src.words,
           spaces: session.src.spaces,
@@ -524,23 +642,24 @@ function TranslatePage() {
 
     setExplanationLoading(false);
   }
+
   
-  // -------------------------
-  // Hover Highlighting
-  // -------------------------
+  // =========================
+  // ( Text Hovering )
+  // =========================
   const handleSourceHover = (idx: number | null) => {
-    if (popoverOpen) return;        // lock
+    if (popoverOpen) return; // lock
     setHoveredSourceIndex(idx);
   };
 
   const handleTargetHover = (idx: number | null) => {
-    if (popoverOpen) return;        // lock
+    if (popoverOpen) return; // lock
     setHoveredTargetIndex(idx);
   };
 
-  // -------------------------
-  // Text blur helper functions
-  // -------------------------
+  // =========================
+  // ( Text Blur Helper Functions )
+  // =========================
   const { prev, next } = useSourceRevealNav({
     session,
     sourceBlurEnabled,
@@ -552,9 +671,13 @@ function TranslatePage() {
     setNavParId,
   });
 
-  // -------------------------
-  // Page navigation
-  // -------------------------
+  /**************************
+   * `updateCachedState`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
   function updateCachedState(pid: number) {
     if (!session) return;
 
@@ -571,6 +694,10 @@ function TranslatePage() {
     setSession(updated);
   }
 
+  // =========================
+  // ( Page Navigation )
+  // -- 
+  // =========================
   async function goPrevPage() {
     const prev = pageId - 1;
     if (prev < 0) return;
@@ -585,22 +712,18 @@ function TranslatePage() {
     await loadPageSession(next);
   }
 
-  // -------------------------
-  // Sample selection
-  // -------------------------
+  // =========================
+  // ( Sample Selection )
+  // -- 
+  // =========================
   useEffect(() => {
     setSampleId("");
   }, [srcLang]);
 
-  // =========================================================================
-  // BIG CHANGE BLOCK: LOAD SAVED DOCUMENT FROM /translate?documentId=<id>
-  // =========================================================================
-  // This lets the library route to /translate with a documentId query param.
-  // When present, we:
-  // 1) fetch the saved document pages from /api/documents/[documentId]
-  // 2) hydrate translate page state
-  // 3) load the first page into the reader, including saved page translation
-  // =========================================================================
+  // =========================
+  // ( Document Loading )
+  // -- 
+  // =========================
   useEffect(() => {
     if (!documentIdParam) return;
     const parsedDocumentId = Number(documentIdParam);
@@ -639,7 +762,7 @@ function TranslatePage() {
         setSourceText(sourceTextFull);
         setSourceFile(null);
         setSampleId("");
-        
+
         // Load source / target languages
         const loadedSrcLang = data.src_lang;
         const loadedTgtLang = data.tgt_lang;
@@ -678,9 +801,10 @@ function TranslatePage() {
     };
   }, [documentIdParam]);
 
-  // -------------------------
-  // Arrow Key Navigation
-  // -------------------------
+  // =========================
+  // ( Arrow Key Navigation )
+  // -- 
+  // =========================
   useEffect(() => {
     if (!showAligned) return;
 
@@ -734,23 +858,20 @@ function TranslatePage() {
     window.addEventListener("keydown", onKeyDown, { capture: true });
 
     return () => {
-      window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
+      window.removeEventListener("keydown", onKeyDown, {
+        capture: true,
+      } as any);
     };
-  }, [
-    showAligned,
-    popoverOpen,
-    prev,
-    next,
-  ]);
+  }, [showAligned, popoverOpen, prev, next]);
 
-
-  // -------------------------
-  // Render
-  // -------------------------
+  // =========================
+  // ( TranslatePage Render )
+  // -- 
+  // =========================
   return (
     <div className="p-4 font-ui">
       {/* -------------------------
-      //* Source Text Input 
+      //* Upload Page
       //* ------------------------- */}
       {!showAligned && !translationLoading && !documentLoading ? (
         <Pane className="h-[80vh]">
@@ -760,11 +881,11 @@ function TranslatePage() {
           <div className="rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm mb-3">
             <div className="flex items-center gap-4">
               {/* -------------------------
-              * Source Language Selector
-              * ------------------------- */}
+               * Source Language Selector
+               * ------------------------- */}
               <div className="flex-1">
                 <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                  Original
+                  {m.upload.original}
                 </div>
                 <select
                   className="
@@ -776,25 +897,27 @@ function TranslatePage() {
                   onChange={(e) => setLocalSrcLang(e.target.value)}
                   disabled={translationLoading}
                 >
-                {LANGS.map((lang) => {
-                  const isDisabled = lang.code === tgtLang;
-                  return (
-                    <option
-                      key={lang.code}
-                      value={lang.code}
-                      disabled={isDisabled}
-                      className={!isDisabled ? "font-semibold" : "font-normal"}
-                    >
-                      {lang.label}
-                    </option>
-                  );
-                })}
+                  {UI_LANGS_MAP.map((lang) => {
+                    const isDisabled = lang.code === tgtLang;
+                    return (
+                      <option
+                        key={lang.code}
+                        value={lang.code}
+                        disabled={isDisabled}
+                        className={
+                          !isDisabled ? "font-semibold" : "font-normal"
+                        }
+                      >
+                        {lang.label}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
 
               {/* -------------------------
-              * Swap Source / Target
-              * ------------------------- */}
+               * Swap Source/Target Language Button
+               * ------------------------- */}
               <div className="hidden sm:flex items-center justify-center">
                 <Button
                   type="button"
@@ -814,11 +937,11 @@ function TranslatePage() {
               </div>
 
               {/* -------------------------
-              * Target Language Selector
-              * ------------------------- */}
+               * Target Language Selector
+               * ------------------------- */}
               <div className="flex-1">
                 <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                  Translation
+                  {m.upload.translation}
                 </div>
                 <select
                   className="
@@ -830,29 +953,31 @@ function TranslatePage() {
                   onChange={(e) => setLocalTgtLang(e.target.value)}
                   disabled={translationLoading}
                 >
-                {LANGS.map((lang) => {
-                  const isDisabled = lang.code === srcLang;
-                  return (
-                    <option
-                      key={lang.code}
-                      value={lang.code}
-                      disabled={isDisabled}
-                      className={!isDisabled ? "font-semibold" : "font-normal"}
-                    >
-                      {lang.label}
-                    </option>
-                  );
-                })}
+                  {UI_LANGS_MAP.map((lang) => {
+                    const isDisabled = lang.code === srcLang;
+                    return (
+                      <option
+                        key={lang.code}
+                        value={lang.code}
+                        disabled={isDisabled}
+                        className={
+                          !isDisabled ? "font-semibold" : "font-normal"
+                        }
+                      >
+                        {lang.label}
+                      </option>
+                    );
+                  })}
                 </select>
               </div>
             </div>
 
             {/* -------------------------
-            * Sample Text
-            * ------------------------- */}
+             * Sample Text
+             * ------------------------- */}
             <div className="mt-4">
               <div className="text-[11px] uppercase tracking-wide text-muted-foreground pb-1">
-                Sample text
+                {m.upload.sampleText}
               </div>
               <select
                 className="
@@ -862,11 +987,21 @@ function TranslatePage() {
                 "
                 value={sampleId}
                 onChange={(e) => handleSampleSelect(e.target.value)}
-                disabled={translationLoading || sampleLoading || sampleOptions.length === 0}
+                disabled={
+                  translationLoading ||
+                  sampleLoading ||
+                  sampleOptions.length === 0
+                }
               >
-                <option value="">Select a sample...</option>
+                <option value="">
+                  {m.upload.selectSample}...
+                </option>
                 {sampleOptions.map((sample) => (
-                  <option key={sample.id} value={sample.id} className="font-semibold">
+                  <option
+                    key={sample.id}
+                    value={sample.id}
+                    className="font-semibold"
+                  >
                     {sample.label}
                   </option>
                 ))}
@@ -880,23 +1015,26 @@ function TranslatePage() {
           </div>
 
           {/* -------------------------
-          //* Source Text Inputs
-          //* ------------------------- */}
-          {/* Document Title */}
+          * Document Title
+          * ------------------------- */}
           <div className="shrink-0 rounded-xl border border-border/70 bg-background/70 px-4 py-3 shadow-sm">
             <div className="flex items-center gap-3">
-              <span className="text-sm font-semibold text-muted-foreground">Title:</span>
+              <span className="text-sm font-semibold text-muted-foreground">
+                Title:
+              </span>
               <Input
                 id="document-title"
                 value={title}
                 onChange={(e) => {
                   setTitle(e.target.value);
                 }}
-                placeholder="Untitled document"
+                placeholder={m.upload.untitledDocument}
               />
             </div>
           </div>
-          {/* Input Box */}
+          {/* -------------------------
+          * Text Input Box
+          * ------------------------- */}
           <div className="mt-3 flex-1 min-h-0">
             <AppTextarea
               className="h-full min-h-0 overflow-y-auto"
@@ -905,12 +1043,19 @@ function TranslatePage() {
                 setSourceText(e.target.value);
                 if (sampleId) setSampleId("");
               }}
-              placeholder={`Type some ${getLangLabel(srcLang)} text...`}
+              placeholder={
+                m.upload.typeText.replace(
+                  "{lang}",
+                  srcLabel
+                )
+              }
             />
           </div>
-          {/* Upload Card */}
+          {/* -------------------------
+          * File Upload Card
+          * ------------------------- */}
           <div className="mt-3 shrink-0">
-            <UploadSurface 
+            <UploadSurface
               className="h-36"
               file={sourceFile}
               onFileChange={async (file) => {
@@ -925,16 +1070,19 @@ function TranslatePage() {
                   setSourceText(text);
                 }
               }}
+              text={m.upload.dragDrop}
             />
           </div>
-          
+
           {/* -------------------------
           //* Translate Button
           //* ------------------------- */}
           <div className="pt-6 shrink-0 flex flex-col items-center gap-2">
             <Button
               onClick={startReadingSession}
-              disabled={translationLoading || !srcLang || !tgtLang || !canTranslate}
+              disabled={
+                translationLoading || !srcLang || !tgtLang || !canTranslate
+              }
               className="
                 group
                 relative
@@ -949,7 +1097,7 @@ function TranslatePage() {
               "
             >
               <span className="relative font-semibold">
-                Translate
+                {m.upload.translate}
                 <span
                   className="
                     absolute left-0 -bottom-1
@@ -964,10 +1112,9 @@ function TranslatePage() {
             </Button>
             {!canTranslate && (
               <div className="text-xs text-muted-foreground">
-                Paste text or upload a file to translate.
+                {m.upload.uploadHint}
               </div>
             )}
-
           </div>
         </Pane>
       ) : (
@@ -979,7 +1126,7 @@ function TranslatePage() {
             <div className="shrink-0 pb-4 text-center text-[20px] tracking-[0.12em] text-muted-foreground">
               {title}
             </div>
-            
+
             <TextSurface className="flex-1 min-h-0 flex flex-col overflow-hidden">
               <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden border-b">
                 <div className="pointer-events-none absolute inset-y-0 left-1/2 w-px bg-border/70" />
@@ -987,11 +1134,16 @@ function TranslatePage() {
                 {/* -------------------------
                 //* Source / Target Headers
                 //* ------------------------- */}
-                <div className="
+                <div
+                  className="
                   shrink-0 grid grid-cols-2 border-b
                   text-[18px] font-medium
                   leading-none text-foreground/90
-                ">
+                "
+                >
+                  {/* -------------------------
+                  * Source Language Header
+                  * ------------------------- */}
                   <div className="px-8 pt-4 pb-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -999,29 +1151,35 @@ function TranslatePage() {
                           <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted" />
                         ) : (
                           <div className="inline-flex flex-col">
-                            <span>
-                              {getLangLabel(srcLang)}
-                            </span>
+                            <span>{srcLabel}</span>
                             <span className="mt-2 h-0.5 w-full bg-blue-300" />
                           </div>
                         )}
                       </div>
-                      <SourceBlurButton value={sourceBlurEnabled} onChange={setSourceBlurEnabled} />
+                      {/* -------------------------
+                      * Source Show/Hide Button
+                      * ------------------------- */}
+                      <SourceBlurButton
+                        value={sourceBlurEnabled}
+                        onChange={setSourceBlurEnabled}
+                        showLabel={m.reader.general.showOriginal}
+                        hideLabel={m.reader.general.hideOriginal}
+                      />
                     </div>
                   </div>
-
+                  {/* -------------------------
+                  * Target Language Header
+                  * ------------------------- */}
                   <div className="pl-12 pt-4 pb-3">
-                      <div>
-                        {readerLoading ? (
-                          <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted" />
-                        ) : (
-                          <div className="inline-flex flex-col">
-                            <span>
-                              {getLangLabel(tgtLang)}
-                            </span>
-                            <span className="mt-2 h-0.5 w-full bg-orange-300" />
-                          </div>
-                        )}
+                    <div>
+                      {readerLoading ? (
+                        <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted" />
+                      ) : (
+                        <div className="inline-flex flex-col">
+                          <span>{tgtLabel}</span>
+                          <span className="mt-2 h-0.5 w-full bg-orange-300" />
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -1043,28 +1201,46 @@ function TranslatePage() {
                     <ParagraphGrid
                       session={session}
                       blurMode={blurMode}
-                      blurredSource={sourceBlurEnabled ? blurredSource : emptyBlurredSource.current}
-                      setBlurredSource={sourceBlurEnabled ? setBlurredSource : noopSetBlurredSource}
+                      blurredSource={
+                        sourceBlurEnabled
+                          ? blurredSource
+                          : emptyBlurredSource.current
+                      }
+                      setBlurredSource={
+                        sourceBlurEnabled
+                          ? setBlurredSource
+                          : noopSetBlurredSource
+                      }
                       sourceHighlightIndices={[
-                        ...(activeSourceIndex !== null ? [activeSourceIndex] : []),
+                        ...(activeSourceIndex !== null
+                          ? [activeSourceIndex]
+                          : []),
                         ...activeAlignedSource,
                       ]}
                       targetHighlightIndices={[
-                        ...(activeTargetIndex !== null ? [activeTargetIndex] : []),
+                        ...(activeTargetIndex !== null
+                          ? [activeTargetIndex]
+                          : []),
                         ...activeAlignedTarget,
                       ]}
                       onSourceHover={handleSourceHover}
                       onTargetHover={handleTargetHover}
                       onTargetWordClick={handleTargetWordClick}
                       targetDisabled={popoverOpen}
-                      className="text-[24px] leading-[1.5]"
+                      className="text-[20px] leading-[1.5]"
                     />
                   )}
                 </div>
               </div>
 
+              {/* -------------------------
+              * Footer
+              * ------------------------- */}
               <div className="shrink-0 border-t px-4 py-3">
                 <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-3">
+                  {/* -------------------------
+                  * Previous Page Button
+                  * ------------------------- */}
                   <div className="flex justify-start">
                     <Button
                       type="button"
@@ -1078,13 +1254,31 @@ function TranslatePage() {
                       <ChevronLeft className="h-4 w-4" />
                     </Button>
                   </div>
+                  {/* -------------------------
+                  * Blur-Mode Toggle
+                  * ------------------------- */}
                   <div className="flex justify-center">
-                    <BlurModeToggle value={blurMode} onChange={setBlurMode} />
+                    <BlurModeToggle 
+                      value={blurMode} 
+                      onChange={setBlurMode} 
+                      msgs={m.reader.blurModeToggle}
+                    />
                   </div>
+                  {/* -------------------------
+                  * Page Counter
+                  * ------------------------- */}
                   <div className="flex justify-center text-sm text-muted-foreground">
-                    Page {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
+                    {m.reader.general.page} {pages.length > 0 ? pageId + 1 : 0} / {pages.length}
                   </div>
-                  <div />
+                  {/* -------------------------
+                  * Help Popover
+                  * ------------------------- */}
+                  <div className="flex justify-start">
+                    <HelpPopover msgs={m.reader.helpPopover}/>
+                  </div>
+                  {/* -------------------------
+                  * Next Page Button
+                  * ------------------------- */}
                   <div className="flex justify-end">
                     <Button
                       type="button"
@@ -1109,7 +1303,7 @@ function TranslatePage() {
               open={popoverOpen}
               onOpenChange={(open) => {
                 setPopoverOpen(open);
-                
+
                 if (!open) {
                   setTargetLocked(false);
                   setLockedTargetIndex(null);
@@ -1121,7 +1315,7 @@ function TranslatePage() {
               }}
               anchorEl={anchorEl}
               className="w-[min(520px,92vw)] overflow-visible"
-              >
+            >
               {explanationLoading || !session ? (
                 <ExplainSkeleton />
               ) : (

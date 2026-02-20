@@ -13,8 +13,12 @@ import { SourceClickInfo } from "./SourceClickInfo";
 import { TargetClickInfo } from "./TargetClickInfo";
 import { PageNavInfo } from "./PageNavInfo";
 import { IPAClickInfo } from "./IPAClickInfo";
+import { messages, UiLang } from "@/app/i18n/messages";
 
-export function HelpPopover() {
+type HelpPopoverMessages = (typeof messages)[UiLang]["reader"]["helpPopover"];
+
+
+export function HelpPopover({ msgs }: { msgs: HelpPopoverMessages }) {
   const [open, setOpen] = React.useState(false);
   const closeTimeout = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -55,15 +59,15 @@ export function HelpPopover() {
         className="w-auto p-0 border shadow-lg"
       >
         <div className="border-b px-4 py-3 text-center">
-          <div className="text-sm font-semibold">Navigation & interactions</div>
+          <div className="text-sm font-semibold">{msgs.header}</div>
         </div>
 
         <div className="flex flex-col gap-3 p-3">
-          <PageNavInfo className="w-full" />
-          <SourceNavInfo className="w-full" />
-          <SourceClickInfo className="w-full" />
-          <TargetClickInfo className="w-full" />
-          <IPAClickInfo className="w-full"/>
+          <PageNavInfo msgs={msgs.pageNav} />
+          <SourceNavInfo msgs={msgs.sourceNav} />
+          <SourceClickInfo msgs={msgs.sourceClick} />
+          <TargetClickInfo msgs={msgs.targetClick} />
+          <IPAClickInfo msgs={msgs.ipaClick} />
         </div>
       </PopoverContent>
     </Popover>

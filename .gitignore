@@ -10,7 +10,5 @@ Icon?
 .vscode/
 *.sqlite*
 testing/
-# React Component Preview
-previewConfig.json
 delete_tables.sh
 init_db.sh

@@ -10,9 +10,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        reading: ["var(--font-reading)", "Georgia", "ui-serif"],
-        ui: ["var(--font-ui)", "ui-sans-serif", "system-ui"],
-        logo: ["var(--font-logo)", "Georgia", "ui-serif"],
+        reading: ["var(--font-lora)", "Georgia", "ui-serif"],
+        ui: ["var(--font-dm_sans)", "ui-sans-serif", "system-ui"],
       },
     },
   },

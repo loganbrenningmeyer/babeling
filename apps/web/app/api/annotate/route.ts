@@ -11,6 +11,7 @@ export async function POST(req: Request) {
     body: JSON.stringify({
       src_lang: req_data.srcLang,
       tgt_lang: req_data.tgtLang,
+      ui_lang: req_data.uiLang,
       src: {
         words: req_data.src.words,
         spaces: req_data.src.spaces,

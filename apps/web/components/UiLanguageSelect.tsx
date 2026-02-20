@@ -1,15 +1,7 @@
 "use client";
 
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
-
-// -------------------------
-// UI Languages
-// -------------------------
-const UI_LANGS = [
-  { code: "en", label: "English" },
-  { code: "es", label: "Español" },
-  { code: "fr", label: "Français" },
-];
+import { UI_LANGS_MAP } from "@/app/i18n/messages";
 
 
 export function UiLanguageSelect() {
@@ -23,7 +15,7 @@ export function UiLanguageSelect() {
       disabled={loading}
       aria-label="UI language"
     >
-      {UI_LANGS.map((l) => (
+      {UI_LANGS_MAP.map((l) => (
         <option key={l.code} value={l.code}>{l.label}</option>
       ))}
     </select>

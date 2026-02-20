@@ -31,6 +31,7 @@ class AnnotateUsageData(BaseModel):
 class AnnotateRequest(BaseModel):
     src_lang: str
     tgt_lang: str
+    ui_lang: str
     src: AnnotateDomainData
     tgt: AnnotateDomainData
     tgt_to_src: dict[int, list[int]]
