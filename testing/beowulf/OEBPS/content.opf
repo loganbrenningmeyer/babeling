@@ -1,0 +1,56 @@
+<?xml version='1.0' encoding='UTF-8'?>
+
+<package xmlns:opf="http://www.idpf.org/2007/opf" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="id" xml:lang="en">
+  <metadata>
+    <dc:rights>Public domain in the USA.</dc:rights>
+    <dc:identifier id="id">http://www.gutenberg.org/16328</dc:identifier>
+    <dc:contributor id="author_0">J. Lesslie Hall</dc:contributor>
+    <meta property="file-as" refines="#author_0">Hall, J. Lesslie (John Lesslie)</meta>
+    <meta property="role" refines="#author_0" scheme="marc:relators">trl</meta>
+    <dc:title>Beowulf: An Anglo-Saxon Epic Poem</dc:title>
+    <dc:language>en</dc:language>
+    <dc:subject>Epic poetry, English (Old)</dc:subject>
+    <dc:subject>Monsters -- Poetry</dc:subject>
+    <dc:subject>Dragons -- Poetry</dc:subject>
+    <dc:date>2005-07-19</dc:date>
+    <meta property="dcterms:modified">2026-02-07T11:38:58Z</meta>
+    <dc:source>https://www.gutenberg.org/files/16328/16328-h/16328-h.htm</dc:source>
+    <meta property="schema:accessMode">textual</meta>
+    <meta property="schema:accessibilityFeature">readingOrder</meta>
+    <meta property="schema:accessibilityHazard">none</meta>
+    <meta property="schema:accessModeSufficient">textual,visual</meta>
+    <meta property="schema:accessibilitySummary">This publication may not have complete alternative text descriptions.</meta>
+    <meta name="cover" content="id-3468094086294956694"/>
+  </metadata>
+  <manifest>
+    <!--Image: 1826 x 2726 size=247187 q=30-->
+    <item href="229036468198665385_cover.jpg" id="id-3468094086294956694" media-type="image/jpeg" properties="cover-image"/>
+    <item href="pgepub.css" id="item1" media-type="text/css"/>
+    <item href="0.css" id="item2" media-type="text/css"/>
+    <item href="1.css" id="item3" media-type="text/css"/>
+    <!--Chunk: size=81559 Split on div.div1-->
+    <item href="5372002912463971283_16328-h-0.htm.xhtml" id="pg-header" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=157761 Split on div-->
+    <item href="5372002912463971283_16328-h-1.htm.xhtml" id="page_1" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=159746 Split on div-->
+    <item href="5372002912463971283_16328-h-2.htm.xhtml" id="XVIII" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=112585-->
+    <item href="5372002912463971283_16328-h-3.htm.xhtml" id="XXXIII" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=5972 Split on section-->
+    <item href="5372002912463971283_16328-h-4.htm.xhtml" id="ADDENDA" media-type="application/xhtml+xml"/>
+    <!--Chunk: size=19700-->
+    <item href="5372002912463971283_16328-h-5.htm.xhtml" id="pg-footer" media-type="application/xhtml+xml"/>
+    <item href="toc.xhtml" id="ncx" media-type="application/xhtml+xml" properties="nav"/>
+    <item href="toc.ncx" id="ncx2" media-type="application/x-dtbncx+xml"/>
+    <item href="wrap0000.xhtml" id="coverpage-wrapper" media-type="application/xhtml+xml" properties="svg"/>
+  </manifest>
+  <spine toc="ncx2">
+    <itemref idref="coverpage-wrapper"/>
+    <itemref idref="pg-header"/>
+    <itemref idref="page_1"/>
+    <itemref idref="XVIII"/>
+    <itemref idref="XXXIII"/>
+    <itemref idref="ADDENDA"/>
+    <itemref idref="pg-footer"/>
+  </spine>
+</package>

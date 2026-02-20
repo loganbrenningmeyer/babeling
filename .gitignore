@@ -9,6 +9,5 @@ artifacts/*
 Icon?
 .vscode/
 *.sqlite*
-testing/
 delete_tables.sh
 init_db.sh

@@ -18,6 +18,8 @@ dependencies = [
   "cryptography",
   "httpx",
   "requests",
+  "pillow",
+  "EbookLib",
 ]
 
 [tool.setuptools]
