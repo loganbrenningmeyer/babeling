@@ -1,15 +1,19 @@
 import io
 from ebooklib import epub, ITEM_COVER, ITEM_IMAGE, ITEM_DOCUMENT
 from ebooklib.epub import EpubBook
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from PIL import Image
-from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup, Tag
 import zipfile
 
 
 def extract_epub(epub_path: str, out_dir: str):
     with zipfile.ZipFile(epub_path, "r") as zf:
         zf.extractall(out_dir)
+
+
+def normalize_path(p: str) -> str:
+    return str(PurePosixPath(p))
 
 
 class EpubParser:
@@ -35,6 +39,15 @@ class EpubParser:
             for item in book.get_items_of_type(ITEM_DOCUMENT)
         }
         return id_to_item
+    
+    def get_doc_by_path(self, book: EpubBook, path: str):
+        """
+        
+        """
+        for item in book.get_items_of_type(ITEM_DOCUMENT):
+            if normalize_path(item.get_name()).endswith(normalize_path(path)):
+                return item
+        return None
 
     def get_metadata(self, book: EpubBook, label: str) -> str | None:
         """
@@ -94,12 +107,13 @@ class EpubParser:
         matches = []
         for link in toc_links:
             href = link.href
-            link_filename, _, fragment = href.partition("#")
+            link_filename, sep, fragment = href.partition("#")
 
             if link_filename == filename:
                 matches.append({
                     "title": link.title,
-                    "fragment": fragment,
+                    "path": link_filename,
+                    "fragment": fragment if sep else None,
                 })
         return matches
     
@@ -156,6 +170,57 @@ class EpubParser:
 
         return chapter_texts
     
+    def get_fragment_text(self, book: EpubBook, start_entry: dict, end_entry: dict | None) -> str:
+        """
+        entry = {
+            "title": str,
+            "path": str,
+            "fragement": str | None
+        }
+        """
+        doc = self.get_doc_by_path(book, start_entry["path"])
+        if doc is None:
+            return ""
+        
+        # -- Create BeautifulSoup xml parser
+        soup = BeautifulSoup(doc.get_body_content(), "xml")
+
+        start_fragment = start_entry["fragment"]
+        end_fragment = end_entry["fragment"] if end_entry else None
+
+        # -------------------------
+        # fragment == None: Get whole file
+        # -------------------------
+        if not start_fragment:
+            return soup.get_text("\n").strip()  # separate children by newline
+
+        # -------------------------
+        # fragment != None: Get between start / end
+        # -------------------------
+        start = soup.find(id=start_fragment)
+        # -- If fragment not found or no end fragment, return full text
+        if start is None or end_fragment is None:
+            return soup.get_text("\n").strip()
+        
+        # -- Collect everything between start / end
+        end = soup.find(id=end_fragment)
+
+        text_chunks = []
+        for el in start.next_elements:
+            # -- Stop when we reach the end fragment
+            if end and el == end:
+                break
+            # -- Only collect block-level tags
+            if isinstance(el, Tag) and el.name in {
+                "p", "h1", "h2", "h3", "h4", "h5", "h6",
+                "li", "blockquote", "div", "pre"
+            }:
+                text = el.get_text(" ", strip=True)
+                if text:
+                    text_chunks.append(text)
+
+        return "\n\n".join(text_chunks)
+    
     def walk_toc(self, toc, depth=0):
         for item in toc:
             if isinstance(item, tuple):
@@ -178,7 +243,16 @@ def main():
 
     spine_entries = parser.build_spine_entries(book)
 
-    print(spine_entries)
+    for item in spine_entries:
+        entries = item["entries"]
+        for i, entry in enumerate(entries):
+            # -- Last entry has no end fragment
+            if i == len(entries) - 1:
+                text = parser.get_fragment_text(book, entry, None)
+            else:
+                text = parser.get_fragment_text(book, entry, entries[i + 1])
+            print(text)
+
 
 
 if __name__ == "__main__":
