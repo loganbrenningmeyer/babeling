@@ -7,7 +7,7 @@ import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 
-import { BlurMode } from "../../translate/types/blur";
+import { BlurMode } from "../feature/types/blur";
 
 import { ReaderShell } from "../feature/components/ReaderShell";
 import { getLangLabel } from "@/app/i18n/messages";
