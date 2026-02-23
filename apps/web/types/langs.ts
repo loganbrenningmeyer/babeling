@@ -1,7 +1,3 @@
-import type { UiLang } from "@/app/i18n/messages";
-
-
-
 export const LANG_BADGE_COLOR_BY_CODE: Record<string, string> = {
   en: "bg-blue-500/15 text-blue-700",
   fr: "bg-rose-500/15 text-rose-700",

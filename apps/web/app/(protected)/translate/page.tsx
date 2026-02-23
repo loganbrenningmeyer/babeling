@@ -49,23 +49,23 @@ import {
 import { Pane } from "@/app/components/Pane";
 import { AppTextarea } from "@/app/components/AppTextarea";
 import { TextSurface } from "@/app/components/TextSurface";
-import { AnchoredPopover } from "@/app/(protected)/translate/components/AnchoredPopover";
+import { AnchoredPopover } from "@/app/(protected)/documents/feature/components/Annotate/AnchoredPopover";
 import {
   AnnotateCard,
   type DefineEntry,
   type ExplainEntry,
-} from "@/app/(protected)/translate/components/AnnotateCard";
-import { SourceBlurButton } from "@/app/(protected)/translate/components/SourceBlur/SourceBlurButton";
+} from "@/app/(protected)/documents/feature/components/Annotate/AnnotateCard";
+import { SourceBlurButton } from "@/app/(protected)/documents/feature/components/SourceBlur/SourceBlurButton";
 import {
   BlurMode,
   BlurModeToggle,
-} from "@/app/(protected)/translate/components/SourceBlur/BlurModeToggle";
-import { ExplainSkeleton } from "@/app/(protected)/translate/components/ExplainSkeleton";
-import { TextSkeleton } from "@/app/(protected)/translate/components/TextSkeleton";
-import { ParagraphGrid } from "@/app/(protected)/translate/components/ParagraphGrid";
+} from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
+import { ExplainSkeleton } from "@/app/(protected)/documents/feature/components/Annotate/AnnotateSkeleton";
+import { TextSkeleton } from "@/app/(protected)/documents/feature/components/Reader/TextSkeleton";
+import { ParagraphGrid } from "@/app/(protected)/documents/feature/components/Reader/ParagraphGrid";
 import { UploadSurface } from "@/app/components/UploadSurface";
-import { useSourceRevealNav } from "@/app/(protected)/translate/components/SourceBlur/useSourceRevealNav";
-import { HelpPopover } from "@/app/(protected)/translate/components/HelpInfo/HelpPopover";
+import { useSourceRevealNav } from "@/app/(protected)/documents/feature/hooks/useSourceRevealNav";
+import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
 
 // =========================
 // ( Language Info Variables / Functions )

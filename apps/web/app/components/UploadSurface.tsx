@@ -1,67 +1,151 @@
 "use client";
 
 import * as React from "react";
+import { Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AppSurface } from "./AppSurface";
 import { Dropzone } from "./Dropzone";
-
+import { Button } from "@/components/ui/button";
 
 type UploadSurfaceProps = {
   className?: string;
   file: File | null;
   onFileChange: (file: File | null) => void;
-  text: string;
+  text?: string;
+};
+
+function FileChip({ children }: { children: React.ReactNode }) {
+  return (
+    <span className="
+      rounded-md border bg-background 
+      px-2 py-0.5 
+      text-[11px] font-medium text-muted-foreground/80
+    ">
+      {children}
+    </span>
+  );
 }
 
-export function UploadSurface({ 
+export function UploadSurface({
   className,
   file,
   onFileChange,
-  text,
+  text = "Drop your file here",
 }: UploadSurfaceProps) {
+
+  const inputId = React.useId();
+  const inputRef = React.useRef<HTMLInputElement | null>(null);
 
   function handleFiles(files: FileList | null) {
     const f = files?.[0] ?? null;
     onFileChange(f);
   }
 
-  const inputId = React.useId();
-
   return (
-    <AppSurface className={cn("h-full p-4", className)}>
-      {/* Hidden file input */}
+    <AppSurface className={className}>
       <input
+        ref={inputRef}
         id={inputId}
         type="file"
         className="sr-only"
-        accept=".pdf,.epub,.txt"
+        accept=".pdf,.epub,.txt,.doc,.docx"
         onChange={(e) => handleFiles(e.target.files)}
       />
 
-      {/* Drag & Drop Files */}
-      <label htmlFor={inputId} className="block h-full cursor-pointer">
+      {/* Make the whole thing clickable via label */}
+      <label htmlFor={inputId} className="block h-full">
         <Dropzone
-          className="
-            h-full rounded-md p-3
-            border border-dashed border-border
-            transition-colors hover:border-ring hover:bg-muted/40
-          "
           onFiles={(files) => handleFiles(files)}
+          className={cn(
+            "h-full rounded-lg border-2 border-dashed border-border",
+            "bg-muted/30 transition-colors hover:border-ring hover:bg-muted/50"
+          )}
         >
-          <div className="h-full flex items-center justify-center text-sm text-muted-foreground text-center">
-            <span>
-              {file ? (
-                file.name
-              ) : (
-                <span>
+          <div className="flex h-full items-center justify-center p-10">
+            {!file ? (
+              <div className="flex w-full max-w-sm flex-col items-center text-center">
+                {/* Icon */}
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border bg-background shadow-sm">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                </div>
+
+                {/* Headline */}
+                <div className="text-sm font-medium text-foreground">
                   {text}
-                </span>
-              )}
-            </span>
+                </div>
+
+                {/* Or */}
+                <div className="mt-2 text-xs text-muted-foreground">or</div>
+
+                {/* Browse button */}
+                <Button
+                  type="button"
+                  size="sm"
+                  className="
+                    mt-3 rounded-xl
+                    bg-indigo-50 text-indigo-600
+                    border border-indigo-100
+                    hover:bg-indigo-100 hover:border-indigo-300
+                    focus-visible:ring-indigo-500
+                    cursor-pointer
+                  "
+                  // keep it a label-driven click; prevent Dropzone click handlers from interfering
+                  onClick={() => inputRef.current?.click()}
+                >
+                  Browse files
+                </Button>
+
+                {/* Filetype chips */}
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <FileChip>TXT</FileChip>
+                  <FileChip>PDF</FileChip>
+                  <FileChip>EPUB</FileChip>
+                  <FileChip>DOCX</FileChip>
+                </div>
+              </div>
+            ) : (
+              // Selected state
+              <div className="flex w-full max-w-sm flex-col items-center text-center">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border bg-background shadow-sm">
+                  <Upload className="h-5 w-5 text-muted-foreground" />
+                </div>
+
+                <div className="text-sm font-medium text-foreground">
+                  {file.name}
+                </div>
+                <div className="mt-2 text-xs text-muted-foreground">
+                  Click to choose a different file
+                </div>
+
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="sm"
+                  className="
+                    mt-3 rounded-xl
+                    bg-indigo-50 text-indigo-600
+                    border border-indigo-100
+                    hover:bg-indigo-100 hover:border-indigo-300
+                    focus-visible:ring-indigo-500
+                    cursor-pointer
+                  "
+                  onClick={() => inputRef.current?.click()}
+                >
+                  Change file
+                </Button>
+
+                {/* Filetype chips */}
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  <FileChip>TXT</FileChip>
+                  <FileChip>PDF</FileChip>
+                  <FileChip>EPUB</FileChip>
+                  <FileChip>DOCX</FileChip>
+                </div>
+              </div>
+            )}
           </div>
         </Dropzone>
       </label>
-
     </AppSurface>
   );
 }

@@ -28,7 +28,7 @@ def split(req: DocumentRequest) -> DocumentSplitResponse:
     # -------------------------
     # Load Segmenter and split pages
     # -------------------------
-    segmenter = get_segmenter(req.src_lang, req.tgt_lang)
+    segmenter = get_segmenter(req.src_lang)
     pages = segmenter.split_pages(req.text)
 
     return DocumentSplitResponse(pages=pages)

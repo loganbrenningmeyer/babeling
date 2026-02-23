@@ -6,14 +6,14 @@ import { useCallback, useEffect, useState } from "react";
 // User information provider
 // -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
-import type { LibraryDocument } from "@/types/library";
+import type { LibraryDocument } from "./feature/types/library";
 
 // -------------------------
 // UI Components
 // -------------------------
 import { Pane } from "@/app/components/Pane";
-import { LibrarySkeleton } from "@/app/(protected)/library/components/LibrarySkeleton";
-import { LibraryDataTable } from "@/app/(protected)/library/components/LibraryDataTable";
+import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
+import { LibraryDataTable } from "@/app/(protected)/library/feature/components/LibraryDataTable";
 
 export default function LibraryTable() {
   // -------------------------

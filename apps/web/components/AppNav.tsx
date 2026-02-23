@@ -41,7 +41,7 @@ export function AppNav() {
               font-ui font-medium text-zinc-600
               transition-colors hover:bg-zinc-100 hover:text-zinc-900
             "
-            href="/translate"
+            href="/upload"
           >
             <span className="inline-flex items-center justify-center">
               <Languages className="size-4" />
