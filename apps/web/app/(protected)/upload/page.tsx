@@ -22,8 +22,6 @@ import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useMessages } from "@/app/hooks/useMessages";
 import { getLangLabel, getUiLangsMap, toUiLang } from "@/app/i18n/messages";
 
-import { SAMPLE_TEXTS_BY_LANG } from "../translate/sampleTexts";
-
 // =========================
 // ( Components )
 // =========================
@@ -89,16 +87,6 @@ export default function UploadPage() {
   const [srcText, setSrcText] = useState("");
   const [srcFile, setSrcFile] = useState<File | null>(null);
 
-  // -------------------------
-  // Sample File Information
-  // -------------------------
-  const [sampleId, setSampleId] = useState("");
-  const [sampleLoading, setSampleLoading] = useState(false);
-  const sampleOptions = SAMPLE_TEXTS_BY_LANG[srcLang] ?? [];
-
-  // Reset selected sample on source language change
-  useEffect(() => setSampleId(""), [srcLang]);
-
   // Allow translating only if file / text has been uploaded
   const canTranslate = srcText.trim().length > 0 || !!srcFile;
 
@@ -111,34 +99,6 @@ export default function UploadPage() {
     const nextTgt = srcLang;
     setLocalSrcLang(nextSrc);
     setLocalTgtLang(nextTgt);
-  }
-
-  /**************************
-   * `handleSampleSelect()`
-   * -- Loads selected sample file by sample ID
-   **************************/
-  async function handleSampleSelect(nextId: string) {
-    setSampleId(nextId);
-    if (!nextId) return;
-
-    const sample = sampleOptions.find((entry) => entry.id === nextId);
-    if (!sample) return;
-
-    setTitle(sample.label);
-
-    setSampleLoading(true);
-    try {
-      const res = await fetch(
-        `/texts/${encodeURIComponent(srcLang)}/${encodeURIComponent(sample.filename)}`
-      );
-      if (!res.ok) throw new Error("Failed to load sample text");
-      const text = await res.text();
-      setSrcFile(null);
-      setSrcText(text);
-      setTitle(sample.label);
-    } finally {
-      setSampleLoading(false);
-    }
   }
 
   /**************************
@@ -263,7 +223,6 @@ export default function UploadPage() {
        * ------------------------- */}
       <div className="mx-auto mt-10 max-w-3xl">
         <TabbedInputCard
-          samples={sampleOptions}
           onPayloadChange={(payload) => {
             if (payload.type === "text") {
               setSrcText(payload.text);

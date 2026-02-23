@@ -20,11 +20,9 @@ type InputPaylod =
 
 export function TabbedInputCard({
   className,
-  samples,
   onPayloadChange,
 }: {
   className?: string;
-  samples: { id: string; label: string; filename: string }[];
   onPayloadChange?: (payload: InputPaylod) => void;
 }) {
   const [tab, setTab] = useState<TabKey>("paste");
@@ -51,13 +49,6 @@ export function TabbedInputCard({
     const f = e.target.files?.[0] ?? null;
     setFile(f);
   }
-
-  // function pickSample(id: string) {
-  //   const s = samples.find((x) => x.id === id);
-  //   if (!s) return;
-  //   setText(s.text);
-  //   setTab("paste");
-  // }
 
   const tabClassName = cn(
     "h-full inline-flex items-center",

@@ -1,0 +1,7 @@
+export type LibraryDocument = {
+  id: number;
+  title: string;
+  src_text: string;
+  src_lang: string;
+  created_at: string | null;
+};

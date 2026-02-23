@@ -1,1 +1,0 @@
-export type BlurMode = "word" | "sentence" | "paragraph";
