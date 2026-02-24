@@ -132,7 +132,7 @@ export function RecentDocumentsPanel({
               </div>
 
               <div className="mt-1 text-sm text-muted-foreground">
-                {formatRelativeTime(doc.created_at)}
+                {formatRelativeTime(doc.last_opened_at)}
               </div>
             </button>
           ))}
