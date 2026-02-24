@@ -109,9 +109,15 @@ export default function UploadPage() {
     if (!canTranslate) return;
 
     const text = srcFile ? await srcFile.text() : srcText;
+    const normalizedFileTitle = srcFile?.name
+      .replace(/\.[^/.]+$/, "")
+      .replace(/[-_]+/g, " ")
+      .trim();
+    const documentTitle =
+      title.trim() || normalizedFileTitle || "Untitled document";
 
     const result = await create({
-      title,
+      title: documentTitle,
       srcLang,
       text,
     });

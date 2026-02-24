@@ -5,7 +5,7 @@ class LibraryDocumentOut(BaseModel):
     title: str
     src_text: str
     src_lang: str
-    created_at: str | None
+    last_opened_at: str | None
     latest_tgt_lang: str | None  # null if no saved translations yet
 
 class LibraryResponse(BaseModel):

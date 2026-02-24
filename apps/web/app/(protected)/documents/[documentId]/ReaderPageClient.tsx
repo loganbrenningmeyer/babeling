@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
+import { saveReadProgress } from "../feature/api/readProgress";
 
 import { BlurMode } from "../feature/types/blur";
 
@@ -182,6 +183,29 @@ export default function ReaderPageClient({
     window.addEventListener("keydown", onKeyDown, { capture: true });
     return () => window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
   }, [interaction, onPrevPage, onNextPage]);
+
+  // -------------------------
+  // Save read progress for user/document/tgtLang
+  // -------------------------
+  useEffect(() => {
+    if (!document?.documentId) return;
+    if (!tgtLang) return;
+    if (pageCount <= 0) return;
+
+    const currentPageNumber = pageIndex + 1;  // DB pages are 1-indexed
+
+    const timer = window.setTimeout(() => {
+      void saveReadProgress({
+        documentId: document.documentId,
+        tgtLang,
+        currentPageNumber,
+      }).catch((err) => {
+        console.error("Failed to save read progress", err);
+      });
+    }, 500);
+
+    return () => window.clearTimeout(timer);
+  }, [document?.documentId, pageIndex, pageCount, tgtLang])
 
   // -------------------------
   // basic error handling for now

@@ -11,6 +11,7 @@ from api.routes import (
     library,
     page_translations,
     pronounce,
+    read_progress,
     translate,
     user_preferences,
 )
@@ -40,5 +41,6 @@ app.include_router(glossary_items.router)
 app.include_router(library.router)
 app.include_router(page_translations.router)
 app.include_router(pronounce.router)
+app.include_router(read_progress.router)
 app.include_router(translate.router)
 app.include_router(user_preferences.router)

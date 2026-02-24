@@ -3,7 +3,7 @@ export type LibraryDocument = {
   title: string;
   src_text: string;
   src_lang: string;
-  created_at: string | null;
+  last_opened_at: string | null;
   latest_tgt_lang: string | null;
 };
 

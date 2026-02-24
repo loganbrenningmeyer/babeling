@@ -6,7 +6,13 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from api.database.db import get_db
 from api.auth.users import get_current_app_user
-from api.database.models import AppUser, Document, DocumentPage, PageTranslation
+from api.database.models import (
+    AppUser, 
+    Document, 
+    DocumentPage, 
+    PageTranslation,
+    UserDocuments,
+)
 from api.services.segmenter import get_segmenter
 from api.schemas.documents import (
     DocumentRequest,
@@ -18,6 +24,23 @@ from api.schemas.documents import (
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+
+def _get_accessible_document(
+    db: Session,
+    user_id: int,
+    document_id: int,
+) -> Document | None:
+    """
+    Returns Document if owned by user_id in user_documents, otherwise None
+    """
+    return db.execute(
+        select(Document)
+        .join(UserDocuments, UserDocuments.document_id == Document.id)
+        .where(
+            Document.id == document_id,
+            UserDocuments.user_id == user_id,
+        )
+    ).scalar_one_or_none()
 
 # -------------------------
 # /api/documents/split
@@ -61,88 +84,115 @@ def split_and_save(
     normalized_text = normalize_text_for_hash(req.text)
     text_hash = text_sha256(normalized_text)
 
-    existing = db.execute(
+    existing_doc = db.execute(
         select(Document).where(
-            Document.user_id == user.id,
+            Document.src_lang == req.src_lang,
             Document.src_text_hash == text_hash,
         )
     ).scalar_one_or_none()
 
-    # -------------------------
-    # Return existing saved Document / DocumentPages
-    # -------------------------
-    if existing is not None:
-        existing_pages = db.execute(
-            select(DocumentPage)
-            .where(DocumentPage.document_id == existing.id)
-            .order_by(DocumentPage.page_number.asc())
-        ).scalars().all()
+    try:
+        # -------------------------
+        # If doc exists, ensure user membership
+        # -------------------------
+        if existing_doc is not None:
+            membership = db.execute(
+                select(UserDocuments).where(
+                    UserDocuments.user_id == user.id,
+                    UserDocuments.document_id == existing_doc.id,
+                )
+            ).scalar_one_or_none()
+
+            # -- Add document to user_documents
+            if membership is None:
+                membership = UserDocuments(
+                    user_id=user.id,
+                    document_id=existing_doc.id,
+                )
+                db.add(membership)
+                db.flush()
+                db.commit()
+            # -- If membership exists, update last_opened_at
+            else:
+                membership.last_opened_at = func.now()
+                db.commit()
+
+            # -------------------------
+            # Return existing saved Document / DocumentPages
+            # -------------------------
+            existing_pages = db.execute(
+                select(DocumentPage)
+                .where(DocumentPage.document_id == existing_doc.id)
+                .order_by(DocumentPage.page_number.asc())
+            ).scalars().all()
+            
+            return DocumentResponse(
+                document_id=existing_doc.id,
+                pages=[
+                    DocumentPageOut(
+                        id=p.id,
+                        page_number=p.page_number,
+                        src_text=p.src_text,
+                    )
+                    for p in existing_pages
+                ]
+            )
         
+        # -------------------------
+        # Otherwise, create Document + pages + membership
+        # -------------------------
+        pages = segmenter.split_pages(req.text, max_chars=2500)
+
+        doc = Document(
+            title=req.title,
+            src_text=req.text,
+            src_text_hash=text_hash,
+            src_lang=req.src_lang,
+        )
+        db.add(doc)
+        db.flush()
+
+        # -------------------------
+        # Save DocumentPages to database
+        # -------------------------
+        page_rows: list[DocumentPage] = []
+        for i, page in enumerate(pages):
+            row = DocumentPage(
+                document_id=doc.id,
+                page_number=i + 1,      # 1-indexed page number
+                src_text=page,
+            )
+            page_rows.append(row)
+
+        db.add_all(page_rows)
+        
+        # -------------------------
+        # Create user_documents membership
+        # -------------------------
+        membership = UserDocuments(
+            user_id=user.id,
+            document_id=doc.id,
+        )
+        db.add(membership)
+        db.flush()
+        db.commit()
+
         return DocumentResponse(
-            document_id=existing.id,
+            document_id=doc.id,
             pages=[
                 DocumentPageOut(
                     id=p.id,
                     page_number=p.page_number,
                     src_text=p.src_text,
                 )
-                for p in existing_pages
+                for p in page_rows
             ]
         )
+    
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
 
-    # -------------------------
-    # Create / save new Document / DocumentPages
-    # -------------------------
-    else:
-        # -- Split text into pages by max characters per page
-        pages = segmenter.split_pages(req.text, max_chars=2500)
-
-        try:
-            # -------------------------
-            # Save Document to database
-            # -------------------------
-            doc = Document(
-                user_id=user.id,
-                title=req.title,
-                src_text=req.text,
-                src_text_hash=text_hash,
-                src_lang=req.src_lang,
-            )
-            db.add(doc)
-            db.flush()
-
-            # -------------------------
-            # Save DocumentPages to database
-            # -------------------------
-            page_rows: list[DocumentPage] = []
-
-            for i, page in enumerate(pages):
-                row = DocumentPage(
-                    document_id=doc.id,
-                    page_number=i + 1,      # 1-indexed page number
-                    src_text=page,
-                )
-                page_rows.append(row)
-
-            db.add_all(page_rows)
-            db.flush()
-            db.commit()
-
-        except SQLAlchemyError as e:
-            db.rollback()
-            raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
-
-    return DocumentResponse(
-        document_id=doc.id,
-        pages=[
-            DocumentPageOut(
-                id=p.id,
-                page_number=p.page_number,
-                src_text=p.src_text,
-            )
-            for p in page_rows
-        ]
-    )
 
 
 # -------------------------
@@ -156,14 +206,9 @@ def load_document(
     user: AppUser = Depends(get_current_app_user),
 ) -> DocumentLoadResponse:
     # -------------------------
-    # Get Document with matching ID from database
+    # Authorize via user_documents ownership
     # -------------------------
-    doc = db.execute(
-        select(Document).where(
-            Document.id == document_id,
-            Document.user_id == user.id,
-        )
-    ).scalar_one_or_none()
+    doc = _get_accessible_document(db, user.id, document_id)
 
     if doc is None:
         raise HTTPException(status_code=404, detail="Document not found")

@@ -23,8 +23,8 @@ export async function getRecentDocuments(args: {
   const docs = (data.documents ?? []) as LibraryDocument[];
 
   docs.sort((a, b) => {
-    const ta = a.created_at ? new Date(a.created_at).getTime() : 0;
-    const tb = b.created_at ? new Date(b.created_at).getTime() : 0;
+    const ta = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
+    const tb = b.last_opened_at ? new Date(b.last_opened_at).getTime() : 0;
     return tb - ta;
   });
 

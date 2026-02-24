@@ -11,7 +11,6 @@ import type { LibraryDocument } from "./feature/types/library";
 // -------------------------
 // UI Components
 // -------------------------
-import { Pane } from "@/app/components/Pane";
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
 import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
 

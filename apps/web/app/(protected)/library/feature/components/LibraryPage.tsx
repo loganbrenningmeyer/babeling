@@ -35,13 +35,13 @@ import { getLangLabel } from "@/app/i18n/messages";
 // -------------------------
 // Library Sorting
 // -------------------------
-type SortKey = "title" | "src_lang" | "created_at";
+type SortKey = "title" | "src_lang" | "last_opened_at";
 type SortDir = "asc" | "desc";
 
 const SORT_LABELS = [
   { key: "title", label: "Title" },
   { key: "src_lang", label: "Original Language" },
-  { key: "created_at", label: "Date Created" },
+  { key: "last_opened_at", label: "Last Opened" },
 ] as const;
 
 function getSortLabel(key: string) {
@@ -49,7 +49,7 @@ function getSortLabel(key: string) {
 }
 
 // -------------------------
-// Format created_at date to Month Day, Year
+// Format last_opened_at date to Month Day, Year
 // -------------------------
 function formatDate(value: string | null) {
   if (!value) return "Unknown date";
@@ -218,7 +218,7 @@ function DocumentCard({
             {doc.title}
           </CardTitle>
           <CardDescription className="text-xs">
-            {formatDate(doc.created_at)}
+            {formatDate(doc.last_opened_at)}
           </CardDescription>
         </div>
       </CardHeader>
@@ -254,7 +254,7 @@ export function LibraryPage({ docs }: { docs: LibraryDocument[] }) {
   const router = useRouter();
 
   const [query, setQuery] = useState("");
-  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortKey, setSortKey] = useState<SortKey>("last_opened_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [groupByLanguage, setGroupByLanguage] = useState(false);
 
@@ -282,7 +282,7 @@ export function LibraryPage({ docs }: { docs: LibraryDocument[] }) {
     }
 
     setSortKey(nextKey);
-    setSortDir(nextKey === "created_at" ? "desc" : "asc");
+    setSortDir(nextKey === "last_opened_at" ? "desc" : "asc");
   }
 
   // -------------------------
@@ -302,9 +302,9 @@ export function LibraryPage({ docs }: { docs: LibraryDocument[] }) {
     });
 
     filtered.sort((a, b) => {
-      if (sortKey === "created_at") {
-        const aTime = a.created_at ? new Date(a.created_at).getTime() : 0;
-        const bTime = b.created_at ? new Date(b.created_at).getTime() : 0;
+      if (sortKey === "last_opened_at") {
+        const aTime = a.last_opened_at ? new Date(a.last_opened_at).getTime() : 0;
+        const bTime = b.last_opened_at ? new Date(b.last_opened_at).getTime() : 0;
         return sortDir === "asc" ? aTime - bTime : bTime - aTime;
       }
 
@@ -364,8 +364,8 @@ export function LibraryPage({ docs }: { docs: LibraryDocument[] }) {
             <DropdownMenuLabel>Sort</DropdownMenuLabel>
 
             <DropdownMenuCheckboxItem
-              checked={sortKey === "created_at"}
-              onCheckedChange={() => toggleSort("created_at")}
+              checked={sortKey === "last_opened_at"}
+              onCheckedChange={() => toggleSort("last_opened_at")}
             >
               <div className="flex items-center gap-2">
                 <Calendar className="h-4 w-4" />

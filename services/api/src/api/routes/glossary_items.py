@@ -9,8 +9,8 @@ from api.database.models import (
     AppUser,
     Document,
     DocumentPage,
-    PageTranslation,
     GlossaryItem,
+    UserDocuments,
 )
 from api.schemas.glossary_items import (
     GlossaryDefinitionData,
@@ -22,7 +22,24 @@ from api.schemas.glossary_items import (
 )
 
 
-router = APIRouter(prefix="/glossary_items", tags=["glossary"])
+router = APIRouter(prefix="/glossary_items", tags=["glossary_items"])
+
+def _get_accessible_document(
+    db: Session,
+    user_id: int,
+    document_id: int,
+) -> Document | None:
+    """
+    Returns Document if owned by user_id in user_documents, otherwise None
+    """
+    return db.execute(
+        select(Document)
+        .join(UserDocuments, UserDocuments.document_id == Document.id)
+        .where(
+            Document.id == document_id,
+            UserDocuments.user_id == user_id,
+        )
+    ).scalar_one_or_none()
 
 # -------------------------
 # POST: /api/glossary_items
@@ -37,12 +54,7 @@ def save_glossary(
     # -------------------------
     # 1) Validate document ownership
     # -------------------------
-    doc = db.execute(
-        select(Document).where(
-            Document.id == req.definition.document_id,
-            Document.user_id == user.id,
-        )
-    ).scalar_one_or_none()
+    doc = _get_accessible_document(db, user.id, req.definition.document_id)
 
     if doc is None:
         raise HTTPException(status_code=404, detail="Document not found")

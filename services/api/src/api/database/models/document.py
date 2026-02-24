@@ -14,21 +14,16 @@ class Document(Base):
     """
     __tablename__ = "documents"
     __table_args__ = (
-        UniqueConstraint("user_id", "src_text_hash", name="uq_documents_user_text_hash"),
+        UniqueConstraint("src_text_hash", name="uq_documents_user_text_hash"),
     )
 
     # -------------------------
-    # Document ID / App User ID / Document Title
+    # Document ID / Document Title
     # -------------------------
     id: Mapped[int] = mapped_column(
         BigInteger,
         primary_key=True,
         autoincrement=True,
-    )
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("app_users.id"),
-        index=True, 
-        nullable=False,
     )
     title: Mapped[str] = mapped_column(
         Text,

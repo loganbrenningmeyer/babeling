@@ -5,7 +5,13 @@ from sqlalchemy.exc import SQLAlchemyError
 
 from api.database.db import get_db
 from api.auth.users import get_current_app_user
-from api.database.models import AppUser, Document, DocumentPage, PageTranslation
+from api.database.models import (
+    AppUser, 
+    Document, 
+    DocumentPage, 
+    PageTranslation,
+    UserDocuments,
+)
 from api.schemas.library import LibraryDocumentOut, LibraryResponse
 
 
@@ -25,19 +31,20 @@ def library(
     documents: list[LibraryDocumentOut] = []
 
     # -------------------------
-    # Get all Documents with user's ID
+    # Load library membership + shared document
     # -------------------------
-    docs = db.execute(
-        select(Document).where(
-            Document.user_id == user.id,
-        )
-    ).scalars().all()
+    rows = db.execute(
+        select(Document, UserDocuments)
+        .join(UserDocuments, UserDocuments.document_id == Document.id)
+        .where(UserDocuments.user_id == user.id)
+        .order_by(UserDocuments.last_opened_at.desc())
+    ).all()
 
     # -------------------------
     # Load most recent target language
     # -- Most recent PageTranslation whose document_page_id -> document_id / src_lang
     # -------------------------
-    for doc in docs:
+    for doc, user_doc in rows:
         latest_tgt_lang = db.execute(
             select(PageTranslation.tgt_lang)
             .join(DocumentPage, DocumentPage.id == PageTranslation.document_page_id)
@@ -54,13 +61,15 @@ def library(
             .limit(1)   # return single target language
         ).scalar_one_or_none()
 
-        documents.append(LibraryDocumentOut(
-            id=doc.id,
-            title=doc.title,
-            src_text=doc.src_text,
-            src_lang=doc.src_lang,
-            created_at=doc.created_at.isoformat() if doc.created_at else None,
-            latest_tgt_lang=latest_tgt_lang,
-        ))
+        documents.append(
+            LibraryDocumentOut(
+                id=doc.id,
+                title=doc.title,
+                src_text=doc.src_text,
+                src_lang=doc.src_lang,
+                last_opened_at=user_doc.last_opened_at.isoformat() if user_doc.last_opened_at else None,
+                latest_tgt_lang=latest_tgt_lang,
+            )
+        )
 
     return LibraryResponse(documents=documents)

@@ -5,9 +5,14 @@ from sqlalchemy.orm import Session
 
 from api.auth.users import get_current_app_user
 from api.database.db import get_db
-from api.database.models import AppUser, Document, DocumentPage, PageTranslation
+from api.database.models import (
+    AppUser, 
+    Document, 
+    DocumentPage, 
+    PageTranslation,
+    UserDocuments,
+)
 from api.schemas.page_translations import (
-    LoadPageTranslationRequest,
     SavePageTranslationRequest,
     PageTranslationOut,
     PageTranslationResponse,
@@ -34,14 +39,16 @@ def _assert_page_access(
     document_page_id: int,
 ) -> None:
     # -------------------------
-    # Validate document page ownership
+    # Validate page access via user_documents ownership
+    # -- DocumentPage -> Document -> UserDocuments
     # -------------------------
     page_id = db.execute(
         select(DocumentPage.id)
         .join(Document, Document.id == DocumentPage.document_id)
+        .join(UserDocuments, UserDocuments.document_id == Document.id)
         .where(
             DocumentPage.id == document_page_id,
-            Document.user_id == user.id,
+            UserDocuments.user_id == user.id,
         )
     ).scalar_one_or_none()
 
