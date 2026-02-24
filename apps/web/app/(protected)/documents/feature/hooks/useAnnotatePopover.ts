@@ -131,6 +131,42 @@ export function useAnnotatePopover({
   }
 
   /**************************
+   * `updateAnnotationCacheBookmark()`
+   * -- 
+   * 
+   * @param 
+   * @returns 
+   **************************/
+  const updateAnnotationCacheBookmark = useCallback(
+    (next: { isBookmarked: boolean; glossaryItemId: number | null }) => {
+      if (documentId == null || pageId == null || lockedTargetIndex == null) return;
+
+      const key = makeAnnotationKey({
+        documentId,
+        pageId,
+        tgtLang,
+        wordId: lockedTargetIndex,
+      });
+
+      const cached = annotationCacheRef.current.get(key);
+      if (!cached) return;
+
+      annotationCacheRef.current.set(key, {
+        ...cached,
+        isBookmarked: next.isBookmarked,
+        glossaryItemId: next.glossaryItemId,
+      });
+
+      if (next.glossaryItemId != null) {
+        savedGlossaryIndexRef.current.set(key, next.glossaryItemId);
+      } else {
+        savedGlossaryIndexRef.current.delete(key);
+      }
+    },
+    [documentId, pageId, lockedTargetIndex, tgtLang]
+  );
+
+  /**************************
    * `setSavedGlossary()`
    * -- Keep saved glossary item / ref in sync
    **************************/
@@ -247,6 +283,9 @@ export function useAnnotatePopover({
     while (currentDesired != null) {
       pendingBookmarkIntentRef.current = null;
 
+      // -------------------------
+      // Save glossary item
+      // -------------------------
       try {
         if (currentDesired) {
           const payload = buildGlossarySaveRequest();
@@ -263,6 +302,12 @@ export function useAnnotatePopover({
           const res = await saveGlossaryItem(payload);
           setSavedGlossary(res.glossaryItemId);
 
+          // Add cached bookmark
+          updateAnnotationCacheBookmark({
+            isBookmarked: true,
+            glossaryItemId: res.glossaryItemId,
+          });
+
           // Saved index cache (word -> glossary_item_id)
           savedGlossaryIndexRef.current.set(key, res.glossaryItemId);
 
@@ -275,6 +320,9 @@ export function useAnnotatePopover({
               glossaryItemId: res.glossaryItemId,
             });
           }
+        // -------------------------
+        // Delete glossary item
+        // -------------------------
         } else {
           // -------------------------
           // If we don't have an ID, clear local state
@@ -286,6 +334,12 @@ export function useAnnotatePopover({
             await deleteGlossaryItem(id);
           }
           setSavedGlossary(null);
+
+          // Remove cached bookmark
+          updateAnnotationCacheBookmark({
+            isBookmarked: false,
+            glossaryItemId: null,
+          });
         }
       } catch (e: any) {
         setBookmarkError(e?.message ?? "Failed to sync bookmark");

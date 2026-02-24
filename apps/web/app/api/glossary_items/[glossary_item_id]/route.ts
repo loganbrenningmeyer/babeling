@@ -8,7 +8,7 @@ import { getBackendToken, getApiBaseUrl } from "@/lib/sever-api";
 // -------------------------
 export async function GET(
   _req: Request,
-  { params }: { params: { glossary_item_id: string }},
+  { params }: { params: Promise<{ glossary_item_id: string }> },
 ) {
   // -------------------------
   // Get Clerk token / API url
@@ -43,7 +43,7 @@ export async function GET(
 // -------------------------
 export async function DELETE(
   _req: Request,
-  { params }: { params: { glossary_item_id: string }},
+  { params }: { params: Promise<{ glossary_item_id: string }> },
 ) {
   // -------------------------
   // Get Clerk token / API url
