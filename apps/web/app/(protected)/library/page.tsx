@@ -13,9 +13,9 @@ import type { LibraryDocument } from "./feature/types/library";
 // -------------------------
 import { Pane } from "@/app/components/Pane";
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
-import { LibraryDataTable } from "@/app/(protected)/library/feature/components/LibraryDataTable";
+import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
 
-export default function LibraryTable() {
+export default function Library() {
   // -------------------------
   // Load user information
   // -------------------------
@@ -83,7 +83,7 @@ export default function LibraryTable() {
           document.
         </div>
       ) : (
-        <LibraryDataTable docs={docs} />
+        <LibraryPage docs={docs} />
       )}
     </div>
   );

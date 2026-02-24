@@ -32,15 +32,15 @@ class GlossaryItem(Base):
     # -------------------------
     # Clicked word info
     # -------------------------
-    word: Mapped[str] = mapped_column(
+    form: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )
-    pos: Mapped[str] = mapped_column(
+    pos_form: Mapped[str] = mapped_column(
         Text,
         nullable=True,
     )
-    ipa: Mapped[str] = mapped_column(
+    ipa_form: Mapped[str] = mapped_column(
         Text,
         nullable=True,
     )
@@ -52,11 +52,11 @@ class GlossaryItem(Base):
         Text,
         nullable=True,
     )
-    lemma_pos: Mapped[str] = mapped_column(
+    pos_lemma: Mapped[str] = mapped_column(
         Text,
         nullable=True,
     )
-    lemma_ipa: Mapped[str] = mapped_column(
+    ipa_lemma: Mapped[str] = mapped_column(
         Text,
         nullable=True,
     )
@@ -117,11 +117,19 @@ class GlossaryItem(Base):
     # -------------------------
     # Sentence / Paragraph of Clicked Word
     # -------------------------
-    sentence: Mapped[str] = mapped_column(
+    src_sentence: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )
-    paragraph: Mapped[str] = mapped_column(
+    src_paragraph: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    tgt_sentence: Mapped[str] = mapped_column(
+        Text,
+        nullable=False,
+    )
+    tgt_paragraph: Mapped[str] = mapped_column(
         Text,
         nullable=False,
     )

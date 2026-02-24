@@ -24,9 +24,13 @@ class AnnotateDefinitionData(BaseModel):
     tgt_sentence: str
     tgt_paragraph: str
 
+class AnnotateExample(BaseModel):
+    source: str
+    target: str
+
 class AnnotateUsageData(BaseModel):
     explanation: str
-    examples: list[dict[str, str]]
+    examples: list[AnnotateExample]
 
 class AnnotateRequest(BaseModel):
     src_lang: str

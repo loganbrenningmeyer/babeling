@@ -1,11 +1,10 @@
-import { cn } from "@/lib/utils";
+import { useLayoutEffect, useRef, useState } from "react";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import { MousePointerClick } from "lucide-react";
-
-import { messages, UiLang } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 
 export type BlurMode = "word" | "sentence" | "paragraph";
+
+type Indicator = { left: number; width: number; ready: boolean };
 
 export function BlurModeToggle({
   value,
@@ -14,54 +13,101 @@ export function BlurModeToggle({
   value: BlurMode;
   onChange: (v: BlurMode) => void;
 }) {
-  // -------------------------
-  // Use UI language messages
-  // -------------------------
   const m = useMessages();
   const msgs = m.reader.blurModeToggle;
 
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const [indicator, setIndicator] = useState<Indicator>({
+    left: 0,
+    width: 0,
+    ready: false,
+  });
+
+  {/* -------------------------
+  * Set sliding pill left / width based on selection
+  * ------------------------- */}
+  useLayoutEffect(() => {
+    const root = trackRef.current;
+    if (!root) return;
+
+    const active = root.querySelector<HTMLElement>(`[data-blur-mode="${value}"]`);
+    if (!active) return;
+
+    const rootRect = root.getBoundingClientRect();
+    const activeRect = active.getBoundingClientRect();
+
+    setIndicator({
+      left: activeRect.left - rootRect.left,
+      width: activeRect.width,
+      ready: true,
+    });
+  }, [value, msgs.word, msgs.sentence, msgs.paragraph]);
+
   return (
-    <div className="
-      flex flex-col items-center 
-      overflow-hidden rounded-xl border border-border/70 
-      bg-muted/40 shadow-sm
-    ">
-      <div className="flex items-center gap-1 text-[10px] text-muted-foreground">
-        <MousePointerClick className="h-3 w-3" />
-        <span className="font-bold text-[10px]">
-          {msgs.header.prefix}{" "}
-          <span className="bg-blue-500/20">{msgs.header.highlight}</span>
-          {" "}{msgs.header.suffix}
-        </span>
+    <div className="rounded-lg bg-muted p-1 shadow-sm">
+      <div ref={trackRef} className="relative inline-flex items-center">
+        {/* -------------------------
+        * Sliding Active Pill
+        * ------------------------- */}
+        <div
+          aria-hidden
+          className={[
+            "pointer-events-none absolute inset-y-0 rounded-md bg-background shadow",
+            "transition-[transform,width] duration-200 ease-out",
+            indicator.ready ? "opacity-100" : "opacity-0",
+          ].join(" ")}
+          style={{
+            width: indicator.width,
+            transform: `translateX(${indicator.left}px)`,
+          }}
+        />
+
+        <ToggleGroup
+          type="single"
+          value={value}
+          spacing={1}
+          onValueChange={(v) => {
+            if (!v) return;
+            onChange(v as BlurMode);
+          }}
+          className="
+            relative z-10 inline-flex w-auto 
+            bg-transparent p-0 shadow-none
+        ">
+          <SegItem value="word">{msgs.word}</SegItem>
+          <SegItem value="sentence">{msgs.sentence}</SegItem>
+          <SegItem value="paragraph">{msgs.paragraph}</SegItem>
+        </ToggleGroup>
       </div>
-      <ToggleGroup
-        type="single"
-        value={value}
-        onValueChange={(v) => {
-          if (!v) return;
-          onChange(v as BlurMode);
-        }}
-        className="grid w-full grid-cols-3 rounded-none border-t border-border/70 bg-background/70"
-      >
-        <ToggleGroupItem
-          value="word"
-          className="w-full !rounded-none border-r border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
-        >
-          {msgs.word}
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="sentence"
-          className="w-full !rounded-none border-r border-border/70 px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
-        >
-          {msgs.sentence}
-        </ToggleGroupItem>
-        <ToggleGroupItem
-          value="paragraph"
-          className="w-full !rounded-none px-3 py-1 text-xs font-semibold text-muted-foreground transition-colors hover:bg-blue-50 hover:text-foreground data-[state=on]:bg-blue-100 data-[state=on]:text-foreground first:!rounded-none last:!rounded-none"
-        >
-          {msgs.paragraph}
-        </ToggleGroupItem>
-      </ToggleGroup>
     </div>
+  );
+}
+
+{/* -------------------------
+* Blur-mode Toggle Button
+* ------------------------- */}
+function SegItem({
+  value,
+  children,
+}: {
+  value: BlurMode;
+  children: React.ReactNode;
+}) {
+  return (
+    <ToggleGroupItem
+      value={value}
+      data-blur-mode={value}
+      className="
+        relative h-7 px-3 text-xs font-medium rounded-md
+        inline-flex items-center justify-center
+        text-muted-foreground hover:text-foreground
+        bg-transparent shadow-none
+        data-[state=on]:bg-transparent
+        data-[state=on]:shadow-none
+        data-[state=on]:text-foreground
+      "
+    >
+      {children}
+    </ToggleGroupItem>
   );
 }

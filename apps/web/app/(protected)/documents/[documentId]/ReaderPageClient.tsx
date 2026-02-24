@@ -121,6 +121,8 @@ export default function ReaderPageClient({
 
   const interaction = useReaderInteraction({
     session,
+    documentId: document?.documentId ?? null,
+    pageId: document?.pages?.[pageIndex]?.id ?? null,
     srcLang: document?.srcLang ?? "en",
     tgtLang,
     uiLang,

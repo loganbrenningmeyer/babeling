@@ -63,7 +63,7 @@ class AlignRequest(BaseModel):
     src_lang: str | None = None
     tgt_lang: str | None = None
 
-@app.cls(gpu="L40S", image=image, scaledown_window=10)
+@app.cls(gpu="A10G", image=image, scaledown_window=10)
 class AlignService:
     @modal.enter()
     def load(self):
@@ -74,7 +74,8 @@ class AlignService:
         # -------------------------
         # Load Segmenter 
         # -------------------------
-        segmenter = Segmenter(req.src_lang or "en", req.tgt_lang or "fr")
+        src_segmenter = Segmenter(req.src_lang or "en")
+        tgt_segmenter = Segmenter(req.tgt_lang or "es")
 
         # -------------------------
         # Align all corresponding source / target sentences
@@ -82,9 +83,8 @@ class AlignService:
         out: AlignmentData = self.aligner.align(
             source=req.source,
             target=req.target,
-            src_lang=req.src_lang,
-            tgt_lang=req.tgt_lang,
-            segmenter=segmenter,
+            src_segmenter=src_segmenter,
+            tgt_segmenter=tgt_segmenter,
             threshold=0.025,
         )
 

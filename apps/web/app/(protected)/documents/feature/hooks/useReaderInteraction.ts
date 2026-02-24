@@ -41,6 +41,10 @@ export type ReaderInteraction = {
 type UseReaderInteractionArgs = {
   session: ReaderSession | null;
 
+  // text IDs
+  documentId: number | null;
+  pageId: number | null;
+
   // for /api/annotate
   srcLang: string;
   tgtLang: string;
@@ -63,6 +67,8 @@ type UseReaderInteractionArgs = {
 
 export function useReaderInteraction({
   session,
+  documentId,
+  pageId,
   srcLang,
   tgtLang,
   uiLang,
@@ -118,6 +124,8 @@ export function useReaderInteraction({
   // -------------------------
   const pop = useAnnotatePopover({
     session,
+    documentId,
+    pageId,
     srcLang,
     tgtLang,
     uiLang,

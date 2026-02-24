@@ -21,10 +21,7 @@ function toDomainDTO(d: AnnotateDomainData): AnnotateDomainDataDTO {
 
 /**************************
  * `annotate()`
- * -- 
- * 
- * @param 
- * @returns 
+ * -- Gets annotation information (definition, explanation, examples)
  **************************/
 export async function annotate(args: AnnotateArgs): Promise<AnnotateResponse> {
   const body: AnnotateRequestDTO = {

@@ -12,7 +12,7 @@ export async function getDocumentById(
   // -------------------------
   // Fetch Document information
   // -------------------------
-  const params = new URLSearchParams({document_id: String(documentId)})
+  const params = new URLSearchParams({ document_id: String(documentId) });
   const res = await fetch(`/api/documents?${params.toString()}`, {
     method: "GET",
     cache: "no-store",

@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, Book } from "lucide-react";
 
 import type { ReaderSession } from "../types/readerSession";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
@@ -133,7 +133,7 @@ export function ReaderShell({
             * Source Langugage Header
             * ------------------------- */}
             <div className="px-8 pt-4 pb-3">
-              <div className="flex items-center justify-between">
+              <div className="flex justify-between">
                 <div>
                   {readerLoading ? (
                     <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted" />
@@ -158,7 +158,7 @@ export function ReaderShell({
             {/* -------------------------
             * Target Language Header
             * ------------------------- */}
-            <div className="pl-12 pt-4 pb-3">
+            <div className="pl-10 pt-4 pb-3">
               <div>
                 {readerLoading ? (
                   <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted" />
@@ -209,19 +209,37 @@ export function ReaderShell({
             {/* -------------------------
             * Previous Page
             * ------------------------- */}
-            <Button type="button" variant="ghost" size="icon" onClick={onPrevPage} disabled={pageIndex <= 0}>
+            <Button 
+              type="button" 
+              size="icon" 
+              onClick={onPrevPage} 
+              disabled={pageIndex <= 0}
+              className="
+                bg-zinc-50
+                border border-primary/30
+                text-zinc-500
+                hover:bg-zinc-100
+                hover:text-zinc-700
+                transition-colors"
+            >
               <ChevronLeft className="h-4 w-4" />
             </Button>
             {/* -------------------------
             * Blur-mode Toggle
             * ------------------------- */}
-            <div className="flex justify-center">
+            <div className="inline-flex items-center justify-center gap-3">
+              <span
+                className="text-sm text-muted-foreground"
+              >
+                Blur
+              </span>
               <BlurModeToggle value={blurMode} onChange={onBlurModeChange} />
             </div>
             {/* -------------------------
             * Page Counter
             * ------------------------- */}
-            <div className="flex justify-center text-sm text-muted-foreground">
+            <div className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground">
+              <Book size={14}/>
               {msgs.general.page} {pageCount > 0 ? pageIndex + 1 : 0} / {pageCount}
             </div>
             {/* -------------------------
@@ -233,7 +251,20 @@ export function ReaderShell({
             {/* -------------------------
             * Next Page
             * ------------------------- */}
-            <Button type="button" variant="ghost" size="icon" onClick={onNextPage} disabled={pageIndex >= pageCount - 1}>
+            <Button 
+              type="button" 
+              size="icon" 
+              onClick={onNextPage} 
+              disabled={pageIndex >= pageCount - 1}
+              className="
+                bg-zinc-50
+                border border-primary/30
+                text-zinc-500
+                hover:bg-zinc-100
+                hover:text-zinc-700
+                transition-colors
+              "
+            >
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>

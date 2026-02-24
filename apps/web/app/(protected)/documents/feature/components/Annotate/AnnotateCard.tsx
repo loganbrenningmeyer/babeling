@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark } from "lucide-react";
+import { Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -66,20 +66,20 @@ export function AnnotateCard({
       {onToggleBookmark && (
         <button
           type="button"
-          className="absolute -top-2.25 right-8 z-10 p-0 focus-visible:outline-none"
+          className="absolute top-6 right-8 z-10 p-0 focus-visible:outline-none"
           aria-label={m.reader.annotationCard.saveDefinition}
           title={m.reader.annotationCard.saveDefinition}
           onClick={onToggleBookmark}
         >
-          <Bookmark
-            strokeWidth={1}
+          <Star
+            strokeWidth={2}
             className={cn(
-              "size-10 origin-top transition-all duration-200 ease-out",
+              "size-6 origin-top transition-all duration-200 ease-out",
               // make sure BOTH stroke and fill animate
               "[transition-color,fill,stroke,transform]",
               isBookmarked
-                ? "text-rose-900 fill-rose-900 scale-y-120"
-                : "text-foreground fill-white scale-y-95 translate-y-0 hover:text-foreground"
+                ? "text-yellow-500 fill-yellow-300"
+                : "text-yellow-300 fill-white hover:text-yellow-500"
             )}
           />
         </button>
