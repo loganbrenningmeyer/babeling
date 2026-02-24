@@ -33,5 +33,5 @@ class DocumentLoadResponse(BaseModel):
     document_id: int
     title: str
     src_lang: str
-    tgt_lang: str
+    tgt_lang: str | None
     pages: list[DocumentPageOut]

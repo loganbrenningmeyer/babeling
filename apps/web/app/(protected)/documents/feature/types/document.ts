@@ -29,6 +29,6 @@ export type LoadedDocumentDTO = {
   document_id: number;
   title: string;
   src_lang: string;
-  tgt_lang: string;
+  tgt_lang: string | null;
   pages: SavedPageDTO[];
 };
