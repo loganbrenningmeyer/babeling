@@ -125,23 +125,23 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen mx-auto w-full max-w-5xl">
       {/* -------------------------
        * Hero
        * ------------------------- */}
-      <div className="mx-auto w-full max-w-3xl pt-12">
+      <div className="pt-12">
         <h1 className="font-reading text-4xl font-bold tracking-tight">
           New reading
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">
-          Paste text, upload a file, or fetch from a URL to begin.
+          Paste text, upload a file, or import an eBook to begin.
         </p>
       </div>
 
       {/* -------------------------
        * Source / Target Language Selection
        * ------------------------- */}
-      <div className="font-ui mx-auto mt-10 max-w-3xl">
+      <div className="font-ui mt-10">
         <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
           {/* -------------------------
            * Source Language
@@ -221,7 +221,7 @@ export default function UploadPage() {
       {/* -------------------------
        * Tabbed Input Area
        * ------------------------- */}
-      <div className="mx-auto mt-10 max-w-3xl">
+      <div className="mt-10">
         <TabbedInputCard
           onPayloadChange={(payload) => {
             if (payload.type === "text") {
@@ -240,7 +240,7 @@ export default function UploadPage() {
       {/* -------------------------
        * ( Start Reading Button ): Save document -> Reader Page
        * ------------------------- */}
-      <div className="font-ui mx-auto mt-8 flex w-full max-w-3xl items-center justify-between">
+      <div className="font-ui mt-8 flex items-center justify-between">
         {/* Translation / Alignment Hint */}
         <span className="inline-flex gap-2 items-center text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
@@ -283,7 +283,7 @@ export default function UploadPage() {
       {/* -------------------------
       * Recent Documents
       * ------------------------- */} 
-      <div className="font-ui mx-auto mt-8 flex w-full max-w-3xl items-center justify-between">
+      <div className="font-ui mt-8 flex items-center justify-between">
         <RecentDocumentsPanel
           documents={recentDocuments}
           loading={recentLoading}

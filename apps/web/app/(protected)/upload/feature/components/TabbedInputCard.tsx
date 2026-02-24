@@ -3,7 +3,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Clipboard, FileUp, Link as LinkIcon, Upload } from "lucide-react";
+import { Clipboard, FileUp, Link as LinkIcon, Upload, BookDown } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,11 +12,12 @@ import { Button } from "@/components/ui/button";
 
 import { UploadSurface } from "@/app/components/UploadSurface";
 
-type TabKey = "paste" | "upload";
+type TabKey = "paste" | "upload" | "import";
 
 type InputPaylod = 
   | { type: "text"; text: string }
-  | { type: "file"; file: File | null };
+  | { type: "file"; file: File | null }
+  | { type: "gutenberg"; bookId: number | null; format: string };
 
 export function TabbedInputCard({
   className,
@@ -29,6 +30,8 @@ export function TabbedInputCard({
 
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
+  const [bookId, setBookId] = useState<number | null>(null);
+  const [format, setFormat] = useState<string>("epub.noimages");
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -39,7 +42,8 @@ export function TabbedInputCard({
     if (!onPayloadChange) return;
     if (tab === "paste") onPayloadChange({ type: "text", text });
     if (tab === "upload") onPayloadChange({ type: "file", file });
-  }, [tab, text, file, onPayloadChange]);
+    if (tab === "import") onPayloadChange({ type: "gutenberg", bookId: bookId, format: format})
+  }, [tab, text, file, bookId, format, onPayloadChange]);
 
   function chooseFile() {
     fileInputRef.current?.click();
@@ -84,6 +88,13 @@ export function TabbedInputCard({
                 <FileUp className="h-4 w-4" />
                 Upload file
               </TabsTrigger>
+              {/* -------------------------
+              * Gutenberg Ebook Import
+              * ------------------------- */}
+              <TabsTrigger value="import" className={tabClassName}>
+                <BookDown className="h-4 w-4" />
+                Import eBook
+              </TabsTrigger>
             </TabsList>
           </div>
 
@@ -120,6 +131,17 @@ export function TabbedInputCard({
                 text="Drag and drop"
                 className="h-full flex-1 p-6 rounded-none"
               />
+            </TabsContent>
+            {/* -------------------------
+            * ( Import Ebook )
+            * ------------------------- */}
+            <TabsContent value="import" className="m-0 h-[320px] flex">
+              <div className="
+                h-full flex-1 p-4
+                font-ui text-muted-foreground/60
+              ">
+                Gutenberg Import UI Here
+              </div>
             </TabsContent>
           </div>
         </div>
