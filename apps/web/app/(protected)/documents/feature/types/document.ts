@@ -11,7 +11,7 @@ export type LoadedDocument = {
   documentId: number;
   title: string;
   srcLang: string;
-  tgtLang: string;
+  tgtLang: string | null;
   pages: SavedPage[];
 };
 

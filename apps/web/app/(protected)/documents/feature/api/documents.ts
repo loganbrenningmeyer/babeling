@@ -39,7 +39,7 @@ export async function getDocumentById(
     documentId: data.document_id,
     title: data.title,
     srcLang: data.src_lang,
-    tgtLang: data.tgt_lang,
+    tgtLang: data.tgt_lang ?? null,
     pages,
   };
 }
