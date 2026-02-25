@@ -13,7 +13,7 @@ import {
 import { ArrowRight, Clock, Repeat } from "lucide-react";
 
 import { useCreateDocument } from "./feature/hooks/useCreateDocument";
-import { useRecentDocuments } from "./feature/hooks/useRecentDocuments";
+import { useRecentDocuments } from "../library/feature/hooks/useRecentDocuments";
 
 // =========================
 // ( User Information / UI Language Providers & Helpers )

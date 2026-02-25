@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-import type { LibraryDocument } from "@/app/(protected)/library/feature/types/library";
+import type { LibraryDocument } from "@/app/(protected)/library/feature/types/document";
 
 type RecentDocumentsPanelProps = {
   documents: LibraryDocument[];
@@ -110,19 +110,19 @@ export function RecentDocumentsPanel({
                     langBadgeClass("src")
                   )}
                 >
-                  {doc.src_lang.toUpperCase()}
+                  {doc.srcLang.toUpperCase()}
                 </span>
 
                 <span className="text-muted-foreground">→</span>
 
-                {doc.latest_tgt_lang ? (
+                {doc.latestTgtLang ? (
                   <span
                     className={cn(
                       "rounded border px-2 py-0.5",
                       langBadgeClass("tgt")
                     )}
                   >
-                    {doc.latest_tgt_lang.toUpperCase()}
+                    {doc.latestTgtLang.toUpperCase()}
                   </span>
                 ) : null}
               </div>
@@ -132,7 +132,7 @@ export function RecentDocumentsPanel({
               </div>
 
               <div className="mt-1 text-sm text-muted-foreground">
-                {formatRelativeTime(doc.last_opened_at)}
+                {formatRelativeTime(doc.lastOpenedAt)}
               </div>
             </button>
           ))}

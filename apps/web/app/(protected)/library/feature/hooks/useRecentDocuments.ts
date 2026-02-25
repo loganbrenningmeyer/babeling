@@ -1,16 +1,16 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getRecentDocuments } from "@/app/(protected)/library/feature/api/library";
-import type { LibraryDocument } from "@/app/(protected)/library/feature/types/library";
+import { getRecentDocuments } from "@/app/(protected)/library/feature/api/documents";
+import type { LibraryDocument } from "@/app/(protected)/library/feature/types/document";
 
 
 /**************************
  * `useRecentDocuments()`
- * -- Hook to fetch user's recent documents up to a limit count
+ * -- Hook to fetch all of user's library documents
  **************************/
-export function useRecentDocuments(args?: { limit?: number }) {
-  const limit = args?.limit ?? 10;
+export function useRecentDocuments(args?: { limit?: number | null }) {
+  const limit = args?.limit ?? null;
 
   const [documents, setDocuments] = useState<LibraryDocument[]>([]);
   const [loading, setLoading] = useState(false);

@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { getBackendToken, getApiBaseUrl } from "@/lib/sever-api";
+import { getBackendToken, getApiBaseUrl } from "@/lib/server-api";
 
 
 // -------------------------
-// GET: /api/documents/[documentId]
+// GET: /api/documents?document_id={id}
 // -- Load saved document
 // -------------------------
 export async function GET(req: Request) {

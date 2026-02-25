@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Babeling – Library</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #f2f1ee;
+  --surface:   #ffffff;
+  --border:    #e6e3dc;
+  --text-1:    #181714;
+  --text-2:    #6a6760;
+  --text-3:    #b0aca4;
+  --radius:    16px;
+  --card-w:    320px;
+  --card-h:    310px;
+
+  /* Language colours */
+  --fr: #2c5f8a; --fr-soft: #e8f1f8;
+  --en: #2d6a4a; --en-soft: #e8f4ed;
+  --de: #6b4226; --de-soft: #f5ede7;
+  --es: #7a3b1e; --es-soft: #f8ece5;
+  --it: #5c3d7a; --it-soft: #f0eaf7;
+  --pt: #1e5f74; --pt-soft: #e6f3f7;
+  --ru: #8b2635; --ru-soft: #f8e8eb;
+  --ja: #5c4a1e; --ja-soft: #f7f1e6;
+
+  /* Document accent colours (bookshelf spines) */
+  --accent-0: #b05c3a;
+  --accent-1: #3a6b8a;
+  --accent-2: #4a7c5c;
+  --accent-3: #7a5c8a;
+  --accent-4: #8a7a3a;
+  --accent-5: #3a5c7a;
+}
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text-1);
+  min-height: 100vh;
+  padding: 48px 32px 80px;
+}
+
+/* ── PAGE HEADER ── */
+.page-header { margin-bottom: 36px; }
+.page-header h1 {
+  font-family: 'Lora', serif;
+  font-size: 30px; font-weight: 400;
+  letter-spacing: -.02em; margin-bottom: 5px;
+}
+.page-header p { font-size: 14px; font-weight: 300; color: var(--text-2); }
+
+/* ── TOOLBAR ── */
+.toolbar {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 28px; flex-wrap: wrap;
+}
+.search-wrap { position: relative; }
+.search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-3); pointer-events: none; }
+.search-input {
+  padding: 8px 14px 8px 34px;
+  background: var(--surface); border: 1.5px solid var(--border);
+  border-radius: 8px; font-family: 'DM Sans', sans-serif;
+  font-size: 13px; color: var(--text-1); outline: none; width: 220px;
+  transition: border-color .15s;
+}
+.search-input:focus { border-color: #2563eb; }
+.search-input::placeholder { color: var(--text-3); }
+.sort-btn {
+  display: flex; align-items: center; gap: 5px;
+  padding: 8px 13px; border-radius: 8px;
+  border: 1.5px solid var(--border); background: var(--surface);
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  color: var(--text-2); cursor: pointer; transition: all .13s;
+}
+.sort-btn:hover { border-color: #ccc9c0; color: var(--text-1); }
+.new-btn {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 16px; border-radius: 8px;
+  background: var(--text-1); color: white; border: none;
+  font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s;
+}
+.new-btn:hover { opacity: .85; }
+
+/* ── GRID ── */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(var(--card-w), 1fr));
+  gap: 20px;
+}
+
+/* ── CARD SHELL (3D perspective) ── */
+.card-shell {
+  width: 100%; height: var(--card-h);
+  perspective: 1200px;
+  cursor: pointer;
+}
+
+.card-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d;
+  transition: transform .55s cubic-bezier(.4, 0.2, 0.2, 1);
+  border-radius: var(--radius);
+}
+
+.card-shell.flipped .card-inner {
+  transform: rotateY(180deg);
+}
+
+/* ── CARD FACE SHARED ── */
+.card-face {
+  position: absolute; inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(0,0,0,.05),
+    0 4px 16px rgba(0,0,0,.07),
+    0 1px 0 rgba(255,255,255,.8) inset;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  display: flex; flex-direction: column;
+}
+
+.card-back {
+  transform: rotateY(180deg);
+}
+
+/* ── FRONT FACE ── */
+.front-spine {
+  width: 5px; height: 100%;
+  position: absolute; left: 0; top: 0;
+  border-radius: var(--radius) 0 0 var(--radius);
+  flex-shrink: 0;
+}
+
+.front-content {
+  flex: 1; display: flex; flex-direction: column;
+  padding: 20px 20px 0 26px;
+}
+
+.front-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 10px;
+  margin-bottom: 10px;
+}
+
+.front-title {
+  font-family: 'Lora', serif;
+  font-size: 18px; font-weight: 500;
+  line-height: 1.2; letter-spacing: -.01em;
+  color: var(--text-1);
+  display: -webkit-box; -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical; overflow: hidden;
+}
+
+.src-badge {
+  flex-shrink: 0;
+  font-size: 11px; font-weight: 700; letter-spacing: .05em;
+  padding: 3px 8px; border-radius: 5px;
+  margin-top: 2px;
+}
+
+.front-author {
+  font-size: 12px; color: var(--text-3); font-style: italic;
+  margin-bottom: 11px;
+}
+
+.front-excerpt {
+  font-family: 'Lora', serif;
+  font-size: 13px; line-height: 1.65;
+  color: var(--text-2); font-style: italic;
+  font-weight: 400;
+  display: -webkit-box; -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical; overflow: hidden;
+  flex: 1;
+}
+
+/* TRANSLATION PILLS (front) */
+.front-trans-row {
+  display: flex; align-items: center; gap: 5px;
+  padding: 12px 20px 12px 26px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.trans-pill {
+  display: flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600; letter-spacing: .03em;
+  cursor: default;
+}
+
+.trans-pill-progress {
+  width: 28px; height: 3px; border-radius: 2px;
+  background: rgba(255,255,255,.4); overflow: hidden;
+}
+.trans-pill-fill {
+  height: 100%; border-radius: 2px;
+  background: rgba(255,255,255,.85);
+}
+
+/* FRONT BOTTOM */
+.front-bottom {
+  padding: 13px 20px 16px 26px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.continue-btn {
+  display: flex; align-items: center; gap: 6px;
+  padding: 9px 18px; border-radius: 30px;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  transition: all .18s;
+  color: white;
+}
+.continue-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+.continue-lang {
+  font-size: 10px; font-weight: 700; letter-spacing: .06em;
+  padding: 2px 5px; border-radius: 3px;
+  background: rgba(255,255,255,.22); color: rgba(255,255,255,.9);
+}
+
+.flip-hint {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 500; color: var(--text-3);
+  cursor: pointer; padding: 4px 0;
+  transition: color .13s;
+  user-select: none;
+}
+.flip-hint:hover { color: var(--text-2); }
+
+.front-timestamp {
+  font-size: 11px; color: var(--text-3);
+  display: flex; align-items: center; gap: 4px;
+}
+
+/* ── BACK FACE ── */
+.back-header {
+  padding: 16px 18px 0;
+  flex-shrink: 0;
+}
+
+.back-header-top {
+  display: flex; align-items: flex-start;
+  justify-content: space-between; gap: 8px;
+  margin-bottom: 12px;
+}
+
+.back-title {
+  font-family: 'Lora', serif;
+  font-size: 15px; font-weight: 500;
+  color: var(--text-1); line-height: 1.2;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  max-width: 200px;
+}
+
+.back-flip-btn {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 12px; font-weight: 500; color: var(--text-3);
+  cursor: pointer; border: none; background: none;
+  font-family: 'DM Sans', sans-serif;
+  transition: color .13s; flex-shrink: 0; padding: 2px 0;
+}
+.back-flip-btn:hover { color: var(--text-2); }
+
+/* LANGUAGE TABS */
+.lang-tabs {
+  display: flex; gap: 2px; overflow-x: auto;
+  scrollbar-width: none; padding-bottom: 1px;
+}
+.lang-tabs::-webkit-scrollbar { display: none; }
+
+.lang-tab {
+  flex-shrink: 0;
+  display: flex; align-items: center; gap: 5px;
+  padding: 6px 12px;
+  border-radius: 8px 8px 0 0;
+  border: 1.5px solid transparent;
+  border-bottom: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .14s;
+  color: var(--text-3); background: none;
+  letter-spacing: .02em;
+  position: relative; bottom: -1px;
+}
+
+.lang-tab.active {
+  background: var(--surface);
+  border-color: var(--border);
+  border-bottom-color: var(--surface);
+  color: var(--text-1);
+}
+
+.lang-tab:not(.active):hover { color: var(--text-2); }
+
+.tab-dot {
+  width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0;
+}
+
+/* TAB CONTENT */
+.tab-content-wrap {
+  flex: 1; overflow: hidden;
+  border-top: 1.5px solid var(--border);
+  display: flex; flex-direction: column;
+}
+
+.tab-pane {
+  display: none; flex-direction: column;
+  height: 100%; padding: 16px 18px 0;
+  animation: fadeIn .15s ease both;
+}
+.tab-pane.active { display: flex; }
+
+@keyframes fadeIn { from{opacity:0;transform:translateY(3px)} to{opacity:1;transform:translateY(0)} }
+
+/* PROGRESS SECTION */
+.progress-section {
+  display: flex; align-items: center; gap: 14px;
+  margin-bottom: 14px;
+}
+
+.big-ring { position: relative; width: 56px; height: 56px; flex-shrink: 0; }
+.big-ring svg { transform: rotate(-90deg); display: block; }
+.ring-bg-big  { fill: none; stroke: var(--border); stroke-width: 4; }
+.ring-fill-big { fill: none; stroke-width: 4; stroke-linecap: round; transition: stroke-dashoffset .6s cubic-bezier(.4,0,.2,1); }
+.ring-pct-big {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: var(--text-1); line-height: 1;
+}
+
+.progress-info { flex: 1; min-width: 0; }
+
+.progress-label {
+  font-size: 11px; font-weight: 500; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--text-3); margin-bottom: 3px;
+}
+
+.progress-pages {
+  font-family: 'Lora', serif;
+  font-size: 20px; font-weight: 500; color: var(--text-1); line-height: 1;
+  margin-bottom: 4px;
+}
+.progress-pages span { font-size: 13px; color: var(--text-3); font-family: 'DM Sans', sans-serif; font-weight: 300; }
+
+.progress-track {
+  height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-bottom: 5px;
+}
+.progress-fill {
+  height: 100%; border-radius: 2px;
+  transition: width .5s ease;
+}
+
+.progress-words {
+  font-size: 11px; color: var(--text-3); font-weight: 300;
+}
+
+/* STATS ROW */
+.stats-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 8px; margin-bottom: 14px;
+}
+
+.stat-box {
+  background: var(--bg); border-radius: 8px;
+  padding: 9px 11px; border: 1px solid var(--border);
+}
+
+.stat-box-label {
+  font-size: 10px; font-weight: 500; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--text-3); margin-bottom: 3px;
+}
+
+.stat-box-val {
+  font-size: 14px; font-weight: 600; color: var(--text-1); line-height: 1;
+}
+
+.stat-box-sub {
+  font-size: 11px; color: var(--text-3); font-weight: 300;
+}
+
+/* BACK ACTIONS */
+.back-actions {
+  margin-top: auto;
+  padding: 12px 18px 16px;
+  border-top: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.resume-btn {
+  flex: 1; display: flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 10px 16px; border-radius: 30px;
+  border: none; cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 13px; font-weight: 600;
+  color: white; transition: all .18s;
+}
+.resume-btn:hover { opacity: .88; transform: translateY(-1px); }
+
+.new-trans-btn {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 1.5px solid var(--border); background: var(--surface);
+  color: var(--text-2); cursor: pointer; transition: all .14s;
+  flex-shrink: 0;
+}
+.new-trans-btn:hover { border-color: #ccc9c0; color: var(--text-1); }
+
+/* ── LANGUAGE COLOUR MAP ── */
+/* Applied dynamically via JS data attributes */
+
+/* ── EMPTY CARD (add new) ── */
+.card-add {
+  width: 100%; height: var(--card-h);
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 10px; cursor: pointer;
+  transition: all .18s; color: var(--text-3);
+}
+.card-add:hover { border-color: #ccc9c0; color: var(--text-2); background: rgba(255,255,255,.5); }
+.card-add-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: var(--bg); border: 1.5px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+}
+.card-add span { font-size: 13px; font-weight: 500; }
+
+/* ── GLOSSARY CHIP ── */
+.gloss-chip {
+  display: flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 20px;
+  font-size: 11px; font-weight: 500;
+  border: 1.5px solid var(--border); color: var(--text-2);
+  background: var(--surface);
+  white-space: nowrap;
+}
+
+/* ── ANIMATIONS ── */
+@keyframes cardIn {
+  from { opacity:0; transform: translateY(10px); }
+  to   { opacity:1; transform: translateY(0); }
+}
+.card-shell { animation: cardIn .35s ease both; }
+.card-shell:nth-child(1) { animation-delay: .04s; }
+.card-shell:nth-child(2) { animation-delay: .08s; }
+.card-shell:nth-child(3) { animation-delay: .12s; }
+.card-shell:nth-child(4) { animation-delay: .16s; }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <h1>Your library</h1>
+  <p>Texts, translations, and vocabulary you've collected.</p>
+</div>
+
+<div class="toolbar">
+  <div class="search-wrap">
+    <svg class="search-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input class="search-input" type="text" placeholder="Search library…">
+  </div>
+  <button class="sort-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+    Recently opened
+  </button>
+  <button class="new-btn">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    New reading
+  </button>
+</div>
+
+<div class="cards-grid" id="cardsGrid"></div>
+
+<script>
+// ── LANGUAGE CONFIG ────────────────────────────────────────────
+const LANG = {
+  FR: { label:'FR', color:'#2c5f8a', soft:'#e8f1f8', name:'French' },
+  EN: { label:'EN', color:'#2d6a4a', soft:'#e8f4ed', name:'English' },
+  DE: { label:'DE', color:'#6b4226', soft:'#f5ede7', name:'German' },
+  ES: { label:'ES', color:'#7a3b1e', soft:'#f8ece5', name:'Spanish' },
+  IT: { label:'IT', color:'#5c3d7a', soft:'#f0eaf7', name:'Italian' },
+  PT: { label:'PT', color:'#1e5f74', soft:'#e6f3f7', name:'Portuguese' },
+  RU: { label:'RU', color:'#8b2635', soft:'#f8e8eb', name:'Russian' },
+};
+
+// Document accent colours (bookshelf identity)
+const ACCENTS = ['#b05c3a','#3a6b8a','#4a7c5c','#7a5c8a','#8a7a3a','#3a5c7a'];
+
+// ── BOOK DATA ──────────────────────────────────────────────────
+const BOOKS = [
+  {
+    id: 0,
+    title: 'Les Misérables',
+    author: 'Victor Hugo',
+    srcLang: 'FR',
+    excerpt: '« Monsieur Myriel était évêque de Digne. C\'était un vieillard d\'environ soixante-quinze ans… »',
+    translations: [
+      { lang:'EN', progress:34, currentPage:12, totalPages:35,
+        wordsRead:14200, savedWords:41, lastOpened:'39 minutes ago', startedDaysAgo:12 },
+      { lang:'DE', progress:8,  currentPage:3,  totalPages:35,
+        wordsRead:3100,  savedWords:14, lastOpened:'5 days ago', startedDaysAgo:6 },
+    ]
+  },
+  {
+    id: 1,
+    title: 'The Little Prince',
+    author: 'Antoine de Saint-Exupéry',
+    srcLang: 'EN',
+    excerpt: '"Once when I was six years old I saw a magnificent picture in a book, called True Stories from Nature…"',
+    translations: [
+      { lang:'FR', progress:61, currentPage:11, totalPages:18,
+        wordsRead:9400,  savedWords:28, lastOpened:'21 hours ago', startedDaysAgo:18 },
+      { lang:'ES', progress:22, currentPage:4,  totalPages:18,
+        wordsRead:3600,  savedWords:11, lastOpened:'3 days ago', startedDaysAgo:5 },
+      { lang:'IT', progress:100,currentPage:18, totalPages:18,
+        wordsRead:15200, savedWords:63, lastOpened:'2 weeks ago', startedDaysAgo:31 },
+    ]
+  },
+  {
+    id: 2,
+    title: 'Frankenstein',
+    author: 'Mary Shelley',
+    srcLang: 'EN',
+    excerpt: '"You will rejoice to hear that no disaster has accompanied the commencement of an enterprise which you have regarded with such evil forebodings…"',
+    translations: [
+      { lang:'FR', progress:19, currentPage:4,  totalPages:22,
+        wordsRead:5800,  savedWords:19, lastOpened:'21 hours ago', startedDaysAgo:4 },
+      { lang:'DE', progress:0,  currentPage:1,  totalPages:22,
+        wordsRead:0,     savedWords:0,  lastOpened:'Just started', startedDaysAgo:1 },
+    ]
+  },
+  {
+    id: 3,
+    title: 'Don Quixote',
+    author: 'Miguel de Cervantes',
+    srcLang: 'ES',
+    excerpt: '"En un lugar de la Mancha, de cuyo nombre no quiero acordarme, no ha mucho tiempo que vivía un hidalgo…"',
+    translations: [
+      { lang:'EN', progress:8, currentPage:4, totalPages:52,
+        wordsRead:6200, savedWords:22, lastOpened:'2 days ago', startedDaysAgo:3 },
+    ]
+  },
+];
+
+// ── RENDER ─────────────────────────────────────────────────────
+function buildCard(book, accentColor) {
+  // Most recently opened translation
+  const recent = [...book.translations].sort((a,b) => {
+    // crude sort: 'minutes' < 'hours' < 'days' < 'weeks'
+    const score = s => s.includes('minute')?0:s.includes('hour')?1:s.includes('day')?2:s.includes('week')?3:4;
+    return score(a.lastOpened) - score(b.lastOpened);
+  })[0];
+
+  const srcCfg = LANG[book.srcLang];
+
+  // ── FRONT ──────────────────────────────────────────────────
+  const transPills = book.translations.map(t => {
+    const cfg = LANG[t.lang];
+    return `
+      <div class="trans-pill" style="background:${cfg.color};color:white"
+           title="${cfg.name} — ${t.progress}%">
+        ${cfg.label}
+        <div class="trans-pill-progress">
+          <div class="trans-pill-fill" style="width:${t.progress}%"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  const recentCfg = LANG[recent.lang];
+
+  const front = `
+    <div class="card-face card-front">
+      <div class="front-spine" style="background:${accentColor}"></div>
+      <div class="front-content">
+        <div class="front-top">
+          <div class="front-title">${book.title}</div>
+          <div class="src-badge" style="background:${srcCfg.soft};color:${srcCfg.color}">
+            ${srcCfg.label}
+          </div>
+        </div>
+        <div class="front-author">${book.author}</div>
+        <div class="front-excerpt">${book.excerpt}</div>
+      </div>
+      <div class="front-trans-row">
+        <span style="font-size:11px;color:var(--text-3);font-weight:500;margin-right:2px">
+          Translated to
+        </span>
+        ${transPills}
+      </div>
+      <div class="front-bottom">
+        <button class="continue-btn" style="background:${recentCfg.color}"
+                onclick="event.stopPropagation(); resumeReading(${book.id}, '${recent.lang}')">
+          Continue
+          <span class="continue-lang">${recentCfg.label}</span>
+        </button>
+        <div class="flip-hint" onclick="event.stopPropagation(); flipCard(${book.id})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/></svg>
+          All translations
+        </div>
+      </div>
+    </div>`;
+
+  // ── BACK ───────────────────────────────────────────────────
+  const tabs = book.translations.map((t, i) => {
+    const cfg = LANG[t.lang];
+    return `
+      <button class="lang-tab ${i===0?'active':''}"
+              data-book="${book.id}" data-idx="${i}"
+              onclick="switchTab(event, ${book.id}, ${i})"
+              style="${i===0 ? `color:${cfg.color}` : ''}">
+        <div class="tab-dot" style="background:${cfg.color}"></div>
+        ${cfg.label}
+      </button>`;
+  }).join('');
+
+  const panes = book.translations.map((t, i) => {
+    const cfg = LANG[t.lang];
+    const r = 22, circ = 2 * Math.PI * r;
+    const offset = circ - (t.progress / 100) * circ;
+    const ringColor = t.progress === 100 ? '#16a34a' : cfg.color;
+    const wordsLabel = t.wordsRead > 0
+      ? `${t.wordsRead.toLocaleString()} words read`
+      : 'Not started yet';
+
+    return `
+      <div class="tab-pane ${i===0?'active':''}" id="pane-${book.id}-${i}">
+        <div class="progress-section">
+          <div class="big-ring">
+            <svg width="56" height="56" viewBox="0 0 56 56">
+              <circle class="ring-bg-big" cx="28" cy="28" r="${r}"/>
+              <circle class="ring-fill-big" cx="28" cy="28" r="${r}"
+                stroke="${ringColor}"
+                stroke-dasharray="${circ.toFixed(1)}"
+                stroke-dashoffset="${offset.toFixed(1)}"/>
+            </svg>
+            <div class="ring-pct-big">${t.progress}%</div>
+          </div>
+          <div class="progress-info">
+            <div class="progress-label">Reading progress</div>
+            <div class="progress-pages">
+              p.${t.currentPage}
+              <span>of ${t.totalPages}</span>
+            </div>
+            <div class="progress-track">
+              <div class="progress-fill"
+                   style="width:${t.progress}%;background:${ringColor}"></div>
+            </div>
+            <div class="progress-words">${wordsLabel}</div>
+          </div>
+        </div>
+        <div class="stats-row">
+          <div class="stat-box">
+            <div class="stat-box-label">Last opened</div>
+            <div class="stat-box-val" style="font-size:13px">${t.lastOpened}</div>
+          </div>
+          <div class="stat-box">
+            <div class="stat-box-label">Saved words</div>
+            <div class="stat-box-val">${t.savedWords}
+              <span class="stat-box-sub" style="font-size:11px;font-weight:300"> words</span>
+            </div>
+          </div>
+        </div>
+      </div>`;
+  }).join('');
+
+  // Which translation is active on back (default first)
+  const activeTrans = book.translations[0];
+  const activeCfg = LANG[activeTrans.lang];
+
+  const back = `
+    <div class="card-face card-back">
+      <div class="back-header">
+        <div class="back-header-top">
+          <div>
+            <div class="back-title">${book.title}</div>
+          </div>
+          <button class="back-flip-btn" onclick="event.stopPropagation(); flipCard(${book.id})">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+            Back
+          </button>
+        </div>
+        <div class="lang-tabs" id="tabs-${book.id}">
+          ${tabs}
+        </div>
+      </div>
+      <div class="tab-content-wrap">
+        ${panes}
+      </div>
+      <div class="back-actions" id="actions-${book.id}"
+           data-book="${book.id}" data-active-lang="${activeTrans.lang}">
+        <button class="resume-btn" style="background:${activeCfg.color}"
+                id="resume-${book.id}"
+                onclick="resumeReading(${book.id}, this.closest('[data-active-lang]').dataset.activeLang)">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          ${activeTrans.progress === 0 ? 'Start reading' : activeTrans.progress === 100 ? 'Read again' : 'Resume reading'}
+        </button>
+        <button class="new-trans-btn" title="New translation"
+                onclick="event.stopPropagation()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 8l6 6M4 14l6-6 2-3M2 5h12M7 2h1M22 22l-5-10-5 10M14 18h6"/></svg>
+        </button>
+        <div class="gloss-chip">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          ${book.translations.reduce((s,t) => s + t.savedWords, 0)} words
+        </div>
+      </div>
+    </div>`;
+
+  return front + back;
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML = '';
+
+  BOOKS.forEach((book, i) => {
+    const accent = ACCENTS[i % ACCENTS.length];
+    const shell = document.createElement('div');
+    shell.className = 'card-shell';
+    shell.id = `card-${book.id}`;
+    shell.innerHTML = `<div class="card-inner">${buildCard(book, accent)}</div>`;
+    // Click anywhere on card face (not buttons) to flip
+    shell.addEventListener('click', () => flipCard(book.id));
+    grid.appendChild(shell);
+  });
+
+  // Add "new reading" card
+  const addCard = document.createElement('div');
+  addCard.className = 'card-add';
+  addCard.innerHTML = `
+    <div class="card-add-icon">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </div>
+    <span>New reading</span>`;
+  grid.appendChild(addCard);
+}
+
+// ── INTERACTIONS ────────────────────────────────────────────────
+function flipCard(bookId) {
+  const shell = document.getElementById(`card-${bookId}`);
+  shell.classList.toggle('flipped');
+}
+
+function switchTab(event, bookId, idx) {
+  event.stopPropagation();
+  const book = BOOKS.find(b => b.id === bookId);
+  const trans = book.translations[idx];
+  const cfg = LANG[trans.lang];
+
+  // Update tab active states
+  document.querySelectorAll(`#tabs-${bookId} .lang-tab`).forEach((tab, i) => {
+    tab.classList.toggle('active', i === idx);
+    tab.style.color = i === idx ? cfg.color : '';
+  });
+
+  // Update pane active states
+  book.translations.forEach((_, i) => {
+    const pane = document.getElementById(`pane-${bookId}-${i}`);
+    pane.classList.toggle('active', i === idx);
+  });
+
+  // Update resume button
+  const actions = document.getElementById(`actions-${bookId}`);
+  actions.dataset.activeLang = trans.lang;
+  const resumeBtn = document.getElementById(`resume-${bookId}`);
+  resumeBtn.style.background = cfg.color;
+  resumeBtn.innerHTML = `
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+    ${trans.progress === 0 ? 'Start reading' : trans.progress === 100 ? 'Read again' : 'Resume reading'}`;
+}
+
+function resumeReading(bookId, lang) {
+  const book = BOOKS.find(b => b.id === bookId);
+  const trans = book.translations.find(t => t.lang === lang);
+  // In production: router.push(`/reader/${bookId}?lang=${lang}&page=${trans.currentPage}`)
+  alert(`Opening: ${book.title}\nTranslation: ${LANG[lang].name}\nResuming at page ${trans.currentPage} of ${trans.totalPages}`);
+}
+
+renderCards();
+</script>
+</body>
+</html>

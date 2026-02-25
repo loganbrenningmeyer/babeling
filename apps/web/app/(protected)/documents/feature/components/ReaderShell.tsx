@@ -17,6 +17,7 @@ import { SourceBlurButton } from "@/app/(protected)/documents/feature/components
 import { BlurModeToggle } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
 
+import { capitalizeWords } from "@/lib/string";
 
 export type ReaderMsgs = (typeof messages)[UiLang]["reader"];
 
@@ -108,7 +109,7 @@ export function ReaderShell({
           className="pointer-events-none absolute bottom-0 left-1/2 border-l border-border/60"
         />
         <div className="inline-flex flex-col">
-          <span className="text-[18px] font-medium">{title}</span>
+          <span className="text-[18px] font-medium">{capitalizeWords(title)}</span>
           <span className="mt-1 h-1 w-full bg-gray-200" />
         </div>
       </div>

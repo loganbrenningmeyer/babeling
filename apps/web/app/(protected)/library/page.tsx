@@ -6,7 +6,7 @@ import { useCallback, useEffect, useState } from "react";
 // User information provider
 // -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
-import { useRecentDocuments } from "../upload/feature/hooks/useRecentDocuments";
+import { useRecentDocuments } from "./feature/hooks/useRecentDocuments";
 import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 
 // -------------------------
@@ -14,6 +14,7 @@ import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 // -------------------------
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
 import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
+
 
 export default function Library() {
   // -------------------------
@@ -29,19 +30,19 @@ export default function Library() {
     loading: docsLoading,
     error: docsError,
     reload: reloadDocs,
-  } = useRecentDocuments({ limit: 20 });
+  } = useRecentDocuments();
 
   const {
     glossaryItems,
-    loading: glossLoading,
-    error: glossError,
-    reload: reloadGloss,
-  } = useRecentGlossaryItems({ limit: 20 });
+    loading: glossaryLoading,
+    error: glossaryError,
+    reload: reloadGlossary,
+  } = useRecentGlossaryItems();
 
   // -------------------------
   // Library Loading Skeleton
   // -------------------------
-  if (userLoading || docsLoading || glossLoading) {
+  if (userLoading || docsLoading || glossaryLoading) {
     return (
       <div className="p-4">
         <LibrarySkeleton />
@@ -49,17 +50,17 @@ export default function Library() {
     );
   }
 
-  if (userError || docsError || glossError) {
-    return <div className="px-12">Error: {userError ?? docsError ?? glossError}</div>;
+  if (userError || docsError || glossaryError) {
+    return <div className="px-12">Error: {userError ?? docsError ?? glossaryError}</div>;
   }
 
   return (
-    <div className="min-h-screen mx-auto w-full max-w-5xl">
+    <div className="min-h-screen px-8 w-full">
       {/* -------------------------
       * Hero
       * ------------------------- */}
       <div className="pt-12">
-        <h1 className="font-reading text-4xl font-bold tracking-tight">
+        <h1 className="font-reading text-4xl tracking-tight">
           Your library
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">
@@ -80,7 +81,10 @@ export default function Library() {
             document.
           </div>
         ) : (
-          <LibraryPage docs={documents} />
+          <LibraryPage 
+            documents={documents}
+            glossaryItems={glossaryItems}
+          />
         )}
       </div>
     </div>

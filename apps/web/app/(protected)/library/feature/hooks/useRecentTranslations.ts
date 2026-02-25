@@ -1,18 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getRecentGlossaryItems } from "../api/glossaryItems";
-import { LibraryGlossaryItem } from "../types/glossaryItem";
-
+import { getRecentTranslations } from "../api/translations";
+import { LibraryTranslation } from "../types/translation";
 
 /**************************
- * `useRecentGlossaryItems()`
- * -- Hook to fetch user's recently saved glossary items up to a limit count
+ * `useRecentTranslations()`
+ * -- Hook to fetch user's recently saved translations for a given document ID
  **************************/
-export function useRecentGlossaryItems(args?: { limit?: number | null }) {
-  const limit = args?.limit ?? null;
+export function useRecentTranslations(args: {
+  documentId: number;
+  limit?: number | null;
+}) {
+  const { documentId } = args;
+  const limit = args.limit ?? null;
 
-  const [glossaryItems, setGlossaryItems] = useState<LibraryGlossaryItem[]>([]);
+  const [translations, setTranslations] = useState<LibraryTranslation[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,30 +28,30 @@ export function useRecentGlossaryItems(args?: { limit?: number | null }) {
     setError(null);
 
     try {
-      const res = await getRecentGlossaryItems({ limit });
+      const res = await getRecentTranslations({ documentId, limit });
 
       if (requestIdRef.current !== reqId) return;
-      setGlossaryItems(res.glossaryItems);
+      setTranslations(res.translations);
 
     } catch (e: any) {
       if (requestIdRef.current !== reqId) return;
 
-      setGlossaryItems([]);
-      setError(e?.message ?? "Failed to load recent glossary items");
+      setTranslations([]);
+      setError(e?.message ?? "Failed to load recent translations");
 
     } finally {
       if (requestIdRef.current === reqId) {
         setLoading(false);
       }
     }
-  }, [limit]);
+  }, [documentId, limit]);
 
   useEffect(() => {
     void load();
   }, [load]);
 
   return {
-    glossaryItems,
+    translations,
     loading,
     error,
     reload: load,

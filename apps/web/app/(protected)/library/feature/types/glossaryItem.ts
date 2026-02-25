@@ -1,69 +1,21 @@
-import { GlossaryDefinition, GlossaryUsage, GlossaryDefinitionDTO, GlossaryUsageDTO } from "@/app/(protected)/documents/feature/types/glossaryItem";
+import {
+  GlossaryDefinition,
+  GlossaryUsage,
+  GlossaryDefinitionDTO,
+  GlossaryUsageDTO,
+} from "@/app/(protected)/documents/feature/types/glossaryItem";
 
-// -------------------------
-// Documents
-// -------------------------
-export type LibraryDocument = {
-  id: number;
-  title: string;
-  srcText: string;
-  srcLang: string;
-  lastOpenedAt: string | null;
-  latestTgtLang: string | null;
-};
-
-export type LibraryDocumentResponse = {
-  documents: LibraryDocument[];
-};
-
-export type LibraryDocumentDTO = {
-  id: number;
-  title: string;
-  src_text: string;
-  src_lang: string;
-  last_opened_at: string | null;
-  latest_tgt_lang: string | null;
-}
-
-export type LibraryDocumentResponseDTO = {
-  documents: LibraryDocumentDTO[];
-}
-
-export function fromLibraryDocumentDTO(
-  dto: LibraryDocumentDTO
-): LibraryDocument {
-  return {
-    id: dto.id,
-    title: dto.title,
-    srcText: dto.src_text,
-    srcLang: dto.src_lang,
-    lastOpenedAt: dto.last_opened_at,
-    latestTgtLang: dto.latest_tgt_lang,
-  }
-}
-
-export function fromLibraryDocumentResponseDTO(
-  dto: LibraryDocumentResponseDTO
-): LibraryDocumentResponse {
-  return {
-    documents: dto.documents.map(fromLibraryDocumentDTO),
-  }
-}
-
-// -------------------------
-// Glossary Items
-// -------------------------
 export type LibraryGlossaryItem = {
   srcLang: string;
   tgtLang: string;
   definition: GlossaryDefinition;
   usage: GlossaryUsage;
   createdAt: string;
-}
+};
 
 export type LibraryGlossaryItemResponse = {
   glossaryItems: LibraryGlossaryItem[];
-}
+};
 
 export type LibraryGlossaryItemDTO = {
   src_lang: string;
@@ -71,7 +23,11 @@ export type LibraryGlossaryItemDTO = {
   definition: GlossaryDefinitionDTO;
   usage: GlossaryUsageDTO;
   created_at: string;
-}
+};
+
+export type LibraryGlossaryItemResponseDTO = {
+  glossary_items: LibraryGlossaryItemDTO[];
+};
 
 export function fromLibraryGlossaryItemDTO(
   dto: LibraryGlossaryItemDTO
@@ -99,5 +55,13 @@ export function fromLibraryGlossaryItemDTO(
     },
     usage: dto.usage,
     createdAt: dto.created_at,
+  };
+}
+
+export function fromLibraryGlossaryItemResponseDTO(
+  dto: LibraryGlossaryItemResponseDTO
+): LibraryGlossaryItemResponse {
+  return {
+    glossaryItems: dto.glossary_items.map(fromLibraryGlossaryItemDTO),
   };
 }

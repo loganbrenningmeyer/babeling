@@ -47,8 +47,8 @@ export default function ReaderPageClient({
     prefTgtLang ??
     "es";
 
-  const requestedPage =
-    typeof searchParams.page === "string" ? Number(searchParams.page) : 0;
+  const requestedPageNumber =
+    typeof searchParams.page === "string" ? Number(searchParams.page) : 1;
   
   // -------------------------
   // Load document by ID
@@ -66,9 +66,13 @@ export default function ReaderPageClient({
   // -------------------------
   const pageIndex = useMemo(() => {
     if (!document || document.pages.length === 0) return 0;
-    const p = Number.isFinite(requestedPage) ? Math.floor(requestedPage) : 0;
-    return Math.max(0, Math.min(p, document.pages.length - 1));
-  }, [document, requestedPage]);
+
+    // Clamp 1-indexed page number / convert to 0-indexed
+    const pageNumber = Number.isFinite(requestedPageNumber) ? Math.floor(requestedPageNumber) : 1;
+    const zeroBased = Math.max(1, pageNumber) - 1;
+
+    return Math.max(0, Math.min(zeroBased, document.pages.length - 1));
+  }, [document, requestedPageNumber]);
 
   // -------------------------
   // Begin ReaderSession for the current document / pageIndex / tgtLang
@@ -141,7 +145,7 @@ export default function ReaderPageClient({
   const setPage = useCallback(
     (nextIndex: number) => {
       const sp = new URLSearchParams();
-      sp.set("page", String(nextIndex));
+      sp.set("page", String(nextIndex + 1));
       sp.set("tgt", tgtLang);
       router.replace(`/documents/${docId}?${sp.toString()}`);
     },

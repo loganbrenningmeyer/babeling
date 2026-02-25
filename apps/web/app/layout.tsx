@@ -8,7 +8,7 @@ import { DM_Sans, Lora, DM_Serif_Display } from "next/font/google";
 
 
 // -------------------------
-// Logo Font
+// Reading Font
 // -------------------------
 const lora = Lora({
   subsets: ["latin"],
@@ -34,7 +34,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className={`${lora.variable} ${dm_sans.variable}`}>
-      <body className="font-ui min-h-screen bg-zinc-50 text-zinc-900 antialiased">
+      <body className="font-ui min-h-screen antialiased">
         <ClerkProvider
           afterSignOutUrl="/"
         >

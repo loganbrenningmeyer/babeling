@@ -1,32 +1,27 @@
 import { NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getBackendToken, getApiBaseUrl } from "@/lib/server-api";
 
+// -------------------------
+// GET: /api/library/documents
+// -- Gets user's documents and their info for the library page
+// -------------------------
 export async function GET() {
   // -------------------------
-  // Get Clerk user identification / token
+  // Get Clerk token / API url
   // -------------------------
-  const { userId, getToken } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  const authResult = await getBackendToken();
+  if ("error" in authResult) return authResult.error;
 
-  const token = await getToken({ template: "backend" });
-  if (!token) {
-    return NextResponse.json(
-      { error: "Missing backend token" },
-      { status: 401 }
-    );
-  }
+  const baseUrlResult = getApiBaseUrl();
+  if ("error" in baseUrlResult) return baseUrlResult.error;
 
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
-  if (!API_BASE_URL) {
-    return NextResponse.json(
-      { error: "NEXT_PUBLIC_API_URL is not set" },
-      { status: 500 }
-    );
-  }
+  const { token } = authResult;
+  const { API_BASE_URL } = baseUrlResult;
 
-  const res = await fetch(`${API_BASE_URL}/library`, {
+  // -------------------------
+  // Get user's documents
+  // -------------------------
+  const res = await fetch(`${API_BASE_URL}/library/documents`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

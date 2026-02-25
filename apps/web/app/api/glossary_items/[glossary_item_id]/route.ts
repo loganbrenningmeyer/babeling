@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getBackendToken, getApiBaseUrl } from "@/lib/sever-api";
+import { getBackendToken, getApiBaseUrl } from "@/lib/server-api";
 
 
 // -------------------------
