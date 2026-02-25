@@ -298,8 +298,8 @@ export default function UploadPage() {
             const sp = new URLSearchParams();
             sp.set("page", "0");
 
-            if (doc.latest_tgt_lang) {
-              sp.set("tgt", doc.latest_tgt_lang);
+            if (doc.latestTgtLang) {
+              sp.set("tgt", doc.latestTgtLang);
             }
 
             router.push(`/documents/${doc.id}?${sp.toString()}`);

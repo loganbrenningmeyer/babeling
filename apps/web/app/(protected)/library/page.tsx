@@ -6,7 +6,8 @@ import { useCallback, useEffect, useState } from "react";
 // User information provider
 // -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
-import type { LibraryDocument } from "./feature/types/library";
+import { useRecentDocuments } from "../upload/feature/hooks/useRecentDocuments";
+import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 
 // -------------------------
 // UI Components
@@ -20,45 +21,27 @@ export default function Library() {
   // -------------------------
   const { user, loading: userLoading, error: userError } = useAppUser();
 
-  const [docs, setDocs] = useState<LibraryDocument[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
   // -------------------------
-  // Load user library
+  // Recent Documents / Glossary Items Hooks
   // -------------------------
-  const loadUserLibrary = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+  const {
+    documents,
+    loading: docsLoading,
+    error: docsError,
+    reload: reloadDocs,
+  } = useRecentDocuments({ limit: 20 });
 
-    try {
-      const res = await fetch("/api/library", {
-        method: "GET",
-        cache: "no-store",
-      });
-      const data = await res.json();
-
-      if (!res.ok) throw new Error(data?.error ?? "Failed to load library");
-      setDocs(data.documents ?? []);
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Unknown error");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  // -------------------------
-  // Refresh user library on new user
-  // -------------------------
-  useEffect(() => {
-    if (!user) return;
-    loadUserLibrary();
-  }, [user, loadUserLibrary]);
+  const {
+    glossaryItems,
+    loading: glossLoading,
+    error: glossError,
+    reload: reloadGloss,
+  } = useRecentGlossaryItems({ limit: 20 });
 
   // -------------------------
   // Library Loading Skeleton
   // -------------------------
-  if (userLoading || loading) {
+  if (userLoading || docsLoading || glossLoading) {
     return (
       <div className="p-4">
         <LibrarySkeleton />
@@ -66,8 +49,8 @@ export default function Library() {
     );
   }
 
-  if (userError || error) {
-    return <div className="px-12">Error: {userError ?? error}</div>;
+  if (userError || docsError || glossError) {
+    return <div className="px-12">Error: {userError ?? docsError ?? glossError}</div>;
   }
 
   return (
@@ -87,7 +70,7 @@ export default function Library() {
       * Library Page
       * ------------------------- */}
       <div className="font-ui mt-10">
-        {docs.length === 0 ? (
+        {documents.length === 0 ? (
           <div className="
             rounded-xl 
             border border-dashed bg-muted/40 p-8 
@@ -97,7 +80,7 @@ export default function Library() {
             document.
           </div>
         ) : (
-          <LibraryPage docs={docs} />
+          <LibraryPage docs={documents} />
         )}
       </div>
     </div>

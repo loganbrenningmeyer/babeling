@@ -47,13 +47,20 @@ class GlossarySaveResponse(BaseModel):
 
 
 # -------------------------
-# GET: /api/glossary_items
+# GET: /api/glossary_items/[glossary_item_id]
 # -------------------------
 class GlossaryLoadResponse(BaseModel):
     src_lang: str
     tgt_lang: str
     definition: GlossaryDefinitionData
     usage: GlossaryUsageData
+    created_at: str
+
+# -------------------------
+# GET: /api/glossary_items
+# -------------------------
+class GlossaryItemsLoadResponse(BaseModel):
+    glossary_items: list[GlossaryLoadResponse]
 
 # -------------------------
 # DELETE: /api/glossary

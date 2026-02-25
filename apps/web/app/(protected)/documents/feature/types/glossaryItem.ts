@@ -56,6 +56,7 @@ export type GlossaryLoadResponse = {
   tgtLang: string;
   definition: GlossaryDefinition;
   usage: GlossaryUsage;
+  createdAt: string;
 };
 
 export type GlossaryDeleteResponse = {
@@ -116,6 +117,7 @@ export type GlossaryLoadResponseDTO = {
   tgt_lang: string;
   definition: GlossaryDefinitionDTO;
   usage: GlossaryUsageDTO;
+  created_at: string;
 };
 
 export type GlossaryDeleteResponseDTO = {
@@ -188,6 +190,7 @@ export function fromGlossaryLoadResponseDTO(
       wordId: dto.definition.word_id,
     },
     usage: dto.usage,
+    createdAt: dto.created_at,
   };
 }
 

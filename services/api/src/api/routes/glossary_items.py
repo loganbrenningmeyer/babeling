@@ -18,11 +18,13 @@ from api.schemas.glossary_items import (
     GlossarySaveRequest,
     GlossarySaveResponse,
     GlossaryLoadResponse,
+    GlossaryItemsLoadResponse,
     GlossaryDeleteResponse,
 )
 
 
 router = APIRouter(prefix="/glossary_items", tags=["glossary_items"])
+
 
 def _get_accessible_document(
     db: Session,
@@ -41,6 +43,7 @@ def _get_accessible_document(
         )
     ).scalar_one_or_none()
 
+
 # -------------------------
 # POST: /api/glossary_items
 # -- Save new GlossaryItem to database
@@ -58,7 +61,7 @@ def save_glossary(
 
     if doc is None:
         raise HTTPException(status_code=404, detail="Document not found")
-    
+
     # -------------------------
     # 2) Validate page belongs to document
     # -------------------------
@@ -71,7 +74,7 @@ def save_glossary(
 
     if page is None:
         raise HTTPException(status_code=404, detail="Page not found")
-    
+
     # -------------------------
     # 3) Check if bookmark already exists
     # -------------------------
@@ -90,7 +93,7 @@ def save_glossary(
             glossary_item_id=existing.id,
             already_exists=True,
         )
-    
+
     # -------------------------
     # 4) If validated / new bookmark, create entry
     # -------------------------
@@ -131,11 +134,69 @@ def save_glossary(
         db.refresh(row)
     except SQLAlchemyError as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to save glossary item: {e}")
-    
+        raise HTTPException(
+            status_code=500, detail=f"Failed to save glossary item: {e}"
+        )
+
     return GlossarySaveResponse(
         glossary_item_id=row.id,
         already_exists=False,
+    )
+
+
+# -------------------------
+# GET: /api/glossary_items
+# -- Fetches all glossary items for user
+# -------------------------
+@router.get("")
+def load_glossary(
+    db: Session = Depends(get_db),
+    user: AppUser = Depends(get_current_app_user),
+) -> GlossaryItemsLoadResponse:
+    # -------------------------
+    # Get all GlossaryItems for user ID
+    # -------------------------
+    items = (
+        db.execute(
+            select(GlossaryItem).where(
+                GlossaryItem.user_id == user.id,
+            )
+        )
+        .scalars()
+        .all()
+    )
+
+    return GlossaryItemsLoadResponse(
+        glossary_items=[
+            GlossaryLoadResponse(
+                src_lang=item.src_lang,
+                tgt_lang=item.tgt_lang,
+                definition=GlossaryDefinitionData(
+                    form=item.form,
+                    pos_form=item.pos_form,
+                    ipa_form=item.ipa_form,
+                    lemma=item.lemma,
+                    pos_lemma=item.pos_lemma,
+                    ipa_lemma=item.ipa_lemma,
+                    gloss=item.gloss,
+                    src_sentence=item.src_sentence,
+                    src_paragraph=item.src_paragraph,
+                    tgt_sentence=item.tgt_sentence,
+                    tgt_paragraph=item.tgt_paragraph,
+                    document_id=item.document_id,
+                    page_id=item.page_id,
+                    par_id=item.par_id,
+                    sent_id=item.sent_id,
+                    word_id=item.word_id,
+                ),
+                usage=GlossaryUsageData(
+                    explanation=item.explanation,
+                    examples=item.examples,
+                ),
+                created_at=item.created_at,
+            )
+            for item in items
+        ]
     )
 
 
@@ -144,7 +205,7 @@ def save_glossary(
 # -- Fetches glossary_item from database and returns data
 # -------------------------
 @router.get("/{glossary_item_id}")
-def load_glossary(
+def load_glossary_item(
     glossary_item_id: int,
     db: Session = Depends(get_db),
     user: AppUser = Depends(get_current_app_user),
@@ -161,7 +222,7 @@ def load_glossary(
 
     if item is None:
         raise HTTPException(status_code=404, detail="Glossary item not found")
-    
+
     return GlossaryLoadResponse(
         src_lang=item.src_lang,
         tgt_lang=item.tgt_lang,
@@ -187,6 +248,7 @@ def load_glossary(
             explanation=item.explanation,
             examples=item.examples,
         ),
+        created_at=item.created_at,
     )
 
 
@@ -198,7 +260,7 @@ def load_glossary(
 def delete_glossary(
     glossary_item_id: int,
     db: Session = Depends(get_db),
-    user: AppUser = Depends(get_current_app_user),    
+    user: AppUser = Depends(get_current_app_user),
 ):
     # -------------------------
     # Get glossary item with matching ID
@@ -221,8 +283,10 @@ def delete_glossary(
         db.commit()
     except SQLAlchemyError as e:
         db.rollback()
-        raise HTTPException(status_code=500, detail=f"Failed to delete glossary item: {e}")
-    
+        raise HTTPException(
+            status_code=500, detail=f"Failed to delete glossary item: {e}"
+        )
+
     return GlossaryDeleteResponse(
         glossary_item_id=glossary_item_id,
         ok=True,

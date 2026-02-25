@@ -1,18 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getRecentDocuments } from "@/app/(protected)/library/feature/api/library";
-import type { LibraryDocument } from "@/app/(protected)/library/feature/types/library";
+import { getRecentGlossaryItems } from "../api/library";
+import { LibraryGlossaryItem } from "../types/library";
 
 
 /**************************
- * `useRecentDocuments()`
- * -- Hook to fetch user's recent documents up to a limit count
+ * `useRecentGlossaryItems()`
+ * -- Hook to fetch user's recently saved glossary items up to a limit count
  **************************/
-export function useRecentDocuments(args?: { limit?: number }) {
+export function useRecentGlossaryItems(args?: { limit?: number }) {
   const limit = args?.limit ?? 10;
 
-  const [documents, setDocuments] = useState<LibraryDocument[]>([]);
+  const [glossaryItems, setGlossaryItems] = useState<LibraryGlossaryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,16 +25,16 @@ export function useRecentDocuments(args?: { limit?: number }) {
     setError(null);
 
     try {
-      const res = await getRecentDocuments({ limit });
+      const res = await getRecentGlossaryItems({ limit });
 
       if (requestIdRef.current !== reqId) return;
-      setDocuments(res.documents);
+      setGlossaryItems(res.glossaryItems);
 
     } catch (e: any) {
       if (requestIdRef.current !== reqId) return;
 
-      setDocuments([]);
-      setError(e?.message ?? "Failed to load recent documents");
+      setGlossaryItems([]);
+      setError(e?.message ?? "Failed to load recent glossary items");
 
     } finally {
       if (requestIdRef.current === reqId) {
@@ -48,7 +48,7 @@ export function useRecentDocuments(args?: { limit?: number }) {
   }, [load]);
 
   return {
-    documents,
+    glossaryItems,
     loading,
     error,
     reload: load,
