@@ -8,6 +8,7 @@ import { PronounceButton } from "@/app/(protected)/documents/feature/components/
 import { LibraryGlossaryItem } from "../../types/glossaryItem";
 
 import { capitalizeWords } from "@/lib/string";
+import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
 export function GlossaryItemFront({
@@ -15,20 +16,26 @@ export function GlossaryItemFront({
 }: {
   glossaryItem: LibraryGlossaryItem,
 }) {
+  // Language color
+  const langAccent = LANG_COLOR_BY_CODE[glossaryItem.tgtLang as keyof typeof LANG_COLOR_BY_CODE].accent;
+
   return (
     <div className="absolute inset-0 [backface-visibility:hidden] [transform:translateZ(0)]">
       <Card className="
-        relative rounded-xl h-full w-full border bg-card p-5 shadow-sm
+        relative rounded-xl h-full w-full overflow-hidden
+        border bg-card p-5 shadow-sm
         transform-gpu will-change-transform
         transition duration-200 ease-out
         group-hover:-translate-y-1
-        group-hover:border-muted-foreground/40
+        group-hover:border-orange-400/60
         group-hover:shadow-md
         group-focus-visible:-translate-y-1
         group-focus-visible:border-orange-200
         group-focus-visible:shadow-md
       ">
-        <CardContent className="h-full p-0 space-y-4 flex flex-col">
+        {/* Source Language Accent Strip */}
+        <div className={`absolute inset-y-0 left-0 w-1.5 ${langAccent}`} />
+        <CardContent className="h-full p-0 space-y-2 flex flex-col">
           {/* -------------------------
           //* Form + POS + Language Badge
           //* ------------------------- */}
@@ -72,7 +79,7 @@ export function GlossaryItemFront({
           {/* -------------------------
           //* ( Bottom ): Originating Document
           //* ------------------------- */}
-          <div className="mt-auto space-y-3">
+          <div className="mt-auto space-y-2">
             <Separator />
             
             <p className="font-ui text-xs text-muted-foreground">

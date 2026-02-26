@@ -55,7 +55,7 @@ export default function Library() {
   }
 
   return (
-    <div className="min-h-screen mx-auto max-w-6xl py-12">
+    <div className="min-h-screen mx-auto max-w-6xl py-12 px-8">
       {/* -------------------------
       * Hero / Reading Stats
       * ------------------------- */}
@@ -65,7 +65,7 @@ export default function Library() {
           <h1 className="font-reading text-4xl tracking-tight">
             Your library
           </h1>
-          <p className="font-ui mt-4 text-sm text-muted-foreground">
+          <p className="font-ui mt-2 text-sm text-muted-foreground">
             Texts, translations, and vocabulary you've collected.
           </p>
         </div>

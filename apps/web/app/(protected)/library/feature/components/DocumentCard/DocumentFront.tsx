@@ -21,9 +21,7 @@ export function DocumentFront({
   recentTranslation: LibraryTranslation | null,
   translationsLoading: boolean,
 }) {
-  // -------------------------
-  // Language Colors
-  // -------------------------
+  // Source language color
   const srcAccent = LANG_COLOR_BY_CODE[document.srcLang as keyof typeof LANG_COLOR_BY_CODE].accent;
 
   {/* -------------------------
@@ -37,7 +35,7 @@ export function DocumentFront({
         transform-gpu will-change-transform
         transition duration-200 ease-out
         group-hover/doc-card:-translate-y-1
-        group-hover/doc-card:border-muted-foreground/40
+        group-hover/doc-card:border-blue-400/60
         group-hover/doc-card:shadow-md
         group-focus-visible/doc-card:-translate-y-1
         group-focus-visible/doc-card:border-orange-200
