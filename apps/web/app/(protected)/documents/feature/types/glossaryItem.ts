@@ -1,12 +1,47 @@
 // -------------------------
 // Frontend return types
 // -------------------------
-export type GlossaryExample = {
+export type GlossaryContextTokenSlice = {
+  words: string[];
+  spaces: string[];
+  globalWordIds: number[];
+  highlightedLocalWordIds: number[];
+};
+
+export type GlossaryContextAlignment = {
+  sentence: {
+    src: GlossaryContextTokenSlice;
+    tgt: GlossaryContextTokenSlice;
+  };
+  paragraph: {
+    src: GlossaryContextTokenSlice;
+    tgt: GlossaryContextTokenSlice;
+  };
+};
+
+export type GlossaryContextTokenSliceDTO = {
+  words: string[];
+  spaces: string[];
+  global_word_ids: number[];
+  highlighted_local_word_ids: number[];
+};
+
+export type GlossaryContextPairDTO = {
+  src: GlossaryContextTokenSliceDTO;
+  tgt: GlossaryContextTokenSliceDTO;
+};
+
+export type GlossaryContextAlignmentDTO = {
+  sentence: GlossaryContextPairDTO;
+  paragraph: GlossaryContextPairDTO;
+};
+
+export type GlossaryItemExample = {
   source: string;
   target: string;
 }
 
-export type GlossaryDefinition = {
+export type GlossaryItemDefinition = {
   // Clicked word
   form: string;
   posForm: string | null;
@@ -25,6 +60,7 @@ export type GlossaryDefinition = {
   srcParagraph: string;
   tgtSentence: string;
   tgtParagraph: string;
+  contextAlignment: GlossaryContextAlignment;
 
   // Location in document/page/tokenized text
   documentId: number;
@@ -34,32 +70,38 @@ export type GlossaryDefinition = {
   wordId: number;
 };
 
-export type GlossaryUsage = {
+export type GlossaryItemUsage = {
   explanation: string;
-  examples: GlossaryExample[];
+  examples: GlossaryItemExample[];
 };
 
-export type GlossarySaveRequest = {
+export type GlossaryItemSaveRequest = {
   srcLang: string;
   tgtLang: string;
-  definition: GlossaryDefinition;
-  usage: GlossaryUsage;
+  definition: GlossaryItemDefinition;
+  usage: GlossaryItemUsage;
 };
 
-export type GlossarySaveResponse = {
+export type GlossaryItemSaveResponse = {
   glossaryItemId: number;
   alreadyExists: boolean;
 };
 
-export type GlossaryLoadResponse = {
+export type GlossaryItemLoadResponse = {
+  glossaryItemId: number;
+  documentTitle: string;
   srcLang: string;
   tgtLang: string;
-  definition: GlossaryDefinition;
-  usage: GlossaryUsage;
+  definition: GlossaryItemDefinition;
+  usage: GlossaryItemUsage;
   createdAt: string;
 };
 
-export type GlossaryDeleteResponse = {
+export type GlossaryItemsLoadResponse = {
+  glossaryItems: GlossaryItemLoadResponse[];
+}
+
+export type GlossaryItemDeleteResponse = {
   glossaryItemId: number;
   ok: boolean;
 }
@@ -67,12 +109,12 @@ export type GlossaryDeleteResponse = {
 // -------------------------
 // Backend return types
 // -------------------------
-export type GlossaryExampleDTO = {
+export type GlossaryItemExampleDTO = {
   source: string;
   target: string;
 };
 
-export type GlossaryDefinitionDTO = {
+export type GlossaryItemDefinitionDTO = {
   form: string;
   pos_form: string | null;
   ipa_form: string | null;
@@ -87,6 +129,7 @@ export type GlossaryDefinitionDTO = {
   src_paragraph: string;
   tgt_sentence: string;
   tgt_paragraph: string;
+  context_alignment: GlossaryContextAlignmentDTO;
 
   document_id: number;
   page_id: number;
@@ -95,32 +138,38 @@ export type GlossaryDefinitionDTO = {
   word_id: number;
 };
 
-export type GlossaryUsageDTO = {
+export type GlossaryItemUsageDTO = {
   explanation: string;
-  examples: GlossaryExampleDTO[];
+  examples: GlossaryItemExampleDTO[];
 };
 
-export type GlossarySaveRequestDTO = {
+export type GlossaryItemSaveRequestDTO = {
   src_lang: string;
   tgt_lang: string;
-  definition: GlossaryDefinitionDTO;
-  usage: GlossaryUsageDTO;
+  definition: GlossaryItemDefinitionDTO;
+  usage: GlossaryItemUsageDTO;
 };
 
-export type GlossarySaveResponseDTO = {
+export type GlossaryItemSaveResponseDTO = {
   glossary_item_id: number;
   already_exists: boolean;
 };
 
-export type GlossaryLoadResponseDTO = {
+export type GlossaryItemLoadResponseDTO = {
+  glossary_item_id: number;
+  document_title: string;
   src_lang: string;
   tgt_lang: string;
-  definition: GlossaryDefinitionDTO;
-  usage: GlossaryUsageDTO;
+  definition: GlossaryItemDefinitionDTO;
+  usage: GlossaryItemUsageDTO;
   created_at: string;
 };
 
-export type GlossaryDeleteResponseDTO = {
+export type GlossaryItemsLoadResponseDTO = {
+  glossary_items: GlossaryItemLoadResponseDTO[];
+}
+
+export type GlossaryItemDeleteResponseDTO = {
   glossary_item_id: number;
   ok: boolean;
 }
@@ -128,9 +177,61 @@ export type GlossaryDeleteResponseDTO = {
 // -------------------------
 // Frontend <-> Backend (DTO) Mapping Functions
 // -------------------------
-export function toGlossarySaveRequestDTO(
-  req: GlossarySaveRequest
-): GlossarySaveRequestDTO {
+export function toGlossaryContextTokenSliceDTO(
+  ctx: GlossaryContextTokenSlice
+): GlossaryContextTokenSliceDTO {
+  return {
+    words: ctx.words,
+    spaces: ctx.spaces,
+    global_word_ids: ctx.globalWordIds,
+    highlighted_local_word_ids: ctx.highlightedLocalWordIds,
+  };
+}
+
+export function fromGlossaryContextTokenSliceDTO(
+  dto: GlossaryContextTokenSliceDTO
+): GlossaryContextTokenSlice {
+  return {
+    words: dto.words,
+    spaces: dto.spaces,
+    globalWordIds: dto.global_word_ids,
+    highlightedLocalWordIds: dto.highlighted_local_word_ids,
+  };
+}
+
+export function toGlossaryContextAlignmentDTO(
+  ctx: GlossaryContextAlignment
+): GlossaryContextAlignmentDTO {
+  return {
+    sentence: {
+      src: toGlossaryContextTokenSliceDTO(ctx.sentence.src),
+      tgt: toGlossaryContextTokenSliceDTO(ctx.sentence.tgt),
+    },
+    paragraph: {
+      src: toGlossaryContextTokenSliceDTO(ctx.paragraph.src),
+      tgt: toGlossaryContextTokenSliceDTO(ctx.paragraph.tgt),
+    },
+  };
+}
+
+export function fromGlossaryContextAlignmentDTO(
+  dto: GlossaryContextAlignmentDTO
+): GlossaryContextAlignment {
+  return {
+    sentence: {
+      src: fromGlossaryContextTokenSliceDTO(dto.sentence.src),
+      tgt: fromGlossaryContextTokenSliceDTO(dto.sentence.tgt),
+    },
+    paragraph: {
+      src: fromGlossaryContextTokenSliceDTO(dto.paragraph.src),
+      tgt: fromGlossaryContextTokenSliceDTO(dto.paragraph.tgt),
+    },
+  };
+}
+
+export function toGlossaryItemSaveRequestDTO(
+  req: GlossaryItemSaveRequest
+): GlossaryItemSaveRequestDTO {
   return {
     src_lang: req.srcLang,
     tgt_lang: req.tgtLang,
@@ -138,14 +239,19 @@ export function toGlossarySaveRequestDTO(
       form: req.definition.form,
       pos_form: req.definition.posForm,
       ipa_form: req.definition.ipaForm,
+
       lemma: req.definition.lemma,
       pos_lemma: req.definition.posLemma,
       ipa_lemma: req.definition.ipaLemma,
+
       gloss: req.definition.gloss,
+
       src_sentence: req.definition.srcSentence,
       src_paragraph: req.definition.srcParagraph,
       tgt_sentence: req.definition.tgtSentence,
       tgt_paragraph: req.definition.tgtParagraph,
+      context_alignment: toGlossaryContextAlignmentDTO(req.definition.contextAlignment),
+
       document_id: req.definition.documentId,
       page_id: req.definition.pageId,
       par_id: req.definition.parId,
@@ -156,19 +262,21 @@ export function toGlossarySaveRequestDTO(
   };
 }
 
-export function fromGlossarySaveResponseDTO(
-  dto: GlossarySaveResponseDTO
-): GlossarySaveResponse {
+export function fromGlossaryItemSaveResponseDTO(
+  dto: GlossaryItemSaveResponseDTO
+): GlossaryItemSaveResponse {
   return {
     glossaryItemId: dto.glossary_item_id,
     alreadyExists: dto.already_exists,
   };
 }
 
-export function fromGlossaryLoadResponseDTO(
-  dto: GlossaryLoadResponseDTO
-): GlossaryLoadResponse {
+export function fromGlossaryItemLoadResponseDTO(
+  dto: GlossaryItemLoadResponseDTO
+): GlossaryItemLoadResponse {
   return {
+    glossaryItemId: dto.glossary_item_id,
+    documentTitle: dto.document_title,
     srcLang: dto.src_lang,
     tgtLang: dto.tgt_lang,
     definition: {
@@ -183,6 +291,7 @@ export function fromGlossaryLoadResponseDTO(
       srcParagraph: dto.definition.src_paragraph,
       tgtSentence: dto.definition.tgt_sentence,
       tgtParagraph: dto.definition.tgt_paragraph,
+      contextAlignment: fromGlossaryContextAlignmentDTO(dto.definition.context_alignment),
       documentId: dto.definition.document_id,
       pageId: dto.definition.page_id,
       parId: dto.definition.par_id,
@@ -194,9 +303,17 @@ export function fromGlossaryLoadResponseDTO(
   };
 }
 
-export function fromGlossaryDeleteResponseDTO(
-  dto: GlossaryDeleteResponseDTO
-): GlossaryDeleteResponse {
+export function fromGlossaryItemsLoadResponseDTO(
+  dto: GlossaryItemsLoadResponseDTO
+): GlossaryItemsLoadResponse {
+  return {
+    glossaryItems: dto.glossary_items.map(fromGlossaryItemLoadResponseDTO),
+  };
+}
+
+export function fromGlossaryItemDeleteResponseDTO(
+  dto: GlossaryItemDeleteResponseDTO
+): GlossaryItemDeleteResponse {
   return {
     glossaryItemId: dto.glossary_item_id,
     ok: dto.ok,

@@ -131,12 +131,12 @@ export default function UploadPage() {
   }
 
   return (
-    <div className="min-h-screen mx-auto w-full max-w-5xl">
+    <div className="min-h-screen mx-auto w-full max-w-6xl">
       {/* -------------------------
        * Hero
        * ------------------------- */}
       <div className="pt-12">
-        <h1 className="font-reading text-4xl font-bold tracking-tight">
+        <h1 className="font-reading text-4xl tracking-tight">
           New reading
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">

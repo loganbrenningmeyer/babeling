@@ -126,6 +126,8 @@ def save_glossary(
         src_paragraph=req.definition.src_paragraph,
         tgt_sentence=req.definition.tgt_sentence,
         tgt_paragraph=req.definition.tgt_paragraph,
+        # -- Tokenized alignment snapshot
+        context_alignment=req.definition.context_alignment.model_dump(),
     )
 
     try:
@@ -154,21 +156,23 @@ def load_glossary(
     user: AppUser = Depends(get_current_app_user),
 ) -> GlossaryItemsLoadResponse:
     # -------------------------
-    # Get all GlossaryItems for user ID
+    # Get all GlossaryItems for user ID / document titles
     # -------------------------
-    items = (
+    rows = (
         db.execute(
-            select(GlossaryItem).where(
-                GlossaryItem.user_id == user.id,
-            )
+            select(GlossaryItem, Document.title.label("document_title"))
+            .join(Document, Document.id == GlossaryItem.document_id)
+            .where(GlossaryItem.user_id == user.id)
+            .order_by(GlossaryItem.created_at.desc())
         )
-        .scalars()
         .all()
     )
 
     return GlossaryItemsLoadResponse(
         glossary_items=[
             GlossaryLoadResponse(
+                glossary_item_id=item.id,
+                document_title=document_title,
                 src_lang=item.src_lang,
                 tgt_lang=item.tgt_lang,
                 definition=GlossaryDefinitionData(
@@ -183,6 +187,7 @@ def load_glossary(
                     src_paragraph=item.src_paragraph,
                     tgt_sentence=item.tgt_sentence,
                     tgt_paragraph=item.tgt_paragraph,
+                    context_alignment=item.context_alignment,
                     document_id=item.document_id,
                     page_id=item.page_id,
                     par_id=item.par_id,
@@ -193,9 +198,9 @@ def load_glossary(
                     explanation=item.explanation,
                     examples=item.examples,
                 ),
-                created_at=item.created_at,
+                created_at=item.created_at.isoformat(),
             )
-            for item in items
+            for item, document_title in rows
         ]
     )
 
@@ -213,17 +218,23 @@ def load_glossary_item(
     # -------------------------
     # Get GlossaryItem with matching ID
     # -------------------------
-    item = db.execute(
-        select(GlossaryItem).where(
+    row = db.execute(
+        select(GlossaryItem, Document.title.label("document_title"))
+        .join(Document, Document.id == GlossaryItem.document_id)
+        .where(
             GlossaryItem.id == glossary_item_id,
             GlossaryItem.user_id == user.id,
         )
-    ).scalar_one_or_none()
+    ).one_or_none()
 
-    if item is None:
+    if row is None:
         raise HTTPException(status_code=404, detail="Glossary item not found")
+    
+    item, document_title = row
 
     return GlossaryLoadResponse(
+        glossary_item_id=item.id,
+        document_title=document_title,
         src_lang=item.src_lang,
         tgt_lang=item.tgt_lang,
         definition=GlossaryDefinitionData(
@@ -238,6 +249,7 @@ def load_glossary_item(
             src_paragraph=item.src_paragraph,
             tgt_sentence=item.tgt_sentence,
             tgt_paragraph=item.tgt_paragraph,
+            context_alignment=item.context_alignment,
             document_id=item.document_id,
             page_id=item.page_id,
             par_id=item.par_id,

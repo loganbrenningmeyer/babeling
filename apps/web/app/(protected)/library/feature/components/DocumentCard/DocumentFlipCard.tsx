@@ -2,25 +2,17 @@
 
 import { useMemo, useState } from "react";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { motion } from "framer-motion";
-import { MoveRight } from "lucide-react";
-
 import { DocumentFront } from "./DocumentFront";
-import { TranslationsBack } from "./TranslationsBack";
+import { DocumentBack } from "./DocumentBack";
 
 import { LibraryDocument } from "../../types/document";
-import { LibraryTranslation } from "../../types/translation";
-
 import { useRecentTranslations } from "../../hooks/useRecentTranslations";
 import { getMostRecentTranslation } from "../../utils/translations";
 
 
-export function FlipCard({
+export function DocumentFlipCard({
   document,
 }: {
   document: LibraryDocument,
@@ -44,26 +36,28 @@ export function FlipCard({
     <div
       role="button"
       onClick={() => setFlipped((v) => !v)}
-      className="inline-block text-left cursor-pointer"
+      className="w-full max-w-sm justify-self-start text-left cursor-pointer"
     >
-      <div className="relative aspect-square [perspective:800px]">
+      <div className="relative aspect-[4/3] w-full [perspective:800px]">
         <motion.div
           animate={{ rotateY: flipped ? 180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
-          className="absolute inset-0 rounded-3xl [transform-style:preserve-3d]"
+          className="absolute inset-0 [transform-style:preserve-3d]"
         >
           {/* -------------------------
           * ( Front ): Document Info
           * ------------------------- */}
-          <DocumentFront 
-            document={document}
-            recentTranslation={recentTranslation}
-            translationsLoading={translationsLoading}
-          />
+          <div className={flipped ? "" : "group/doc-card"}>
+            <DocumentFront 
+              document={document}
+              recentTranslation={recentTranslation}
+              translationsLoading={translationsLoading}
+            />
+          </div>
           {/* -------------------------
           * ( Back ): Translations Info
           * ------------------------- */}
-          <TranslationsBack 
+          <DocumentBack 
             title={document.title}
             srcLang={document.srcLang}
             translations={translations}

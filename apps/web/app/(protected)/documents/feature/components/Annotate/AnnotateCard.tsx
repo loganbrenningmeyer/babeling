@@ -1,7 +1,7 @@
 "use client";
 
-import { Star } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import { Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
@@ -86,35 +86,43 @@ export function AnnotateCard({
       )}
 
       {/* -------------------------
-      //* Clicked Word Info
+      //* ( Form ): Clicked Word Info
       //* ------------------------- */}
       {defineData && (
         <div className="space-y-3">
           <div className="flex flex-col gap-2">
-            <div className="inline-flex items-baseline gap-2">
-              <div className="font-reading text-2xl font-bold">{defineData.form}</div>
-              {defineData.posForm && (
-                <Badge
-                  variant="secondary"
-                  className="h-6 inline-flex text-md font-reading border border-border"
-                >
-                  {defineData.posForm}
-                </Badge>
-              )}
+            <div className="space-y-1">
+              {/* Form */}
+              <div className="font-reading text-2xl font-bold">
+                {defineData.form.toLowerCase()}
+              </div>
+              {/* POS + IPA */}
+              <div className="flex flex-wrap items-center gap-2">
+                {defineData.posForm && (
+                  <div
+                    className="
+                      h-6 inline-flex 
+                      text-md text-orange-600 font-ui 
+                  ">
+                    {defineData.posForm}
+                  </div>
+                )}
+
+                {defineData.ipaForm && (
+                  <PronounceButton
+                    text={defineData.form}
+                    label={defineData.ipaForm}
+                    tgtLang={tgtLang}
+                    className="h-6 text-sm font-ui"
+                    iconClassName="h-3 w-3"
+                  />
+                )}
+              </div>
             </div>
           </div>
 
-          {defineData.ipaForm && (
-            <PronounceButton
-              text={defineData.form}
-              label={defineData.ipaForm}
-              tgtLang={tgtLang}
-              className="h-8 text-md"
-              iconClassName="h-3 w-3"
-            />
-          )}
 
-          <p className="text-lg leading-6 font-reading pt-4">
+          <p className="text-lg leading-6 font-ui pt-4">
             {defineData.gloss ? defineData.gloss : m.reader.annotationCard.defUnavailable}
           </p>
         </div>

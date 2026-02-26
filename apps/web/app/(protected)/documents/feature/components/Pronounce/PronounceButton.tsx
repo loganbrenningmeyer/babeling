@@ -70,10 +70,12 @@ export function PronounceButton({
   const { play, stop, loading, playing } = usePronunciation();
 
   return (
-    <button
-      type="button"
-      disabled={loading || !text}
-      onClick={() => (playing || loading ? stop() : play(text, tgtLang))}
+    <div
+      role="button"
+      onClick={(e) => {
+        e.stopPropagation();
+        playing || loading ? stop() : play(text, tgtLang);
+      }}
       className={cn(`
         group
         inline-flex items-center gap-2 w-fit
@@ -111,6 +113,6 @@ export function PronounceButton({
           <Volume2 className={iconClassName}/>
         )}
       </span>
-    </button>
+    </div>
   );
 }

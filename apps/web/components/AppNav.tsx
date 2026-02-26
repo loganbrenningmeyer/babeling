@@ -11,7 +11,7 @@ export function AppNav() {
   const m = useMessages();
 
   return (
-    <nav className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70">
+    <nav className="fixed inset-x-0 top-0 z-50 border-b border-zinc-200/80 bg-white/85 backdrop-blur-xl supports-[backdrop-filter]:bg-white/70">
       <div className="grid h-16 w-full grid-cols-[1fr_auto_1fr] items-center px-4">
         <div className="flex justify-start">
           <Link className="group inline-flex items-center gap-2" href="/">

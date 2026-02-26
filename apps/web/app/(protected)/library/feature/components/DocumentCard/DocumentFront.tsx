@@ -1,19 +1,15 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { ChevronRight, Play } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { ResumeTranslationButton } from "./ResumeTranslationButton";
-import { LangBadge } from "./LangBadge";
+import { LangBadge } from "@/app/components/LangBadge";
 
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
-import { truncate, capitalizeWords, formatRelativeTime } from "@/lib/string";
+import { truncate, capitalizeWords } from "@/lib/string";
 
 
 export function DocumentFront({
@@ -34,8 +30,19 @@ export function DocumentFront({
   * ( Front ): Document Info
   * ------------------------- */}
   return (
-    <div className="absolute inset-0 rounded-3xl [backface-visibility:hidden]">
-      <Card className="relative h-full w-full overflow-hidden rounded-3xl border bg-card p-5 shadow-sm">
+    <div className="absolute inset-0 [backface-visibility:hidden]">
+      <Card className="
+        relative rounded-xl h-full w-full overflow-hidden
+        border bg-card p-5 shadow-sm
+        transform-gpu will-change-transform
+        transition duration-200 ease-out
+        group-hover/doc-card:-translate-y-1
+        group-hover/doc-card:border-muted-foreground/40
+        group-hover/doc-card:shadow-md
+        group-focus-visible/doc-card:-translate-y-1
+        group-focus-visible/doc-card:border-orange-200
+        group-focus-visible/doc-card:shadow-md
+      ">
         {/* Source Language Accent Strip */}
         <div className={`absolute inset-y-0 left-0 w-1.5 ${srcAccent}`} />
         <CardContent className="h-full p-0 space-y-4 flex flex-col">

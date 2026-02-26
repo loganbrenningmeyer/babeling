@@ -185,6 +185,7 @@ export function ReaderShell({
                 </div>
               ) : (
                 <ParagraphGrid
+                  className="text-[20px] leading-[1.5]"
                   session={session}
                   blurMode={blurMode}
                   blurredSource={sourceBlurEnabled ? interaction.blurredSource : new Set()}
@@ -195,7 +196,6 @@ export function ReaderShell({
                   onTargetHover={interaction.onTargetHover}
                   onTargetWordClick={interaction.onTargetWordClick}
                   targetDisabled={interaction.targetDisabled}
-                  className="text-[18px] leading-[1.5]"
                 />
               )}
             </div>

@@ -1,7 +1,7 @@
 import {
-  LibraryGlossaryItemResponse,
-  LibraryGlossaryItemResponseDTO,
-  fromLibraryGlossaryItemResponseDTO
+  LibraryGlossaryItemsResponse,
+  LibraryGlossaryItemsResponseDTO,
+  fromLibraryGlossaryItemsResponseDTO
 } from "../types/glossaryItem";
 
 /**************************
@@ -10,7 +10,7 @@ import {
  **************************/
 export async function getRecentGlossaryItems(args: {
   limit: number | null;
-}): Promise<LibraryGlossaryItemResponse> {
+}): Promise<LibraryGlossaryItemsResponse> {
   const { limit } = args;
 
   const res = await fetch("/api/glossary_items", {
@@ -24,8 +24,8 @@ export async function getRecentGlossaryItems(args: {
     throw new Error("Failed to load recent documents");
   }
 
-  const { glossaryItems } = fromLibraryGlossaryItemResponseDTO(
-    data as LibraryGlossaryItemResponseDTO
+  const { glossaryItems } = fromLibraryGlossaryItemsResponseDTO(
+    data as LibraryGlossaryItemsResponseDTO
   );
 
   glossaryItems.sort((a, b) => {

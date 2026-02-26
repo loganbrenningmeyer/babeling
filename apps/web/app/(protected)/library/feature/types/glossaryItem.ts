@@ -1,31 +1,36 @@
 import {
-  GlossaryDefinition,
-  GlossaryUsage,
-  GlossaryDefinitionDTO,
-  GlossaryUsageDTO,
+  GlossaryItemDefinition,
+  GlossaryItemUsage,
+  GlossaryItemDefinitionDTO,
+  GlossaryItemUsageDTO,
+  fromGlossaryContextAlignmentDTO,
 } from "@/app/(protected)/documents/feature/types/glossaryItem";
 
 export type LibraryGlossaryItem = {
+  glossaryItemId: number;
+  documentTitle: string;
   srcLang: string;
   tgtLang: string;
-  definition: GlossaryDefinition;
-  usage: GlossaryUsage;
+  definition: GlossaryItemDefinition;
+  usage: GlossaryItemUsage;
   createdAt: string;
 };
 
-export type LibraryGlossaryItemResponse = {
+export type LibraryGlossaryItemsResponse = {
   glossaryItems: LibraryGlossaryItem[];
 };
 
 export type LibraryGlossaryItemDTO = {
+  glossary_item_id: number;
+  document_title: string;
   src_lang: string;
   tgt_lang: string;
-  definition: GlossaryDefinitionDTO;
-  usage: GlossaryUsageDTO;
+  definition: GlossaryItemDefinitionDTO;
+  usage: GlossaryItemUsageDTO;
   created_at: string;
 };
 
-export type LibraryGlossaryItemResponseDTO = {
+export type LibraryGlossaryItemsResponseDTO = {
   glossary_items: LibraryGlossaryItemDTO[];
 };
 
@@ -33,6 +38,8 @@ export function fromLibraryGlossaryItemDTO(
   dto: LibraryGlossaryItemDTO
 ): LibraryGlossaryItem {
   return {
+    glossaryItemId: dto.glossary_item_id,
+    documentTitle: dto.document_title,
     srcLang: dto.src_lang,
     tgtLang: dto.tgt_lang,
     definition: {
@@ -47,6 +54,7 @@ export function fromLibraryGlossaryItemDTO(
       srcParagraph: dto.definition.src_paragraph,
       tgtSentence: dto.definition.tgt_sentence,
       tgtParagraph: dto.definition.tgt_paragraph,
+      contextAlignment: fromGlossaryContextAlignmentDTO(dto.definition.context_alignment),
       documentId: dto.definition.document_id,
       pageId: dto.definition.page_id,
       parId: dto.definition.par_id,
@@ -58,9 +66,9 @@ export function fromLibraryGlossaryItemDTO(
   };
 }
 
-export function fromLibraryGlossaryItemResponseDTO(
-  dto: LibraryGlossaryItemResponseDTO
-): LibraryGlossaryItemResponse {
+export function fromLibraryGlossaryItemsResponseDTO(
+  dto: LibraryGlossaryItemsResponseDTO
+): LibraryGlossaryItemsResponse {
   return {
     glossaryItems: dto.glossary_items.map(fromLibraryGlossaryItemDTO),
   };

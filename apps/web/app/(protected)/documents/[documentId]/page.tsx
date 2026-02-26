@@ -10,5 +10,9 @@ export default async function Page({
   const { documentId } = await params;
   const sp = await searchParams;
 
-  return <ReaderPageClient documentId={documentId} searchParams={sp} />;
+  return (
+    <div>
+      <ReaderPageClient documentId={documentId} searchParams={sp} />;
+    </div>
+  )
 }

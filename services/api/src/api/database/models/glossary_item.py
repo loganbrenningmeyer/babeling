@@ -2,6 +2,7 @@ from sqlalchemy import BigInteger, Integer, DateTime, ForeignKey, Text, func
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
+from typing import Any
 
 from api.database.db import Base
 
@@ -131,6 +132,14 @@ class GlossaryItem(Base):
     )
     tgt_paragraph: Mapped[str] = mapped_column(
         Text,
+        nullable=False,
+    )
+
+    # -------------------------
+    # Tokenized alignment snapshot
+    # -------------------------
+    context_alignment: Mapped[dict[str, Any]] = mapped_column(
+        JSONB,
         nullable=False,
     )
 

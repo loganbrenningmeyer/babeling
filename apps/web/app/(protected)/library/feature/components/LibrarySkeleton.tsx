@@ -74,7 +74,7 @@ export function LibrarySkeleton({
   cardsPerGroup = 6,
 }: LibrarySkeletonProps) {
   return (
-    <div className={cn("min-h-screen mx-auto w-full max-w-5xl space-y-4 font-ui", containerClassName)}>
+    <div className={cn("min-h-screen mx-auto w-full max-w-6xl space-y-4 font-ui", containerClassName)}>
       {/* -------------------------
        * Controls
        * ------------------------- */}

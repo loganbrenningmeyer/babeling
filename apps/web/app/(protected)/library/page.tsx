@@ -55,17 +55,26 @@ export default function Library() {
   }
 
   return (
-    <div className="min-h-screen px-8 w-full">
+    <div className="min-h-screen mx-auto max-w-6xl py-12">
       {/* -------------------------
-      * Hero
+      * Hero / Reading Stats
       * ------------------------- */}
-      <div className="pt-12">
-        <h1 className="font-reading text-4xl tracking-tight">
-          Your library
-        </h1>
-        <p className="font-ui mt-4 text-sm text-muted-foreground">
-          Texts, translations, and vocabulary you've collected.
-        </p>
+      <div className="flex items-end justify-between">
+        {/* Hero */}
+        <div>
+          <h1 className="font-reading text-4xl tracking-tight">
+            Your library
+          </h1>
+          <p className="font-ui mt-4 text-sm text-muted-foreground">
+            Texts, translations, and vocabulary you've collected.
+          </p>
+        </div>
+        {/* Reading Stats */}
+        <div>
+          <h2 className="font-reading text-xl tracking-tight">
+            Texts
+          </h2>
+        </div>
       </div>
       {/* -------------------------
       * Library Page

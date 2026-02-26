@@ -1,5 +1,20 @@
 from pydantic import BaseModel
+from datetime import datetime
 
+
+class GlossaryContextTokenSlice(BaseModel):
+    words: list[str]
+    spaces: list[str]
+    global_word_ids: list[int]
+    highlighted_local_word_ids: list[int]
+
+class GlossaryContextPair(BaseModel):
+    src: GlossaryContextTokenSlice
+    tgt: GlossaryContextTokenSlice
+
+class GlossaryContextAlignment(BaseModel):
+    sentence: GlossaryContextPair
+    paragraph: GlossaryContextPair
 
 class GlossaryDefinitionData(BaseModel):
     # -- Form (clicked word)
@@ -17,6 +32,8 @@ class GlossaryDefinitionData(BaseModel):
     src_paragraph: str
     tgt_sentence: str
     tgt_paragraph: str
+    # -- Tokenized alignment snapshot
+    context_alignment: GlossaryContextAlignment
     # -- Text IDs
     document_id: int
     page_id: int
@@ -50,6 +67,8 @@ class GlossarySaveResponse(BaseModel):
 # GET: /api/glossary_items/[glossary_item_id]
 # -------------------------
 class GlossaryLoadResponse(BaseModel):
+    glossary_item_id: int
+    document_title: str
     src_lang: str
     tgt_lang: str
     definition: GlossaryDefinitionData

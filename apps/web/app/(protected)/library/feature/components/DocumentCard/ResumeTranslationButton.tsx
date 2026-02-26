@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import { LangBadge } from "./LangBadge";
+import { LangBadge } from "../../../../../components/LangBadge";
 
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";

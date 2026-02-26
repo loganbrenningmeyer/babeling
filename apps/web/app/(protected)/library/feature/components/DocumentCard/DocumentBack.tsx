@@ -5,13 +5,13 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { MoveRight } from "lucide-react";
-import { LangBadge } from "./LangBadge";
+import { LangBadge } from "../../../../../components/LangBadge";
 
 import { LibraryTranslation } from "../../types/translation";
 import { truncate, capitalizeWords } from "@/lib/string";
 
 
-export function TranslationsBack({
+export function DocumentBack({
   title,
   srcLang,
   translations,
@@ -82,8 +82,8 @@ export function TranslationsBack({
   })();
 
   return (
-    <div className="absolute inset-0 rounded-3xl [transform:rotateY(180deg)] [backface-visibility:hidden]">
-      <Card className="h-full w-full rounded-3xl border bg-card p-5 shadow-sm">
+    <div className="absolute inset-0 [transform:rotateY(180deg)] [backface-visibility:hidden]">
+      <Card className="h-full w-full rounded-xl border bg-card p-5 shadow-sm">
         <CardContent className="h-full p-0 space-y-4 flex flex-col">
           {content}
         </CardContent>
