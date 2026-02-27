@@ -1,8 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
-
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { DocumentFront } from "./DocumentFront";
 import { DocumentBack } from "./DocumentBack";
@@ -36,7 +34,7 @@ export function DocumentFlipCard({
     <div
       role="button"
       onClick={() => setFlipped((v) => !v)}
-      className="w-full max-w-sm justify-self-start text-left cursor-pointer"
+      className="w-full max-w-sm justify-self-start text-left"
     >
       <div className="relative aspect-[4/3] w-full [perspective:800px]">
         <motion.div
@@ -47,23 +45,28 @@ export function DocumentFlipCard({
           {/* -------------------------
           * ( Front ): Document Info
           * ------------------------- */}
-          <div className={flipped ? "" : "group/doc-card"}>
-            <DocumentFront 
-              document={document}
-              recentTranslation={recentTranslation}
-              translationsLoading={translationsLoading}
-            />
+          <div className="absolute inset-0 [backface-visibility:hidden] cursor-pointer">
+            <div className={`h-full w-full ${flipped ? "" : "group/doc-card"}`}>
+              <DocumentFront 
+                document={document}
+                recentTranslation={recentTranslation}
+                translationsLoading={translationsLoading}
+                />
+            </div>
           </div>
           {/* -------------------------
           * ( Back ): Translations Info
           * ------------------------- */}
-          <DocumentBack 
-            title={document.title}
-            srcLang={document.srcLang}
-            translations={translations}
-            loading={translationsLoading}
-            error={translationsError}
-          />
+          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
+            <div className="h-full w-full">
+              <DocumentBack 
+                document={document}
+                translations={translations}
+                loading={translationsLoading}
+                error={translationsError}
+              />
+            </div>
+          </div>
         </motion.div>
       </div>
     </div>

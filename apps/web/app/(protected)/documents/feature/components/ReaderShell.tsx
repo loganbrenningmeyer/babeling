@@ -95,8 +95,7 @@ export function ReaderShell({
   interaction,
   msgs,
 }: ReaderShellProps) {
-  
-  const readerLoading = loading || !session;
+  const renderLoading = loading || !session;
 
   return (
     <div className="h-[calc(100dvh-4rem-2rem)] flex flex-col overflow-hidden">
@@ -136,8 +135,8 @@ export function ReaderShell({
             <div className="px-8 pt-4 pb-3">
               <div className="flex justify-between">
                 <div>
-                  {readerLoading ? (
-                    <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted" />
+                  {renderLoading ? (
+                    <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted-foreground/20" />
                   ) : (
                     <div className="inline-flex flex-col">
                       <span>{srcLabel}</span>
@@ -161,8 +160,8 @@ export function ReaderShell({
             * ------------------------- */}
             <div className="pl-10 pt-4 pb-3">
               <div>
-                {readerLoading ? (
-                  <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted" />
+                {renderLoading ? (
+                  <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted-foreground/20" />
                 ) : (
                   <div className="inline-flex flex-col">
                     <span>{tgtLabel}</span>
@@ -177,8 +176,11 @@ export function ReaderShell({
           * [Source] | [Target] ParagraphGrid
           * ------------------------- */}
           <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto pb-8">
+            {/* -------------------------
+            //* Loading Skeleton || Translation Preview || ParagraphGrid
+            //* ------------------------- */}
             <div className="min-h-full">
-              {readerLoading ? (
+              {renderLoading ? (
                 <div className="grid grid-cols-2 p-8 pt-4">
                   <div className="pr-8"><TextSkeleton blurClassName="blur-sm" /></div>
                   <div className="pl-8"><TextSkeleton /></div>

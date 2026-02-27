@@ -3,6 +3,7 @@ export type LibraryDocument = {
   title: string;
   srcText: string;
   srcLang: string;
+  totalPages: number;
   lastOpenedAt: string | null;
   latestTgtLang: string | null;
 };
@@ -16,6 +17,7 @@ export type LibraryDocumentDTO = {
   title: string;
   src_text: string;
   src_lang: string;
+  total_pages: number;
   last_opened_at: string | null;
   latest_tgt_lang: string | null;
 };
@@ -32,6 +34,7 @@ export function fromLibraryDocumentDTO(
     title: dto.title,
     srcText: dto.src_text,
     srcLang: dto.src_lang,
+    totalPages: dto.total_pages,
     lastOpenedAt: dto.last_opened_at,
     latestTgtLang: dto.latest_tgt_lang,
   };

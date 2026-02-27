@@ -45,28 +45,16 @@ export function GlossaryItemFront({
               <div className="text-lg font-reading font-semibold leading-tight">
                 {glossaryItem.definition.form.toLowerCase()}
               </div>
-              {/* POS + IPA */}
-              <div className="flex flex-wrap items-center gap-2">
-                {glossaryItem.definition.posForm && (
-                  <div
-                    className="
-                      h-6 inline-flex 
-                      text-md text-orange-600 font-ui 
-                  ">
-                    {glossaryItem.definition.posForm}
-                  </div>
-                )}
-
-                {glossaryItem.definition.ipaForm && (
-                  <PronounceButton
-                    text={glossaryItem.definition.form}
-                    label={glossaryItem.definition.ipaForm}
-                    tgtLang={glossaryItem.tgtLang}
-                    className="h-6 text-sm font-ui"
-                    iconClassName="h-3 w-3"
-                  />
-                )}
-              </div>
+              {/* POS */}
+              {glossaryItem.definition.posForm && (
+                <div
+                  className="
+                    h-6 inline-flex 
+                    text-md text-orange-600 font-ui 
+                ">
+                  {glossaryItem.definition.posForm}
+                </div>
+              )}
             </div>
             <LangBadge lang={glossaryItem.tgtLang} />
           </div>

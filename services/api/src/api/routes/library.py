@@ -96,6 +96,7 @@ def get_library_documents(
                 title=doc.title,
                 src_text=doc.src_text,
                 src_lang=doc.src_lang,
+                total_pages=doc.total_pages,
                 last_opened_at=(
                     user_doc.last_opened_at.isoformat()
                     if user_doc.last_opened_at
@@ -257,12 +258,13 @@ def get_library_document_translations(
                     if progress and progress.last_read_at
                     else None
                 ),
-                completed_percent=(
+                completion_percent=(
                     int(progress.completion_percent) if progress else 0
                 ),
                 current_page_number=(
                     int(progress.current_page_number) if progress else 1
                 ),
+                total_pages=doc.total_pages,
             )
         )
     

@@ -4,6 +4,8 @@ import { useState, useMemo } from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Book, Languages, Star } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -13,6 +15,7 @@ import { FilterItem } from "./FilterItem";
 
 import type { LibraryDocument } from "../types/document";
 import type { LibraryGlossaryItem } from "../types/glossaryItem";
+import type { LibraryFilterKey } from "./FilterItem";
 
 import { useMessages } from "@/app/hooks/useMessages";
 import { getLangLabel } from "@/app/i18n/messages";
@@ -26,7 +29,6 @@ export function LibraryPage({
   glossaryItems: LibraryGlossaryItem[],
 }) {
   {/* Filtering */}
-  type LibraryFilterKey = "all" | "texts" | "glossary";
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilterKey>("all");
 
   {/* Sorting */}
@@ -35,6 +37,13 @@ export function LibraryPage({
   const [documentSort, setDocumentSort] = useState<DocumentSortKey>("recent");
   const [glossarySort, setGlossarySort] = useState<GlossarySortKey>("recent");
 
+  {/* Searching */}
+  const [query, setQuery] = useState("");
+  const q = query.trim().toLocaleLowerCase();
+
+  {/* -------------------------
+  //* Documents sorted by DocumentSortKey
+  //* ------------------------- */}
   const sortedDocuments = useMemo(() => {
     const collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
@@ -57,6 +66,9 @@ export function LibraryPage({
     });
   }, [documents, documentSort]);
 
+  {/* -------------------------
+  //* GlossaryItems sorted by GlossarySortKey
+  //* ------------------------- */}
   const sortedGlossaryItems = useMemo(() => {
     const collator = new Intl.Collator(undefined, { sensitivity: "base" });
 
@@ -76,76 +88,118 @@ export function LibraryPage({
     });
   }, [glossaryItems, glossarySort]);
 
+  {/* -------------------------
+  //* Documents sorted by DocumentSortKey / filtered by query
+  //* ------------------------- */}
+  const filteredDocuments = useMemo(() => {
+    if (!q) return sortedDocuments;
+
+    return sortedDocuments.filter((d) => 
+    (d.title ?? "").toLocaleLowerCase().includes(q)
+    )
+  }, [sortedDocuments, q]);
+
+  {/* -------------------------
+  //* GlossaryItems sorted by DocumentSortKey / filtered by query
+  //* ------------------------- */}
+  const filteredGlossaryItems = useMemo(() => {
+    if (!q) return sortedGlossaryItems;
+
+    return sortedGlossaryItems.filter((g) => 
+      (g.definition.form ?? "").toLocaleLowerCase().includes(q) ||
+      (g.documentTitle ?? "").toLocaleLowerCase().includes(q)
+    );
+  }, [sortedGlossaryItems, q]);
+
   return (
     <div className="space-y-8">
-      <div className="flex flex-row gap-3 justify-between items-center">
-        {/* -------------------------
-        * Library Filter
-        * ------------------------- */}
-        <ToggleGroup
-          type="single"
-          value={libraryFilter}
-          onValueChange={(v) => {
-            if (!v) return;
-            setLibraryFilter(v as LibraryFilterKey);
-          }}
-          className="inline-flex bg-transparent p-0"
-          spacing={2}
-        >
-          <FilterItem value="all" count={documents.length + glossaryItems.length}>
-            All
-          </FilterItem>
-          <FilterItem value="texts" count={documents.length}>
-            <Book className="size-3" /> Texts
-          </FilterItem>
-          <FilterItem value="glossary" count={glossaryItems.length}>
-            <Star className="size-3" /> Glossary
-          </FilterItem>
-        </ToggleGroup>
-
-        {/* -------------------------
-        * Sort Selection
-        * ------------------------- */}
-        <Select 
-          value={documentSort} 
-          onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
-        >
-          <SelectTrigger className="w-44">
-            <SelectValue placeholder="Sort documents" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="recent">Recently read</SelectItem>
-            <SelectItem value="srcLang">Original language</SelectItem>
-            <SelectItem value="tgtLang">Translated language</SelectItem>
-            <SelectItem value="title">Title</SelectItem>
-          </SelectContent>
-        </Select>
+      <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-1">
+          {/* -------------------------
+          //* Search Bar
+          //* ------------------------- */}
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input 
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search library..."
+              className="pl-9"
+              />
+          </div>
+          {/* -------------------------
+          * Library Filter
+          * ------------------------- */}
+          <ToggleGroup
+            type="single"
+            value={libraryFilter}
+            onValueChange={(v) => {
+              if (!v) return;
+              setLibraryFilter(v as LibraryFilterKey);
+            }}
+            className="inline-flex bg-transparent p-0"
+            spacing={2}
+            >
+            <FilterItem value="all" count={documents.length + glossaryItems.length}>
+              All
+            </FilterItem>
+            <FilterItem value="texts" count={documents.length}>
+              <Book className="size-3" /> Texts
+            </FilterItem>
+            <FilterItem value="glossary" count={glossaryItems.length}>
+              <Star className="size-3" /> Glossary
+            </FilterItem>
+          </ToggleGroup>
+        </div>
       </div>
 
         {/* -------------------------
         * Documents / Translations Card Grid
         * ------------------------- */}
-        {(libraryFilter === "all" || libraryFilter === "texts") && (
+        {(filteredDocuments.length > 0 && (libraryFilter === "all" || libraryFilter === "texts")) && (
           <div className="space-y-4">
-            <div className="flex items-center gap-2">
-              {/* Documents Header */}
-              <div className="rounded-sm p-1 bg-blue-300/20">
-                <Book className="h-4 w-4 text-blue-500" />
+            <div className="flex items-center justify-between gap-2">
+              {/* -------------------------
+              //* Documents Header
+              //* ------------------------- */}
+              <div className="flex inline-flex gap-2">
+                <div className="rounded-sm p-1 bg-blue-300/20">
+                  <Book className="h-4 w-4 text-blue-500" />
+                </div>
+                <h3 className="font-ui text-md font-semibold">Texts</h3>
+                <Badge className="font-ui font-bold text-xs bg-muted-foreground/10 text-muted-foreground">
+                  {documents.length}
+                </Badge>
               </div>
-              <h3 className="font-ui text-md font-semibold">Texts</h3>
-              <Badge className="font-ui font-bold text-xs bg-muted-foreground/10 text-muted-foreground">
-                {documents.length}
-              </Badge>
+              {/* -------------------------
+              * Document Sort Selector
+              * ------------------------- */}
+              <Select 
+                value={documentSort} 
+                onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
+              >
+                <SelectTrigger className="w-44">
+                  <SelectValue placeholder="Sort documents" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Recently read</SelectItem>
+                  <SelectItem value="srcLang">Original language</SelectItem>
+                  <SelectItem value="tgtLang">Translated language</SelectItem>
+                  <SelectItem value="title">Title</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            {/* Documents Card Grid */}
+            {/* -------------------------
+            //* Documents Card Grid
+            //* ------------------------- */}
             <div className="
               grid gap-6 justify-start 
-              [grid-template-columns:repeat(auto-fit,minmax(min(100%,18rem),1fr))]
+              [grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]
               ">
-              {sortedDocuments.map((doc) => (
+              {filteredDocuments.map((doc) => (
                 <DocumentFlipCard
-                key={doc.id}
-                document={doc}
+                  key={doc.id}
+                  document={doc}
                 />
               ))}
             </div>
@@ -154,30 +208,53 @@ export function LibraryPage({
       {/* -------------------------
       * Glossary Items
       * ------------------------- */}
-      {(libraryFilter === "all" || libraryFilter === "glossary") && (
+      {(filteredGlossaryItems.length > 0 && (libraryFilter === "all" || libraryFilter === "glossary")) && (
         <>
           {libraryFilter === "all" && <Separator/>}
 
           <div className="space-y-4">
-            {/* Glossary Items Header */}
-            <div className="flex items-center gap-2">
-              <div className="rounded-sm p-1 bg-orange-300/20">
-                <Languages className="h-4 w-4 text-orange-500"/>  
+            <div className="flex items-center justify-between gap-2">
+              {/* -------------------------
+              //* GlossaryItems Header
+              //* ------------------------- */}
+              <div className="flex inline-flex gap-2">
+                <div className="rounded-sm p-1 bg-orange-300/20">
+                  <Languages className="h-4 w-4 text-orange-500"/>  
+                </div>
+                <h3 className="font-ui text-md font-semibold">Glossary</h3>
+                <Badge className="font-ui font-bold bg-muted-foreground/10 text-muted-foreground">
+                  {glossaryItems.length}
+                </Badge>
               </div>
-              <h3 className="font-ui text-md font-semibold">Glossary</h3>
-              <Badge className="font-ui font-bold bg-muted-foreground/10 text-muted-foreground">
-                {glossaryItems.length}
-              </Badge>
+              {/* -------------------------
+              //* GlossaryItems Sort Selector
+              //* ------------------------- */}
+              <Select 
+                value={glossarySort} 
+                onValueChange={(v) => setGlossarySort(v as GlossarySortKey)}
+              >
+                <SelectTrigger className="w-44">
+                  <SelectValue placeholder="Sort glossary" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Recently saved</SelectItem>
+                  <SelectItem value="language">Language</SelectItem>
+                  <SelectItem value="documentTitle">Document title</SelectItem>
+                  <SelectItem value="word">Word</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            {/* Glossary Items Card Grid */}
+            {/* -------------------------
+            //* GlossaryItems Card Grid
+            //* ------------------------- */}
             <div className="
               grid gap-3 justify-start 
-              [grid-template-columns:repeat(auto-fit,minmax(min(100%,15rem),1fr))]
+              [grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]
               ">
-              {glossaryItems.map((glossaryItem) => (
+              {filteredGlossaryItems.map((glossaryItem) => (
                 <GlossaryItemFlipCard 
-                key={glossaryItem.createdAt}
-                glossaryItem={glossaryItem} 
+                  key={glossaryItem.createdAt}
+                  glossaryItem={glossaryItem} 
                 />
               ))}
             </div>

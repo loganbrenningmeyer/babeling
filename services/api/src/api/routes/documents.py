@@ -145,6 +145,7 @@ def split_and_save(
 
         doc = Document(
             title=req.title,
+            total_pages=len(pages),
             src_text=req.text,
             src_text_hash=text_hash,
             src_lang=req.src_lang,

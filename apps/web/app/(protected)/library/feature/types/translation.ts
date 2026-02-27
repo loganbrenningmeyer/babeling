@@ -3,8 +3,9 @@ export type LibraryTranslation = {
   tgtText: string;
   tgtLang: string;
   lastOpenedAt: string | null;
-  completedPercent: number;
+  completionPercent: number;
   currentPageNumber: number;
+  totalPages: number;
 };
 
 export type LibraryTranslationResponse = {
@@ -16,8 +17,9 @@ export type LibraryTranslationDTO = {
   tgt_text: string;
   tgt_lang: string;
   last_opened_at: string | null;
-  completed_percent: number;
+  completion_percent: number;
   current_page_number: number;
+  total_pages: number;
 };
 
 export type LibraryTranslationResponseDTO = {
@@ -32,8 +34,9 @@ export function fromLibraryTranslationDTO(
     tgtText: dto.tgt_text,
     tgtLang: dto.tgt_lang,
     lastOpenedAt: dto.last_opened_at,
-    completedPercent: dto.completed_percent,
+    completionPercent: dto.completion_percent,
     currentPageNumber: dto.current_page_number,
+    totalPages: dto.total_pages,
   };
 }
 

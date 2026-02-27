@@ -14,10 +14,12 @@ export function ResumeTranslationButton({
   document,
   translation,
   loading,
+  children,
 }: {
   document: LibraryDocument,
   translation: LibraryTranslation | null,
   loading: boolean,
+  children: React.ReactNode,
 }) {
   // -------------------------
   // API Router Usage
@@ -78,8 +80,10 @@ export function ResumeTranslationButton({
               transition-transform duration-300 ease-out
               group-hover:translate-x-0.5
               motion-reduce:transition-none
-            "/>
-          Resume <LangBadge lang={translation.tgtLang}/>
+          "/>
+          <span className="inline-flex items-center gap-2">
+            {children}
+          </span>
         </Button>
       ) : (
         <Button

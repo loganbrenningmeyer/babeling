@@ -1,4 +1,4 @@
-from sqlalchemy import BigInteger, DateTime, ForeignKey, Text, String, UniqueConstraint, func
+from sqlalchemy import BigInteger, Integer, DateTime, Text, String, UniqueConstraint, func
 from sqlalchemy.orm import Mapped, mapped_column
 from datetime import datetime
 
@@ -29,6 +29,10 @@ class Document(Base):
         Text,
         nullable=False,
         server_default="'Untitled document'",
+    )
+    total_pages: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
     )
 
     # -------------------------

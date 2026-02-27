@@ -112,6 +112,8 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
         tgtLang,
       });
 
+      if (requestIdRef.current !== reqId) return;
+
       // ---- Align ----
       const alignment = await align({
         source,

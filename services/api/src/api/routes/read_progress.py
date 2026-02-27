@@ -1,6 +1,6 @@
 from datetime import datetime, timezone
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, func
+from sqlalchemy import select
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
@@ -9,7 +9,6 @@ from api.auth.users import get_current_app_user
 from api.database.models import (
     AppUser,
     Document,
-    DocumentPage,
     DocumentReadProgress,
     UserDocuments,
 )
@@ -54,16 +53,16 @@ def save_read_progress(
         raise HTTPException(status_code=404, detail="Document not found")
     
     # -------------------------
-    # 2) Count total pages for completion %
+    # 2) Load total pages from Document metadata
     # -------------------------
-    total_pages= int(
-        db.execute(
-            select(func.count(DocumentPage.id)).where(
-                DocumentPage.document_id == req.document_id
-            )
-        ).scalar_one()
-        or 0
-    )
+    total_pages_raw = db.execute(
+        select(Document.total_pages).where(Document.id == req.document_id)
+    ).scalar_one_or_none()
+
+    if total_pages_raw is None:
+        raise HTTPException(status_code=404, detail="Document not found")
+
+    total_pages = int(total_pages_raw or 0)
 
     if total_pages <= 0:
         raise HTTPException(status_code=400, detail="Document has no pages")
