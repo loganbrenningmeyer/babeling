@@ -162,7 +162,7 @@ export function LibraryPage({
               {/* -------------------------
               //* Documents Header
               //* ------------------------- */}
-              <div className="flex inline-flex gap-2">
+              <div className="inline-flex gap-2">
                 <div className="rounded-sm p-1 bg-blue-300/20">
                   <Book className="h-4 w-4 text-blue-500" />
                 </div>
@@ -217,7 +217,7 @@ export function LibraryPage({
               {/* -------------------------
               //* GlossaryItems Header
               //* ------------------------- */}
-              <div className="flex inline-flex gap-2">
+              <div className="inline-flex gap-2">
                 <div className="rounded-sm p-1 bg-orange-300/20">
                   <Languages className="h-4 w-4 text-orange-500"/>  
                 </div>

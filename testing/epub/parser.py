@@ -1,4 +1,5 @@
-import re
+import io
+import itertools
 import zipfile
 from ebooklib import epub, ITEM_COVER, ITEM_IMAGE, ITEM_DOCUMENT
 from ebooklib.epub import EpubBook, EpubItem, Link
@@ -60,26 +61,6 @@ def resolve_src(doc_path: str, src: str) -> str:
         return norm_path(str(base_dir / src))
 
 
-def get_item_by_href(book: EpubBook, href: str) -> EpubItem | None:
-    """
-    Given the path (href) to an item in the EpubBook, returns the
-    item by matching the href to the book items' names
-    """
-    href = norm_path(href)
-
-    # -- Primary: Find exact match in book items
-    for item in book.get_items():
-        if norm_path(item.get_name()) == href:
-            return item
-    
-    # -- Fallback: endswith match
-    for item in book.get_items():
-        if norm_path(item.get_name()).endswith(href):
-            return item
-        
-    return None
-
-
 def is_texty_leaf_div(el: Tag) -> bool:
     """
     Verifies if a <div> element contains purely text, acting as a paragraph block
@@ -125,15 +106,19 @@ class EpubParser:
     def __init__(self):
         pass
 
-    def build_document(self, epub_path: str | Path) -> EpubDocument:
+    def build_document(self, epub_bytes: bytes | None = None, epub_path: str | Path | None = None) -> EpubDocument | None:
         """
         1) Read EPUB with ebooklib
         2) Use EpubParser to extract normalized sections/blocks
         3) Builds EpubDocument dataclass
         """
-        epub_path = Path(epub_path)
-        book: EpubBook = epub.read_epub(str(epub_path))
-
+        if epub_bytes:
+            book: EpubBook = epub.read_epub(io.BytesIO(epub_bytes))
+        elif epub_path:
+            book: EpubBook = epub.read_epub(epub_path)
+        else:
+            return None
+        
         # -------------------------
         # Metadata (DC)
         # -------------------------
@@ -157,14 +142,17 @@ class EpubParser:
 
         # -------------------------
         # Convert images into EpubImage objects
+        # -- Only store links to images, load lazily to save memory
         # -------------------------
         images = {}
-        for image_id, data in raw_images.items():
-            images[image_id] = EpubImage(
-                image_id=image_id,
+        for image_key, data in raw_images.items():
+            payload = data.get("bytes")
+            images[image_key] = EpubImage(
+                image_key=image_key,
                 href=data["href"],
                 media_type=data.get("media_type"),
-                bytes=data["bytes"],
+                byte_length=len(payload) if payload is not None else 0,
+                data=payload,
             )
 
         # -------------------------
@@ -190,13 +178,13 @@ class EpubParser:
 
                 # -- Images
                 elif b["type"] == "image":
-                    image_id = b.get("image_id")
-                    if not image_id:
+                    image_key = b.get("image_key")
+                    if not image_key:
                         continue
                     epub_blocks.append(
                         EpubBlock(
                             type="image",
-                            image_id=image_id,
+                            image_key=image_key,
                             alt=b.get("alt"),
                         )
                     )
@@ -208,6 +196,8 @@ class EpubParser:
                     fragment=s.get("fragment"),
                     spine_id=s["spine_id"],
                     blocks=tuple(epub_blocks),
+                    parent_title=s.get("parent_title"),
+                    parent_key=s.get("parent_key"),
                 )
             )
 
@@ -235,9 +225,44 @@ class EpubParser:
         """
         Finds and returns the XHTML item whose internal name matches a TOC path
         """
+        path = norm_path(path.lstrip("/"))
+
+        # -- Attempt direct retrieval via EpubBook
+        direct = book.get_item_with_href(path)
+        if direct is not None and direct.get_type() == ITEM_DOCUMENT:
+            return direct
+
+        suffix = "/" + path
         for item in book.get_items_of_type(ITEM_DOCUMENT):
-            if norm_path(item.get_name()).endswith(norm_path(path)):
+            name = norm_path(item.get_name())
+            if name == path or name.endswith(suffix):
                 return item
+
+        return None
+    
+    def get_item_by_href(self, book: EpubBook, href: str) -> EpubItem | None:
+        """
+        Given the path (href) to an item in the EpubBook, returns the
+        item by matching the href to the book items' names
+        """
+        href = norm_path(href.lstrip("/"))
+
+        # -- Attempt direct retrieval via EpubBook
+        direct = book.get_item_with_href(href)
+        if direct is not None:
+            return direct
+        
+        # -- Primary: Find exact match in book items
+        for item in book.get_items():
+            if norm_path(item.get_name()) == href:
+                return item
+
+        # -- Narrow fallback: Folder boundary match only
+        suffix = "/" + href
+        for item in book.get_items():
+            if norm_path(item.get_name()).endswith(suffix):
+                return item
+            
         return None
 
     def get_metadata(self, book: EpubBook, label: str) -> str | None:
@@ -251,30 +276,83 @@ class EpubParser:
             meta = None
         return meta
 
-    def flatten_toc(self, toc) -> list[Link]:
+    def flatten_toc(self, toc, depth: int = 0, parent_key: str | None = None, parent_title: str | None = None) -> list[dict]:
         """
         Flattens nested TOC structure (Link, Section -> [Link1, Link2], etc.)
-        into a list of Links in traversal order
+        into a list of Link dicts with depth / parent title information
         """
-        out = []
+        out: list[dict] = []
+
         for item in toc:
+            # -------------------------
+            # 1) Section -> Children
+            # -------------------------
             if isinstance(item, tuple):
                 section, children = item
-                out.extend(self.flatten_toc(children))
-            else:
-                out.append(item)
+                section_title = getattr(section, "title", None) or parent_title
+                section_href = getattr(section, "href", None)
+                next_parent_key = self._href_to_key(section_href) if section_href else parent_key
+                out.extend(self.flatten_toc(children, depth + 1, next_parent_key, section_title))
+                continue
+
+            # -------------------------
+            # 2) Isolated Link
+            # -------------------------
+            if isinstance(item, Link):
+                out.append({
+                    "link": item,
+                    "key": self._href_to_key(item.href),
+                    "parent_key": parent_key,
+                    "depth": depth,
+                    "parent_title": parent_title,
+                })
+                continue
+
+            # -------------------------
+            # Handle EpubHtml entries that may appear directly in TOC
+            # -------------------------
+            if hasattr(item, "get_name"):
+                href = item.get_name()
+                pseudo = Link(href, getattr(item, "title", ""), getattr(item, "id", ""))
+                out.append({
+                    "link": pseudo,
+                    "key": self._href_to_key(href),
+                    "parent_key": parent_key,
+                    "depth": depth,
+                    "parent_title": parent_title,
+                })
+
         return out
 
     def get_cover_image(self, book: EpubBook) -> tuple[bytes, str] | None:
         """
         Returns the EPUB cover image as bytes / media type string if found, otherwise None
         """
-        for item in book.get_items():
-            if item.get_type() == ITEM_COVER:
-                return item.get_content(), item.media_type
-            elif item.get_type() == ITEM_IMAGE:
-                if "cover" in item.get_name().lower():
-                    return item.get_content(), item.media_type
+        # -------------------------
+        # 1) Preferred: OPF metadata
+        # -------------------------
+        for value, attrs in book.get_metadata("OPF", "cover"):
+            cover_id = (attrs or {}).get("content")
+            if not cover_id:
+                continue
+            item = book.get_item_with_id(cover_id)
+            if item is not None:
+                return item.get_content(), getattr(item, "media_type", None)
+            
+        # -------------------------
+        # 2) Fallback: Explicity cover-type items
+        # -------------------------
+        for item in book.get_items_of_type(ITEM_COVER):
+            return item.get_content(), getattr(item, "media_type", None)
+        
+        # -------------------------
+        # 3) Last resort: Filename heuristic
+        # -------------------------
+        for item in book.get_items_of_type(ITEM_IMAGE):
+            name = norm_path(item.get_name()).lower()
+            if name.rsplit("/", 1)[-1].startswith("cover") or "/cover" in name:
+                return item.get_content(), getattr(item, "media_type", None)
+            
         return None
 
     def get_entries_by_spine_id(self, book: EpubBook, spine_id: str) -> list[dict]:
@@ -299,7 +377,9 @@ class EpubParser:
         # Get all TOC entries that correspond to the spine_id
         # -------------------------
         matches = []
-        for link in toc_links:
+        for row in toc_links:
+            link: Link = row["link"]
+
             # -------------------------
             # Internal TOC href path, e.g., "...xhtml#pubid00000"
             # -- link_filename: "...xhtml"
@@ -318,6 +398,9 @@ class EpubParser:
                         "title": link.title,
                         "path": link_filename,
                         "fragment": fragment if sep else None,
+                        "depth": row["depth"],
+                        "parent_title": row["parent_title"],
+                        "parent_key": row["parent_key"],
                     }
                 )
 
@@ -342,13 +425,6 @@ class EpubParser:
             )
         return out
 
-    def _html_to_text(self, html: epub.EpubHtml) -> str:
-        """
-        Extracts text from HTML document
-        """
-        soup = BeautifulSoup(html, "xml")
-        return soup.get_text()
-
     def get_sections(self, book: EpubBook) -> list[dict]:
         """
         Collects all TOC entry information in spine reading order
@@ -370,7 +446,7 @@ class EpubParser:
         # -------------------------
         # Collect all TOC entries' information
         # -------------------------
-        sections = []
+        sections: list[dict] = []
         all_images: dict[str, dict] = {}
 
         for spine_item in spine_entries:
@@ -382,7 +458,16 @@ class EpubParser:
             #       fragment: <TOC doc fragment tag>
             #    }
             # -------------------------
-            entries = spine_item["entries"]
+            entries = spine_item["entries"] or []
+
+            # -------------------------
+            # Fallback: No TOC entries but content exists in spine
+            # -------------------------
+            if not entries:
+                fallback = self._default_entry_for_spine_doc(book, spine_item["spine_id"])
+                if fallback is None:
+                    continue
+                entries = [fallback]
 
             for i, entry in enumerate(entries):
                 # -- Get next spine TOC entry (to extract text between current -> next)
@@ -396,10 +481,12 @@ class EpubParser:
                         "path": entry["path"],
                         "fragment": entry["fragment"],
                         "spine_id": spine_item["spine_id"],
+                        "depth": entry.get("depth", 0),
+                        "parent_title": entry.get("parent_title"),
+                        "parent_key": entry.get("parent_key"),
                         "blocks": blocks,
                     }
                 )
-
                 all_images.update(images)
 
         return sections, all_images
@@ -416,7 +503,7 @@ class EpubParser:
         """
         doc = self.get_doc_by_path(book, start_entry["path"])
         if doc is None:
-            return []
+            return ([], {})
 
         # -- Create BeautifulSoup xml parser
         soup = BeautifulSoup(doc.get_body_content(), "lxml")
@@ -444,11 +531,16 @@ class EpubParser:
         # -------------------------
         end = soup.find(id=end_fragment) if end_fragment is not None else None
 
-        # -- If we started at body/soup, iterate through descendents, otherwise go from start_fragment next_elements
-        iterator = start.descendants if (start is soup or start is soup.body) else start.next_elements
+        # -------------------------
+        # Include start node itself when anchored to fragment
+        # -------------------------
+        if start is soup or start is soup.body:
+            iterator = start.descendants
+        else:
+            iterator = itertools.chain([start], start.next_elements)
 
         blocks: list[dict] = []
-        images = {}     # image_id -> {href, media_type, bytes}
+        images = {}     # image_key -> {href, media_type, bytes}
 
         for el in iterator:
             # -------------------------
@@ -466,11 +558,11 @@ class EpubParser:
                 src = el.get("src")
                 if src:
                     href = resolve_src(doc.get_name(), src)
-                    item = get_item_by_href(book, href)
+                    item = self.get_item_by_href(book, href)
 
-                    image_id = href     # use href as ID, simplest stable image ID
-                    if item is not None and image_id not in images:
-                        images[image_id] = {
+                    image_key = href     # use href as key, simplest stable image ID
+                    if item is not None and image_key not in images:
+                        images[image_key] = {
                             "href": norm_path(item.get_name()),
                             "media_type": getattr(item, "media_type", None),
                             "bytes": item.get_content(),
@@ -478,7 +570,7 @@ class EpubParser:
 
                     blocks.append({
                         "type": "image",
-                        "image_id": image_id,
+                        "image_key": image_key,
                         "src": src,
                         "href": href,
                         "alt": el.get("alt") or None,
@@ -489,24 +581,20 @@ class EpubParser:
             # 2. Semantic text blocks
             # -------------------------
             if el.name in BLOCK_TAGS:
+                # -- Prevent parent/child duplicate blocks
+                if self._has_nested_semantic_block(el):
+                    continue
+
                 text = el.get_text(" ", strip=True)
                 if text:
-                    blocks.append({
-                        "type": "text",
-                        "tag": el.name, 
-                        "text": text,
-                    })
+                    blocks.append({"type": "text", "tag": el.name, "text": text})
                 continue
 
             # -------------------------
             # 3. <div> fallback paragraphs
             # -------------------------
             if is_texty_leaf_div(el):
-                blocks.append({
-                    "type": "text",
-                    "tag": "div", 
-                    "text": el.get_text(" ", strip=True),
-                })
+                blocks.append({"type": "text", "tag": "div", "text": el.get_text(" ", strip=True)})
                 continue
 
         return blocks, images
@@ -517,3 +605,45 @@ class EpubParser:
         """
         with zipfile.ZipFile(epub_path, "r") as zf:
             zf.extractall(out_dir)
+
+    def _default_entry_for_spine_doc(self, book: EpubBook, spine_id: str) -> dict | None:
+        """
+        
+        """
+        id_to_item = self.build_id_to_item(book)
+        doc = id_to_item.get(spine_id)
+        if doc is None:
+            return None
+        
+        path = norm_path(doc.get_name())
+
+        # -- Fallback title when TOC label is missing
+        fallback_title = Path(path).stem.replace("_", " ").replace("-", " ").strip() or path
+
+        return {
+            "title": fallback_title,
+            "path": path,
+            "fragment": None,
+            "depth": 0,
+            "parent_title": None,
+        }
+    
+    def _has_nested_semantic_block(self, el: Tag) -> bool:
+        """
+        Determines if an element has a semantic block (e.g., nested p) within it
+        """
+        for child in el.find_all(BLOCK_TAGS):
+            if child is not el:
+                return True
+        return False
+
+    def _html_to_text(self, html: epub.EpubHtml) -> str:
+        """
+        Extracts text from HTML document
+        """
+        soup = BeautifulSoup(html, "xml")
+        return soup.get_text()
+    
+    def _href_to_key(self, href: str) -> str:
+        path, sep, fragment = href.partition("#")
+        return f"{norm_path(path)}#{fragment if sep else ''}"

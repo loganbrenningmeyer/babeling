@@ -1,0 +1,757 @@
+
+
+=============== [ Page 1 - 13 Characters ]: ( Section - Frankenstein; ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): h1
+-- ( text ): Frankenstein;
+
+
+=============== [ Page 2 - 64 Characters ]: ( Section - or, the Modern Prometheus ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): h3
+-- ( text ): or, the Modern Prometheus
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): h2
+-- ( text ): by Mary Wollstonecraft (Godwin) Shelley
+
+
+=============== [ Page 3 - 1884 Characters ]: ( Section - Letter 1 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): And now, dear Margaret, do I not deserve to accomplish some great purpose? My
+life might have been passed in ease and luxury, but I preferred glory to every
+enticement that wealth placed in my path. Oh, that some encouraging voice would
+answer in the affirmative! My courage and my resolution is firm; but my hopes
+fluctuate, and my spirits are often depressed. I am about to proceed on a long
+and difficult voyage, the emergencies of which will demand all my fortitude: I
+am required not only to raise the spirits of others, but sometimes to sustain
+my own, when theirs are failing.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): This is the most favourable period for travelling in Russia. They fly quickly
+over the snow in their sledges; the motion is pleasant, and, in my opinion, far
+more agreeable than that of an English stagecoach. The cold is not excessive,
+if you are wrapped in furs—a dress which I have already adopted, for there is a
+great difference between walking the deck and remaining seated motionless for
+hours, when no exercise prevents the blood from actually freezing in your
+veins. I have no ambition to lose my life on the post-road between St.
+Petersburgh and Archangel.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): I shall depart for the latter town in a fortnight or three weeks; and my
+intention is to hire a ship there, which can easily be done by paying the
+insurance for the owner, and to engage as many sailors as I think necessary
+among those who are accustomed to the whale-fishing. I do not intend to sail
+until the month of June; and when shall I return? Ah, dear sister, how can I
+answer this question? If I succeed, many, many months, perhaps years, will pass
+before you and I may meet. If I fail, you will see me again soon, or never.
+
+===== [ Block 4 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Farewell, my dear, excellent Margaret. Heaven shower down blessings on you, and
+save me, that I may again and again testify my gratitude for all your love and
+kindness.
+
+===== [ Block 5 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Your affectionate brother, R. Walton
+
+
+=============== [ Page 4 - 2188 Characters ]: ( Section - Letter 2 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Yet do not suppose, because I complain a little or because I can conceive a
+consolation for my toils which I may never know, that I am wavering in my
+resolutions. Those are as fixed as fate, and my voyage is only now delayed
+until the weather shall permit my embarkation. The winter has been dreadfully
+severe, but the spring promises well, and it is considered as a remarkably
+early season, so that perhaps I may sail sooner than I expected. I shall do
+nothing rashly: you know me sufficiently to confide in my prudence and
+considerateness whenever the safety of others is committed to my care.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): I cannot describe to you my sensations on the near prospect of my undertaking.
+It is impossible to communicate to you a conception of the trembling sensation,
+half pleasurable and half fearful, with which I am preparing to depart. I am
+going to unexplored regions, to “the land of mist and snow,” but I shall kill
+no albatross; therefore do not be alarmed for my safety or if I should come
+back to you as worn and woeful as the “Ancient Mariner.” You will smile at my
+allusion, but I will disclose a secret. I have often attributed my attachment
+to, my passionate enthusiasm for, the dangerous mysteries of ocean to that
+production of the most imaginative of modern poets. There is something at work
+in my soul which I do not understand. I am practically industrious—painstaking,
+a workman to execute with perseverance and labour—but besides this there is a
+love for the marvellous, a belief in the marvellous, intertwined in all my
+projects, which hurries me out of the common pathways of men, even to the wild
+sea and unvisited regions I am about to explore.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): But to return to dearer considerations. Shall I meet you again, after having
+traversed immense seas, and returned by the most southern cape of Africa or
+America? I dare not expect such success, yet I cannot bear to look on the
+reverse of the picture. Continue for the present to write to me by every
+opportunity: I may receive your letters on some occasions when I need them most
+to support my spirits. I love you very tenderly. Remember me with affection,
+should you never hear from me again.
+
+===== [ Block 4 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Your affectionate brother, Robert Walton
+
+
+=============== [ Page 5 - 1684 Characters ]: ( Section - Letter 3 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): h2
+-- ( text ): Letter 3
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): To Mrs. Saville, England.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): July 7th, 17—.
+
+===== [ Block 4 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): My dear Sister,
+
+===== [ Block 5 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): I write a few lines in haste to say that I am safe—and well advanced on my
+voyage. This letter will reach England by a merchantman now on its homeward
+voyage from Archangel; more fortunate than I, who may not see my native land,
+perhaps, for many years. I am, however, in good spirits: my men are bold and
+apparently firm of purpose, nor do the floating sheets of ice that continually
+pass us, indicating the dangers of the region towards which we are advancing,
+appear to dismay them. We have already reached a very high latitude; but it is
+the height of summer, and although not so warm as in England, the southern
+gales, which blow us speedily towards those shores which I so ardently desire
+to attain, breathe a degree of renovating warmth which I had not expected.
+
+===== [ Block 6 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): No incidents have hitherto befallen us that would make a figure in a letter.
+One or two stiff gales and the springing of a leak are accidents which
+experienced navigators scarcely remember to record, and I shall be well content
+if nothing worse happen to us during our voyage.
+
+===== [ Block 7 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Adieu, my dear Margaret. Be assured that for my own sake, as well as yours, I
+will not rashly encounter danger. I will be cool, persevering, and prudent.
+
+===== [ Block 8 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): But success shall crown my endeavours. Wherefore not? Thus far I have
+gone, tracing a secure way over the pathless seas, the very stars themselves
+being witnesses and testimonies of my triumph. Why not still proceed over the
+untamed yet obedient element? What can stop the determined heart and resolved
+will of man?
+
+===== [ Block 9 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): My swelling heart involuntarily pours itself out thus. But I must finish.
+Heaven bless my beloved sister!
+
+===== [ Block 10 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): R.W.
+
+
+=============== [ Page 6 - 1719 Characters ]: ( Section - Letter 4 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): You may easily imagine that I was much gratified by the offered communication,
+yet I could not endure that he should renew his grief by a recital of his
+misfortunes. I felt the greatest eagerness to hear the promised narrative,
+partly from curiosity and partly from a strong desire to ameliorate his fate if
+it were in my power. I expressed these feelings in my answer.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “I thank you,” he replied, “for your sympathy, but it is useless; my fate is
+nearly fulfilled. I wait but for one event, and then I shall repose in peace. I
+understand your feeling,” continued he, perceiving that I wished to interrupt
+him; “but you are mistaken, my friend, if thus you will allow me to name you;
+nothing can alter my destiny; listen to my history, and you will perceive how
+irrevocably it is determined.”
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): He then told me that he would commence his narrative the next day when I should
+be at leisure. This promise drew from me the warmest thanks. I have resolved
+every night, when I am not imperatively occupied by my duties, to record, as
+nearly as possible in his own words, what he has related during the day. If I
+should be engaged, I will at least make notes. This manuscript will doubtless
+afford you the greatest pleasure; but to me, who know him, and who hear it from
+his own lips—with what interest and sympathy shall I read it in some future
+day! Even now, as I commence my task, his full-toned voice swells in my ears;
+his lustrous eyes dwell on me with all their melancholy sweetness; I see his
+thin hand raised in animation, while the lineaments of his face are irradiated
+by the soul within. Strange and harrowing must be his story, frightful the
+storm which embraced the gallant vessel on its course and wrecked it—thus!
+
+
+=============== [ Page 7 - 823 Characters ]: ( Section - Chapter 2 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Thus strangely are our souls constructed, and by such slight ligaments are we
+bound to prosperity or ruin. When I look back, it seems to me as if this almost
+miraculous change of inclination and will was the immediate suggestion of the
+guardian angel of my life—the last effort made by the spirit of preservation to
+avert the storm that was even then hanging in the stars and ready to envelop
+me. Her victory was announced by an unusual tranquillity and gladness of soul
+which followed the relinquishing of my ancient and latterly tormenting studies.
+It was thus that I was to be taught to associate evil with their prosecution,
+happiness with their disregard.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): It was a strong effort of the spirit of good, but it was ineffectual. Destiny
+was too potent, and her immutable laws had decreed my utter and terrible
+destruction.
+
+
+=============== [ Page 8 - 397 Characters ]: ( Section - Chapter 3 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): He then took me into his laboratory and explained to me the uses of his various
+machines, instructing me as to what I ought to procure and promising me the use
+of his own when I should have advanced far enough in the science not to derange
+their mechanism. He also gave me the list of books which I had requested, and I
+took my leave.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Thus ended a day memorable to me; it decided my future destiny.
+
+
+=============== [ Page 9 - 1296 Characters ]: ( Section - Chapter 4 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): But I forget that I am moralizing in the most interesting part of my tale, and
+your looks remind me to proceed.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): My father made no reproach in his letters and only took notice of my silence by
+inquiring into my occupations more particularly than before. Winter, spring,
+and summer passed away during my labours; but I did not watch the blossom or
+the expanding leaves—sights which before always yielded me supreme delight—so
+deeply was I engrossed in my occupation. The leaves of that year had withered
+before my work drew near to a close, and now every day showed me more plainly
+how well I had succeeded. But my enthusiasm was checked by my anxiety, and I
+appeared rather like one doomed by slavery to toil in the mines, or any other
+unwholesome trade than an artist occupied by his favourite employment. Every
+night I was oppressed by a slow fever, and I became nervous to a most painful
+degree; the fall of a leaf startled me, and I shunned my fellow creatures as if
+I had been guilty of a crime. Sometimes I grew alarmed at the wreck I perceived
+that I had become; the energy of my purpose alone sustained me: my labours
+would soon end, and I believed that exercise and amusement would then drive
+away incipient disease; and I promised myself both of these when my creation
+should be complete.
+
+
+=============== [ Page 10 - 1239 Characters ]: ( Section - Chapter 5 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Dearest Clerval,” exclaimed I, “how kind, how very good you are to me. This
+whole winter, instead of being spent in study, as you promised yourself, has
+been consumed in my sick room. How shall I ever repay you? I feel the greatest
+remorse for the disappointment of which I have been the occasion, but you will
+forgive me.”
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “You will repay me entirely if you do not discompose yourself, but get well as
+fast as you can; and since you appear in such good spirits, I may speak to you
+on one subject, may I not?”
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): I trembled. One subject! What could it be? Could he allude to an object on whom
+I dared not even think?
+
+===== [ Block 4 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Compose yourself,” said Clerval, who observed my change of colour, “I will not
+mention it if it agitates you; but your father and cousin would be very happy
+if they received a letter from you in your own handwriting. They hardly know
+how ill you have been and are uneasy at your long silence.”
+
+===== [ Block 5 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Is that all, my dear Henry? How could you suppose that my first thought would
+not fly towards those dear, dear friends whom I love and who are so deserving
+of my love?”
+
+===== [ Block 6 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “If this is your present temper, my friend, you will perhaps be glad to see a
+letter that has been lying here some days for you; it is from your cousin, I
+believe.”
+
+
+=============== [ Page 11 - 712 Characters ]: ( Section - Chapter 6 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Henry rejoiced in my gaiety, and sincerely sympathised in my feelings: he
+exerted himself to amuse me, while he expressed the sensations that filled his
+soul. The resources of his mind on this occasion were truly astonishing: his
+conversation was full of imagination; and very often, in imitation of the
+Persian and Arabic writers, he invented tales of wonderful fancy and passion.
+At other times he repeated my favourite poems, or drew me out into arguments,
+which he supported with great ingenuity.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): We returned to our college on a Sunday afternoon: the peasants were dancing,
+and every one we met appeared gay and happy. My own spirits were high, and I
+bounded along with feelings of unbridled joy and hilarity.
+
+
+=============== [ Page 12 - 587 Characters ]: ( Section - Chapter 7 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “She is innocent, my Elizabeth,” said I, “and that shall be proved; fear
+nothing, but let your spirits be cheered by the assurance of her acquittal.”
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “How kind and generous you are! every one else believes in her guilt, and that
+made me wretched, for I knew that it was impossible: and to see every one else
+prejudiced in so deadly a manner rendered me hopeless and despairing.” She
+wept.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Dearest niece,” said my father, “dry your tears. If she is, as you believe,
+innocent, rely on the justice of our laws, and the activity with which I shall
+prevent the slightest shadow of partiality.”
+
+
+=============== [ Page 13 - 1607 Characters ]: ( Section - Chapter 8 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): And on the morrow Justine died. Elizabeth’s heart-rending eloquence failed to
+move the judges from their settled conviction in the criminality of the saintly
+sufferer. My passionate and indignant appeals were lost upon them. And when I
+received their cold answers and heard the harsh, unfeeling reasoning of these
+men, my purposed avowal died away on my lips. Thus I might proclaim myself a
+madman, but not revoke the sentence passed upon my wretched victim. She
+perished on the scaffold as a murderess!
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): From the tortures of my own heart, I turned to contemplate the deep and
+voiceless grief of my Elizabeth. This also was my doing! And my father’s woe,
+and the desolation of that late so smiling home all was the work of my
+thrice-accursed hands! Ye weep, unhappy ones, but these are not your last
+tears! Again shall you raise the funeral wail, and the sound of your
+lamentations shall again and again be heard! Frankenstein, your son, your
+kinsman, your early, much-loved friend; he who would spend each vital drop of
+blood for your sakes, who has no thought nor sense of joy except as it is
+mirrored also in your dear countenances, who would fill the air with blessings
+and spend his life in serving you—he bids you weep, to shed countless tears;
+happy beyond his hopes, if thus inexorable fate be satisfied, and if the
+destruction pause before the peace of the grave have succeeded to your sad
+torments!
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Thus spoke my prophetic soul, as, torn by remorse, horror, and despair, I
+beheld those I loved spend vain sorrow upon the graves of William and Justine,
+the first hapless victims to my unhallowed arts.
+
+
+=============== [ Page 14 - 1186 Characters ]: ( Section - Chapter 9 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): A tingling long-lost sense of pleasure often came across me during this
+journey. Some turn in the road, some new object suddenly perceived and
+recognised, reminded me of days gone by, and were associated with the
+lighthearted gaiety of boyhood. The very winds whispered in soothing accents,
+and maternal Nature bade me weep no more. Then again the kindly influence
+ceased to act—I found myself fettered again to grief and indulging in all the
+misery of reflection. Then I spurred on my animal, striving so to forget the
+world, my fears, and more than all, myself—or, in a more desperate fashion, I
+alighted and threw myself on the grass, weighed down by horror and despair.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): At length I arrived at the village of Chamounix. Exhaustion succeeded to the
+extreme fatigue both of body and of mind which I had endured. For a short space
+of time I remained at the window watching the pallid lightnings that played
+above Mont Blanc and listening to the rushing of the Arve, which pursued its
+noisy way beneath. The same lulling sounds acted as a lullaby to my too keen
+sensations; when I placed my head upon my pillow, sleep crept over me; I felt
+it as it came and blessed the giver of oblivion.
+
+
+=============== [ Page 15 - 1754 Characters ]: ( Section - Chapter 11 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “The old man had, in the meantime, been pensive, but on the appearance of his
+companions he assumed a more cheerful air, and they sat down to eat. The meal
+was quickly dispatched. The young woman was again occupied in arranging the
+cottage, the old man walked before the cottage in the sun for a few minutes,
+leaning on the arm of the youth. Nothing could exceed in beauty the contrast
+between these two excellent creatures. One was old, with silver hairs and a
+countenance beaming with benevolence and love; the younger was slight and
+graceful in his figure, and his features were moulded with the finest symmetry,
+yet his eyes and attitude expressed the utmost sadness and despondency. The old
+man returned to the cottage, and the youth, with tools different from those he
+had used in the morning, directed his steps across the fields.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Night quickly shut in, but to my extreme wonder, I found that the cottagers
+had a means of prolonging light by the use of tapers, and was delighted to find
+that the setting of the sun did not put an end to the pleasure I experienced in
+watching my human neighbours. In the evening the young girl and her companion
+were employed in various occupations which I did not understand; and the old
+man again took up the instrument which produced the divine sounds that had
+enchanted me in the morning. So soon as he had finished, the youth began, not
+to play, but to utter sounds that were monotonous, and neither resembling the
+harmony of the old man’s instrument nor the songs of the birds; I since found
+that he read aloud, but at that time I knew nothing of the science of words or
+letters.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “The family, after having been thus occupied for a short time, extinguished
+their lights and retired, as I conjectured, to rest.”
+
+
+=============== [ Page 16 - 1081 Characters ]: ( Section - Chapter 12 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “These thoughts exhilarated me and led me to apply with fresh ardour to the
+acquiring the art of language. My organs were indeed harsh, but supple; and
+although my voice was very unlike the soft music of their tones, yet I
+pronounced such words as I understood with tolerable ease. It was as the ass
+and the lap-dog; yet surely the gentle ass whose intentions were affectionate,
+although his manners were rude, deserved better treatment than blows and
+execration.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “The pleasant showers and genial warmth of spring greatly altered the aspect of
+the earth. Men who before this change seemed to have been hid in caves
+dispersed themselves and were employed in various arts of cultivation. The
+birds sang in more cheerful notes, and the leaves began to bud forth on the
+trees. Happy, happy earth! Fit habitation for gods, which, so short a time
+before, was bleak, damp, and unwholesome. My spirits were elevated by the
+enchanting appearance of nature; the past was blotted from my memory, the
+present was tranquil, and the future gilded by bright rays of hope and
+anticipations of joy.”
+
+
+=============== [ Page 17 - 2391 Characters ]: ( Section - Chapter 13 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “I cannot describe to you the agony that these reflections inflicted upon me; I
+tried to dispel them, but sorrow only increased with knowledge. Oh, that I had
+for ever remained in my native wood, nor known nor felt beyond the sensations
+of hunger, thirst, and heat!
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Of what a strange nature is knowledge! It clings to the mind when it has once
+seized on it like a lichen on the rock. I wished sometimes to shake off all
+thought and feeling, but I learned that there was but one means to overcome the
+sensation of pain, and that was death—a state which I feared yet did not
+understand. I admired virtue and good feelings and loved the gentle manners and
+amiable qualities of my cottagers, but I was shut out from intercourse with
+them, except through means which I obtained by stealth, when I was unseen and
+unknown, and which rather increased than satisfied the desire I had of becoming
+one among my fellows. The gentle words of Agatha and the animated smiles of the
+charming Arabian were not for me. The mild exhortations of the old man and the
+lively conversation of the loved Felix were not for me. Miserable, unhappy
+wretch!
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Other lessons were impressed upon me even more deeply. I heard of the
+difference of sexes, and the birth and growth of children, how the father doted
+on the smiles of the infant, and the lively sallies of the older child, how all
+the life and cares of the mother were wrapped up in the precious charge, how
+the mind of youth expanded and gained knowledge, of brother, sister, and all
+the various relationships which bind one human being to another in mutual
+bonds.
+
+===== [ Block 4 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “But where were my friends and relations? No father had watched my infant days,
+no mother had blessed me with smiles and caresses; or if they had, all my past
+life was now a blot, a blind vacancy in which I distinguished nothing. From my
+earliest remembrance I had been as I then was in height and proportion. I had
+never yet seen a being resembling me or who claimed any intercourse with me.
+What was I? The question again recurred, to be answered only with groans.
+
+===== [ Block 5 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “I will soon explain to what these feelings tended, but allow me now to return
+to the cottagers, whose story excited in me such various feelings of
+indignation, delight, and wonder, but which all terminated in additional love
+and reverence for my protectors (for so I loved, in an innocent, half-painful
+self-deceit, to call them).”
+
+
+=============== [ Page 18 - 1284 Characters ]: ( Section - Chapter 16 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “The sleeper stirred; a thrill of terror ran through me. Should she indeed
+awake, and see me, and curse me, and denounce the murderer? Thus would she
+assuredly act if her darkened eyes opened and she beheld me. The thought was
+madness; it stirred the fiend within me—not I, but she, shall suffer; the
+murder I have committed because I am for ever robbed of all that she could give
+me, she shall atone. The crime had its source in her; be hers the punishment!
+Thanks to the lessons of Felix and the sanguinary laws of man, I had learned
+now to work mischief. I bent over her and placed the portrait securely in one
+of the folds of her dress. She moved again, and I fled.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “For some days I haunted the spot where these scenes had taken place, sometimes
+wishing to see you, sometimes resolved to quit the world and its miseries for
+ever. At length I wandered towards these mountains, and have ranged through
+their immense recesses, consumed by a burning passion which you alone can
+gratify. We may not part until you have promised to comply with my requisition.
+I am alone and miserable; man will not associate with me; but one as deformed
+and horrible as myself would not deny herself to me. My companion must be of
+the same species and have the same defects. This being you must create.”
+
+
+=============== [ Page 19 - 1091 Characters ]: ( Section - Chapter 17 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): These were wild and miserable thoughts, but I cannot describe to you how the
+eternal twinkling of the stars weighed upon me and how I listened to every
+blast of wind as if it were a dull ugly siroc on its way to consume me.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Morning dawned before I arrived at the village of Chamounix; I took no rest,
+but returned immediately to Geneva. Even in my own heart I could give no
+expression to my sensations—they weighed on me with a mountain’s weight and
+their excess destroyed my agony beneath them. Thus I returned home, and
+entering the house, presented myself to the family. My haggard and wild
+appearance awoke intense alarm, but I answered no question, scarcely did I
+speak. I felt as if I were placed under a ban—as if I had no right to claim
+their sympathies—as if never more might I enjoy companionship with them. Yet
+even thus I loved them to adoration; and to save them, I resolved to dedicate
+myself to my most abhorred task. The prospect of such an occupation made every
+other circumstance of existence pass before me like a dream, and that thought
+only had to me the reality of life.
+
+
+=============== [ Page 20 - 1492 Characters ]: ( Section - Chapter 19 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): In this manner I distributed my occupations when I first arrived, but as I
+proceeded in my labour, it became every day more horrible and irksome to me.
+Sometimes I could not prevail on myself to enter my laboratory for several
+days, and at other times I toiled day and night in order to complete my work.
+It was, indeed, a filthy process in which I was engaged. During my first
+experiment, a kind of enthusiastic frenzy had blinded me to the horror of my
+employment; my mind was intently fixed on the consummation of my labour, and my
+eyes were shut to the horror of my proceedings. But now I went to it in cold
+blood, and my heart often sickened at the work of my hands.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Thus situated, employed in the most detestable occupation, immersed in a
+solitude where nothing could for an instant call my attention from the actual
+scene in which I was engaged, my spirits became unequal; I grew restless and
+nervous. Every moment I feared to meet my persecutor. Sometimes I sat with my
+eyes fixed on the ground, fearing to raise them lest they should encounter the
+object which I so much dreaded to behold. I feared to wander from the sight of
+my fellow creatures lest when alone he should come to claim his companion.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): In the mean time I worked on, and my labour was already considerably advanced.
+I looked towards its completion with a tremulous and eager hope, which I dared
+not trust myself to question but which was intermixed with obscure forebodings
+of evil that made my heart sicken in my bosom.
+
+
+=============== [ Page 21 - 1076 Characters ]: ( Section - Chapter 22 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): Thus Elizabeth endeavoured to divert her thoughts and mine from all reflection
+upon melancholy subjects. But her temper was fluctuating; joy for a few
+instants shone in her eyes, but it continually gave place to distraction and
+reverie.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): The sun sank lower in the heavens; we passed the river Drance and observed its
+path through the chasms of the higher and the glens of the lower hills. The
+Alps here come closer to the lake, and we approached the amphitheatre of
+mountains which forms its eastern boundary. The spire of Evian shone under the
+woods that surrounded it and the range of mountain above mountain by which it
+was overhung.
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): The wind, which had hitherto carried us along with amazing rapidity, sank at
+sunset to a light breeze; the soft air just ruffled the water and caused a
+pleasant motion among the trees as we approached the shore, from which it
+wafted the most delightful scent of flowers and hay. The sun sank beneath the
+horizon as we landed, and as I touched the shore I felt those cares and fears
+revive which soon were to clasp me and cling to me for ever.
+
+
+=============== [ Page 22 - 1272 Characters ]: ( Section - Chapter 24 ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “Farewell! I leave you, and in you the last of humankind whom these eyes will
+ever behold. Farewell, Frankenstein! If thou wert yet alive and yet cherished a
+desire of revenge against me, it would be better satiated in my life than in my
+destruction. But it was not so; thou didst seek my extinction, that I might not
+cause greater wretchedness; and if yet, in some mode unknown to me, thou hadst
+not ceased to think and feel, thou wouldst not desire against me a vengeance
+greater than that which I feel. Blasted as thou wert, my agony was still
+superior to thine, for the bitter sting of remorse will not cease to rankle in
+my wounds until death shall close them for ever.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): “But soon,” he cried with sad and solemn enthusiasm, “I shall die, and what I
+now feel be no longer felt. Soon these burning miseries will be extinct. I
+shall ascend my funeral pile triumphantly and exult in the agony of the
+torturing flames. The light of that conflagration will fade away; my ashes will
+be swept into the sea by the winds. My spirit will sleep in peace, or if it
+thinks, it will not surely think thus. Farewell.”
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): p
+-- ( text ): He sprang from the cabin-window as he said this, upon the ice raft which lay
+close to the vessel. He was soon borne away by the waves and lost in darkness
+and distance.
+
+
+=============== [ Page 23 - 614 Characters ]: ( Section - THE FULL PROJECT GUTENBERG LICENSE ) ===============
+
+===== [ Block 1 ] =====
+-- ( type ): text
+-- ( tag ): div
+-- ( text ): Project Gutenberg™ eBooks are often created from several printed
+editions, all of which are confirmed as not protected by copyright in
+the U.S. unless a copyright notice is included. Thus, we do not
+necessarily keep eBooks in compliance with any particular paper
+edition.
+
+===== [ Block 2 ] =====
+-- ( type ): text
+-- ( tag ): div
+-- ( text ): Most people start at our website which has the main PG search
+facility: www.gutenberg.org .
+
+===== [ Block 3 ] =====
+-- ( type ): text
+-- ( tag ): div
+-- ( text ): This website includes information about Project Gutenberg™,
+including how to make donations to the Project Gutenberg Literary
+Archive Foundation, how to help produce our new eBooks, and how to
+subscribe to our email newsletter to hear about new eBooks.

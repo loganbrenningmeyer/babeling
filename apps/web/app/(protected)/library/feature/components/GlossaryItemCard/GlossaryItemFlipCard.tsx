@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
@@ -28,22 +28,45 @@ export function GlossaryItemFlipCard({
     setOpen(false);
   }, [closing]);
 
-  const layoutId = `glossary-${glossaryItem.glossaryItemId}`;
+  {/* -------------------------
+  * Close Card on [esc]
+  * ------------------------- */}
+  useEffect(() => {
+    if (!open) return;
+    
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        closeCard();
+      }
+    }
 
-  const CardBody = ({ side }: { side: "front" | "back" }) => (
-    <div className="
+    window.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [open, closeCard]);
+
+  {/* -------------------------
+    * Base CardBody layout for front / back
+    * ------------------------- */}
+    const CardBody = ({ side }: { side: "front" | "back" }) => (
+      <div className="
       relative aspect-[3/2] w-full 
       cursor-pointer
-    ">
+      ">
       <div className="absolute inset-0">
         { side === "front" ? (
           <GlossaryItemFront glossaryItem={glossaryItem} />
         ) : (
-          <GlossaryItemBack glossaryItem={glossaryItem} />
+          <GlossaryItemBack glossaryItem={glossaryItem} onClose={closeCard}/>
         )}
       </div>
     </div>
   );
+
+  {/* Unique layoutId for each GlossaryItem card */}
+  const layoutId = `glossary-${glossaryItem.glossaryItemId}`;
   
   return (
     <>
@@ -70,7 +93,7 @@ export function GlossaryItemFlipCard({
         <button
           type="button"
           onClick={openCard}
-          className="group block w-full text-left"
+          className="group/gloss-front block w-full text-left"
         >
           {CardBody({ side: "front" })}
         </button>
@@ -101,12 +124,17 @@ export function GlossaryItemFlipCard({
                 <div className="fixed inset-0 z-50 grid place-items-center p-4 pointer-events-none">
                   <motion.div
                     layoutId={layoutId}
-                    layout
                     transition={{ 
                       layout: { duration: 0.45, ease: [0.2, 0.8, 0.2, 1] },
                       opacity: { duration: 0 },
                     }}
-                    className="pointer-events-auto w-full max-w-3xl cursor-default drop-shadow-2xl [perspective:800px]"
+                    className="
+                      group/gloss-back
+                      w-full max-w-3xl
+                      drop-shadow-2xl
+                      cursor-default pointer-events-auto
+                      [perspective:800px]
+                    "
                   >
                     {CardBody({ side: "back" })}
                   </motion.div>

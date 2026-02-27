@@ -43,3 +43,17 @@ class DocumentPage(Base):
         Text,
         nullable=False,
     )
+
+    # -------------------------
+    # Document Section Mapping
+    # -------------------------
+    section_id: Mapped[int | None] = mapped_column(
+        ForeignKey("document_sections.id"),
+        index=True,
+        nullable=True,
+    )
+    
+    section_page_index: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+    )

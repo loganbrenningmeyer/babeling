@@ -1,0 +1,169 @@
+===== INPUT =====
+epub=testing/epub/the-brothers-karamazov.epub
+title='The Brothers Karamazov'
+author='Fyodor Dostoyevsky'
+lang=en
+sections=120
+images=0
+epub_pipeline_pages=97
+raw_pipeline_pages=853
+raw_text_chars=1947975
+
+
+===== PIPELINE A: EpubDocument.build_pages -> token spaces =====
+pages=97
+summary: tokens=20609, missing_token_matches=0, empty_spaces=4220, suspicious_alpha_joins=92
+showing_top_pages=8 (sorted by mismatch severity)
+
+[page 93] chars=1218, tokens=324, missing=0 (0.00%), empty_spaces=89, suspicious_joins=8, first_rebuild_diff=None
+whitespace: newline(U+000A)=35, space(U+0020)=211
+suspicious_join_examples:
+  - idx=7: 'can'+'not'
+  - idx=22: 'ca'+'n’t'
+  - idx=43: 'do'+'n’t'
+  - idx=92: 'ca'+'n’t'
+  - idx=115: 'do'+'n’t'
+  - idx=192: 'do'+'n’t'
+
+[page 22] chars=790, tokens=208, missing=0 (0.00%), empty_spaces=64, suspicious_joins=6, first_rebuild_diff=None
+whitespace: newline(U+000A)=25, space(U+0020)=128
+suspicious_join_examples:
+  - idx=35: 'could'+'n’t'
+  - idx=54: 'sha'+'n’t'
+  - idx=73: 'do'+'n’t'
+  - idx=78: 'do'+'n’t'
+  - idx=84: 'sha'+'n’t'
+  - idx=192: 'does'+'n’t'
+
+[page 75] chars=373, tokens=106, missing=0 (0.00%), empty_spaces=35, suspicious_joins=5, first_rebuild_diff=None
+whitespace: newline(U+000A)=10, space(U+0020)=64
+suspicious_join_examples:
+  - idx=11: 'wo'+'n’t'
+  - idx=16: 'wo'+'n’t'
+  - idx=39: 'wo'+'n’t'
+  - idx=74: 'do'+'n’t'
+  - idx=88: 'do'+'n’t'
+
+[page 23] chars=1432, tokens=332, missing=0 (0.00%), empty_spaces=90, suspicious_joins=4, first_rebuild_diff=None
+whitespace: newline(U+000A)=36, space(U+0020)=216
+suspicious_join_examples:
+  - idx=36: 'do'+'n’t'
+  - idx=205: 'could'+'n’t'
+  - idx=245: 'Do'+'n’t'
+  - idx=254: 'do'+'n’t'
+
+[page 32] chars=1154, tokens=285, missing=0 (0.00%), empty_spaces=81, suspicious_joins=4, first_rebuild_diff=None
+whitespace: newline(U+000A)=38, space(U+0020)=179
+suspicious_join_examples:
+  - idx=68: 'Do'+'n’t'
+  - idx=95: 'Do'+'n’t'
+  - idx=212: 'ca'+'n’t'
+  - idx=237: 'do'+'n’t'
+
+[page 94] chars=989, tokens=240, missing=0 (0.00%), empty_spaces=62, suspicious_joins=4, first_rebuild_diff=None
+whitespace: newline(U+000A)=19, space(U+0020)=163
+suspicious_join_examples:
+  - idx=19: 'do'+'n’t'
+  - idx=23: 'do'+'n’t'
+  - idx=85: 'ca'+'n’t'
+  - idx=176: 'ca'+'n’t'
+
+[page 58] chars=2296, tokens=565, missing=0 (0.00%), empty_spaces=126, suspicious_joins=3, first_rebuild_diff=None
+whitespace: newline(U+000A)=36, space(U+0020)=406
+suspicious_join_examples:
+  - idx=170: 'sha'+'n’t'
+  - idx=518: 'do'+'n’t'
+  - idx=525: 'do'+'n’t'
+
+[page 21] chars=2441, tokens=572, missing=0 (0.00%), empty_spaces=109, suspicious_joins=3, first_rebuild_diff=None
+whitespace: newline(U+000A)=38, space(U+0020)=428
+suspicious_join_examples:
+  - idx=215: 'do'+'n’t'
+  - idx=386: 'do'+'n’t'
+  - idx=420: 'did'+'n’t'
+
+
+===== PIPELINE B: flattened raw text -> Segmenter.split_pages -> token spaces =====
+pages=853
+summary: tokens=434555, missing_token_matches=0, empty_spaces=82162, suspicious_alpha_joins=2183
+showing_top_pages=8 (sorted by mismatch severity)
+
+[page 640] chars=3561, tokens=858, missing=0 (0.00%), empty_spaces=196, suspicious_joins=19, first_rebuild_diff=None
+whitespace: newline(U+000A)=10, space(U+0020)=667
+suspicious_join_examples:
+  - idx=64: 'ca'+'n’t'
+  - idx=76: 'ca'+'n’t'
+  - idx=117: 'ca'+'n’t'
+  - idx=369: 'ca'+'n’t'
+  - idx=420: 'Do'+'n’t'
+  - idx=436: 'do'+'n’t'
+
+[page 247] chars=6691, tokens=1529, missing=0 (0.00%), empty_spaces=267, suspicious_joins=15, first_rebuild_diff=None
+whitespace: newline(U+000A)=18, space(U+0020)=1271
+suspicious_join_examples:
+  - idx=152: 'do'+'n’t'
+  - idx=255: 'do'+'n’t'
+  - idx=265: 'wo'+'n’t'
+  - idx=352: 'can'+'not'
+  - idx=459: 'ca'+'n’t'
+  - idx=566: 'have'+'n’t'
+
+[page 240] chars=5354, tokens=1210, missing=0 (0.00%), empty_spaces=214, suspicious_joins=15, first_rebuild_diff=None
+whitespace: newline(U+000A)=14, space(U+0020)=1003
+suspicious_join_examples:
+  - idx=247: 'is'+'n’t'
+  - idx=419: 'wo'+'n’t'
+  - idx=533: 'is'+'n’t'
+  - idx=676: 'ca'+'n’t'
+  - idx=683: 'ca'+'n’t'
+  - idx=881: 'do'+'n’t'
+
+[page 573] chars=8221, tokens=1961, missing=0 (0.00%), empty_spaces=371, suspicious_joins=14, first_rebuild_diff=None
+whitespace: newline(U+000A)=18, space(U+0020)=1599
+suspicious_join_examples:
+  - idx=367: 'would'+'n’t'
+  - idx=449: 'ca'+'n’t'
+  - idx=645: 'should'+'n’t'
+  - idx=1102: 'ca'+'n’t'
+  - idx=1219: 'was'+'n’t'
+  - idx=1254: 'wo'+'n’t'
+
+[page 636] chars=4012, tokens=968, missing=0 (0.00%), empty_spaces=204, suspicious_joins=12, first_rebuild_diff=None
+whitespace: newline(U+000A)=18, space(U+0020)=773
+suspicious_join_examples:
+  - idx=22: 'can'+'not'
+  - idx=127: 'was'+'n’t'
+  - idx=242: 'can'+'not'
+  - idx=289: 'do'+'n’t'
+  - idx=298: 'do'+'n’t'
+  - idx=333: 'do'+'n’t'
+
+[page 679] chars=5178, tokens=1275, missing=0 (0.00%), empty_spaces=271, suspicious_joins=11, first_rebuild_diff=None
+whitespace: newline(U+000A)=6, space(U+0020)=1007
+suspicious_join_examples:
+  - idx=144: 'could'+'n’t'
+  - idx=463: 'could'+'n’t'
+  - idx=551: 'did'+'n’t'
+  - idx=654: 'would'+'n’t'
+  - idx=678: 'do'+'n’t'
+  - idx=715: 'do'+'n’t'
+
+[page 272] chars=3187, tokens=729, missing=0 (0.00%), empty_spaces=162, suspicious_joins=11, first_rebuild_diff=None
+whitespace: newline(U+000A)=10, space(U+0020)=572
+suspicious_join_examples:
+  - idx=38: 'are'+'n’t'
+  - idx=98: 'sha'+'n’t'
+  - idx=131: 'wo'+'n’t'
+  - idx=178: 'wo'+'n’t'
+  - idx=193: 'does'+'n’t'
+  - idx=268: 'has'+'n’t'
+
+[page 467] chars=1908, tokens=499, missing=0 (0.00%), empty_spaces=145, suspicious_joins=11, first_rebuild_diff=None
+whitespace: newline(U+000A)=14, space(U+0020)=361
+suspicious_join_examples:
+  - idx=1: 'Do'+'n’t'
+  - idx=16: 'Do'+'n’t'
+  - idx=35: 'do'+'n’t'
+  - idx=52: 'must'+'n’t'
+  - idx=72: 'wo'+'n’t'
+  - idx=181: 'do'+'n’t'

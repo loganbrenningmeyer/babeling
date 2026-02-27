@@ -1,15 +1,18 @@
 "use client";
 
+import { RotateCcw } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { ChevronRight } from "lucide-react";
+
 import { ResumeTranslationButton } from "./ResumeTranslationButton";
 import { LangBadge } from "@/app/components/LangBadge";
 
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
-import { truncate, capitalizeWords } from "@/lib/string";
+
+import { capitalizeWords, formatRelativeTime, truncate } from "@/lib/string";
 
 
 export function DocumentFront({
@@ -28,18 +31,23 @@ export function DocumentFront({
   * ( Front ): Document Info
   * ------------------------- */}
   return (
-    <Card className="
-      relative rounded-xl h-full w-full overflow-hidden
-      border bg-card p-5 shadow-sm
-      transform-gpu will-change-transform
-      transition duration-200 ease-out
-      group-hover/doc-card:-translate-y-1
-      group-hover/doc-card:border-blue-400/60
-      group-hover/doc-card:shadow-md
-      group-focus-visible/doc-card:-translate-y-1
-      group-focus-visible/doc-card:border-orange-200
-      group-focus-visible/doc-card:shadow-md
-    ">
+    <Card 
+      className="
+        relative h-full w-full overflow-hidden
+
+        rounded-xl border bg-card p-5 pb-2 shadow-sm
+        
+        transform-gpu will-change-transform
+        transition duration-200 ease-out
+        
+        group-hover/doc-front:-translate-y-1
+        group-hover/doc-front:border-blue-400/60
+        group-hover/doc-front:shadow-md
+        group-focus-visible/doc-front:-translate-y-1
+        group-focus-visible/doc-front:border-orange-200
+        group-focus-visible/doc-front:shadow-md
+      "
+    >
       {/* Source Language Accent Strip */}
       <div className={`absolute inset-y-0 left-0 w-1.5 ${srcAccent}`} />
       <CardContent className="h-full p-0 space-y-4 flex flex-col">
@@ -67,20 +75,48 @@ export function DocumentFront({
         * Continue Button + Tap to view translations
         * ------------------------- */}
         <Separator />
-        <div className="mt-auto flex items-center justify-between gap-4 whitespace-nowrap">
-          {recentTranslation && (
+        <div 
+          className="
+            flex items-center justify-between 
+            mt-auto gap-4 whitespace-nowrap
+          "
+        >
+          <div className="flex flex-col items-center gap-1">
             <ResumeTranslationButton
               document={document}
               translation={recentTranslation}
               loading={translationsLoading}
             >
               <span>Continue</span>
-              <LangBadge lang={recentTranslation.tgtLang} />
+              {recentTranslation && (
+                <LangBadge lang={recentTranslation.tgtLang} />
+              )}
             </ResumeTranslationButton>
-          )}
-          <span className="inline-flex gap-1 items-center text-xs text-muted-foreground">
+            
+            {recentTranslation && (
+              <p className="text-xs text-muted-foreground/60 text-center italic">
+                Read {formatRelativeTime(recentTranslation.lastOpenedAt)}
+              </p>
+            )}
+          </div>
+          <span 
+            className="
+              inline-flex gap-1 items-center 
+              text-xs text-muted-foreground
+              text-muted-foreground
+              pointer-events-none
+              opacity-0 group-hover/doc-front:opacity-60
+              transition-opacity duration-150
+            "
+          >
             Translations
-            <ChevronRight size={14}/>
+            <RotateCcw 
+              className="
+                h-4 w-4
+                transition-transform duration-300 ease-out
+                group-hover/doc-front:-rotate-180
+              "
+            />
           </span>
         </div>
       </CardContent>

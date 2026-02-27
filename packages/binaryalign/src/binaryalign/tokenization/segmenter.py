@@ -21,8 +21,9 @@ class Segmenter:
 
     def split_words(self, text: str) -> list[str]:
         """ """
-        # -- Break sentences into words
-        words = [t.text for t in self.nlp(text)]
+        # -- Break text into lexical tokens only (exclude pure whitespace tokens).
+        # This keeps token arrays compatible with UI rendering and spacing logic.
+        words = [t.text for t in self.nlp(text) if not t.is_space]
         return words
 
     def split_sents(self, text: str) -> list[str]:
@@ -240,29 +241,40 @@ class Segmenter:
     
     def get_token_spaces(self, text: str, tokens: list[str]) -> list[str]:
         """ 
-        Scans text left-to-right and for each token, captures the whitespace
-        immediately after it
+        Returns trailing whitespace for each token.
+
+        Primary strategy:
+            tokenize `text` once with spaCy and read `token.whitespace_`.
+
+        Fallback strategy:
+            if `tokens` is a filtered/reordered subset, align as an ordered
+            subsequence against spaCy token stream to avoid `str.find` drift.
 
         Returns:
             spaces (list[str]): List of trailing whitespaces (or "") for each token in text
         """
-        i = 0
-        spaces = []
+        doc = self.nlp(text)
+        doc_tokens = [t.text for t in doc if not t.is_space]
+        doc_spaces = [t.whitespace_ for t in doc if not t.is_space]
+
+        # -- Fast path: tokenization matches exactly.
+        if tokens == doc_tokens:
+            return doc_spaces
+
+        # -- Robust path: align requested tokens against spaCy token stream
+        # in order. This prevents catastrophic drift when one token mismatches.
+        spaces: list[str] = []
+        j = 0
 
         for token in tokens:
-            start = text.find(token, i)
+            while j < len(doc_tokens) and doc_tokens[j] != token:
+                j += 1
 
-            if start == -1:
+            if j >= len(doc_tokens):
                 spaces.append("")
                 continue
 
-            end = start + len(token)
-
-            j = end
-            while j < len(text) and text[j].isspace():
-                j += 1
-
-            spaces.append(text[end:j])
-            i = j
+            spaces.append(doc_spaces[j])
+            j += 1
 
         return spaces

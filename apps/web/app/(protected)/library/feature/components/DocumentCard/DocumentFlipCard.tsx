@@ -38,7 +38,7 @@ export function DocumentFlipCard({
     >
       <div className="relative aspect-[4/3] w-full [perspective:800px]">
         <motion.div
-          animate={{ rotateY: flipped ? 180 : 0 }}
+          animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
           className="absolute inset-0 [transform-style:preserve-3d]"
         >
@@ -46,19 +46,19 @@ export function DocumentFlipCard({
           * ( Front ): Document Info
           * ------------------------- */}
           <div className="absolute inset-0 [backface-visibility:hidden] cursor-pointer">
-            <div className={`h-full w-full ${flipped ? "" : "group/doc-card"}`}>
+            <div className={`h-full w-full ${flipped ? "" : "group/doc-front"}`}>
               <DocumentFront 
                 document={document}
                 recentTranslation={recentTranslation}
                 translationsLoading={translationsLoading}
-                />
+              />
             </div>
           </div>
           {/* -------------------------
           * ( Back ): Translations Info
           * ------------------------- */}
-          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)]">
-            <div className="h-full w-full">
+          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(-180deg)]">
+            <div className={`h-full w-full ${!flipped ? "" : "group/doc-back"}`}>
               <DocumentBack 
                 document={document}
                 translations={translations}

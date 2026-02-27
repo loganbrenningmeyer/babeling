@@ -37,7 +37,7 @@ export async function GET(req: Request) {
 
 // -------------------------
 // POST: /api/documents/
-// -- Save document to database
+// -- Save raw text as Document to database
 // -------------------------
 export async function POST(req: Request) {
   // -------------------------

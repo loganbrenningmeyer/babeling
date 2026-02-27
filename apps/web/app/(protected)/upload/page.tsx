@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { ArrowRight, Clock, Repeat } from "lucide-react";
 
-import { useCreateDocument } from "./feature/hooks/useCreateDocument";
+import { CreateDocumentInput, useCreateDocument } from "./feature/hooks/useCreateDocument";
 import { useRecentDocuments } from "../library/feature/hooks/useRecentDocuments";
 
 // =========================
@@ -108,7 +108,6 @@ export default function UploadPage() {
   async function onClickTranslate() {
     if (!canTranslate) return;
 
-    const text = srcFile ? await srcFile.text() : srcText;
     const normalizedFileTitle = srcFile?.name
       .replace(/\.[^/.]+$/, "")
       .replace(/[-_]+/g, " ")
@@ -116,11 +115,30 @@ export default function UploadPage() {
     const documentTitle =
       title.trim() || normalizedFileTitle || "Untitled document";
 
-    const result = await create({
-      title: documentTitle,
-      srcLang,
-      text,
-    });
+    // Create document creation input
+    let input: CreateDocumentInput;
+
+    if (srcFile) {
+      input = {
+        title: documentTitle,
+        srcLang,
+        source: {
+          kind: "file",
+          file: srcFile,
+        },
+      };
+    } else {
+      input = {
+        title: documentTitle,
+        srcLang,
+        source: {
+          kind: "text",
+          text: srcText,
+        }
+      };
+    }
+
+    const result = await create(input);
 
     if (!result) return;
 

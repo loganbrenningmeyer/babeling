@@ -2,16 +2,20 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { RotateCw } from "lucide-react";
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { RadialProgress } from "@/app/components/RadialProgress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { RadialProgress } from "@/app/components/RadialProgress";
+
 import { ResumeTranslationButton } from "./ResumeTranslationButton";
 
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
-import { capitalizeWords } from "@/lib/string";
+
+import { capitalizeWords, formatRelativeTime } from "@/lib/string";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
@@ -88,14 +92,41 @@ export function DocumentBack({
   }
 
   return (
-    <Card className="h-full w-full rounded-xl border bg-card p-5 shadow-sm">
+    <Card className="h-full w-full rounded-xl border bg-card p-5 pb-2 shadow-sm">
       <CardContent className="p-0 h-full flex flex-col">
         {/* -------------------------
         //* Document Title
         //* ------------------------- */}
-        <h2 className="text-md font-reading font-medium leading-tight mb-3">
-          {capitalizeWords(document.title)}
-        </h2>
+        <div 
+          className="
+            inline-flex items-center justify-between 
+            gap-3 mb-3
+          "
+        >
+          <h2 className="text-md font-reading font-medium leading-tight">
+            {capitalizeWords(document.title)}
+          </h2>
+
+          <div
+            className="
+              inline-flex gap-1 items-center 
+              text-xs text-muted-foreground
+              text-muted-foreground
+              opacity-0 group-hover/doc-back:opacity-60
+              transition-opacity duration-150
+              cursor-pointer
+            "
+          >
+            Back
+            <RotateCw 
+              className="
+                h-4 w-4
+                transition-transform duration-300 ease-out
+                group-hover/doc-back:rotate-180
+              "
+            />
+          </div>
+        </div>
         {/* -------------------------
         //* Translations Tabs
         //* ------------------------- */}
@@ -173,7 +204,7 @@ export function DocumentBack({
                         {"Progress".toUpperCase()}
                       </h2>
                       <div>
-                        <span className="text-lg font-reading font-semibold">p.{t.currentPageNumber}</span>
+                        <span className="text-lg font-reading font-semibold">p. {t.currentPageNumber}</span>
                         <span className="text-sm font-reading font-normal"> of {document.totalPages}</span>
                       </div>
                     </div>
@@ -191,13 +222,19 @@ export function DocumentBack({
               //* ------------------------- */}
               <Separator />
               <div className="mt-auto">
-                <ResumeTranslationButton 
-                  document={document}
-                  translation={t}
-                  loading={false}
-                >
-                  Resume reading
-                </ResumeTranslationButton>
+                <div className="w-fit flex flex-col items-center gap-1">
+                  <ResumeTranslationButton 
+                    document={document}
+                    translation={t}
+                    loading={false}
+                  >
+                    Resume reading
+                  </ResumeTranslationButton>
+                  
+                  <p className="text-xs text-muted-foreground/60 text-center italic">
+                    Read {formatRelativeTime(t.lastOpenedAt)}
+                  </p>
+                </div>
               </div>
             </TabsContent>
           ))}

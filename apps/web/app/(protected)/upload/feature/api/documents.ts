@@ -1,9 +1,10 @@
+
 /**************************
- * `createDocument()`
+ * `createTextDocument()`
  * -- POST: /api/documents
  *    Saves new Document to database and returns its document ID
  **************************/
-export async function createDocument(args: {
+export async function createTextDocument(args: {
   title: string;
   srcLang: string;
   text: string;
@@ -28,4 +29,32 @@ export async function createDocument(args: {
 }
 
 
+/**************************
+ * `createFileDocument()`
+ * -- POST: /api/documents/upload
+ *    Saves new Document from given file and returns its document ID
+ **************************/
+export async function createFileDocument(args: {
+  title: string;
+  srcLang: string;
+  file: File;
+}): Promise<{ documentId: number }> {
+  // Create FormData
+  const fd = new FormData();
+  fd.append("title", args.title);
+  fd.append("src_lang", args.srcLang);
+  fd.append("file", args.file);
 
+  const res = await fetch("/api/documents/upload", {
+    method: "POST",
+    body: fd,
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to save document");
+  }
+
+  const data = await res.json();
+
+  return { documentId: data.document_id };
+}
