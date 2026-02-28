@@ -112,36 +112,23 @@ class EpubDocument:
             cur_len = 0
             page_idx = 0
 
-            for b_i, b in enumerate(s.blocks):
+            for b in s.blocks:
                 if b.type == "text":
                     add = len(b.text) + 2
                 else:
                     add = 0
 
                 if page_blocks and cur_len + add > max_chars:
-                    # -- Add final block
-                    page_blocks.append(b)
-
-                    # -- If second to last section block, add final block if small enough (< quarter of page size)
-                    if b_i == len(s.blocks) - 2 and s.blocks[-1].text is not None:
-                        if len(s.blocks[-1].text) < max_chars // 4:
-                            page_blocks.append(s.blocks[-1])
-
-                            pages.append(EpubPage(
-                                section_key=s.key,
-                                section_title=s.title,
-                                page_index=page_idx,
-                                blocks=tuple(page_blocks),
-                            ))
-
-                            page_idx += 1
-                            page_blocks = []
-                            cur_len = 0
-                            break
+                    pages.append(EpubPage(
+                        section_key=s.key,
+                        section_title=s.title,
+                        page_index=page_idx,
+                        blocks=tuple(page_blocks),
+                    ))
 
                     page_idx += 1
-                    page_blocks = []
-                    cur_len = 0
+                    page_blocks = [b]
+                    cur_len = add
                     continue
 
                 page_blocks.append(b)

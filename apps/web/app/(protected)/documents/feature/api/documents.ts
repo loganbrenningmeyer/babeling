@@ -31,15 +31,26 @@ export async function getDocumentById(
     id: p.id,
     pageNumber: p.page_number,
     srcText: p.src_text,
+    sectionId: p.section_id ?? null,
   }));
 
   pages.sort((a, b) => a.pageNumber - b.pageNumber);
 
+  // -------------------------
+  // Preserve sections for current-page section title lookup
+  // -------------------------
+  const sections = (data.sections ?? []).map((s) => ({
+    id: s.id,
+    title: s.title,
+  }));
+
   return {
     documentId: data.document_id,
     title: data.title,
+    author: data.author,
     srcLang: data.src_lang,
     tgtLang: data.tgt_lang ?? null,
     pages,
+    sections,
   };
 }

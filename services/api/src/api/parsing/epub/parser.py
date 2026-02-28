@@ -1,5 +1,6 @@
 import io
 import itertools
+import re
 import zipfile
 from ebooklib import epub, ITEM_COVER, ITEM_IMAGE, ITEM_DOCUMENT
 from ebooklib.epub import EpubBook, EpubItem, Link
@@ -33,6 +34,16 @@ def norm_path(p: str) -> str:
     to avoid using OS-specific path separators (e.g., Windows \)
     """
     return str(PurePosixPath(p))
+
+
+def norm_text_block(text: str) -> str:
+    """
+    De-wraps publisher hard line breaks inside a text block
+    """
+    norm_text = text.replace("\r\n", "\n").replace("\r", "\n")
+    norm_text = re.sub(r"\s*\n\s*", " ", norm_text)
+    norm_text = re.sub(r"[^\S\n]+", " ", norm_text).strip()
+    return norm_text
 
 
 def resolve_src(doc_path: str, src: str) -> str:
@@ -590,7 +601,8 @@ class EpubParser:
                 if self._has_nested_semantic_block(el):
                     continue
 
-                text = el.get_text(" ", strip=True)
+                text = norm_text_block(el.get_text(" ", strip=True))
+
                 if text:
                     blocks.append({"type": "text", "tag": el.name, "text": text})
                 continue
@@ -599,7 +611,9 @@ class EpubParser:
             # 3. <div> fallback paragraphs
             # -------------------------
             if is_texty_leaf_div(el):
-                blocks.append({"type": "text", "tag": "div", "text": el.get_text(" ", strip=True)})
+                text = norm_text_block(el.get_text(" ", strip=True))
+
+                blocks.append({"type": "text", "tag": "div", "text": text})
                 continue
 
         return blocks, images

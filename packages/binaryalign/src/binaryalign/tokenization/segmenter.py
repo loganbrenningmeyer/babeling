@@ -21,10 +21,72 @@ class Segmenter:
 
     def split_words(self, text: str) -> list[str]:
         """ """
-        # -- Break text into lexical tokens only (exclude pure whitespace tokens).
-        # This keeps token arrays compatible with UI rendering and spacing logic.
-        words = [t.text for t in self.nlp(text) if not t.is_space]
+        # -- Reuse the same one-pass tokenizer that also produces spaces, so
+        #    the render token stream always comes from one canonical source.
+        words, _ = self.tokenize_with_spaces(text)
         return words
+    
+    def tokenize_with_spaces(self, text: str) -> tuple[list[str], list[str]]:
+        """
+        Tokenizes `text` once with spaCy and returns:
+        1) the renderable tokens (excluding pure whitespace tokens)
+        2) the exact trailing whitespace for each token
+
+        This is the canonical render tokenization path. The key idea is that
+        the words and spaces come from the same spaCy document pass, which
+        avoids later attempts to "re-find" tokens inside the raw text.
+        """
+        # -------------------------
+        # Tokenize text once
+        # -------------------------
+        doc = self.nlp(text)
+
+        words: list[str] = []
+        spaces: list[str] = []
+
+        for token in doc:
+            # -- Skip pure whitespace tokens
+            if token.is_space:
+                continue
+
+            words.append(token.text)
+            spaces.append(token.whitespace_)
+
+        return words, spaces
+
+    def find_token_span(
+        self,
+        full_tokens: list[str],
+        sentence_tokens: list[str],
+        start_idx: int = 0,
+    ) -> tuple[int, int]:
+        """
+        Finds `sentence_tokens` as one contiguous slice inside `full_tokens`,
+        searching from `start_idx` forward.
+
+        This is used to map sentence-level tokenization back onto the single
+        full-text token stream so global token indices stay aligned with the
+        exact words/spaces that the UI renders.
+
+        Returns:
+            (start, end): slice bounds such that:
+                full_tokens[start:end] == sentence_tokens
+        """
+        # -- Empty sentence maps to an empty slice at the current cursor
+        if not sentence_tokens:
+            return start_idx, start_idx
+
+        # -------------------------
+        # Search for exact contiguous match
+        # -------------------------
+        max_start = len(full_tokens) - len(sentence_tokens)
+        for i in range(start_idx, max_start + 1):
+            if full_tokens[i:i + len(sentence_tokens)] == sentence_tokens:
+                return i, i + len(sentence_tokens)
+
+        raise ValueError(
+            f"Could not map sentence tokens back to full token stream from index {start_idx}"
+        )
 
     def split_sents(self, text: str) -> list[str]:
         """ """
@@ -70,10 +132,15 @@ class Segmenter:
         # Protect common abbreviations (both EN/FR-ish); keep this list small+high precision
         # NOTE: This is intentionally conservative; you can expand as needed.
         abbr = [
-            r"Mr\.", r"Mrs\.", r"Ms\.", r"Dr\.", r"Prof\.", r"Sr\.", r"Jr\.",
-            r"St\.", r"No\.", r"Inc\.", r"Ltd\.", r"Co\.", r"vs\.", r"etc\.",
-            r"e\.g\.", r"i\.e\.", r"U\.S\.", r"U\.K\.", r"E\.U\.",
-            r"M\.", r"Mme\.", r"Mlle\.", r"p\.\s*ex\.", r"c\.-à-d\.", r"n°\."
+            r"(?<!\w)Mr\.(?!\w)", r"(?<!\w)Mrs\.(?!\w)", r"(?<!\w)Ms\.(?!\w)",
+            r"(?<!\w)Dr\.(?!\w)", r"(?<!\w)Prof\.(?!\w)", r"(?<!\w)Sr\.(?!\w)",
+            r"(?<!\w)Jr\.(?!\w)", r"(?<!\w)St\.(?!\w)", r"(?<!\w)No\.(?!\w)",
+            r"(?<!\w)Inc\.(?!\w)", r"(?<!\w)Ltd\.(?!\w)", r"(?<!\w)Co\.(?!\w)",
+            r"(?<!\w)vs\.(?!\w)", r"(?<!\w)etc\.(?!\w)", r"(?<!\w)e\.g\.(?!\w)",
+            r"(?<!\w)i\.e\.(?!\w)", r"(?<!\w)U\.S\.(?!\w)", r"(?<!\w)U\.K\.(?!\w)",
+            r"(?<!\w)E\.U\.(?!\w)", r"(?<!\w)M\.(?!\w)", r"(?<!\w)Mme\.(?!\w)",
+            r"(?<!\w)Mlle\.(?!\w)", r"(?<!\w)p\.\s*ex\.(?!\w)",
+            r"(?<!\w)c\.-à-d\.(?!\w)", r"(?<!\w)n°\.(?!\w)"
         ]
         # Replace the final dot in each abbreviation with DOT
         for a in abbr:
@@ -253,9 +320,8 @@ class Segmenter:
         Returns:
             spaces (list[str]): List of trailing whitespaces (or "") for each token in text
         """
-        doc = self.nlp(text)
-        doc_tokens = [t.text for t in doc if not t.is_space]
-        doc_spaces = [t.whitespace_ for t in doc if not t.is_space]
+        # -- Tokenize once to get the canonical token/space stream
+        doc_tokens, doc_spaces = self.tokenize_with_spaces(text)
 
         # -- Fast path: tokenization matches exactly.
         if tokens == doc_tokens:

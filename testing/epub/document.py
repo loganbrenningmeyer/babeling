@@ -157,19 +157,47 @@ class EpubDocument:
 
         return pages
     
-    def save_pages(self, out_path: Path | str, max_chars: int = 1800):
+    def print_pages(self, max_chars: int = 1800, out_path: Path | str = None):
         # -- Build EpubPages
         pages = self.build_pages(max_chars)
-        page_texts = [p.get_page_text() for p in pages]
-
+        
         # -------------------------
         # Save to file
         # -------------------------
-        Path(out_path).parent.mkdir(parents=True, exist_ok=True)
+        if out_path:
+            Path(out_path).parent.mkdir(parents=True, exist_ok=True)
 
-        with open(out_path, "w", encoding="utf-8") as f:
-            for text in page_texts:
-                f.write(f"{text}\n\n")
+            with open(out_path, "w", encoding="utf-8") as f:
+                for i, page in enumerate(pages):
+                    num_chars = sum([len(b.text) for b in page.blocks])
+
+                    f.write(
+                        f"\n\n=============== [ Page {i + 1} - {num_chars} Characters ]: "
+                        f"( Section - {page.section_title} ) ===============\n"
+                    )
+
+                    for b_i, block in enumerate(page.blocks):
+                        f.write(f"\n===== [ Block {b_i + 1} ] =====\n")
+                        f.write(f"-- ( type ): {block.type}\n")
+                        f.write(f"-- ( tag ): {block.tag}\n")
+                        if block.type == "text":
+                            f.write(f"-- ( text ): {block.text}\n")
+                        else:
+                            f.write(f"-- ( image_key ): {block.image_key}\n")
+        # -------------------------
+        # Print to terminal
+        # -------------------------
+        else:
+            for i, page in enumerate(pages):
+                print(f"\n=============== [ Page {i + 1} ]: ( Section - {page.section_title} ) ===============")
+                for b_i, block in enumerate(page.blocks):
+                    print(f"===== [ Block {b_i + 1} ] =====")
+                    print(f"-- ( type ): {block.type}")
+                    print(f"-- ( tag ): {block.tag}")
+                    if block.type == "text":
+                        print(f"-- ( text ): {block.text}")
+                    else:
+                        print(f"-- ( image_key ): {block.image_key}")
 
     @staticmethod
     def _is_front_matter_title(title: str) -> bool:

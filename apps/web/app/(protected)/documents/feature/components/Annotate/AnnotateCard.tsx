@@ -89,11 +89,11 @@ export function AnnotateCard({
       //* ( Form ): Clicked Word Info
       //* ------------------------- */}
       {defineData && (
-        <div className="space-y-3">
+        <div className="space-y-2">
           <div className="flex flex-col gap-2">
             <div className="space-y-1">
               {/* Form */}
-              <div className="font-reading text-2xl font-bold">
+              <div className="font-reading text-xl font-bold">
                 {defineData.form.toLowerCase()}
               </div>
               {/* POS + IPA */}
@@ -122,7 +122,7 @@ export function AnnotateCard({
           </div>
 
 
-          <p className="text-lg leading-6 font-ui pt-4">
+          <p className="text-md leading-6 font-ui">
             {defineData.gloss ? defineData.gloss : m.reader.annotationCard.defUnavailable}
           </p>
         </div>

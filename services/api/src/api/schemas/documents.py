@@ -57,6 +57,7 @@ class DocumentPageOut(BaseModel):
 class DocumentLoadResponse(BaseModel):
     document_id: int
     title: str
+    author: str | None
     source_kind: str
     src_lang: str
     tgt_lang: str | None

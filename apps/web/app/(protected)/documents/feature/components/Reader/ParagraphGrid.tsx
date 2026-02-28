@@ -26,6 +26,7 @@ type ParagraphGridProps = {
   targetDisabled?: boolean;
 
   className?: string;
+  gapAndPad?: string;
 }
 
 // Slice words/spaces by idxs range
@@ -45,7 +46,7 @@ function stripTrailingParagraphBreak(spaces: string[]) {
   if (!spaces.length) return spaces;
   const out = [...spaces];
   const last = out.length - 1;
-  if (out[last].includes("\n\n")) out[last] = "\n";
+  out[last] = out[last].replace(/\n+$/, "");
   return out;
 }
 
@@ -76,6 +77,7 @@ export function ParagraphGrid({
   onTargetWordClick,
   targetDisabled,
   className,  
+  gapAndPad,
 }: ParagraphGridProps) {
   // Get unique paragraph IDs
   const parIds = useMemo(() => {
@@ -98,9 +100,9 @@ export function ParagraphGrid({
         tgtSlice.spaces = stripTrailingParagraphBreak(tgtSlice.spaces);
 
         return (
-          <div key={parId} className="grid grid-cols-2">
+          <div key={parId} className={`grid grid-cols-2 py-4 ${gapAndPad ?? ""}`}>
             {/* Left: Source paragraph */}
-            <div className="my-4 mx-8 mr-10">
+            <div>
               <HoverText
                 variant="source"
                 words={srcSlice.words}
@@ -117,12 +119,13 @@ export function ParagraphGrid({
                   blurred: blurredSource,
                   setBlurred: setBlurredSource,
                 }}
+                indentFirstLine={true}
                 className="text-muted-foreground"
               />
             </div>
 
             {/* Right: Target paragraph */}
-            <div className="my-4 mr-8 ml-12">
+            <div>
               <HoverText
                 variant="target"
                 words={tgtSlice.words}
@@ -132,6 +135,7 @@ export function ParagraphGrid({
                 onHover={onTargetHover}
                 highlightIndices={targetHighlightIndices}
                 onWordClick={onTargetWordClick}
+                indentFirstLine={true}
               />
             </div>
 

@@ -3,14 +3,18 @@
 import { useState, useMemo, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+import { Separator } from "@/components/ui/separator";
+
+import { ReaderShell } from "../feature/components/ReaderShell";
+import { TOCSheet } from "../feature/components/Navigation/TOCSheet";
+
+import { BlurMode } from "../feature/types/blur";
+
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 import { saveReadProgress } from "../feature/api/readProgress";
-
-import { BlurMode } from "../feature/types/blur";
-
-import { ReaderShell } from "../feature/components/ReaderShell";
+import { capitalizeWords } from "@/lib/string";
 import { getLangLabel } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
@@ -73,6 +77,22 @@ export default function ReaderPageClient({
 
     return Math.max(0, Math.min(zeroBased, document.pages.length - 1));
   }, [document, requestedPageNumber]);
+
+  // -------------------------
+  // Get current page / section title from loaded document data
+  // -------------------------
+  const currentPage = useMemo(() => {
+    if (!document) return null;
+    return document.pages[pageIndex] ?? null;
+  }, [document, pageIndex]);
+
+  const currentSectionTitle = useMemo(() => {
+    if (!document || currentPage?.sectionId == null) return null;
+
+    return (
+      document.sections.find((section) => section.id === currentPage.sectionId)?.title ?? null
+    );
+  }, [document, currentPage?.sectionId]);
 
   // -------------------------
   // Begin ReaderSession for the current document / pageIndex / tgtLang
@@ -218,30 +238,66 @@ export default function ReaderPageClient({
   if (sessError) return <div className="p-4 text-sm text-red-600">{sessError}</div>;
 
   return (
-    <div className="p-4 font-ui">
-      <ReaderShell
-        title={document?.title ?? ""}
-        srcLang={srcLang}
-        tgtLang={tgtLang}
-        srcLabel={srcLabel}
-        tgtLabel={tgtLabel}
-        session={session}
-        loading={documentLoading || sessLoading}
-        pageIndex={pageIndex}
-        pageCount={pageCount}
-        onPrevPage={onPrevPage}
-        onNextPage={onNextPage}
-        blurMode={blurMode}
-        onBlurModeChange={setBlurMode}
-        sourceBlurEnabled={sourceBlurEnabled}
-        onSourceBlurEnabledChange={setSourceBlurEnabled}
-        interaction={{
-          blurredSource,
-          setBlurredSource,
-          ...interaction,
-        }}
-        msgs={m.reader}
-      />
+    <div className="flex h-full min-h-0 flex-col overflow-hidden">
+      <div className="relative h-16 shrink-0 px-4">
+        {/* -------------------------
+        * Left: TOC + Title / Author
+        * ------------------------- */}
+        <div className="flex h-full min-w-0 items-center">
+          <TOCSheet />
+          <div className="ml-4 min-w-0">
+            <span className="font-reading text-md font-bold">
+              {capitalizeWords(document?.title ?? "")}
+              {document?.author && (
+                <span className="font-reading italic font-thin text-muted-foreground">
+                  {" — "}{document.author}
+                </span>
+              )}
+            </span>
+          </div>
+        </div>
+
+        {/* -------------------------
+        * Center: Current Section
+        * ------------------------- */}
+        {currentSectionTitle && (
+          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-20">
+            <span className="font-reading truncate text-lg text-muted-foreground">
+              {currentSectionTitle}
+            </span>
+          </div>
+        )}
+      </div>
+
+      <Separator />
+
+      <div className="min-h-0 flex-1 overflow-hidden">
+        <div className="mx-auto h-full w-full max-w-[90rem] overflow-hidden">
+          <ReaderShell
+            title={document?.title ?? ""}
+            srcLang={srcLang}
+            tgtLang={tgtLang}
+            srcLabel={srcLabel}
+            tgtLabel={tgtLabel}
+            session={session}
+            loading={documentLoading || sessLoading}
+            pageIndex={pageIndex}
+            pageCount={pageCount}
+            onPrevPage={onPrevPage}
+            onNextPage={onNextPage}
+            blurMode={blurMode}
+            onBlurModeChange={setBlurMode}
+            sourceBlurEnabled={sourceBlurEnabled}
+            onSourceBlurEnabledChange={setSourceBlurEnabled}
+            interaction={{
+              blurredSource,
+              setBlurredSource,
+              ...interaction,
+            }}
+            msgs={m.reader}
+          />
+        </div>
+      </div>
     </div>
   );
 }

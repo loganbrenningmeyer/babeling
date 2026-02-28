@@ -684,6 +684,7 @@ def load_document(
     return DocumentLoadResponse(
         document_id=doc.id,
         title=doc.title,
+        author=doc.epub_author,
         source_kind=doc.source_kind,
         src_lang=doc.src_lang,
         tgt_lang=latest_tgt_lang,

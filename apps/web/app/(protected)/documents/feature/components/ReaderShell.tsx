@@ -16,6 +16,7 @@ import { AnnotateCard, type DefineEntry, type ExplainEntry } from "@/app/(protec
 import { SourceBlurButton } from "@/app/(protected)/documents/feature/components/SourceBlur/SourceBlurButton";
 import { BlurModeToggle } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
+import { TOCSheet } from "./Navigation/TOCSheet";
 
 import { capitalizeWords } from "@/lib/string";
 
@@ -97,22 +98,24 @@ export function ReaderShell({
 }: ReaderShellProps) {
   const renderLoading = loading || !session;
 
-  return (
-    <div className="h-[calc(100dvh-4rem-2rem)] flex flex-col overflow-hidden">
-      {/* -------------------------
-      * Document Title
-      * ------------------------- */}
-      <div className="relative shrink-0 pb-4 text-center">
-        <div
-          aria-hidden="true"
-          className="pointer-events-none absolute bottom-0 left-1/2 border-l border-border/60"
-        />
-        <div className="inline-flex flex-col">
-          <span className="text-[18px] font-medium">{capitalizeWords(title)}</span>
-          <span className="mt-1 h-1 w-full bg-gray-200" />
-        </div>
-      </div>
+  {/* -------------------------
+  * Control Text / Header gap and side padding
+  * ------------------------- */}
+  const layoutPresets = {
+    12: "gap-12 px-6",
+    16: "gap-16 px-8",
+    20: "gap-20 px-10",
+    24: "gap-24 px-12",
+    28: "gap-28 px-14",
+    32: "gap-32 px-16",
+  } as const;
 
+  const gap = 24;
+  const gapAndPad = layoutPresets[gap] ?? layoutPresets[16];
+
+
+  return (
+    <div className="h-full flex flex-col overflow-hidden">
       <TextSurface className="flex-1 min-h-0 flex flex-col overflow-hidden">
         <div className="relative flex-1 min-h-0 flex flex-col overflow-hidden border-b">
           <div
@@ -123,16 +126,17 @@ export function ReaderShell({
           * Source / Target Language Headers
           * ------------------------- */}
           <div
-            className="
-            shrink-0 grid grid-cols-2 border-b
-            text-[16px] font-medium
-            leading-none text-foreground/90
-          "
+            className={`
+              shrink-0 grid grid-cols-2 border-b
+              text-[16px] font-medium
+              leading-none text-foreground/90
+              ${gapAndPad}
+            `}
           >
             {/* -------------------------
             * Source Langugage Header
             * ------------------------- */}
-            <div className="px-8 pt-4 pb-3">
+            <div className="pt-4 pb-3">
               <div className="flex justify-between">
                 <div>
                   {renderLoading ? (
@@ -158,7 +162,7 @@ export function ReaderShell({
             {/* -------------------------
             * Target Language Header
             * ------------------------- */}
-            <div className="pl-10 pt-4 pb-3">
+            <div className="pt-4 pb-3">
               <div>
                 {renderLoading ? (
                   <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted-foreground/20" />
@@ -175,19 +179,19 @@ export function ReaderShell({
           {/* -------------------------
           * [Source] | [Target] ParagraphGrid
           * ------------------------- */}
-          <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto pb-8">
+          <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto pb-8 no-scrollbar">
             {/* -------------------------
             //* Loading Skeleton || Translation Preview || ParagraphGrid
             //* ------------------------- */}
             <div className="min-h-full">
               {renderLoading ? (
-                <div className="grid grid-cols-2 p-8 pt-4">
-                  <div className="pr-8"><TextSkeleton blurClassName="blur-sm" /></div>
-                  <div className="pl-8"><TextSkeleton /></div>
+                <div className={`grid grid-cols-2 pt-4 pb-8 ${gapAndPad}`}>
+                  <div><TextSkeleton blurClassName="blur-sm" /></div>
+                  <div><TextSkeleton /></div>
                 </div>
               ) : (
                 <ParagraphGrid
-                  className="text-[20px] leading-[1.5]"
+                  className="text-[20px] leading-[1.7]"
                   session={session}
                   blurMode={blurMode}
                   blurredSource={sourceBlurEnabled ? interaction.blurredSource : new Set()}
@@ -198,6 +202,7 @@ export function ReaderShell({
                   onTargetHover={interaction.onTargetHover}
                   onTargetWordClick={interaction.onTargetWordClick}
                   targetDisabled={interaction.targetDisabled}
+                  gapAndPad={gapAndPad}
                 />
               )}
             </div>
@@ -281,7 +286,7 @@ export function ReaderShell({
         open={interaction.popoverOpen}
         onOpenChange={interaction.onPopoverOpenChange}
         anchorEl={interaction.anchorEl}
-        className="w-[min(520px,92vw)] overflow-visible"
+        className="w-[30rem] overflow-visible"
       >
         {interaction.explanationLoading || !session ? (
           <ExplainSkeleton />

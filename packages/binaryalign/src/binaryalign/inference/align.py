@@ -128,7 +128,7 @@ class BinaryAlign:
         tgt_segmenter: Segmenter,
         threshold: float = 0.5,
     ) -> AlignmentData:
-        """
+        """about:blank#blocked
 
 
         Args:
@@ -145,11 +145,34 @@ class BinaryAlign:
         src_par_sent_words = src_segmenter.split_par_sent_words(source)
         tgt_par_sent_words = tgt_segmenter.split_par_sent_words(target)
 
+        for i, (src_par, tgt_par) in enumerate(zip(src_par_sent_words, tgt_par_sent_words)):
+            if len(src_par) != len(tgt_par):
+                print(f"----- [ MISMATCH ( Paragraph {i} ) ] -----")
+                for j, src_sent in enumerate(src_par):
+                    print(f"[ Source Sentence {j} ]: {' '.join(src_sent)}")
+                for j, tgt_sent in enumerate(tgt_par):
+                    print(f"[ Target Sentence {j} ]: {' '.join(tgt_sent)}")
+
         # -------------------------
-        # Align sentence pairs / track word index offsets
+        # Build one canonical token stream for rendering
+        # -- This is the exact tokenization of the original text that the UI
+        #    should render. Sentence-level tokenization is mapped back onto
+        #    this stream so words/spaces never drift apart.
         # -------------------------
-        src_offset = 0
-        tgt_offset = 0
+        src_full_words, src_full_spaces = src_segmenter.tokenize_with_spaces(source)
+        tgt_full_words, tgt_full_spaces = tgt_segmenter.tokenize_with_spaces(target)
+
+        out.src.words = list(src_full_words)
+        out.src.spaces = list(src_full_spaces)
+
+        out.tgt.words = list(tgt_full_words)
+        out.tgt.spaces = list(tgt_full_spaces)
+
+        # -------------------------
+        # Align sentence pairs / map them onto full token stream
+        # -------------------------
+        src_cursor = 0
+        tgt_cursor = 0
 
         sent_id = 0
         # -- For each paragraph...
@@ -158,6 +181,21 @@ class BinaryAlign:
         ):
             # -- For words in each sentence...
             for src_words, tgt_words in zip(src_par, tgt_par):
+                # -------------------------
+                # Map sentence tokens to the canonical full token stream
+                # -- We search from the current cursor forward so repeated
+                #    words map to the correct occurrence in reading order.
+                # -------------------------
+                src_start, src_end = src_segmenter.find_token_span(
+                    src_full_words,
+                    src_words,
+                    src_cursor,
+                )
+                tgt_start, tgt_end = tgt_segmenter.find_token_span(
+                    tgt_full_words,
+                    tgt_words,
+                    tgt_cursor,
+                )
 
                 # -------------------------
                 # Align source / target sentence pair
@@ -167,30 +205,22 @@ class BinaryAlign:
                 )
 
                 # -------------------------
-                # Fill global words
-                # -------------------------
-                out.src.words.extend(src_words)
-                out.tgt.words.extend(tgt_words)
-
-                # -------------------------
                 # Update global alignments w/ src and tgt offset indices
                 # -------------------------
                 for src_idx, tgt_idxs in src_alignments.items():
-                    tgt_idxs_global = [tgt_idx + tgt_offset for tgt_idx in tgt_idxs]
-                    out.align.src_to_tgt[src_idx + src_offset] = tgt_idxs_global
+                    tgt_idxs_global = [tgt_start + tgt_idx for tgt_idx in tgt_idxs]
+                    out.align.src_to_tgt[src_start + src_idx] = tgt_idxs_global
 
                 for tgt_idx, src_idxs in tgt_alignments.items():
-                    src_idxs_global = [src_idx + src_offset for src_idx in src_idxs]
-                    out.align.tgt_to_src[tgt_idx + tgt_offset] = src_idxs_global
+                    src_idxs_global = [src_start + src_idx for src_idx in src_idxs]
+                    out.align.tgt_to_src[tgt_start + tgt_idx] = src_idxs_global
 
                 # -------------------------
                 # [Source]: Assign sentence / paragraph ids
                 # -------------------------
                 out.src.par_to_sent_ids[par_id].append(sent_id)
 
-                for src_idx in range(len(src_words)):
-                    # -- Global document word index
-                    src_idx_global = src_idx + src_offset
+                for src_idx_global in range(src_start, src_end):
                     # -- Sentence / Paragraph IDs
                     out.src.sent_ids.append(sent_id)
                     out.src.par_ids.append(par_id)
@@ -205,9 +235,7 @@ class BinaryAlign:
                 # -------------------------
                 out.tgt.par_to_sent_ids[par_id].append(sent_id)
 
-                for tgt_idx in range(len(tgt_words)):
-                    # -- Global document word index
-                    tgt_idx_global = tgt_idx + tgt_offset
+                for tgt_idx_global in range(tgt_start, tgt_end):
                     # -- Sentence / Paragraph IDs
                     out.tgt.sent_ids.append(sent_id)
                     out.tgt.par_ids.append(par_id)
@@ -217,17 +245,10 @@ class BinaryAlign:
                     # -- Sentence <--> Paragraph Mappings
                     out.tgt.sent_to_par_ids[sent_id] = par_id
 
-                # -- Update sentence id / word index offsets
+                # -- Advance sentence id / token cursors
                 sent_id += 1
-
-                src_offset += len(src_words)
-                tgt_offset += len(tgt_words)
-
-        # -------------------------
-        # Determine trailing whitespaces for source / target words
-        # -------------------------
-        out.src.spaces = src_segmenter.get_token_spaces(source, out.src.words)
-        out.tgt.spaces = tgt_segmenter.get_token_spaces(target, out.tgt.words)
+                src_cursor = src_end
+                tgt_cursor = tgt_end
 
         # -------------------------
         # Convert defaultdicts to dicts

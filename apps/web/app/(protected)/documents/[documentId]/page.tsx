@@ -1,6 +1,6 @@
 import ReaderPageClient from "./ReaderPageClient";
 
-export default async function Page({
+export default async function ReaderPage({
   params,
   searchParams,
 }: {
@@ -11,8 +11,11 @@ export default async function Page({
   const sp = await searchParams;
 
   return (
-    <div>
-      <ReaderPageClient documentId={documentId} searchParams={sp} />;
+    <div className="mx-auto h-[calc(100dvh-4rem)] w-full overflow-hidden">
+      <ReaderPageClient
+        documentId={documentId}
+        searchParams={sp}
+      />
     </div>
   )
 }

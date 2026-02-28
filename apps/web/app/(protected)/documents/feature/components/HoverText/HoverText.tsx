@@ -27,6 +27,7 @@ type HoverTextProps = {
   onWordClick?: (index: number, el: HTMLElement) => void;
   blur?: BlurConfig;
   disabled?: boolean;
+  indentFirstLine?: boolean;
   className?: string;
 };
 
@@ -40,6 +41,7 @@ export function HoverText({
   onWordClick,
   blur,
   disabled,
+  indentFirstLine,
   className,
 }: HoverTextProps) {
   // Define source / target highlight colors
@@ -136,38 +138,48 @@ export function HoverText({
   return (
     <p 
       className={cn(
-        "whitespace-pre-wrap font-reading", 
+        "font-reading whitespace-pre-wrap text-left", 
         disabled ? "pointer-events-none" : "",
         "select-none",
         className
       )}
     >
-    {clusters.map((c) => {
-      const baseIndex = c.anchorLocalIndex + indexOffset;
-      const isHighlighted = highlightIndices.includes(baseIndex);
-      const isBlurred = blur ? blurred.has(baseIndex) : false;
+      {/* -------------------------
+      * First Line Indent
+      * ------------------------- */}
+      {indentFirstLine && (
+        <span
+          aria-hidden
+          className="inline-block w-[1.5em]"
+        />
+      )}
 
-      return (
-        <span key={baseIndex} className="inline">
-          <span
-            onMouseEnter={() => onHover?.(baseIndex)}
-            onMouseLeave={() => onHover?.(null)}
-            onClick={(e) => handleClick(baseIndex, e)}
-            className={`inline-block rounded cursor-pointer transition-colors duration-150 ${
-              isHighlighted ? highlightColor : ""
-            }`}
-          >
-            <span className={`inline-block ${isBlurred ? "blur-sm" : "blur-none"}`}>
-              {c.text}
+      {clusters.map((c) => {
+        const baseIndex = c.anchorLocalIndex + indexOffset;
+        const isHighlighted = highlightIndices.includes(baseIndex);
+        const isBlurred = blur ? blurred.has(baseIndex) : false;
+
+        return (
+          <span key={baseIndex} className="inline">
+            <span
+              onMouseEnter={() => onHover?.(baseIndex)}
+              onMouseLeave={() => onHover?.(null)}
+              onClick={(e) => handleClick(baseIndex, e)}
+              className={`inline-block rounded cursor-pointer transition-colors duration-150 ${
+                isHighlighted ? highlightColor : ""
+              }`}
+            >
+              <span className={`inline-block ${isBlurred ? "blur-sm" : "blur-none"}`}>
+                {c.text}
+              </span>
+            </span>
+
+            <span aria-hidden className="select-none whitespace-pre-wrap">
+              {renderSpace(c.afterSpace)}
             </span>
           </span>
-
-          <span aria-hidden className="select-none whitespace-pre-wrap">
-            {renderSpace(c.afterSpace)}
-          </span>
-        </span>
-      );
-    })}
+        );
+      })}
     </p>
   )
 }
