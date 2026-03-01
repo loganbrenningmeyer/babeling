@@ -3,6 +3,8 @@
 import React, { useMemo } from "react";
 import { cn } from "@/lib/utils";
 
+import { Separator } from "@/components/ui/separator";
+
 import { HoverText } from "@/app/(protected)/documents/feature/components/HoverText/HoverText";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import type { ReaderSession } from "../../types/readerSession";
@@ -89,7 +91,7 @@ export function ParagraphGrid({
   const tgtParToWordIds = useMemo(() => buildTgtParToWordIds(session), [session]);
 
   return (
-    <div className={cn("relative min-h-full", className)}>
+    <div className={cn("relative min-h-full py-8", className)}>
       {parIds.map((parId, idx) => {
         const srcIdxs = session.alignment.src.parToWordIds[parId];
         const tgtIdxs = tgtParToWordIds[parId];
@@ -100,7 +102,7 @@ export function ParagraphGrid({
         tgtSlice.spaces = stripTrailingParagraphBreak(tgtSlice.spaces);
 
         return (
-          <div key={parId} className={`grid grid-cols-2 py-4 ${gapAndPad ?? ""}`}>
+          <div key={parId} className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
             {/* Left: Source paragraph */}
             <div>
               <HoverText
@@ -142,11 +144,11 @@ export function ParagraphGrid({
             {/* Row 2: aligned inset dividers (two separate lines) */}
             {idx < parIds.length - 1 && (
               <>
-                <div className="border-r border-border px-12">
-                  <div className="h-0.25 bg-border/60" />
+                <div className="py-4">
+                  <Separator />
                 </div>
-                <div className="px-12">
-                  <div className="h-0.25 bg-border/60" />
+                <div className="py-4">
+                  <Separator />
                 </div>
               </>
             )}

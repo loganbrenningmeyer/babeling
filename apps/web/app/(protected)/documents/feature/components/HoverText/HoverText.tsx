@@ -139,8 +139,7 @@ export function HoverText({
     <p 
       className={cn(
         "font-reading whitespace-pre-wrap text-left", 
-        disabled ? "pointer-events-none" : "",
-        "select-none",
+        disabled ? "pointer-events-none" : "",  
         className
       )}
     >
@@ -165,7 +164,7 @@ export function HoverText({
               onMouseEnter={() => onHover?.(baseIndex)}
               onMouseLeave={() => onHover?.(null)}
               onClick={(e) => handleClick(baseIndex, e)}
-              className={`inline-block rounded cursor-pointer transition-colors duration-150 ${
+              className={`inline-block rounded cursor-pointer transition-colors duration-75 ${
                 isHighlighted ? highlightColor : ""
               }`}
             >

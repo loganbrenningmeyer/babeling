@@ -11,6 +11,11 @@ export type SavedPage = {
 export type LoadedSection = {
   id: number;
   title: string;
+  depth: number;
+  parentSectionId: number | null;
+  orderIndex: number;
+  firstPageNumber: number;
+  lastPageNumber: number;
 };
 
 export type LoadedDocument = {
@@ -37,6 +42,11 @@ export type SavedPageDTO = {
 export type LoadedSectionDTO = {
   id: number;
   title: string;
+  depth: number;
+  parent_section_id: number | null;
+  order_index: number;
+  first_page_number: number;
+  last_page_number: number;
 };
 
 export type LoadedDocumentDTO = {

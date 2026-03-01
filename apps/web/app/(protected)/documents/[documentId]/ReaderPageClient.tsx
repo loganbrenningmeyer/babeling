@@ -244,7 +244,11 @@ export default function ReaderPageClient({
         * Left: TOC + Title / Author
         * ------------------------- */}
         <div className="flex h-full min-w-0 items-center">
-          <TOCSheet />
+          <TOCSheet 
+            sections={document?.sections ?? []}
+            currentPageNumber={pageIndex + 1}
+            onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
+          />
           <div className="ml-4 min-w-0">
             <span className="font-reading text-md font-bold">
               {capitalizeWords(document?.title ?? "")}

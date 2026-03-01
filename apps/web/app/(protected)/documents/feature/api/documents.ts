@@ -42,6 +42,11 @@ export async function getDocumentById(
   const sections = (data.sections ?? []).map((s) => ({
     id: s.id,
     title: s.title,
+    depth: s.depth,
+    parentSectionId: s.parent_section_id,
+    orderIndex: s.order_index,
+    firstPageNumber: s.first_page_number,
+    lastPageNumber: s.last_page_number,
   }));
 
   return {

@@ -4,7 +4,7 @@ set -eu
 # -------------------------
 # Resolve repo paths from home directory
 # -------------------------
-REPO_DIR="$HOME/projects/babeling"
+REPO_DIR="$HOME/Documents/GitHub/babeling"
 API_DIR="$REPO_DIR/services/api"
 
 if [ ! -d "$API_DIR" ]; then

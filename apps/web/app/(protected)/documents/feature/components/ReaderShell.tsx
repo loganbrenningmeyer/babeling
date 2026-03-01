@@ -102,12 +102,12 @@ export function ReaderShell({
   * Control Text / Header gap and side padding
   * ------------------------- */}
   const layoutPresets = {
-    12: "gap-12 px-6",
-    16: "gap-16 px-8",
-    20: "gap-20 px-10",
-    24: "gap-24 px-12",
-    28: "gap-28 px-14",
-    32: "gap-32 px-16",
+    12: "gap-x-12 px-6",
+    16: "gap-x-16 px-8",
+    20: "gap-x-20 px-10",
+    24: "gap-x-24 px-12",
+    28: "gap-x-28 px-14",
+    32: "gap-x-32 px-16",
   } as const;
 
   const gap = 24;
@@ -179,7 +179,7 @@ export function ReaderShell({
           {/* -------------------------
           * [Source] | [Target] ParagraphGrid
           * ------------------------- */}
-          <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto pb-8 no-scrollbar">
+          <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar">
             {/* -------------------------
             //* Loading Skeleton || Translation Preview || ParagraphGrid
             //* ------------------------- */}
