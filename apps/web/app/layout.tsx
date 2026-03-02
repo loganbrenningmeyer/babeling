@@ -1,5 +1,6 @@
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { UserPreferencesProvider } from "@/components/UserPreferencesProvider";
 import { AppNav } from "@/components/AppNav";
@@ -44,6 +45,10 @@ export default function RootLayout({
             <main className="w-full h-full pt-16">{children}</main>
           </UserPreferencesProvider>
         </ClerkProvider>
+        {/* -------------------------
+        * Vercel Performance Metrics
+        * ------------------------- */}
+        <SpeedInsights />
       </body>
     </html>
   );
