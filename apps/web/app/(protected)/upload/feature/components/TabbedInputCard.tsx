@@ -126,7 +126,7 @@ export function TabbedInputCard({
             {/* -------------------------
             * ( Import Ebook )
             * ------------------------- */}
-            <TabsContent value="import" className="m-0 h-[320px] flex">
+            <TabsContent value="import" className="m-0 h-[320px] min-w-0 overflow-hidden flex">
               <ImportEbookPanel
                 selectedBookId={bookId}
                 onSelectBook={({ bookId, format }) => {

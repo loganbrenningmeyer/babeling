@@ -52,8 +52,8 @@ export function ImportEbookPanel({
   }
 
   return (
-    <div className="flex h-full flex-1 flex-col p-4 font-ui">
-      <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_220px]">
+    <div className="flex h-full min-w-0 w-full flex-1 flex-col overflow-hidden p-4 font-ui">
+      <div className="grid min-w-0 gap-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,220px)]">
         <Input
           value={search}
           onChange={(e) => {
@@ -97,18 +97,18 @@ export function ImportEbookPanel({
         })}
       </div>
 
-      <div className="mt-3 flex items-center justify-between text-xs text-muted-foreground">
-        <span>
+      <div className="mt-3 flex min-w-0 items-center justify-between gap-3 text-xs text-muted-foreground">
+        <span className="truncate">
           {loading
             ? "Searching Gutendex..."
             : count > 0
               ? `${count.toLocaleString()} matches`
               : "Search for an EPUB to import"}
         </span>
-        <span>Page {page}</span>
+        <span className="shrink-0">Page {page}</span>
       </div>
 
-      <div className="mt-3 min-h-0 flex-1 overflow-y-auto rounded-lg border border-border/60 bg-muted/20">
+      <div className="mt-3 min-h-0 min-w-0 flex-1 overflow-y-auto rounded-lg border border-border/60 bg-muted/20">
         {error ? (
           <div className="p-4 text-sm text-destructive">{error}</div>
         ) : books.length === 0 ? (
@@ -126,11 +126,11 @@ export function ImportEbookPanel({
                 <div
                   key={book.id}
                   className={cn(
-                    "flex items-start justify-between gap-4 p-4",
+                    "flex min-w-0 items-start justify-between gap-4 p-4",
                     isSelected && "bg-foreground/5",
                   )}
                 >
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="truncate text-sm font-medium text-foreground">
                       {book.title}
                     </div>
@@ -149,6 +149,7 @@ export function ImportEbookPanel({
                     type="button"
                     variant={isSelected ? "default" : "outline"}
                     size="sm"
+                    className="shrink-0"
                     onClick={() => handleSelectBook(book.id)}
                   >
                     {isSelected ? "Selected" : "Select"}
