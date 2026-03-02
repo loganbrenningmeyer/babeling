@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useRef, useState } from "react";
+import { useAuth } from "@clerk/nextjs";
 import { createTextDocument, createFileDocument } from "../api/documents";
 
 
@@ -17,6 +18,7 @@ export type CreateDocumentInput = {
  * -- Saves document to database given the title, srcLang, and text
  **************************/
 export function useCreateDocument() {
+  const { getToken } = useAuth();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,10 +51,16 @@ export function useCreateDocument() {
       // ( File )
       // -------------------------
       if (args.source.kind === "file") {
+        const token = await getToken({ template: "backend" });
+        if (!token) {
+          throw new Error("Missing backend token");
+        }
+
         const res = await createFileDocument({
           title: args.title,
           srcLang: args.srcLang,
           file: args.source.file,
+          token,
         });
 
         // Stale guard
@@ -61,10 +69,10 @@ export function useCreateDocument() {
         return res; // { documentId }
       }
 
-    } catch (e: any) {
+    } catch (e: unknown) {
       if (requestIdRef.current !== reqId) return null;
 
-      setError(e?.message ?? "Failed to create document");
+      setError(e instanceof Error ? e.message : "Failed to create document");
       return null;
 
     } finally {
@@ -72,7 +80,7 @@ export function useCreateDocument() {
         setCreating(false);
       }
     }
-  }, []);
+  }, [getToken]);
 
   const resetError = useCallback(() => setError(null), []);
 

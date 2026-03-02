@@ -38,23 +38,33 @@ export async function createFileDocument(args: {
   title: string;
   srcLang: string;
   file: File;
+  token: string;
 }): Promise<{ documentId: number }> {
-  // Create FormData
+  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL;
+  if (!apiBaseUrl) {
+    throw new Error("NEXT_PUBLIC_API_URL is not set");
+  }
+
   const fd = new FormData();
   fd.append("title", args.title);
   fd.append("src_lang", args.srcLang);
   fd.append("file", args.file);
 
-  const res = await fetch("/api/documents/upload", {
+  const res = await fetch(`${apiBaseUrl}/documents/upload`, {
     method: "POST",
+    headers: {
+      Authorization: `Bearer ${args.token}`,
+    },
     body: fd,
   });
 
+  const text = await res.text();
+
   if (!res.ok) {
-    throw new Error("Failed to save document");
+    throw new Error(text || "Failed to save document");
   }
 
-  const data = await res.json();
+  const data = JSON.parse(text) as { document_id: number };
 
   return { documentId: data.document_id };
 }

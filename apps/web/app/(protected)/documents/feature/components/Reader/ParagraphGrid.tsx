@@ -265,11 +265,6 @@ export function ParagraphGrid({
                       loading="lazy"
                       className="h-auto max-h-[32rem] w-auto max-w-full rounded-md object-contain"
                     />
-                    {row.alt ? (
-                      <figcaption className="px-1 text-sm text-muted-foreground">
-                        {row.alt}
-                      </figcaption>
-                    ) : null}
                   </figure>
                 </div>
               </div>

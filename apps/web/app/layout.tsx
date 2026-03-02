@@ -1,7 +1,7 @@
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Analytics } from "@vercel/analytics/next"
+import { Analytics } from "@vercel/analytics/next";
 
 import { UserPreferencesProvider } from "@/components/UserPreferencesProvider";
 import { AppNav } from "@/components/AppNav";
