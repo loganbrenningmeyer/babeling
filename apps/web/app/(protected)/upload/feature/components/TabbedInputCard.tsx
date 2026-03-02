@@ -1,16 +1,15 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Clipboard, FileUp, Link as LinkIcon, Upload, BookDown } from "lucide-react";
+import { Clipboard, FileUp, BookDown } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
-import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 
 import { UploadSurface } from "@/app/components/UploadSurface";
+import { ImportEbookPanel } from "./ImportEbookPanel";
 
 type TabKey = "paste" | "upload" | "import";
 
@@ -33,8 +32,6 @@ export function TabbedInputCard({
   const [bookId, setBookId] = useState<number | null>(null);
   const [format, setFormat] = useState<string>("epub.noimages");
 
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
   // -------------------------
   // Keep parent in sync with active tab
   // -------------------------
@@ -42,17 +39,10 @@ export function TabbedInputCard({
     if (!onPayloadChange) return;
     if (tab === "paste") onPayloadChange({ type: "text", text });
     if (tab === "upload") onPayloadChange({ type: "file", file });
-    if (tab === "import") onPayloadChange({ type: "gutenberg", bookId: bookId, format: format})
+    if (tab === "import") {
+      onPayloadChange({ type: "gutenberg", bookId, format });
+    }
   }, [tab, text, file, bookId, format, onPayloadChange]);
-
-  function chooseFile() {
-    fileInputRef.current?.click();
-  }
-
-  function onFileChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0] ?? null;
-    setFile(f);
-  }
 
   const tabClassName = cn(
     "h-full inline-flex items-center",
@@ -62,10 +52,10 @@ export function TabbedInputCard({
     "data-[state=active]:bg-transparent",
     "data-[state=active]:border-b-foreground",
     "data-[state=active]:shadow-none",
-  )
+  );
 
   return (
-    <div>
+    <div className={className}>
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabKey)} className="gap-0">
         <div className="rounded-xl border border-foreground/20 shadow-sm overflow-hidden">
 
@@ -137,17 +127,18 @@ export function TabbedInputCard({
             * ( Import Ebook )
             * ------------------------- */}
             <TabsContent value="import" className="m-0 h-[320px] flex">
-              <div className="
-                h-full flex-1 p-4
-                font-ui text-muted-foreground/60
-              ">
-                Gutenberg Import UI Here
-              </div>
+              <ImportEbookPanel
+                selectedBookId={bookId}
+                onSelectBook={({ bookId, format }) => {
+                  setBookId(bookId);
+                  setFormat(format);
+                }}
+              />
             </TabsContent>
           </div>
         </div>
       </Tabs>
 
     </div>
-  )
+  );
 }
