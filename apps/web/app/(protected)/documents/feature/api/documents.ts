@@ -26,12 +26,23 @@ export async function getDocumentById(
 
   // -------------------------
   // Sort pages
+  // -- Preserve saved page blocks so the reader can interleave text + images
   // -------------------------
   const pages = (data.pages ?? []).map((p) => ({
     id: p.id,
     pageNumber: p.page_number,
     srcText: p.src_text,
     sectionId: p.section_id ?? null,
+    sectionPageIndex: p.section_page_index ?? null,
+    blocks: (p.blocks ?? []).map((block) => ({
+      id: block.id,
+      blockIndex: block.block_index,
+      blockType: block.block_type,
+      tag: block.tag ?? null,
+      text: block.text ?? null,
+      documentImageId: block.document_image_id ?? null,
+      alt: block.alt ?? null,
+    })),
   }));
 
   pages.sort((a, b) => a.pageNumber - b.pageNumber);
@@ -53,9 +64,18 @@ export async function getDocumentById(
     documentId: data.document_id,
     title: data.title,
     author: data.author,
+    sourceKind: data.source_kind,
     srcLang: data.src_lang,
     tgtLang: data.tgt_lang ?? null,
     pages,
     sections,
+    // -------------------------
+    // Preserve image metadata so page blocks can validate image references
+    // -------------------------
+    images: (data.images ?? []).map((image) => ({
+      id: image.id,
+      mediaType: image.media_type ?? null,
+      byteLength: image.byte_length,
+    })),
   };
 }

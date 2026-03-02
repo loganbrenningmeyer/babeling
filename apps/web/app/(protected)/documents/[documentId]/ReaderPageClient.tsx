@@ -36,7 +36,7 @@ export default function ReaderPageClient({
   const router = useRouter();
   const m = useMessages();
 
-  const { srcLang: prefSrcLang, tgtLang: prefTgtLang, uiLang: prefUiLang } = useUserPreferences();
+  const { tgtLang: prefTgtLang, uiLang: prefUiLang } = useUserPreferences();
 
   // -------------------------
   // Normalize / default search params (documentId, tgtLang, pageIndex)
@@ -63,8 +63,6 @@ export default function ReaderPageClient({
     error: documentError 
   } = useDocumentLoader(docId);
 
-  const srcLang = document?.srcLang ?? prefSrcLang ?? "en";
-  
   // -------------------------
   // Clamp / default page index if out of bounds
   // -------------------------
@@ -92,7 +90,7 @@ export default function ReaderPageClient({
     return (
       document.sections.find((section) => section.id === currentPage.sectionId)?.title ?? null
     );
-  }, [document, currentPage?.sectionId]);
+  }, [document, currentPage]);
 
   // -------------------------
   // Begin ReaderSession for the current document / pageIndex / tgtLang
@@ -204,8 +202,8 @@ export default function ReaderPageClient({
       if (e.key === "ArrowDown") interaction.revealNext("paragraph");
     };
 
-    window.addEventListener("keydown", onKeyDown, { capture: true });
-    return () => window.removeEventListener("keydown", onKeyDown, { capture: true } as any);
+    window.addEventListener("keydown", onKeyDown, true);
+    return () => window.removeEventListener("keydown", onKeyDown, true);
   }, [interaction, onPrevPage, onNextPage]);
 
   // -------------------------
@@ -281,11 +279,12 @@ export default function ReaderPageClient({
       <div className="min-h-0 flex-1 overflow-hidden">
         <div className="mx-auto h-full w-full max-w-[90rem] overflow-hidden">
           <ReaderShell
-            title={document?.title ?? ""}
-            srcLang={srcLang}
             tgtLang={tgtLang}
             srcLabel={srcLabel}
             tgtLabel={tgtLabel}
+            documentId={document?.documentId ?? null}
+            currentPage={currentPage}
+            documentImages={document?.images ?? []}
             session={session}
             loading={documentLoading || sessLoading}
             pageIndex={pageIndex}

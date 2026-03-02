@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight, Book } from "lucide-react";
 
+import type { LoadedDocumentImage, SavedPage } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import type { UiLang, messages } from "@/app/i18n/messages";
@@ -16,19 +17,17 @@ import { AnnotateCard, type DefineEntry, type ExplainEntry } from "@/app/(protec
 import { SourceBlurButton } from "@/app/(protected)/documents/feature/components/SourceBlur/SourceBlurButton";
 import { BlurModeToggle } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
-import { TOCSheet } from "./Navigation/TOCSheet";
-
-import { capitalizeWords } from "@/lib/string";
 
 export type ReaderMsgs = (typeof messages)[UiLang]["reader"];
 
 type ReaderShellProps = {
-  title: string;
-
-  srcLang: string;
   tgtLang: string;
   srcLabel: string;
   tgtLabel: string;
+
+  documentId: number | null;
+  currentPage: SavedPage | null;
+  documentImages: LoadedDocumentImage[];
 
   session: ReaderSession | null;
   loading: boolean;
@@ -78,11 +77,12 @@ type ReaderShellProps = {
 
 
 export function ReaderShell({
-  title,
-  srcLang,
   tgtLang,
   srcLabel,
   tgtLabel,
+  documentId,
+  currentPage,
+  documentImages,
   session,
   loading,
   pageIndex,
@@ -193,6 +193,9 @@ export function ReaderShell({
                 <ParagraphGrid
                   className="text-[20px] leading-[1.7]"
                   session={session}
+                  documentId={documentId ?? 0}
+                  pageBlocks={currentPage?.blocks ?? []}
+                  documentImages={documentImages}
                   blurMode={blurMode}
                   blurredSource={sourceBlurEnabled ? interaction.blurredSource : new Set()}
                   setBlurredSource={sourceBlurEnabled ? interaction.setBlurredSource : () => {}}
