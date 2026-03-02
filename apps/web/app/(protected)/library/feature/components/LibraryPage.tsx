@@ -18,7 +18,6 @@ import type { LibraryGlossaryItem } from "../types/glossaryItem";
 import type { LibraryFilterKey } from "./FilterItem";
 
 import { useMessages } from "@/app/hooks/useMessages";
-import { getLangLabel } from "@/app/i18n/messages";
 
 
 export function LibraryPage({
@@ -28,6 +27,11 @@ export function LibraryPage({
   documents: LibraryDocument[],
   glossaryItems: LibraryGlossaryItem[],
 }) {
+  // -------------------------
+  // Load UI language / messages info
+  // -------------------------
+  const m = useMessages();
+
   {/* Filtering */}
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilterKey>("all");
 
@@ -197,6 +201,7 @@ export function LibraryPage({
                 <DocumentFlipCard
                   key={doc.id}
                   document={doc}
+                  langs={m.langs}
                 />
               ))}
             </div>

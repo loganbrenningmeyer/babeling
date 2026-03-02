@@ -65,6 +65,7 @@ export async function getDocumentById(
     title: data.title,
     author: data.author,
     sourceKind: data.source_kind,
+    coverImageId: data.cover_image_id ?? null,
     srcLang: data.src_lang,
     tgtLang: data.tgt_lang ?? null,
     pages,

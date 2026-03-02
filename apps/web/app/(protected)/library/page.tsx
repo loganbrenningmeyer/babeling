@@ -9,11 +9,14 @@ import { useAppUser } from "@/components/AppUserProvider";
 import { useRecentDocuments } from "./feature/hooks/useRecentDocuments";
 import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 
+
 // -------------------------
 // UI Components
 // -------------------------
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
 import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
+
+import { toUiLang } from "@/app/i18n/messages";
 
 
 export default function Library() {

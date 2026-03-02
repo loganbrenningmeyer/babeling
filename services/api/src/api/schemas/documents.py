@@ -59,6 +59,7 @@ class DocumentLoadResponse(BaseModel):
     title: str
     author: str | None
     source_kind: str
+    cover_image_id: int | None
     src_lang: str
     tgt_lang: str | None
     pages: list[DocumentPageOut]

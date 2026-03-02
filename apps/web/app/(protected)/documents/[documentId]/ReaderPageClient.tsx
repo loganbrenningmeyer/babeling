@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 import { Separator } from "@/components/ui/separator";
@@ -91,6 +92,15 @@ export default function ReaderPageClient({
       document.sections.find((section) => section.id === currentPage.sectionId)?.title ?? null
     );
   }, [document, currentPage]);
+
+  // -------------------------
+  // Get document cover image from database
+  // -- /api/documents/[documentId]/images/[coverImageId]
+  // -------------------------
+  const coverImageSrc =
+    document?.documentId && document?.coverImageId
+      ? `/api/documents/${document.documentId}/images/${document.coverImageId}`
+      : null;
 
   // -------------------------
   // Begin ReaderSession for the current document / pageIndex / tgtLang
@@ -239,7 +249,7 @@ export default function ReaderPageClient({
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <div className="relative h-16 shrink-0 px-4">
         {/* -------------------------
-        * Left: TOC + Title / Author
+        * Left: TOC + Cover Image + Title/Author
         * ------------------------- */}
         <div className="flex h-full min-w-0 items-center">
           <TOCSheet 
@@ -247,7 +257,27 @@ export default function ReaderPageClient({
             currentPageNumber={pageIndex + 1}
             onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
           />
-          <div className="ml-4 min-w-0">
+          <div className="ml-4 flex min-w-0 items-center gap-3">
+            {/* -------------------------
+            * Cover Image
+            * ------------------------- */}
+            {coverImageSrc ? (
+              <Image
+                src={coverImageSrc}
+                alt={
+                  document?.title
+                    ? `${document.title} cover`
+                    : "Document cover"
+                }
+                width={36}
+                height={48}
+                unoptimized
+                className="h-12 w-9 shrink-0 rounded-sm border border-border/60 object-cover shadow-sm"
+              />
+            ) : null}
+            {/* -------------------------
+            * Title / Author
+            * ------------------------- */}
             <div className="flex flex-col">
               <span className="font-reading text-md font-bold leading-tight">
                 {capitalizeWords(document?.title ?? "")}

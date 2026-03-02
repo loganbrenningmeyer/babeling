@@ -41,6 +41,7 @@ export type LoadedDocument = {
   title: string;
   author: string | null;
   sourceKind: string;
+  coverImageId: number | null;
   srcLang: string;
   tgtLang: string | null;
   pages: SavedPage[];
@@ -92,6 +93,7 @@ export type LoadedDocumentDTO = {
   title: string;
   author: string | null;
   source_kind: string;
+  cover_image_id: number | null;
   src_lang: string;
   tgt_lang: string | null;
   pages: SavedPageDTO[];

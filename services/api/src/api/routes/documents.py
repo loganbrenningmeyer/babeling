@@ -686,6 +686,7 @@ def load_document(
         title=doc.title,
         author=doc.epub_author,
         source_kind=doc.source_kind,
+        cover_image_id=doc.cover_image_id,
         src_lang=doc.src_lang,
         tgt_lang=latest_tgt_lang,
         pages=[

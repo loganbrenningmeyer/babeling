@@ -94,9 +94,11 @@ def get_library_documents(
             LibraryDocumentOut(
                 id=doc.id,
                 title=doc.title,
+                author=doc.epub_author,
                 src_text=doc.src_text,
                 src_lang=doc.src_lang,
                 total_pages=doc.total_pages,
+                cover_image_id=doc.cover_image_id,
                 last_opened_at=(
                     user_doc.last_opened_at.isoformat()
                     if user_doc.last_opened_at

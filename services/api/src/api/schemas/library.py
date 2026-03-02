@@ -6,9 +6,11 @@ from pydantic import BaseModel
 class LibraryDocumentOut(BaseModel):
     id: int
     title: str
+    author: str | None
     src_text: str
     src_lang: str
     total_pages: int
+    cover_image_id: int | None
     last_opened_at: str | None
     latest_tgt_lang: str | None  # null if no saved translations yet
 

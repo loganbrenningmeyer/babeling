@@ -56,7 +56,7 @@ export function TOCSheet({
           border border-border
         "
       >
-        <SheetHeader className="shrink-0">
+        <SheetHeader className="shrink-0 border-b">
           <SheetTitle 
             className="
               font-ui text-muted-foreground text-xs
@@ -76,12 +76,12 @@ export function TOCSheet({
                   onClick={(e) => onSelectSection(section)}
                   className={`
                       w-full min-h-12 h-auto rounded-none text-foreground
-                      bg-transparent border border-border
+                      bg-transparent
                       justify-start whitespace-normal break-words
                       text-left items-start py-3
                       hover:bg-muted-foreground/10
                       ${isCurrentSection(currentPageNumber, section) 
-                        ? "border-blue-300 bg-blue-300/20 hover:bg-blue-500/20" 
+                        ? "bg-blue-300/20 text-blue-60 hover:bg-blue-300/20" 
                         : ""
                       }
                     `}

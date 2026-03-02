@@ -826,6 +826,7 @@ export const messages = {
 // -- UI_LANGS: List of available lang codes in messages
 // =========================
 export type UiLang = keyof typeof messages; 
+export type LangLabels = (typeof messages)[UiLang]["langs"];
 
 export const UI_LANGS = Object.keys(messages) as UiLang[]; // ["en", "es", "fr", ...]
 export const UI_LANGS_MAP = [
