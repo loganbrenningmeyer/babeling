@@ -17,10 +17,11 @@ type UploadSurfaceProps = {
 function FileChip({ children }: { children: React.ReactNode }) {
   return (
     <span className="
-      rounded-md border bg-background 
-      px-2 py-0.5 
-      text-[11px] font-medium text-muted-foreground/80
-    ">
+        rounded-md border bg-background 
+        px-2 py-0.5 
+        text-[11px] font-medium text-muted-foreground/80
+      "
+    >
       {children}
     </span>
   );
@@ -48,7 +49,7 @@ export function UploadSurface({
         id={inputId}
         type="file"
         className="sr-only"
-        accept=".pdf,.epub,.txt,.doc,.docx"
+        accept=".epub,.txt"
         onChange={(e) => handleFiles(e.target.files)}
       />
 
@@ -98,9 +99,7 @@ export function UploadSurface({
                 {/* Filetype chips */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <FileChip>TXT</FileChip>
-                  <FileChip>PDF</FileChip>
                   <FileChip>EPUB</FileChip>
-                  <FileChip>DOCX</FileChip>
                 </div>
               </div>
             ) : (
@@ -137,9 +136,7 @@ export function UploadSurface({
                 {/* Filetype chips */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
                   <FileChip>TXT</FileChip>
-                  <FileChip>PDF</FileChip>
                   <FileChip>EPUB</FileChip>
-                  <FileChip>DOCX</FileChip>
                 </div>
               </div>
             )}

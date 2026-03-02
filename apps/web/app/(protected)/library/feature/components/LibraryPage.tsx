@@ -32,7 +32,7 @@ export function LibraryPage({
   const [libraryFilter, setLibraryFilter] = useState<LibraryFilterKey>("all");
 
   {/* Sorting */}
-  type DocumentSortKey = "recent" | "srcLang" | "tgtLang" | "title";
+  type DocumentSortKey = "recent" | "srcLang" | "title";
   type GlossarySortKey = "recent" | "language" | "documentTitle" | "word";
   const [documentSort, setDocumentSort] = useState<DocumentSortKey>("recent");
   const [glossarySort, setGlossarySort] = useState<GlossarySortKey>("recent");
@@ -56,8 +56,6 @@ export function LibraryPage({
         }
         case "srcLang":
           return collator.compare(a.srcLang ?? "", b.srcLang ?? "");
-        case "tgtLang":
-          return collator.compare(a.latestTgtLang ?? "", b.latestTgtLang ?? "");
         case "title":
           return collator.compare(a.title ?? "", b.title ?? "");
         default:
@@ -178,14 +176,13 @@ export function LibraryPage({
                 value={documentSort} 
                 onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
               >
-                <SelectTrigger className="w-44">
+                <SelectTrigger className="w-56">
                   <SelectValue placeholder="Sort documents" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="recent">Recently read</SelectItem>
-                  <SelectItem value="srcLang">Original language</SelectItem>
-                  <SelectItem value="tgtLang">Translated language</SelectItem>
-                  <SelectItem value="title">Title</SelectItem>
+                  <SelectItem value="title">Title (A-Z)</SelectItem>
+                  <SelectItem value="srcLang">Original language (A-Z)</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -233,14 +230,14 @@ export function LibraryPage({
                 value={glossarySort} 
                 onValueChange={(v) => setGlossarySort(v as GlossarySortKey)}
               >
-                <SelectTrigger className="w-44">
+                <SelectTrigger className="w-56">
                   <SelectValue placeholder="Sort glossary" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="recent">Recently saved</SelectItem>
-                  <SelectItem value="language">Language</SelectItem>
-                  <SelectItem value="documentTitle">Document title</SelectItem>
-                  <SelectItem value="word">Word</SelectItem>
+                  <SelectItem value="recent">Recently added</SelectItem>
+                  <SelectItem value="word">Word (A-Z)</SelectItem>
+                  <SelectItem value="language">Language (A-Z)</SelectItem>
+                  <SelectItem value="documentTitle">Document title (A-Z)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

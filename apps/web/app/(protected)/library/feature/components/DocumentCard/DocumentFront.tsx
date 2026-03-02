@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw } from "lucide-react";
+import { Book, Clock, RotateCcw } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -81,7 +81,7 @@ export function DocumentFront({
             mt-auto gap-4 whitespace-nowrap
           "
         >
-          <div className="flex flex-col items-center gap-1">
+          <div className="flex flex-col gap-2">
             <ResumeTranslationButton
               document={document}
               translation={recentTranslation}
@@ -94,32 +94,44 @@ export function DocumentFront({
             </ResumeTranslationButton>
             
             {recentTranslation && (
-              <p className="text-xs text-muted-foreground/60 text-center italic">
-                Read {formatRelativeTime(recentTranslation.lastOpenedAt)}
-              </p>
+              <div 
+                className="
+                  w-full flex justify-center gap-4
+                  text-xs text-muted-foreground/60
+                "
+              >
+                <span className="flex items-center gap-1">
+                  <Book size={12}/> 
+                  p. {recentTranslation.currentPageNumber} / {document.totalPages}
+                </span>
+                <span className="flex items-center gap-1">
+                  <Clock size={12} /> 
+                  {formatRelativeTime(recentTranslation.lastOpenedAt)}
+                </span>
+              </div>
             )}
           </div>
-          <span 
-            className="
-              inline-flex gap-1 items-center 
-              text-xs text-muted-foreground
-              text-muted-foreground
-              pointer-events-none
-              opacity-0 group-hover/doc-front:opacity-60
-              transition-opacity duration-150
-            "
-          >
-            Translations
-            <RotateCcw 
-              className="
-                h-4 w-4
-                transition-transform duration-300 ease-out
-                group-hover/doc-front:-rotate-180
-              "
-            />
-          </span>
         </div>
       </CardContent>
+      <span 
+        className="
+          absolute bottom-2 right-4
+          inline-flex gap-1 items-center 
+          text-xs text-muted-foreground
+          pointer-events-none
+          opacity-0 group-hover/doc-front:opacity-60
+          transition-opacity duration-150
+        "
+      >
+        Translations
+        <RotateCcw 
+          className="
+            h-4 w-4
+            transition-transform duration-300 ease-out
+            group-hover/doc-front:-rotate-180
+          "
+        />
+      </span>
     </Card>
   )
 }

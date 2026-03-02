@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { RotateCw } from "lucide-react";
+import { Book, Clock, RotateCw } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -217,12 +217,15 @@ export function DocumentBack({
                 </div>
               </div>
 
-              {/* -------------------------
-              //* Current Page Sample Text
-              //* ------------------------- */}
               <Separator />
-              <div className="mt-auto">
-                <div className="w-fit flex flex-col items-center gap-1">
+
+              <div 
+                className="
+                  flex items-center justify-between 
+                  mt-auto gap-4 whitespace-nowrap
+                "
+              >
+                <div className="flex flex-col gap-2">
                   <ResumeTranslationButton 
                     document={document}
                     translation={t}
@@ -231,9 +234,21 @@ export function DocumentBack({
                     Resume reading
                   </ResumeTranslationButton>
                   
-                  <p className="text-xs text-muted-foreground/60 text-center italic">
-                    Read {formatRelativeTime(t.lastOpenedAt)}
-                  </p>
+                  <div
+                    className="
+                      w-full flex justify-center gap-4
+                      text-xs text-muted-foreground/60
+                    "
+                  >
+                    <span className="flex items-center gap-1">
+                      <Book size={12}/>
+                      p. {t.currentPageNumber} / {document.totalPages}
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Clock size={12}/>
+                      {formatRelativeTime(t.lastOpenedAt)}
+                    </span>
+                  </div>
                 </div>
               </div>
             </TabsContent>

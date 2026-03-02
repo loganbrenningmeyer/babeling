@@ -210,7 +210,7 @@ export default function UploadPage() {
                   transition-transform duration-300 ease-out
                   group-hover:rotate-180
                   motion-reduce:transition-none 
-              "
+                "
               />
             </Button>
           </div>
@@ -293,11 +293,11 @@ export default function UploadPage() {
               <span>Start reading</span>
               <ArrowRight
                 className="
-                h-6 w-6
-                transition-transform duration-200 ease-out
-                group-hover:translate-x-1
-                motion-reduce:transform-none
-              "
+                  h-6 w-6
+                  transition-transform duration-200 ease-out
+                  group-hover:translate-x-1
+                  motion-reduce:transform-none
+                "
               />
             </span>
           )}

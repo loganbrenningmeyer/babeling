@@ -116,7 +116,8 @@ export function TabbedInputCard({
                   border-0 bg-background
                   shadow-none focus-visible:ring-0
                   font-ui placeholder:text-muted-foreground/60
-              "/>
+                "
+              />
             </TabsContent>
             {/* -------------------------
             * ( File Upload ): Drop or browse
