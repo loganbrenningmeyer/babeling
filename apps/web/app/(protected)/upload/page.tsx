@@ -200,17 +200,20 @@ export default function UploadPage() {
               type="button"
               variant="outline"
               size="icon"
-              className="group h-9 w-9 rounded-full"
+              className="
+                h-9 w-9 rounded-full
+                border-border/80 bg-background/95
+                text-muted-foreground shadow-sm
+                transition duration-300 ease-out
+                hover:text-foreground
+                hover:rotate-180
+                motion-reduce:transition-none
+              "
               onClick={handleSwapLanguages}
               aria-label="Swap languages"
             >
               <Repeat
-                className="
-                  h-4 w-4
-                  transition-transform duration-300 ease-out
-                  group-hover:rotate-180
-                  motion-reduce:transition-none 
-                "
+                className="h-4 w-4"
               />
             </Button>
           </div>

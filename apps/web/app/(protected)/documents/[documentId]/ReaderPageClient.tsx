@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
@@ -16,7 +16,6 @@ import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 import { saveReadProgress } from "../feature/api/readProgress";
 import { capitalizeWords } from "@/lib/string";
-import { getLangLabel } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 import { useReaderInteraction } from "../feature/hooks/useReaderInteraction";
@@ -37,7 +36,7 @@ export default function ReaderPageClient({
   const router = useRouter();
   const m = useMessages();
 
-  const { tgtLang: prefTgtLang, uiLang: prefUiLang } = useUserPreferences();
+  const { srcLang: prefSrcLang, tgtLang: prefTgtLang, uiLang: prefUiLang } = useUserPreferences();
 
   // -------------------------
   // Normalize / default search params (documentId, tgtLang, pageIndex)
@@ -113,22 +112,11 @@ export default function ReaderPageClient({
   } = usePageSession({ document, pageIndex, tgtLang });
 
   // -------------------------
-  // Source / target language labels
-  // -------------------------
-  const srcLabel = useMemo(() => {
-    const src = document?.srcLang ?? "en";
-    return getLangLabel(src, m.langs);
-  }, [document?.srcLang, m.langs]);
-
-  const tgtLabel = useMemo(() => {
-    return getLangLabel(tgtLang, m.langs);
-  }, [tgtLang, m.langs]);
-
-  // -------------------------
   // Reader UI toggles
   // -------------------------
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
   const [sourceBlurEnabled, setSourceBlurEnabled] = useState(true);
+  const [isSwapped, setIsSwapped] = useState(false);
 
   // -------------------------
   // Wire blurredSource to session.ui via updateCachedUi
@@ -154,6 +142,7 @@ export default function ReaderPageClient({
 
   const interaction = useReaderInteraction({
     session,
+    isSwapped,
     documentId: document?.documentId ?? null,
     pageId: document?.pages?.[pageIndex]?.id ?? null,
     srcLang: document?.srcLang ?? "en",
@@ -169,6 +158,27 @@ export default function ReaderPageClient({
   // Page navigation => update URL
   // -------------------------
   const pageCount = document?.pages.length ?? 0;
+
+  const blurSyncKeyRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (!session || !currentPage?.id) return;
+
+    const nextKey = `${currentPage.id}|${tgtLang}|${isSwapped ? "swapped" : "default"}`;
+    if (blurSyncKeyRef.current === nextKey) return;
+
+    const sourceWordCount = isSwapped
+      ? session.alignment.tgt.words.length
+      : session.alignment.src.words.length;
+
+    updateCachedUi((prevUi) => ({
+      ...prevUi,
+      blurredSource: new Set(Array.from({ length: sourceWordCount }, (_, i) => i)),
+      navSentId: -1,
+      navParId: -1,
+    }));
+    blurSyncKeyRef.current = nextKey;
+  }, [session, currentPage?.id, tgtLang, isSwapped, updateCachedUi]);
 
   const setPage = useCallback(
     (nextIndex: number) => {
@@ -254,8 +264,15 @@ export default function ReaderPageClient({
         <div className="flex h-full min-w-0 items-center">
           <TOCSheet 
             sections={document?.sections ?? []}
+            documentTitle={document?.title ?? "Untitled document"}
+            documentAuthor={document?.author}
+            srcLang={document?.srcLang ?? "en"}
+            tgtLang={tgtLang}
+            langLabels={m.langs}
             currentPageNumber={pageIndex + 1}
+            pageCount={pageCount}
             onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
+            onGoToPage={(pageNumber) => setPage(pageNumber - 1)}
           />
           <div className="ml-4 flex min-w-0 items-center gap-3">
             {/* -------------------------
@@ -284,7 +301,7 @@ export default function ReaderPageClient({
               </span>
 
               {document?.author && (
-                <span className="font-reading text-sm italic font-thin text-muted-foreground leading-tight">
+                <span className="font-ui text-sm font-thin text-muted-foreground leading-tight">
                   {document.author}
                 </span>
               )}
@@ -297,7 +314,7 @@ export default function ReaderPageClient({
         * ------------------------- */}
         {currentSectionTitle && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-20">
-            <span className="font-reading truncate text-lg text-muted-foreground">
+            <span className="font-ui truncate text-lg text-muted-foreground tracking-wider">
               {currentSectionTitle}
             </span>
           </div>
@@ -309,9 +326,11 @@ export default function ReaderPageClient({
       <div className="min-h-0 flex-1 overflow-hidden">
         <div className="mx-auto h-full w-full max-w-[90rem] overflow-hidden">
           <ReaderShell
+            srcLang={document?.srcLang ?? prefSrcLang ?? "en"}
             tgtLang={tgtLang}
-            srcLabel={srcLabel}
-            tgtLabel={tgtLabel}
+            langLabels={m.langs}
+            isSwapped={isSwapped}
+            onSwapSides={() => setIsSwapped((prev) => !prev)}
             documentId={document?.documentId ?? null}
             currentPage={currentPage}
             documentImages={document?.images ?? []}

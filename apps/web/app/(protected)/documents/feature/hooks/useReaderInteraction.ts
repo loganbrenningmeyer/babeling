@@ -40,6 +40,7 @@ export type ReaderInteraction = {
 
 type UseReaderInteractionArgs = {
   session: ReaderSession | null;
+  isSwapped: boolean;
 
   // text IDs
   documentId: number | null;
@@ -67,6 +68,7 @@ type UseReaderInteractionArgs = {
 
 export function useReaderInteraction({
   session,
+  isSwapped,
   documentId,
   pageId,
   srcLang,
@@ -110,6 +112,7 @@ export function useReaderInteraction({
   // Source reveal navigation hook
   const { prev, next } = useSourceRevealNav({
     session,
+    isSwapped,
     sourceBlurEnabled,
     blurredSource,
     setBlurredSource,
@@ -126,6 +129,7 @@ export function useReaderInteraction({
     session,
     documentId,
     pageId,
+    isSwapped,
     srcLang,
     tgtLang,
     uiLang,
@@ -145,14 +149,18 @@ export function useReaderInteraction({
     if (!session) return [];
     if (pop.popoverOpen) return pop.lockedSourceIndices;
     if (hoveredTargetIndex == null) return [];
-    return session.alignment.align.tgtToSrc[hoveredTargetIndex] ?? [];
-  }, [session, pop.popoverOpen, pop.lockedSourceIndices, hoveredTargetIndex]);
+    return isSwapped
+      ? session.alignment.align.srcToTgt[hoveredTargetIndex] ?? []
+      : session.alignment.align.tgtToSrc[hoveredTargetIndex] ?? [];
+  }, [session, pop.popoverOpen, pop.lockedSourceIndices, hoveredTargetIndex, isSwapped]);
 
   const activeAlignedTarget = useMemo(() => {
     if (!session) return [];
     if (activeSourceIndex == null) return [];
-    return session.alignment.align.srcToTgt[activeSourceIndex] ?? [];
-  }, [session, activeSourceIndex]);
+    return isSwapped
+      ? session.alignment.align.tgtToSrc[activeSourceIndex] ?? []
+      : session.alignment.align.srcToTgt[activeSourceIndex] ?? [];
+  }, [session, activeSourceIndex, isSwapped]);
 
   const sourceHighlightIndices = useMemo(() => {
     const out: number[] = [];

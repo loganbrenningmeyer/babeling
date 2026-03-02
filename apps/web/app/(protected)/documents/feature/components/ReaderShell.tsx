@@ -1,12 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Book } from "lucide-react";
+import { ChevronLeft, ChevronRight, Book, Repeat } from "lucide-react";
 
 import type { LoadedDocumentImage, SavedPage } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
-import type { UiLang, messages } from "@/app/i18n/messages";
+import { LangLabels, toUiLang, type UiLang, type messages } from "@/app/i18n/messages";
 
 import { ParagraphGrid } from "@/app/(protected)/documents/feature/components/Reader/ParagraphGrid";
 import { TextSurface } from "@/app/components/TextSurface";
@@ -17,13 +17,16 @@ import { AnnotateCard, type DefineEntry, type ExplainEntry } from "@/app/(protec
 import { SourceBlurButton } from "@/app/(protected)/documents/feature/components/SourceBlur/SourceBlurButton";
 import { BlurModeToggle } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
+import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 export type ReaderMsgs = (typeof messages)[UiLang]["reader"];
 
 type ReaderShellProps = {
+  srcLang: string;
   tgtLang: string;
-  srcLabel: string;
-  tgtLabel: string;
+  langLabels: LangLabels;
+  isSwapped: boolean;
+  onSwapSides: () => void;
 
   documentId: number | null;
   currentPage: SavedPage | null;
@@ -77,9 +80,11 @@ type ReaderShellProps = {
 
 
 export function ReaderShell({
+  srcLang,
   tgtLang,
-  srcLabel,
-  tgtLabel,
+  langLabels,
+  isSwapped,
+  onSwapSides,
   documentId,
   currentPage,
   documentImages,
@@ -97,10 +102,28 @@ export function ReaderShell({
   msgs,
 }: ReaderShellProps) {
   const renderLoading = loading || !session;
+  const srcLangColors = LANG_COLOR_BY_CODE[toUiLang(srcLang)];
+  const tgtLangColors = LANG_COLOR_BY_CODE[toUiLang(tgtLang)];
+  const sourcePane = isSwapped
+    ? {
+        label: langLabels[toUiLang(tgtLang)],
+        colors: tgtLangColors,
+      }
+    : {
+        label: langLabels[toUiLang(srcLang)],
+        colors: srcLangColors,
+      };
+  const targetPane = isSwapped
+    ? {
+        label: langLabels[toUiLang(srcLang)],
+        colors: srcLangColors,
+      }
+    : {
+        label: langLabels[toUiLang(tgtLang)],
+        colors: tgtLangColors,
+      };
+  const annotateTgtLang = isSwapped ? srcLang : tgtLang;
 
-  {/* -------------------------
-  * Control Text / Header gap and side padding
-  * ------------------------- */}
   const layoutPresets = {
     12: "gap-x-12 px-6",
     16: "gap-x-16 px-8",
@@ -123,6 +146,28 @@ export function ReaderShell({
             className="pointer-events-none absolute inset-y-0 left-1/2 border-l border-border/60"
           />
           {/* -------------------------
+          * Swap Source / Target Languages Button
+          * ------------------------- */}
+          <Button
+            type="button"
+            variant="outline"
+            size="icon"
+            onClick={onSwapSides}
+            className="
+              absolute left-1/2 top-3 z-10 h-9 w-9
+              -translate-x-1/2 rounded-full
+              border-border/80 bg-background/95
+              text-muted-foreground shadow-sm
+              transition duration-300 ease-out
+              hover:text-foreground
+              hover:rotate-180
+              motion-reduce:transition-none
+            "
+            aria-label="Swap source and target roles"
+          >
+            <Repeat className="h-4 w-4" />
+          </Button>
+          {/* -------------------------
           * Source / Target Language Headers
           * ------------------------- */}
           <div
@@ -142,10 +187,16 @@ export function ReaderShell({
                   {renderLoading ? (
                     <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted-foreground/20" />
                   ) : (
-                    <div className="inline-flex flex-col">
-                      <span>{srcLabel}</span>
-                      <span className="mt-2 h-0.5 w-full bg-blue-300" />
-                    </div>
+                  <div 
+                    className={`
+                      rounded-md border px-2 py-1
+                      text-md font-ui
+                      ${sourcePane.colors.bg} ${sourcePane.colors.text}
+                      ${sourcePane.colors.border}
+                    `}
+                  >
+                    {sourcePane.label}
+                  </div>
                   )}
                 </div>
                 {/* -------------------------
@@ -167,9 +218,16 @@ export function ReaderShell({
                 {renderLoading ? (
                   <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted-foreground/20" />
                 ) : (
-                  <div className="inline-flex flex-col">
-                    <span>{tgtLabel}</span>
-                    <span className="mt-2 h-0.5 w-full bg-orange-300" />
+                  <div 
+                    className={`
+                      inline-flex items-center
+                      rounded-md border px-2 py-1
+                      text-md font-ui
+                      ${targetPane.colors.bg} ${targetPane.colors.text}
+                      ${targetPane.colors.border}
+                    `}
+                  >
+                    {targetPane.label}
                   </div>
                 )}
               </div>
@@ -201,6 +259,9 @@ export function ReaderShell({
                   setBlurredSource={sourceBlurEnabled ? interaction.setBlurredSource : () => {}}
                   sourceHighlightIndices={interaction.sourceHighlightIndices}
                   targetHighlightIndices={interaction.targetHighlightIndices}
+                  sourceHighlightClassName={sourcePane.colors.highlight}
+                  targetHighlightClassName={targetPane.colors.highlight}
+                  isSwapped={isSwapped}
                   onSourceHover={interaction.onSourceHover}
                   onTargetHover={interaction.onTargetHover}
                   onTargetWordClick={interaction.onTargetWordClick}
@@ -297,7 +358,7 @@ export function ReaderShell({
           <AnnotateCard
             defineData={interaction.defineData}
             explainData={interaction.explainData}
-            tgtLang={tgtLang}
+            tgtLang={annotateTgtLang}
             isBookmarked={interaction.isBookmarked}
             onToggleBookmark={interaction.onToggleBookmark}
           />

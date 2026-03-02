@@ -67,6 +67,7 @@ def validate_alignment(request: TranslationRequestPayload, response: Translation
     tgt_par_ids = [par.par_id for par in response.paragraphs]
 
     if src_par_ids != tgt_par_ids:
+        print(f"[ Paragraph IDs not aligned ]\n-- [ Source ]: {src_par_ids}\n-- [ Target ]: {tgt_par_ids}", flush=False)
         return False
 
     # -------------------------
@@ -77,6 +78,7 @@ def validate_alignment(request: TranslationRequestPayload, response: Translation
         tgt_sent_ids = [sent.sent_id for sent in tgt_par.sentences]
 
         if src_sent_ids != tgt_sent_ids:
+            print(f"[ Sentence IDs not aligned ]\n-- [ Source Par {src_par.par_id} ]: {src_sent_ids}\n-- [ Target Par {tgt_par.par_id} ]: {tgt_sent_ids}", flush=False)
             return False
         
     return True

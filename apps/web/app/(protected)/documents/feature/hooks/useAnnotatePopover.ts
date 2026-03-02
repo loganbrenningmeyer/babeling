@@ -42,6 +42,7 @@ type UseAnnotatePopoverArgs = {
   session: ReaderSession | null;
   documentId: number | null;
   pageId: number | null;
+  isSwapped: boolean;
 
   // annotate() API data
   srcLang: string;
@@ -70,12 +71,16 @@ export function useAnnotatePopover({
   session,
   documentId,
   pageId,
+  isSwapped,
   srcLang,
   tgtLang,
   uiLang,
   sourceBlurEnabled,
   setBlurredSource,
 }: UseAnnotatePopoverArgs): AnnotatePopoverController {
+  const logicalSrcLang = isSwapped ? tgtLang : srcLang;
+  const logicalTgtLang = isSwapped ? srcLang : tgtLang;
+
   // -------------------------
   // Annotation Popover State
   // -------------------------
@@ -122,6 +127,10 @@ export function useAnnotatePopover({
   const annotateReqIdRef = useRef(0);
 
   const targetDisabled = popoverOpen;
+
+  const logicalTargetToSource = isSwapped
+    ? session?.alignment.align.srcToTgt
+    : session?.alignment.align.tgtToSrc;
 
   /**************************
    * `makeAnnotationKey()`
@@ -189,7 +198,7 @@ export function useAnnotatePopover({
       const key = makeAnnotationKey({
         documentId,
         pageId,
-        tgtLang,
+        tgtLang: logicalTgtLang,
         wordId: lockedTargetIndex,
       });
 
@@ -208,7 +217,7 @@ export function useAnnotatePopover({
         savedGlossaryIndexRef.current.delete(key);
       }
     },
-    [documentId, pageId, lockedTargetIndex, tgtLang]
+    [documentId, pageId, lockedTargetIndex, logicalTgtLang]
   );
 
   /**************************
@@ -305,12 +314,16 @@ export function useAnnotatePopover({
     tgtIdx: number;
   }): GlossaryContextAlignment {
     const { session, tgtIdx } = args;
-    const { src, tgt, align } = session.alignment;
+    const src = isSwapped ? session.alignment.tgt : session.alignment.src;
+    const tgt = isSwapped ? session.alignment.src : session.alignment.tgt;
+    const targetToSource = isSwapped
+      ? session.alignment.align.srcToTgt
+      : session.alignment.align.tgtToSrc;
 
     const sentId = tgt.sentIds[tgtIdx];
     const parId = tgt.parIds[tgtIdx];
     
-    const srcAlignedGlobal = new Set(align.tgtToSrc[tgtIdx] ?? []);
+    const srcAlignedGlobal = new Set(targetToSource[tgtIdx] ?? []);
     const tgtClickedGlobal = new Set([tgtIdx]);
 
     return {
@@ -361,8 +374,8 @@ export function useAnnotatePopover({
     });
 
     return {
-      srcLang,
-      tgtLang,
+      srcLang: logicalSrcLang,
+      tgtLang: logicalTgtLang,
       definition: {
         form: defineData.form,
         posForm: defineData.posForm || null,
@@ -394,8 +407,9 @@ export function useAnnotatePopover({
     documentId,
     pageId,
     lockedTargetIndex,
-    srcLang,
-    tgtLang,
+    logicalSrcLang,
+    logicalTgtLang,
+    isSwapped,
   ]);
 
   /**************************
@@ -426,12 +440,12 @@ export function useAnnotatePopover({
           if (!payload) throw new Error("Missing glossary save data");
 
           // Store annotation in cache
-          const key = makeAnnotationKey({
-            documentId,
-            pageId,
-            tgtLang,
-            wordId: lockedTargetIndex!,
-          });
+            const key = makeAnnotationKey({
+              documentId,
+              pageId,
+              tgtLang: logicalTgtLang,
+              wordId: lockedTargetIndex!,
+            });
 
           const res = await saveGlossaryItem(payload);
           setSavedGlossary(res.glossaryItemId);
@@ -474,12 +488,12 @@ export function useAnnotatePopover({
           setSavedGlossary(null);
 
           if (documentId != null && pageId != null && lockedTargetIndex != null) {
-            const key = makeAnnotationKey({
-              documentId,
-              pageId,
-              tgtLang,
-              wordId: lockedTargetIndex,
-            });
+              const key = makeAnnotationKey({
+                documentId,
+                pageId,
+                tgtLang: logicalTgtLang,
+                wordId: lockedTargetIndex,
+              });
 
             savedGlossaryKeysRef.current.delete(key);
             savedGlossaryIndexRef.current.delete(key);
@@ -491,8 +505,8 @@ export function useAnnotatePopover({
             glossaryItemId: null,
           });
         }
-      } catch (e: any) {
-        setBookmarkError(e?.message ?? "Failed to sync bookmark");
+      } catch (e: unknown) {
+        setBookmarkError(e instanceof Error ? e.message : "Failed to sync bookmark");
         setIsBookmarked(!currentDesired);
         break;
       }
@@ -537,7 +551,7 @@ export function useAnnotatePopover({
       setIsBookmarked(false);
       setSavedGlossary(null);
 
-      const srcIdxs = session.alignment.align.tgtToSrc[tgtIdx] ?? [];
+      const srcIdxs = logicalTargetToSource?.[tgtIdx] ?? [];
 
       setLockedTargetIndex(tgtIdx);
       setLockedSourceIndices(srcIdxs);
@@ -563,7 +577,7 @@ export function useAnnotatePopover({
       const key = makeAnnotationKey({
         documentId,
         pageId,
-        tgtLang,
+        tgtLang: logicalTgtLang,
         wordId: tgtIdx,
       });
 
@@ -603,7 +617,7 @@ export function useAnnotatePopover({
       // -------------------------
       try {
         const res = await annotate(
-          makeAnnotateArgs({ session, srcLang, tgtLang, uiLang, tgtIdx })
+          makeAnnotateArgs({ session, srcLang, tgtLang, uiLang, tgtIdx, isSwapped })
         );
 
         if (annotateReqIdRef.current !== reqId) return;
@@ -639,6 +653,9 @@ export function useAnnotatePopover({
       srcLang,
       tgtLang,
       uiLang,
+      isSwapped,
+      logicalTargetToSource,
+      logicalTgtLang,
     ]
   );
 

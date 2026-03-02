@@ -20,12 +20,14 @@ export function LangBadge({
   const text = (useLabel && labels) ? labels[toUiLang(lang)] : lang.toUpperCase();
 
   return (
-    <div className={`
-      ${langColors.bg} ${langColors.text} 
-      border ${langColors.border}
-      rounded-md text-xs font-semibold 
-      py-0.5 px-2
-    `}>
+    <div 
+      className={`
+        ${langColors.bg} ${langColors.text} 
+        border ${langColors.border}
+        rounded-md text-xs font-semibold font-ui
+        py-0.5 px-2
+      `}
+    >
       {text}
     </div>
   )

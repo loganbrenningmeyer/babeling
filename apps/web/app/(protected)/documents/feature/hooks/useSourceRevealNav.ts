@@ -11,6 +11,7 @@ import type { ReaderSession } from "../types/readerSession";
  **************************/
 export function useSourceRevealNav(args: {
   session: ReaderSession | null;
+  isSwapped: boolean;
   sourceBlurEnabled: boolean;
   blurredSource: Set<number>;
   setBlurredSource: React.Dispatch<React.SetStateAction<Set<number>>>;
@@ -21,12 +22,15 @@ export function useSourceRevealNav(args: {
 }) {
   const {
     session,
+    isSwapped,
     sourceBlurEnabled,
     blurredSource,
     setBlurredSource,
     setNavSentId,
     setNavParId,
   } = args;
+
+  const sourceBlock = isSwapped ? session?.alignment.tgt : session?.alignment.src;
 
   const revealWordIndices = useCallback((idxs: number[]) => {
     if (!sourceBlurEnabled) return;
@@ -49,58 +53,58 @@ export function useSourceRevealNav(args: {
   }, [setBlurredSource, sourceBlurEnabled]);
 
   const getMaxSentId = useCallback(() => {
-    if (!session) return 0;
-    return Math.max(...session.alignment.src.sentIds);
-  }, [session]);
+    if (!sourceBlock) return 0;
+    return Math.max(...sourceBlock.sentIds);
+  }, [sourceBlock]);
 
   const getMaxParId = useCallback(() => {
-    if (!session) return 0;
-    return Math.max(...session.alignment.src.parIds);
-  }, [session]);
+    if (!sourceBlock) return 0;
+    return Math.max(...sourceBlock.parIds);
+  }, [sourceBlock]);
 
   const revealSentence = useCallback((sentId: number) => {
-    if (!session) return;
-    revealWordIndices(session.alignment.src.sentToWordIds[sentId] ?? []);
-  }, [session, revealWordIndices]);
+    if (!sourceBlock) return;
+    revealWordIndices(sourceBlock.sentToWordIds[sentId] ?? []);
+  }, [sourceBlock, revealWordIndices]);
 
   const hideSentence = useCallback((sentId: number) => {
-    if (!session) return;
-    hideWordIndices(session.alignment.src.sentToWordIds[sentId] ?? []);
-  }, [session, hideWordIndices]);
+    if (!sourceBlock) return;
+    hideWordIndices(sourceBlock.sentToWordIds[sentId] ?? []);
+  }, [sourceBlock, hideWordIndices]);
 
   const revealParagraph = useCallback((parId: number) => {
-    if (!session) return;
-    revealWordIndices(session.alignment.src.parToWordIds[parId] ?? []);
-  }, [session, revealWordIndices]);
+    if (!sourceBlock) return;
+    revealWordIndices(sourceBlock.parToWordIds[parId] ?? []);
+  }, [sourceBlock, revealWordIndices]);
 
   const hideParagraph = useCallback((parId: number) => {
-    if (!session) return;
-    hideWordIndices(session.alignment.src.parToWordIds[parId] ?? []);
-  }, [session, hideWordIndices]);
+    if (!sourceBlock) return;
+    hideWordIndices(sourceBlock.parToWordIds[parId] ?? []);
+  }, [sourceBlock, hideWordIndices]);
 
   const isSentenceFullyRevealed = useCallback((sentId: number) => {
-    if (!session) return true;
-    const idxs = session.alignment.src.sentToWordIds[sentId] ?? [];
+    if (!sourceBlock) return true;
+    const idxs = sourceBlock.sentToWordIds[sentId] ?? [];
     return idxs.every((i) => !blurredSource.has(i));
-  }, [session, blurredSource]);
+  }, [sourceBlock, blurredSource]);
 
   const isParagraphFullyRevealed = useCallback((parId: number) => {
-    if (!session) return true;
-    const idxs = session.alignment.src.parToWordIds[parId] ?? [];
+    if (!sourceBlock) return true;
+    const idxs = sourceBlock.parToWordIds[parId] ?? [];
     return idxs.every((i) => !blurredSource.has(i));
-  }, [session, blurredSource]);
+  }, [sourceBlock, blurredSource]);
 
   const isParagraphPartiallyOrFullyRevealed = useCallback((parId: number) => {
-    if (!session) return false;
-    const idxs = session.alignment.src.parToWordIds[parId] ?? [];
+    if (!sourceBlock) return false;
+    const idxs = sourceBlock.parToWordIds[parId] ?? [];
     return idxs.some((i) => !blurredSource.has(i));
-  }, [session, blurredSource]);
+  }, [sourceBlock, blurredSource]);
 
   const getLastSentInPar = useCallback((parId: number) => {
-    if (!session) return 0;
-    const sents = session.alignment.src.parToSentIds[parId] ?? [];
+    if (!sourceBlock) return 0;
+    const sents = sourceBlock.parToSentIds[parId] ?? [];
     return sents.length ? sents[sents.length - 1] : 0;
-  }, [session]);
+  }, [sourceBlock]);
 
   const findFirstHiddenSentence = useCallback(() => {
     for (let s = 0; s <= getMaxSentId(); s++) {
@@ -139,7 +143,7 @@ export function useSourceRevealNav(args: {
   }, [findLastRevealedParagraphBefore, getMaxParId]);
 
   const prev = useCallback((mode: "sentence" | "paragraph") => {
-    if (!session) return;
+    if (!sourceBlock) return;
     if (!sourceBlurEnabled) return;
 
     if (mode === "sentence") {
@@ -156,7 +160,7 @@ export function useSourceRevealNav(args: {
       }
 
       setNavSentId(prevShown);
-      setNavParId(session.alignment.src.sentToParIds[prevShown]);
+      setNavParId(sourceBlock.sentToParIds[prevShown]);
       return;
     }
 
@@ -175,7 +179,8 @@ export function useSourceRevealNav(args: {
     setNavParId(prevPar);
     setNavSentId(getLastSentInPar(prevPar));
   }, [
-    session,
+    sourceBlock,
+    sourceBlurEnabled,
     findLastRevealedSentence,
     findLastRevealedSentenceBefore,
     hideSentence,
@@ -188,14 +193,14 @@ export function useSourceRevealNav(args: {
   ]);
 
   const next = useCallback((mode: "sentence" | "paragraph") => {
-    if (!session) return;
+    if (!sourceBlock) return;
     if (!sourceBlurEnabled) return;
 
     if (mode === "sentence") {
       const firstHidden = findFirstHiddenSentence();
       if (firstHidden === null) return;
 
-      setNavParId(session.alignment.src.sentToParIds[firstHidden]);
+      setNavParId(sourceBlock.sentToParIds[firstHidden]);
       setNavSentId(firstHidden);
       revealSentence(firstHidden);
       return;
@@ -208,7 +213,8 @@ export function useSourceRevealNav(args: {
     setNavParId(firstHiddenPar);
     setNavSentId(getLastSentInPar(firstHiddenPar));
   }, [
-    session,
+    sourceBlock,
+    sourceBlurEnabled,
     findFirstHiddenSentence,
     revealSentence,
     setNavParId,

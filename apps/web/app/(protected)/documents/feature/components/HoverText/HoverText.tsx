@@ -22,7 +22,7 @@ type HoverTextProps = {
   spaces: string[];
   indexOffset?: number;
   highlightIndices?: number[];
-  variant: "source" | "target";
+  highlightClassName: string;
   onHover?: (index: number | null) => void;
   onWordClick?: (index: number, el: HTMLElement) => void;
   blur?: BlurConfig;
@@ -36,7 +36,7 @@ export function HoverText({
   spaces,
   indexOffset = 0,
   highlightIndices = [],
-  variant,
+  highlightClassName,
   onHover,
   onWordClick,
   blur,
@@ -44,12 +44,6 @@ export function HoverText({
   indentFirstLine,
   className,
 }: HoverTextProps) {
-  // Define source / target highlight colors
-  const highlightColor =
-    variant === "source"
-      ? "bg-blue-500/20 hover:bg-blue-500/30"
-      : "bg-orange-500/20 hover:bg-orange-500/30";
-
   // Toggle blur/unblur (initially all blurred source)
   const [internalBlurred, internalSetBlurred] = useState<Set<number>>(() =>
     blur ? new Set(words.map((_, i) => i)) : new Set()
@@ -71,7 +65,11 @@ export function HoverText({
 
       // Word blur
       if (blur.mode === "word") {
-        wordIsBlurred ? next.delete(i) : next.add(i);
+        if (wordIsBlurred) {
+          next.delete(i);
+        } else {
+          next.add(i);
+        }
         return next;
       }
 
@@ -82,7 +80,11 @@ export function HoverText({
         for (const j of idxs) {
           // Toggle sentence with clicked word
           if (next.has(j) === wordIsBlurred) {
-            next.has(j) ? next.delete(j) : next.add(j);
+            if (next.has(j)) {
+              next.delete(j);
+            } else {
+              next.add(j);
+            }
           }
         }
         return next;
@@ -95,7 +97,11 @@ export function HoverText({
         for (const j of idxs) {
           // Toggle paragraph with clicked word
           if (next.has(j) === wordIsBlurred) {
-            next.has(j) ? next.delete(j) : next.add(j);
+            if (next.has(j)) {
+              next.delete(j);
+            } else {
+              next.add(j);
+            }
           }
         }
         return next;
@@ -165,7 +171,7 @@ export function HoverText({
               onMouseLeave={() => onHover?.(null)}
               onClick={(e) => handleClick(baseIndex, e)}
               className={`inline-block rounded cursor-pointer transition-colors duration-75 ${
-                isHighlighted ? highlightColor : ""
+                isHighlighted ? highlightClassName : ""
               }`}
             >
               <span className={`inline-block ${isBlurred ? "blur-sm" : "blur-none"}`}>

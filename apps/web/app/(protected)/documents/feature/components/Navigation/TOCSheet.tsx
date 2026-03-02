@@ -1,3 +1,9 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+
+import { MoveRight } from "lucide-react";
+
 import { TableOfContents } from "lucide-react"
 import {
   Sheet,
@@ -7,8 +13,14 @@ import {
   SheetTrigger,
 } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Progress } from "@/components/ui/progress"
+import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
+
+import { capitalizeWords } from "@/lib/string";
+import { LangLabels, toUiLang } from "@/app/i18n/messages";
 
 
 function isCurrentSection(
@@ -24,13 +36,47 @@ function isCurrentSection(
 
 export function TOCSheet({
   sections,
+  documentTitle,
+  documentAuthor,
+  srcLang,
+  tgtLang,
+  langLabels,
   currentPageNumber,
+  pageCount,
   onSelectSection,
+  onGoToPage,
 }: {
   sections: LoadedSection[],
+  documentTitle: string,
+  documentAuthor?: string | null,
+  srcLang: string,
+  tgtLang: string,
+  langLabels: LangLabels,
   currentPageNumber: number,
+  pageCount: number,
   onSelectSection: (section: LoadedSection) => void;
+  onGoToPage: (pageNumber: number) => void;
 }) {
+  const [pageInputOverride, setPageInputOverride] = useState<string | null>(null);
+  const pageInput = pageInputOverride ?? (pageCount > 0 ? String(currentPageNumber) : "");
+
+  const requestedPageNumber = Number(pageInput);
+  const canGoToPage =
+    Number.isInteger(requestedPageNumber) &&
+    requestedPageNumber >= 1 &&
+    requestedPageNumber <= pageCount;
+  const displayPageNumber = pageCount > 0 ? currentPageNumber : 0;
+  const progressPercent = pageCount > 0 ? (currentPageNumber / pageCount) * 100 : 0;
+
+  const handleGoToPage = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+
+    if (!canGoToPage) return;
+
+    setPageInputOverride(null);
+    onGoToPage(requestedPageNumber);
+  };
+
   return (
     <Sheet>
       <SheetTrigger asChild>
@@ -57,50 +103,126 @@ export function TOCSheet({
         "
       >
         <SheetHeader className="shrink-0 border-b">
-          <SheetTitle 
-            className="
-              font-ui text-muted-foreground text-xs
-              tracking-wider uppercase
-            "
-          >
-            Table of Contents
-          </SheetTitle>
+          <div className="flex min-h-0 flex-1 flex-col gap-4">
+            <SheetTitle 
+              className="
+                font-ui text-muted-foreground text-xs
+                tracking-wider uppercase
+              "
+            >
+              Table of Contents
+            </SheetTitle>
+            <div>
+              <h2 className="font-reading text-xl font-semibold leading-tight text-foreground">
+                {capitalizeWords(documentTitle)}
+              </h2>
+              {documentAuthor && (
+                <span className="min-w-0 font-ui text-sm text-muted-foreground">
+                  {documentAuthor}
+                </span>
+              )}
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2">
+              <LangBadge lang={srcLang} labels={langLabels} useLabel={true}/>
+              <MoveRight size={14} />
+              <LangBadge lang={tgtLang} labels={langLabels} useLabel={true}/>
+            </span>
+          </div>
         </SheetHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto">
-          <div className="grid grid-cols">
-            {sections.map((section, idx) => {
-              return (
-                <Button 
-                  key={section.id}
-                  onClick={(e) => onSelectSection(section)}
-                  className={`
-                      w-full min-h-12 h-auto rounded-none text-foreground
-                      bg-transparent
-                      justify-start whitespace-normal break-words
-                      text-left items-start py-3
-                      hover:bg-muted-foreground/10
-                      ${isCurrentSection(currentPageNumber, section) 
-                        ? "bg-blue-300/20 text-blue-60 hover:bg-blue-300/20" 
-                        : ""
-                      }
-                    `}
-                  style={{
-                    paddingLeft: `${1 + section.depth * 0.75}rem`
-                  }}
-                >
-                  <span className="flex flex-col items-start">
-                    <span>{section.title}</span>
-                    <span className="text-xs text-muted-foreground">
-                      {section.firstPageNumber === section.lastPageNumber
-                        ? `p. ${section.firstPageNumber}`
-                        : `pp. ${section.firstPageNumber}-${section.lastPageNumber}`
-                      }
+        <div className="flex min-h-0 flex-1 flex-col">
+          <div className="shrink-0 border-b px-4 pt-0 pb-4">
+            <div className="mb-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
+              <span>Reading progress</span>
+              <span className="shrink-0">
+                Page {displayPageNumber} of {pageCount}
+              </span>
+            </div>
+            <Progress
+              value={progressPercent}
+              className="h-1.5 bg-border/80"
+              indicatorClassName="bg-blue-600"
+            />
+          </div>
+
+          <form
+            onSubmit={handleGoToPage}
+            className="flex flex-nowrap items-center justify-between gap-3 border-b px-4 py-4"
+          >
+            <span className="flex items-center gap-2">
+              <span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">
+                Go to page
+              </span>
+              <Input
+                type="number"
+                min={1}
+                max={pageCount}
+                inputMode="numeric"
+                value={pageInput}
+                onChange={(e) => setPageInputOverride(e.target.value)}
+                aria-label="Go to page"
+                className="h-8 w-16 shrink-0 px-2 text-center"
+              />
+              <span className="shrink-0 text-sm text-muted-foreground">
+                / {pageCount}
+              </span>
+            </span>
+            <Button
+              type="submit"
+              disabled={!canGoToPage}
+              className="
+                h-8 shrink-0 rounded-xl px-4 font-semibold
+                bg-blue-600 text-white
+                border border-blue-700
+                shadow-sm shadow-blue-900/40
+                transition-transform duration-200 ease-out
+                hover:bg-blue-600/90
+                hover:-translate-y-0.5
+                motion-reduce:transform-none
+              "
+            >
+              Go
+            </Button>
+          </form>
+
+          <div className="min-h-0 flex-1 overflow-y-auto">
+            <div className="grid grid-cols">
+              {sections.map((section) => {
+                return (
+                  <Button 
+                    key={section.id}
+                    onClick={() => {
+                      setPageInputOverride(null);
+                      onSelectSection(section);
+                    }}
+                    className={`
+                        w-full min-h-12 h-auto rounded-none text-foreground
+                        bg-transparent
+                        justify-start whitespace-normal break-words
+                        text-left items-start py-3
+                        hover:bg-muted-foreground/10
+                        ${isCurrentSection(currentPageNumber, section) 
+                          ? "bg-blue-300/20 text-blue-60 hover:bg-blue-300/20" 
+                          : ""
+                        }
+                      `}
+                    style={{
+                      paddingLeft: `${1 + section.depth * 0.75}rem`
+                    }}
+                  >
+                    <span className="flex flex-col items-start">
+                      <span>{section.title}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {section.firstPageNumber === section.lastPageNumber
+                          ? `p. ${section.firstPageNumber}`
+                          : `pp. ${section.firstPageNumber}-${section.lastPageNumber}`
+                        }
+                      </span>
                     </span>
-                  </span>
-                </Button>
-              )
-            })}
+                  </Button>
+                )
+              })}
+            </div>
           </div>
         </div>
       </SheetContent>

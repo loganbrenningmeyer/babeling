@@ -18,6 +18,7 @@ type ParagraphGridProps = {
   documentId: number;
   pageBlocks: SavedPageBlock[];
   documentImages: LoadedDocumentImage[];
+  isSwapped: boolean;
 
   // Blur
   blurMode: BlurMode;
@@ -27,6 +28,8 @@ type ParagraphGridProps = {
   // Highlight + hover
   sourceHighlightIndices: number[];
   targetHighlightIndices: number[];
+  sourceHighlightClassName: string;
+  targetHighlightClassName: string;
   onSourceHover?: (idx: number | null) => void;
   onTargetHover?: (idx: number | null) => void;
 
@@ -197,11 +200,14 @@ export function ParagraphGrid({
   documentId,
   pageBlocks,
   documentImages,
+  isSwapped,
   blurMode,
   blurredSource,
   setBlurredSource,
   sourceHighlightIndices,
   targetHighlightIndices,
+  sourceHighlightClassName,
+  targetHighlightClassName,
   onSourceHover,
   onTargetHover,
   onTargetWordClick,
@@ -304,24 +310,27 @@ export function ParagraphGrid({
 
         tgtSlice.spaces = stripTrailingParagraphBreak(tgtSlice.spaces);
 
+        const sourceBlock = isSwapped ? session.alignment.tgt : session.alignment.src;
+        const sourceSlice = isSwapped ? tgtSlice : srcSlice;
+        const targetSlice = isSwapped ? srcSlice : tgtSlice;
+
         return (
           <React.Fragment key={row.key}>
             <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-              {/* Left: Source paragraph */}
               <div>
                 <HoverText
-                  variant="source"
-                  words={srcSlice.words}
-                  spaces={srcSlice.spaces}
-                  indexOffset={srcSlice.offset}
+                  words={sourceSlice.words}
+                  spaces={sourceSlice.spaces}
+                  indexOffset={sourceSlice.offset}
                   onHover={onSourceHover}
+                  highlightClassName={sourceHighlightClassName}
                   highlightIndices={sourceHighlightIndices}
                   blur={{
                     mode: blurMode,
-                    sentIds: session.alignment.src.sentIds,
-                    parIds: session.alignment.src.parIds,
-                    sentToWordIds: session.alignment.src.sentToWordIds,
-                    parToWordIds: session.alignment.src.parToWordIds,
+                    sentIds: sourceBlock.sentIds,
+                    parIds: sourceBlock.parIds,
+                    sentToWordIds: sourceBlock.sentToWordIds,
+                    parToWordIds: sourceBlock.parToWordIds,
                     blurred: blurredSource,
                     setBlurred: setBlurredSource,
                   }}
@@ -330,15 +339,14 @@ export function ParagraphGrid({
                 />
               </div>
 
-              {/* Right: Target paragraph */}
               <div>
                 <HoverText
-                  variant="target"
-                  words={tgtSlice.words}
-                  spaces={tgtSlice.spaces}
-                  indexOffset={tgtSlice.offset}
+                  words={targetSlice.words}
+                  spaces={targetSlice.spaces}
+                  indexOffset={targetSlice.offset}
                   disabled={targetDisabled}
                   onHover={onTargetHover}
+                  highlightClassName={targetHighlightClassName}
                   highlightIndices={targetHighlightIndices}
                   onWordClick={onTargetWordClick}
                   indentFirstLine={true}

@@ -6,6 +6,7 @@ export const LANG_COLOR_BY_CODE = {
     border: "border-blue-700/40",
     stroke: "stroke-blue-700",
     progress: "bg-blue-700",
+    highlight: "bg-blue-400/20 hover:bg-blue-400/20",
   },
   fr: {
     bg: "bg-rose-50",
@@ -14,6 +15,7 @@ export const LANG_COLOR_BY_CODE = {
     border: "border-rose-700/40",
     stroke: "stroke-rose-700",
     progress: "bg-rose-700",
+    highlight: "bg-rose-400/20 hover:bg-rose-400/20",
   },
   es: {
     bg: "bg-amber-50",
@@ -22,6 +24,7 @@ export const LANG_COLOR_BY_CODE = {
     border: "border-amber-700/40",
     stroke: "stroke-amber-600",
     progress: "bg-amber-600",
+    highlight: "bg-amber-400/20 hover:bg-amber-400/20",
   },
   it: {
     bg: "bg-emerald-50",
@@ -30,6 +33,7 @@ export const LANG_COLOR_BY_CODE = {
     border: "border-emerald-700/40",
     stroke: "stroke-emerald-700",
     progress: "bg-emerald-700",
+    highlight: "bg-emerald-400/20 hover:bg-emerald-400/20",
   },
   de: {
     bg: "bg-violet-50",
@@ -38,5 +42,6 @@ export const LANG_COLOR_BY_CODE = {
     border: "border-violet-700/40",
     stroke: "stroke-violet-700",
     progress: "bg-violet-700",
+    highlight: "bg-violet-400/20 hover:bg-violet-400/20",
   },
 } as const;

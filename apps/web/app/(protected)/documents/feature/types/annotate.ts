@@ -116,26 +116,33 @@ export function makeAnnotateArgs(args: {
   tgtLang: string;
   uiLang: string;
   tgtIdx: number;
+  isSwapped: boolean;
 }): AnnotateArgs {
-  const { session, srcLang, tgtLang, uiLang, tgtIdx } = args;
+  const { session, srcLang, tgtLang, uiLang, tgtIdx, isSwapped } = args;
+
+  const srcBlock = isSwapped ? session.alignment.tgt : session.alignment.src;
+  const tgtBlock = isSwapped ? session.alignment.src : session.alignment.tgt;
+  const targetToSourceMap = isSwapped
+    ? session.alignment.align.srcToTgt
+    : session.alignment.align.tgtToSrc;
 
   return {
-    srcLang,
-    tgtLang,
+    srcLang: isSwapped ? tgtLang : srcLang,
+    tgtLang: isSwapped ? srcLang : tgtLang,
     uiLang,
     src: {
-      words: session.alignment.src.words,
-      spaces: session.alignment.src.spaces,
-      sentIds: session.alignment.src.sentIds,
-      parIds: session.alignment.src.parIds,
+      words: srcBlock.words,
+      spaces: srcBlock.spaces,
+      sentIds: srcBlock.sentIds,
+      parIds: srcBlock.parIds,
     },
     tgt: {
-      words: session.alignment.tgt.words,
-      spaces: session.alignment.tgt.spaces,
-      sentIds: session.alignment.tgt.sentIds,
-      parIds: session.alignment.tgt.parIds,
+      words: tgtBlock.words,
+      spaces: tgtBlock.spaces,
+      sentIds: tgtBlock.sentIds,
+      parIds: tgtBlock.parIds,
     },
-    tgtToSrc: session.alignment.align.tgtToSrc,
+    tgtToSrc: targetToSourceMap,
     tgtIdx,
   };
 }
