@@ -181,8 +181,8 @@ export function ReaderShell({
             {/* -------------------------
             * Source Langugage Header
             * ------------------------- */}
-            <div className="pt-4 pb-3">
-              <div className="flex justify-between">
+            <div className="pt-4 pb-3 flex justify-center">
+              <div className="relative flex justify-center w-full items-center">
                 <div>
                   {renderLoading ? (
                     <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted-foreground/20" />
@@ -202,18 +202,20 @@ export function ReaderShell({
                 {/* -------------------------
                 * Source Show / Hide Button
                 * ------------------------- */}
-                <SourceBlurButton
-                  value={sourceBlurEnabled}
-                  onChange={onSourceBlurEnabledChange}
-                  showLabel={msgs.general.showOriginal}
-                  hideLabel={msgs.general.hideOriginal}
-                />
+                <div className="absolute right-0">
+                  <SourceBlurButton
+                    value={sourceBlurEnabled}
+                    onChange={onSourceBlurEnabledChange}
+                    showLabel={msgs.general.showOriginal}
+                    hideLabel={msgs.general.hideOriginal}
+                  />
+                </div>
               </div>
             </div>
             {/* -------------------------
             * Target Language Header
             * ------------------------- */}
-            <div className="pt-4 pb-3">
+            <div className="pt-4 pb-3 flex justify-center">
               <div>
                 {renderLoading ? (
                   <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted-foreground/20" />

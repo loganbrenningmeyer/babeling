@@ -97,6 +97,7 @@ export function TOCSheet({
         side="left"
         viewportTopClassName="top-32"
         showOverlay={false}
+        onOpenAutoFocus={(event) => event.preventDefault()}
         className="
           w-[20rem] font-ui 
           border border-border
