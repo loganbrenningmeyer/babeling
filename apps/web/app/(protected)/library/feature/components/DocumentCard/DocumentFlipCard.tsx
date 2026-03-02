@@ -9,17 +9,15 @@ import { LibraryDocument } from "../../types/document";
 import { useRecentTranslations } from "../../hooks/useRecentTranslations";
 import { getMostRecentTranslation } from "../../utils/translations";
 
-import type { UiLang, messages } from "@/app/i18n/messages";
-
-type LangLabels = (typeof messages)[UiLang]["langs"];
+import type { LangLabels } from "@/app/i18n/messages";
 
 
 export function DocumentFlipCard({
   document,
-  langs,
+  langLabels,
 }: {
   document: LibraryDocument,
-  langs: LangLabels, 
+  langLabels: LangLabels, 
 }) {
   const [flipped, setFlipped] = useState(false);
 
@@ -57,7 +55,7 @@ export function DocumentFlipCard({
                 document={document}
                 recentTranslation={recentTranslation}
                 translationsLoading={translationsLoading}
-                langs={langs}
+                langLabels={langLabels}
               />
             </div>
           </div>

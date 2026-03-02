@@ -201,7 +201,7 @@ export function LibraryPage({
                 <DocumentFlipCard
                   key={doc.id}
                   document={doc}
-                  langs={m.langs}
+                  langLabels={m.langs}
                 />
               ))}
             </div>
@@ -257,6 +257,7 @@ export function LibraryPage({
                 <GlossaryItemFlipCard 
                   key={glossaryItem.createdAt}
                   glossaryItem={glossaryItem} 
+                  langLabels={m.langs}
                 />
               ))}
             </div>

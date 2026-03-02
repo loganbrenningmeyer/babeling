@@ -128,7 +128,7 @@ export function ReaderShell({
           <div
             className={`
               shrink-0 grid grid-cols-2 border-b
-              text-[16px] font-medium
+              text-[16px] font-medium font-ui
               leading-none text-foreground/90
               ${gapAndPad}
             `}
@@ -156,7 +156,7 @@ export function ReaderShell({
                   onChange={onSourceBlurEnabledChange}
                   showLabel={msgs.general.showOriginal}
                   hideLabel={msgs.general.hideOriginal}
-                  />
+                />
               </div>
             </div>
             {/* -------------------------

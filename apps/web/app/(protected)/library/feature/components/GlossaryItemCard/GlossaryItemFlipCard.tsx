@@ -9,11 +9,15 @@ import { GlossaryItemBack } from "./GlossaryItemBack";
 
 import { LibraryGlossaryItem } from "../../types/glossaryItem";
 
+import type { LangLabels } from "@/app/i18n/messages";
+
 
 export function GlossaryItemFlipCard({
   glossaryItem,
+  langLabels,
 }: {
   glossaryItem: LibraryGlossaryItem,
+  langLabels: LangLabels,
 }) {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -59,7 +63,7 @@ export function GlossaryItemFlipCard({
         { side === "front" ? (
           <GlossaryItemFront glossaryItem={glossaryItem} />
         ) : (
-          <GlossaryItemBack glossaryItem={glossaryItem} onClose={closeCard}/>
+          <GlossaryItemBack glossaryItem={glossaryItem} langLabels={langLabels} onClose={closeCard}/>
         )}
       </div>
     </div>

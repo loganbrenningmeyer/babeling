@@ -12,15 +12,19 @@ import { PronounceButton } from "@/app/(protected)/documents/feature/components/
 import { UsageInfo } from "./UsageInfo";
 
 import { LibraryGlossaryItem } from "../../types/glossaryItem";
+import { toUiLang, type LangLabels } from "@/app/i18n/messages";
 
 import { capitalizeWords } from "@/lib/string";
+import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
 export function GlossaryItemBack({
   glossaryItem,
+  langLabels,
   onClose,
 }: {
   glossaryItem: LibraryGlossaryItem;
+  langLabels: LangLabels,
   onClose: () => void;
 }) {
   return (
@@ -134,7 +138,11 @@ export function GlossaryItemBack({
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
                           Original
                         </span>
-                        <LangBadge lang={glossaryItem.srcLang} />
+                        <LangBadge 
+                          lang={glossaryItem.srcLang} 
+                          labels={langLabels}
+                          useLabel={true}
+                        />
                       </div>
                     </div>
                     <HighlightedTokenSlice
@@ -153,7 +161,11 @@ export function GlossaryItemBack({
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
                           Translation
                         </span>
-                        <LangBadge lang={glossaryItem.tgtLang} />
+                        <LangBadge 
+                          lang={glossaryItem.tgtLang} 
+                          labels={langLabels}
+                          useLabel={true}
+                        />
                       </div>
                     </div>
                     <HighlightedTokenSlice

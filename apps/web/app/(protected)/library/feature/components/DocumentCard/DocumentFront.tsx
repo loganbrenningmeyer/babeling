@@ -22,12 +22,12 @@ export function DocumentFront({
   document,
   recentTranslation,
   translationsLoading,
-  langs,
+  langLabels,
 }: {
   document: LibraryDocument,
   recentTranslation: LibraryTranslation | null,
   translationsLoading: boolean,
-  langs: LangLabels,
+  langLabels: LangLabels,
 }) {
   // Source language color
   const srcAccent = LANG_COLOR_BY_CODE[document.srcLang as keyof typeof LANG_COLOR_BY_CODE].accent;
@@ -41,10 +41,8 @@ export function DocumentFront({
     : null;
 
   const sampleLangCode = recentTranslation ? recentTranslation.tgtLang : document.srcLang;
-  const sampleLangLabel = langs[toUiLang(sampleLangCode)];
-  const sampleLangColors =
-    LANG_COLOR_BY_CODE[sampleLangCode as keyof typeof LANG_COLOR_BY_CODE] ??
-    LANG_COLOR_BY_CODE.en;
+  const sampleLangLabel = langLabels[toUiLang(sampleLangCode)];
+  const sampleLangColors = LANG_COLOR_BY_CODE[toUiLang(sampleLangCode)]
 
   {/* -------------------------
   * ( Front ): Document Info
