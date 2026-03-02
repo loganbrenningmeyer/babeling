@@ -3,7 +3,13 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
+import { ResumeTranslationButton } from "@/app/(protected)/library/feature/components/DocumentCard/ResumeTranslationButton";
+
 import type { LibraryDocument } from "@/app/(protected)/library/feature/types/document";
+
+import { capitalizeWords } from "@/lib/string";
+import { Button } from "@/components/ui/button";
+import { Play } from "lucide-react";
 
 type RecentDocumentsPanelProps = {
   documents: LibraryDocument[];
@@ -60,9 +66,9 @@ export function RecentDocumentsPanel({
       <div className="mb-4 flex items-center justify-between">
         <h2
           id="recent-docs-title"
-          className="text-xs font-semibold tracking-wider text-muted-foreground"
+          className="text-xs font-semibold tracking-wider text-muted-foreground uppercase"
         >
-          RECENT
+          Recently read
         </h2>
 
         <Link
@@ -93,10 +99,8 @@ export function RecentDocumentsPanel({
       ) : (
         <div className="grid gap-4 md:grid-cols-3">
           {documents.map((doc) => (
-            <button
+            <div
               key={doc.id}
-              type="button"
-              onClick={() => onOpenDocument(doc)}
               className="
                 rounded-2xl border border-foreground/10 bg-background px-4 py-3 text-left shadow-sm
                 transition-colors hover:bg-muted/20
@@ -127,14 +131,43 @@ export function RecentDocumentsPanel({
                 ) : null}
               </div>
 
-              <div className="line-clamp-1 text-base font-medium text-foreground">
-                {doc.title?.trim() || "Untitled"}
+              <div className="mb-3 line-clamp-1 font-reading text-base font-semibold text-foreground">
+                {capitalizeWords(doc.title?.trim()) || "Untitled"}
               </div>
 
-              <div className="mt-1 text-sm text-muted-foreground">
-                {formatRelativeTime(doc.lastOpenedAt)}
+              <div className="w-fit flex flex-col items-center gap-1">
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenDocument(doc);
+                  }}
+                  className="
+                      group
+                      rounded-full px-6
+                      bg-blue-600/10 text-blue-700
+                      border border-blue-700
+                      transition-[transform, colors] duration-200 ease-out
+                      hover:bg-blue-600/20
+                      hover:-translate-y-0.5
+                      motion-reduce:transform-none
+                    "
+                  >
+                  <Play 
+                    size={12}
+                    className="
+                        transition-transform duration-300 ease-out
+                        group-hover:translate-x-0.5
+                        motion-reduce:transition-none
+                      "
+                    />
+                  Resume reading
+                </Button>
+
+                <p className="text-xs text-muted-foreground/60 text-center italic">
+                  Read {formatRelativeTime(doc.lastOpenedAt)}
+                </p>
               </div>
-            </button>
+            </div>
           ))}
         </div>
       )}

@@ -1,5 +1,8 @@
 import type { AlignmentPayload } from "../types/pageTranslation";
 import type { AlignResponseDTO } from "../types/align";
+import type { TranslateParagraph } from "../types/translate";
+
+import { toParagraphsDTO } from "../types/align";
 
 /**************************
  * `align()`
@@ -9,8 +12,7 @@ import type { AlignResponseDTO } from "../types/align";
  * @returns 
  **************************/
 export async function align(args: {
-  source: string;
-  target: string;
+  paragraphs: TranslateParagraph[];
   srcLang: string;
   tgtLang: string;
 }): Promise<AlignmentPayload> {
@@ -18,8 +20,7 @@ export async function align(args: {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      source: args.source,
-      target: args.target,
+      paragraphs: toParagraphsDTO(args.paragraphs),
       src_lang: args.srcLang,
       tgt_lang: args.tgtLang,
     }),

@@ -106,8 +106,8 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
       // 3) Otherwise, translate + align + save page translation
       // -------------------------
       // ---- Translate ----
-      const { source, target } = await translate({
-        source: pageText,
+      const translation = await translate({
+        sourceText: pageText,
         srcLang,
         tgtLang,
       });
@@ -116,8 +116,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
 
       // ---- Align ----
       const alignment = await align({
-        source,
-        target,
+        paragraphs: translation.paragraphs,
         srcLang,
         tgtLang,
       });
@@ -127,7 +126,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
         documentPageId,
         srcLang,
         tgtLang,
-        translatedText: target,
+        translatedText: translation.targetText,
         alignmentData: alignment,
       })
 
@@ -137,8 +136,8 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
       // Build page session from new translation + alignment data
       // -------------------------
       const sess = makeReaderSession({
-        srcText: source,
-        tgtText: target,
+        srcText: translation.sourceText,
+        tgtText: translation.targetText,
         alignment,
       });
 

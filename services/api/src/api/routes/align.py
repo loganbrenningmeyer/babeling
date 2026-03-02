@@ -26,7 +26,7 @@ def align(req: AlignRequest) -> AlignResponse:
         return r.json()
 
     # -------------------------
-    # Load Aligner / Segmenter
+    # Load Aligner / Segmenters
     # -------------------------
     aligner = get_aligner()
 
@@ -37,8 +37,7 @@ def align(req: AlignRequest) -> AlignResponse:
     # Align all corresponding source / target sentences
     # -------------------------
     res: AlignmentData = aligner.align(
-        source=req.source,
-        target=req.target,
+        paragraphs=req.paragraphs, 
         src_segmenter=src_segmenter,
         tgt_segmenter=tgt_segmenter,
         threshold=0.025,

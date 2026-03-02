@@ -1,5 +1,5 @@
 from api.config import LANGS, PROMPTS_DIR
-from babeling_nlp.gemini import GeminiAPI
+from babeling_nlp.gemini_api import GeminiAPI
 
 
 _gemini: dict[tuple[str, str, str], GeminiAPI] = {}
@@ -28,7 +28,7 @@ def get_gemini(src_lang: str, tgt_lang: str, ui_lang: str | None = None) -> Gemi
     resolved_ui_lang = ui_lang or src_lang
     key = (src_lang, tgt_lang, resolved_ui_lang)
     if key not in _gemini:
-        system_translate = load_prompt("translate.txt", src_lang, tgt_lang)
+        system_translate = load_prompt("translate_segmented.txt", src_lang, tgt_lang)
         system_explain = load_prompt(
             "annotate.txt", src_lang, tgt_lang, resolved_ui_lang
         )

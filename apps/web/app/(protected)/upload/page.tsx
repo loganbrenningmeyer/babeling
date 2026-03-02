@@ -154,7 +154,7 @@ export default function UploadPage() {
        * Hero
        * ------------------------- */}
       <div className="pt-12">
-        <h1 className="font-reading text-4xl tracking-tight">
+        <h1 className="font-reading font-semibold text-4xl tracking-tight">
           New reading
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">

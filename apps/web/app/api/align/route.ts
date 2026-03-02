@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const { source, target, src_lang, tgt_lang } = await req.json();
+  const { paragraphs, src_lang, tgt_lang } = await req.json();
 
   const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -9,8 +9,7 @@ export async function POST(req: Request) {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      source,
-      target,
+      paragraphs,
       src_lang,
       tgt_lang,
     }),

@@ -2,10 +2,21 @@ from pydantic import BaseModel
 
 
 class TranslateRequest(BaseModel):
-    source: str
-    src_lang: str | None = None
-    tgt_lang: str | None = None
+    source_text: str
+    src_lang: str
+    tgt_lang: str
 
-class TranslateResponse(BaseModel):
+
+class TranslateSentence(BaseModel):
+    sent_id: int
     source: str
     target: str
+
+class TranslateParagraph(BaseModel):
+    par_id: int
+    sentences: list[TranslateSentence]
+
+class TranslateResponse(BaseModel):
+    source_text: str
+    target_text: str
+    paragraphs: list[TranslateParagraph]

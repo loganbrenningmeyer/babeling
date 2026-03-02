@@ -4,7 +4,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { UserPreferencesProvider } from "@/components/UserPreferencesProvider";
 import { AppNav } from "@/components/AppNav";
 
-import { DM_Sans, Lora, DM_Serif_Display } from "next/font/google";
+import { DM_Sans, Lora, DM_Serif_Text } from "next/font/google";
 
 
 // -------------------------

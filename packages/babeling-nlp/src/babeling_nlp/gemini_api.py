@@ -7,22 +7,11 @@ from textwrap import dedent
 
 from babeling_nlp.define import get_lemma_ipa, get_form_ipa
 from babeling_nlp.utils import mark_words, extract_text_group
-
-
-class ExplainExample(BaseModel):
-    source: str
-    target: str
-
-
-class ExplainDefineOut(BaseModel):
-    lemma: str
-    pos_lemma: str
-    pos_form: str
-    gloss: str
-    ipa_form: str
-    ipa_lemma: str
-    explanation: str
-    examples: list[ExplainExample]
+from babeling_nlp.schemas.translate import (
+    TranslationRequestPayload,
+    TranslationResponsePayload,
+)
+from babeling_nlp.schemas.annotate import ExplainExample, ExplainDefineOut
 
 
 class GeminiAPI:
@@ -31,7 +20,7 @@ class GeminiAPI:
         self.system_translate = system_translate
         self.system_explain = system_explain
 
-    def translate(self, source: str) -> str:
+    def translate_text(self, source: str) -> str:
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=source,
@@ -44,6 +33,23 @@ class GeminiAPI:
         )
 
         return response.text.strip()
+    
+    def translate_segmented(self, request: TranslationRequestPayload):
+        response = self.client.models.generate_content(
+            model="gemini-3-flash-preview",
+            contents=request.model_dump_json(),
+            config=types.GenerateContentConfig(
+                system_instruction=self.system_translate,
+                response_mime_type="application/json",
+                response_schema=TranslationResponsePayload,
+                thinking_config=types.ThinkingConfig(thinking_budget=0),
+            ),
+        )
+
+        if hasattr(response, "parsed"):
+            return response.parsed
+        else:
+            return TranslationResponsePayload.model_validate_json(response.text)
 
     def annotate(
         self,
@@ -114,5 +120,5 @@ class GeminiAPI:
             "usage": {
                 "explanation": data.get("explanation"),
                 "examples": data.get("examples"),
-            }
+            },
         }

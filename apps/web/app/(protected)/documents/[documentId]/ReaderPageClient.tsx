@@ -250,14 +250,17 @@ export default function ReaderPageClient({
             onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
           />
           <div className="ml-4 min-w-0">
-            <span className="font-reading text-md font-bold">
-              {capitalizeWords(document?.title ?? "")}
+            <div className="flex flex-col">
+              <span className="font-reading text-md font-bold leading-tight">
+                {capitalizeWords(document?.title ?? "")}
+              </span>
+
               {document?.author && (
-                <span className="font-reading italic font-thin text-muted-foreground">
-                  {" — "}{document.author}
+                <span className="font-reading text-sm italic font-thin text-muted-foreground leading-tight">
+                  {document.author}
                 </span>
               )}
-            </span>
+            </div>
           </div>
         </div>
 

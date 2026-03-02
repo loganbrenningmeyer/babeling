@@ -3,6 +3,7 @@ from pathlib import Path
 from pydantic import BaseModel
 from babeling_nlp.align import Aligner, AlignmentData
 from binaryalign.tokenization import Segmenter
+from api.schemas.align import AlignRequest
 
 app = modal.App("babeling-align")
 
@@ -57,12 +58,6 @@ if (REPO_ROOT / "artifacts/binaryalign/en-all").is_dir():
 
 CKPT_PATH = "/model/model-pretrain-step50000.ckpt"
 
-class AlignRequest(BaseModel):
-    source: str
-    target: str
-    src_lang: str | None = None
-    tgt_lang: str | None = None
-
 @app.cls(gpu="A10G", image=image, scaledown_window=10)
 class AlignService:
     @modal.enter()
@@ -74,15 +69,14 @@ class AlignService:
         # -------------------------
         # Load Segmenter 
         # -------------------------
-        src_segmenter = Segmenter(req.src_lang or "en")
-        tgt_segmenter = Segmenter(req.tgt_lang or "es")
+        src_segmenter = Segmenter(req.src_lang)
+        tgt_segmenter = Segmenter(req.tgt_lang)
 
         # -------------------------
         # Align all corresponding source / target sentences
         # -------------------------
         out: AlignmentData = self.aligner.align(
-            source=req.source,
-            target=req.target,
+            paragraphs=req.paragraphs,
             src_segmenter=src_segmenter,
             tgt_segmenter=tgt_segmenter,
             threshold=0.025,

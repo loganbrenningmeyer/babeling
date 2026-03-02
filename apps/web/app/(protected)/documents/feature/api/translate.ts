@@ -2,14 +2,10 @@ import type { TranslateResponse, TranslateResponseDTO } from "../types/translate
 
 /**************************
  * `translate()`
- * -- Given `source` text, `srcLang` / `tgtLang`, normalizes the source
- *    text and translates to `target` text using Gemini, returning normalized source / target
- * 
- * @param 
- * @returns 
+ * -- 
  **************************/
 export async function translate(args: {
-  source: string;
+  sourceText: string;
   srcLang: string;
   tgtLang: string;
 }): Promise<TranslateResponse> {
@@ -17,7 +13,7 @@ export async function translate(args: {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      source: args.source,
+      source_text: args.sourceText,
       src_lang: args.srcLang,
       tgt_lang: args.tgtLang,
     }),
@@ -30,7 +26,15 @@ export async function translate(args: {
   const data = (await res.json()) as TranslateResponseDTO;
 
   return {
-    source: data.source,
-    target: data.target,
+    sourceText: data.source_text,
+    targetText: data.target_text,
+    paragraphs: data.paragraphs.map((p) => ({
+      parId: p.par_id,
+      sentences: p.sentences.map((s) => ({
+        sentId: s.sent_id,
+        source: s.source,
+        target: s.target,
+      })),
+    })),
   };
 }

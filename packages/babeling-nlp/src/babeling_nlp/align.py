@@ -3,6 +3,7 @@ import torch
 from binaryalign.tokenization import BinaryAlignTokenizer, Segmenter
 from binaryalign.models import BinaryAlignModel, BinaryAlignClassifier, load_backbone
 from binaryalign.inference import BinaryAlign, AlignmentData
+from babeling_nlp.schemas.align import AlignedParagraph
 
 
 class Aligner:
@@ -24,25 +25,23 @@ class Aligner:
 
     def align(
         self, 
-        source: str,
-        target: str,
+        paragraphs: list[AlignedParagraph], 
         src_segmenter: Segmenter,
         tgt_segmenter: Segmenter,
-        threshold: float=0.5,
+        threshold: float = 0.5,
     ) -> AlignmentData:
         """
-        
-        
+
+
         Args:
-        
-        
+
+
         Returns:
-        
+
         """
-        return self.binaryalign.align_text_pair(
-            source=source, 
-            target=target, 
-            src_segmenter=src_segmenter, 
+        return self.binaryalign.align_segmented_pair(
+            paragraphs=paragraphs,
+            src_segmenter=src_segmenter,
             tgt_segmenter=tgt_segmenter, 
             threshold=threshold,
         )

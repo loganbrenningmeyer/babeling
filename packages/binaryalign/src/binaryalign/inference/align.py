@@ -3,6 +3,7 @@ from dataclasses import dataclass, field
 
 from binaryalign.models import BinaryAlignModel
 from binaryalign.tokenization import BinaryAlignTokenizer, Segmenter
+from babeling_nlp.schemas.align import AlignedParagraph
 
 
 @dataclass
@@ -259,6 +260,95 @@ class BinaryAlign:
         out.src.par_to_word_ids = dict(out.src.par_to_word_ids)
         out.tgt.par_to_word_ids = dict(out.tgt.par_to_word_ids)
 
+        out.src.par_to_sent_ids = dict(out.src.par_to_sent_ids)
+        out.tgt.par_to_sent_ids = dict(out.tgt.par_to_sent_ids)
+
+        return out
+    
+    def align_segmented_pair(
+        self,
+        paragraphs: list[AlignedParagraph],
+        src_segmenter: Segmenter,
+        tgt_segmenter: Segmenter,
+        threshold: float = 0.5,
+    ) -> AlignmentData:
+        """
+        
+        """
+        out = AlignmentData()
+        global_sent_id = 0
+
+        for par_idx, par in enumerate(paragraphs):
+            par_id = par.par_id
+            is_last_par = par_idx == len(paragraphs) - 1
+
+            for sent_idx, sent in enumerate(par.sentences):
+                is_last_sent = sent_idx == len(par.sentences) - 1
+
+                src_words, src_spaces = src_segmenter.tokenize_with_spaces(sent.source)
+                tgt_words, tgt_spaces = tgt_segmenter.tokenize_with_spaces(sent.target)
+
+                # -------------------------
+                # Add trailing whitespace to sentences / paragraphs
+                # -------------------------
+                if not is_last_sent:
+                    boundary_ws = " "
+                elif not is_last_par:
+                    boundary_ws = "\n\n"
+                else:
+                    boundary_ws = ""
+
+                if src_spaces and boundary_ws:
+                    src_spaces[-1] += boundary_ws
+                if tgt_spaces and boundary_ws:
+                    tgt_spaces[-1] += boundary_ws
+
+                src_start = len(out.src.words)
+                tgt_start = len(out.tgt.words)
+
+                out.src.words.extend(src_words)
+                out.src.spaces.extend(src_spaces)
+                out.tgt.words.extend(tgt_words)
+                out.tgt.spaces.extend(tgt_spaces)
+
+                out.src.par_to_sent_ids[par_id].append(global_sent_id)
+                out.tgt.par_to_sent_ids[par_id].append(global_sent_id)
+                out.src.sent_to_par_ids[global_sent_id] = par_id
+                out.tgt.sent_to_par_ids[global_sent_id] = par_id
+
+                for i in range(len(src_words)):
+                    idx = src_start + i
+                    out.src.sent_ids.append(global_sent_id)
+                    out.src.par_ids.append(par_id)
+                    out.src.sent_to_word_ids[global_sent_id].append(idx)
+                    out.src.par_to_word_ids[par_id].append(idx)
+
+                for i in range(len(tgt_words)):
+                    idx = tgt_start + i
+                    out.tgt.sent_ids.append(global_sent_id)
+                    out.tgt.par_ids.append(par_id)
+                    out.tgt.sent_to_word_ids[global_sent_id].append(idx)
+                    out.tgt.par_to_word_ids[par_id].append(idx)
+
+                if src_words and tgt_words:
+                    src_map, tgt_map = self.align_sentence_pair(src_words, tgt_words, threshold)
+
+                    for src_idx, tgt_idxs in src_map.items():
+                        out.align.src_to_tgt[src_start + src_idx] = [
+                            tgt_start + tgt_idx for tgt_idx in tgt_idxs
+                        ]
+
+                    for tgt_idx, src_idxs in tgt_map.items():
+                        out.align.tgt_to_src[tgt_start + tgt_idx] = [
+                            src_start + src_idx for src_idx in src_idxs
+                        ]
+
+                global_sent_id += 1
+
+        out.src.sent_to_word_ids = dict(out.src.sent_to_word_ids)
+        out.tgt.sent_to_word_ids = dict(out.tgt.sent_to_word_ids)
+        out.src.par_to_word_ids = dict(out.src.par_to_word_ids)
+        out.tgt.par_to_word_ids = dict(out.tgt.par_to_word_ids)
         out.src.par_to_sent_ids = dict(out.src.par_to_sent_ids)
         out.tgt.par_to_sent_ids = dict(out.tgt.par_to_sent_ids)
 

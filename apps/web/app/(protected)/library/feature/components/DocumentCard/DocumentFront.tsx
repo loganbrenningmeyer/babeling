@@ -68,7 +68,7 @@ export function DocumentFront({
             font-reading text-sm italic
             text-muted-foreground leading-relaxed line-clamp-3
           ">
-            {truncate(document.srcText, 100)}…
+            {truncate(recentTranslation ? recentTranslation.tgtText : document.srcText, 100)}…
           </p>
         </div>
         {/* -------------------------
