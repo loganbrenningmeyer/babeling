@@ -16,17 +16,20 @@ import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
 
 import { capitalizeWords, formatRelativeTime } from "@/lib/string";
+import { LangLabels, toUiLang } from "@/app/i18n/messages";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
 export function DocumentBack({
   document,
   translations,
+  langLabels,
   loading,
   error,
 }: {
   document: LibraryDocument,
   translations: LibraryTranslation[],
+  langLabels: LangLabels,
   loading: boolean,
   error: string | null,
 }) {
@@ -231,7 +234,19 @@ export function DocumentBack({
                     translation={t}
                     loading={false}
                   >
-                    Resume reading
+                    <span>
+                      Continue in{" "}
+                      <span 
+                        className={`
+                          rounded-xl border px-1 
+                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
+                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
+                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
+                        `}
+                      >
+                        {langLabels[toUiLang(t.tgtLang)]}
+                      </span>
+                    </span>
                   </ResumeTranslationButton>
                   
                   <div

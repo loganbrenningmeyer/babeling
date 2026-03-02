@@ -67,6 +67,7 @@ export function DocumentFlipCard({
               <DocumentBack 
                 document={document}
                 translations={translations}
+                langLabels={langLabels}
                 loading={translationsLoading}
                 error={translationsError}
               />
