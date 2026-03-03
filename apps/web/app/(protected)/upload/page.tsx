@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -87,8 +87,21 @@ export default function UploadPage() {
   const [srcText, setSrcText] = useState("");
   const [srcFile, setSrcFile] = useState<File | null>(null);
 
+  // -------------------------
+  // Selected Gutendex book
+  // -------------------------
+  const [selectedGutenbergBook, setSelectedGutenbergBook] = useState<{
+    bookId: number;
+    format: string;
+    title: string;
+    epubUrl: string;
+  } | null>(null);
+
   // Allow translating only if file / text has been uploaded
-  const canTranslate = srcText.trim().length > 0 || !!srcFile;
+  const canTranslate =
+    srcText.trim().length > 0 ||
+    !!srcFile ||
+    !!selectedGutenbergBook?.epubUrl;
 
   /**************************
    * `handleSwapLanguages()`
@@ -102,58 +115,176 @@ export default function UploadPage() {
   }
 
   /**************************
+   * `fetchSelectedGutenbergFile()`
+   * -- Downloads the selected Gutendex EPUB through a local proxy route
+   *    so the browser never hits the external EPUB URL directly
+   **************************/
+  async function fetchSelectedGutenbergFile(args: {
+    title: string;
+    format: string;
+    epubUrl: string;
+  }) {
+    const res = await fetch("/api/gutendex/download", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        epub_url: args.epubUrl,
+      }),
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      let message = "Failed to download selected eBook";
+
+      try {
+        const data = (await res.json()) as { error?: string };
+        if (data?.error) {
+          message = data.error;
+        }
+      } catch {
+        // Ignore JSON parse errors and keep the default message
+      }
+
+      throw new Error(message);
+    }
+
+    const blob = await res.blob();
+    const normalizedTitle =
+      args.title
+        .replace(/[<>:"/\\|?*\u0000-\u001F]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim() || "Imported eBook";
+
+    return new File(
+      [blob],
+      `${normalizedTitle}.epub`,
+      { type: blob.type || args.format },
+    );
+  }
+
+  /**************************
    * `onClickTranslate()`
    * -- Uploads or loads document to/from database, then begins reading session
    **************************/
   async function onClickTranslate() {
     if (!canTranslate) return;
 
-    const normalizedFileTitle = srcFile?.name
-      .replace(/\.[^/.]+$/, "")
-      .replace(/[-_]+/g, " ")
-      .trim();
-    const documentTitle =
-      title.trim() || normalizedFileTitle || "Untitled document";
+    try {
+      const normalizedFileTitle = srcFile?.name
+        .replace(/\.[^/.]+$/, "")
+        .replace(/[-_]+/g, " ")
+        .trim();
+      const documentTitle =
+        title.trim() ||
+        selectedGutenbergBook?.title ||
+        normalizedFileTitle ||
+        "Untitled document";
 
-    // Create document creation input
-    let input: CreateDocumentInput;
+      // -------------------------
+      // Create document creation input
+      // -------------------------
+      let input: CreateDocumentInput;
 
-    if (srcFile) {
-      input = {
-        title: documentTitle,
-        srcLang,
-        source: {
-          kind: "file",
-          file: srcFile,
-        },
-      };
-    } else {
-      input = {
-        title: documentTitle,
-        srcLang,
-        source: {
-          kind: "text",
-          text: srcText,
-        }
-      };
+      if (selectedGutenbergBook?.epubUrl) {
+        const importedFile = await fetchSelectedGutenbergFile({
+          title: selectedGutenbergBook.title,
+          format: selectedGutenbergBook.format,
+          epubUrl: selectedGutenbergBook.epubUrl,
+        });
+
+        input = {
+          title: documentTitle,
+          srcLang,
+          source: {
+            kind: "file",
+            file: importedFile,
+          },
+        };
+      } else if (srcFile) {
+        input = {
+          title: documentTitle,
+          srcLang,
+          source: {
+            kind: "file",
+            file: srcFile,
+          },
+        };
+      } else {
+        input = {
+          title: documentTitle,
+          srcLang,
+          source: {
+            kind: "text",
+            text: srcText,
+          }
+        };
+      }
+
+      const result = await create(input);
+
+      if (!result) return;
+
+      // Begin document reading session with tgtLang on the first page
+      router.push(
+        `/documents/${result.documentId}?tgt=${encodeURIComponent(tgtLang)}&page=0`
+      );
+    } catch (e) {
+      console.error("Failed to start reading session", e);
     }
-
-    const result = await create(input);
-
-    if (!result) return;
-
-    // Begin document reading session with tgtLang on the first page
-    router.push(
-      `/documents/${result.documentId}?tgt=${encodeURIComponent(tgtLang)}&page=0`
-    );
   }
 
+  /**************************
+   * `handleInputPayloadChange()`
+   * -- Syncs the active tab payload into the upload page state
+   **************************/
+  const handleInputPayloadChange = useCallback((payload: {
+    type: "text";
+    text: string;
+  } | {
+    type: "file";
+    file: File | null;
+  } | {
+    type: "gutenberg";
+    bookId: number | null;
+    format: string;
+    title: string;
+    epubUrl: string | null;
+  }) => {
+    if (payload.type === "text") {
+      setSrcText(payload.text);
+      setSrcFile(null);
+      setSelectedGutenbergBook(null);
+    }
+
+    if (payload.type === "file") {
+      setSrcFile(payload.file);
+      if (payload.file) setSrcText("");
+      setSelectedGutenbergBook(null);
+    }
+
+    if (payload.type === "gutenberg") {
+      setSrcText("");
+      setSrcFile(null);
+
+      if (payload.bookId != null && payload.epubUrl) {
+        setSelectedGutenbergBook({
+          bookId: payload.bookId,
+          format: payload.format,
+          title: payload.title,
+          epubUrl: payload.epubUrl,
+        });
+      } else {
+        setSelectedGutenbergBook(null);
+      }
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen mx-auto w-full max-w-6xl">
+    <div className="min-h-screen mx-auto w-full max-w-6xl py-12">
       {/* -------------------------
        * Hero
        * ------------------------- */}
-      <div className="pt-12">
+      <div className="">
         <h1 className="font-reading font-semibold text-4xl tracking-tight">
           New reading
         </h1>
@@ -175,7 +306,7 @@ export default function UploadPage() {
               SOURCE LANGUAGE
             </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
-              <SelectTrigger className="w-full bg-background">
+              <SelectTrigger className="w-full bg-zinc-50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
@@ -202,7 +333,7 @@ export default function UploadPage() {
               size="icon"
               className="
                 h-9 w-9 rounded-full
-                border-border/80 bg-background/95
+                border-border/80 bg-zinc-50/90
                 text-muted-foreground shadow-sm
                 transition duration-300 ease-out
                 hover:text-foreground
@@ -226,7 +357,7 @@ export default function UploadPage() {
               TARGET LANGUAGE
             </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
-              <SelectTrigger className="w-full bg-background">
+              <SelectTrigger className="w-full bg-zinc-50">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
@@ -250,17 +381,8 @@ export default function UploadPage() {
        * ------------------------- */}
       <div className="mt-10">
         <TabbedInputCard
-          onPayloadChange={(payload) => {
-            if (payload.type === "text") {
-              setSrcText(payload.text);
-              setSrcFile(null);
-            }
-
-            if (payload.type === "file") {
-              setSrcFile(payload.file);
-              if (payload.file) setSrcText("");
-            }
-          }}
+          onPayloadChange={handleInputPayloadChange}
+          langLabels={m.langs}
         />
       </div>
 
@@ -283,6 +405,7 @@ export default function UploadPage() {
             bg-blue-600 text-white
             border border-blue-700
             shadow-lg shadow-blue-900/40
+            cursor-pointer
             transition-transform duration-200 ease-out
             hover:bg-blue-600/90
             hover:-translate-y-0.5

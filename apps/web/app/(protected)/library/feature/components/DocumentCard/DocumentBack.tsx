@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { Book, Clock, RotateCw } from "lucide-react";
+import { Clock, RotateCw } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -15,7 +15,8 @@ import { ResumeTranslationButton } from "./ResumeTranslationButton";
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
 
-import { capitalizeWords, formatRelativeTime } from "@/lib/string";
+import { formatRelativeTime } from "@/lib/string";
+import { getLangColors } from "@/lib/langs";
 import { LangLabels, toUiLang } from "@/app/i18n/messages";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
@@ -87,15 +88,9 @@ export function DocumentBack({
     );
   }
 
-  {/* -------------------------
-  //* Language Colors
-  //* ------------------------- */}
-  function getLangColors(lang: string) {
-    return LANG_COLOR_BY_CODE[lang as keyof typeof LANG_COLOR_BY_CODE];
-  }
 
   return (
-    <Card className="h-full w-full rounded-xl border bg-card p-5 pb-2 shadow-sm">
+    <Card className="h-full w-full rounded-xl border bg-card p-5 shadow-sm">
       <CardContent className="p-0 h-full flex flex-col">
         {/* -------------------------
         //* Document Title
@@ -107,7 +102,7 @@ export function DocumentBack({
           "
         >
           <h2 className="text-md font-reading font-medium leading-tight">
-            {capitalizeWords(document.title)}
+            {document.title}
           </h2>
 
           <div
@@ -228,7 +223,7 @@ export function DocumentBack({
                   mt-auto gap-4 whitespace-nowrap
                 "
               >
-                <div className="flex flex-col gap-2">
+                <div className="flex w-full items-end justify-between gap-4">
                   <ResumeTranslationButton 
                     document={document}
                     translation={t}
@@ -248,17 +243,13 @@ export function DocumentBack({
                       </span>
                     </span>
                   </ResumeTranslationButton>
-                  
+
                   <div
                     className="
-                      w-full flex justify-center gap-4
+                      flex items-center gap-1
                       text-xs text-muted-foreground/60
                     "
                   >
-                    <span className="flex items-center gap-1">
-                      <Book size={12}/>
-                      p. {t.currentPageNumber} / {document.totalPages}
-                    </span>
                     <span className="flex items-center gap-1">
                       <Clock size={12}/>
                       {formatRelativeTime(t.lastOpenedAt)}

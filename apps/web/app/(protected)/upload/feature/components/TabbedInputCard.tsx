@@ -9,28 +9,44 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 
 import { UploadSurface } from "@/app/components/UploadSurface";
-import { ImportEbookPanel } from "./ImportEbookPanel";
+import { ImportEbookPanel } from "./ImportEbook/ImportEbookPanel";
+
+import type { LangLabels } from "@/app/i18n/messages";
 
 type TabKey = "paste" | "upload" | "import";
 
 type InputPaylod = 
   | { type: "text"; text: string }
   | { type: "file"; file: File | null }
-  | { type: "gutenberg"; bookId: number | null; format: string };
+  | {
+      type: "gutenberg";
+      bookId: number | null;
+      format: string;
+      title: string;
+      epubUrl: string | null;
+    };
 
 export function TabbedInputCard({
   className,
   onPayloadChange,
+  langLabels,
 }: {
   className?: string;
   onPayloadChange?: (payload: InputPaylod) => void;
+  langLabels: LangLabels;
 }) {
   const [tab, setTab] = useState<TabKey>("paste");
 
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
+
+  // -------------------------
+  // Selected Gutendex book metadata
+  // -------------------------
   const [bookId, setBookId] = useState<number | null>(null);
-  const [format, setFormat] = useState<string>("epub.noimages");
+  const [format, setFormat] = useState<string>("application/epub+zip");
+  const [bookTitle, setBookTitle] = useState("");
+  const [epubUrl, setEpubUrl] = useState<string | null>(null);
 
   // -------------------------
   // Keep parent in sync with active tab
@@ -40,9 +56,9 @@ export function TabbedInputCard({
     if (tab === "paste") onPayloadChange({ type: "text", text });
     if (tab === "upload") onPayloadChange({ type: "file", file });
     if (tab === "import") {
-      onPayloadChange({ type: "gutenberg", bookId, format });
+      onPayloadChange({ type: "gutenberg", bookId, format, title: bookTitle, epubUrl });
     }
-  }, [tab, text, file, bookId, format, onPayloadChange]);
+  }, [tab, text, file, bookId, format, bookTitle, epubUrl, onPayloadChange]);
 
   const tabClassName = cn(
     "h-full inline-flex items-center",
@@ -53,6 +69,10 @@ export function TabbedInputCard({
     "data-[state=active]:border-b-foreground",
     "data-[state=active]:shadow-none",
   );
+
+  // Define tab heights depending on tab type
+  const tabHeightClass = 
+    tab === "import" ? "h-[560px]" : "h-[320px]";
 
   return (
     <div className={className}>
@@ -91,11 +111,16 @@ export function TabbedInputCard({
           {/* -------------------------
           * Content area
           * ------------------------- */}
-          <div>
+          <div
+            className={cn(
+              "overflow-hidden transition-[height] duration-300 ease-in-out",
+              tabHeightClass,
+            )}
+          >
             {/* -------------------------
             * ( Paste ): Text input
             * ------------------------- */}
-            <TabsContent value="paste" className="m-0 h-[320px] flex">
+            <TabsContent value="paste" className="m-0 h-full flex">
               <Textarea 
                 value={text}
                 onChange={(e) => setText(e.target.value)}
@@ -103,7 +128,8 @@ export function TabbedInputCard({
                 className="
                   flex-1
                   resize-none p-4
-                  border-0 bg-background
+                  rounded-none
+                  border-0 bg-zinc-50
                   shadow-none focus-visible:ring-0
                   font-ui placeholder:text-muted-foreground/60
                 "
@@ -112,7 +138,7 @@ export function TabbedInputCard({
             {/* -------------------------
             * ( File Upload ): Drop or browse
             * ------------------------- */}
-            <TabsContent value="upload" className="m-0 h-[320px] flex">
+            <TabsContent value="upload" className="m-0 h-full flex">
               <UploadSurface 
                 file={file}
                 onFileChange={async (file) => {
@@ -120,19 +146,22 @@ export function TabbedInputCard({
                   if (!file) return;
                 }}
                 text="Drag and drop"
-                className="h-full flex-1 p-6 rounded-none"
+                className="h-full bg-zinc-50 flex-1 p-6 rounded-none"
               />
             </TabsContent>
             {/* -------------------------
             * ( Import Ebook )
             * ------------------------- */}
-            <TabsContent value="import" className="m-0 h-[320px] min-w-0 overflow-hidden flex">
+            <TabsContent value="import" className="m-0 h-full min-w-0 overflow-hidden flex">
               <ImportEbookPanel
                 selectedBookId={bookId}
-                onSelectBook={({ bookId, format }) => {
+                onSelectBook={({ bookId, format, title, epubUrl }) => {
                   setBookId(bookId);
                   setFormat(format);
+                  setBookTitle(title);
+                  setEpubUrl(epubUrl);
                 }}
+                langLabels={langLabels}
               />
             </TabsContent>
           </div>

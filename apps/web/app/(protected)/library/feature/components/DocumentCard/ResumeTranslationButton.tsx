@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
@@ -15,11 +16,13 @@ export function ResumeTranslationButton({
   translation,
   loading,
   children,
+  className,
 }: {
   document: LibraryDocument,
   translation: LibraryTranslation | null,
   loading: boolean,
   children: React.ReactNode,
+  className?: string,
 }) {
   // -------------------------
   // API Router Usage
@@ -45,12 +48,13 @@ export function ResumeTranslationButton({
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="
-            rounded-full px-6
-            bg-blue-600/10 text-blue-700
-            border border-blue-700/60
-            opacity-100
-          "
+          className={cn(`            
+              rounded-full px-6
+              bg-blue-600/10 text-blue-700
+              border border-blue-700/60
+              opacity-100
+            `, className
+          )}
         >
           <span className="inline-flex items-center gap-1.5" aria-hidden="true">
             <span className="dot h-1 w-[3px] rounded-full" />
@@ -65,16 +69,18 @@ export function ResumeTranslationButton({
             e.stopPropagation();
             openRecentTranslation();
           }} 
-          className="
-            group
-            rounded-full px-6 
-            bg-blue-600/10 text-blue-700 
-            border border-blue-700
-            transition-[transform, colors] duration-200 ease-out
-            hover:bg-blue-600/20
-            hover:-translate-y-0.5
-            motion-reduce:transform-none
-          "
+          className={cn(`
+              group
+              rounded-full px-6 
+              bg-blue-600/10 text-blue-700 
+              border border-blue-700
+              cursor-pointer
+              transition-[transform, colors] duration-200 ease-out
+              hover:bg-blue-600/20
+              hover:-translate-y-0.5
+              motion-reduce:transform-none
+            `, className
+          )}
         >
           <Play 
             size={12} 

@@ -3,6 +3,7 @@ export type GutendexBook = {
   title: string;
   authors: string[];
   languages: string[];
+  summaries: string[];
   downloadCount: number;
   epubUrl: string | null;
   coverUrl: string | null;
@@ -25,6 +26,7 @@ export type GutendexBookDTO = {
   title: string;
   authors: GutendexAuthorDTO[];
   languages: string[];
+  summaries: string[];
   download_count: number;
   formats: Record<string, string | undefined>;
 }

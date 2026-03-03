@@ -11,11 +11,9 @@ import { LangBadge } from "@/app/components/LangBadge";
 import { PronounceButton } from "@/app/(protected)/documents/feature/components/Pronounce/PronounceButton";
 import { UsageInfo } from "./UsageInfo";
 
-import { LibraryGlossaryItem } from "../../types/glossaryItem";
-import { toUiLang, type LangLabels } from "@/app/i18n/messages";
+import type { LibraryGlossaryItem } from "../../types/glossaryItem";
+import type { LangLabels } from "@/app/i18n/messages";
 
-import { capitalizeWords } from "@/lib/string";
-import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
 export function GlossaryItemBack({
@@ -126,7 +124,7 @@ export function GlossaryItemBack({
             <ScrollArea className="h-full pr-3">
               <div className="space-y-3">
                 <p className="font-ui text-sm text-muted-foreground italic">
-                  {capitalizeWords(glossaryItem.documentTitle)}
+                  {glossaryItem.documentTitle}
                 </p>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {/* -------------------------

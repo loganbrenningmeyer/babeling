@@ -1,22 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Book } from "lucide-react";
 
-// -------------------------
-// User information provider
-// -------------------------
 import { useAppUser } from "@/components/AppUserProvider";
 import { useRecentDocuments } from "./feature/hooks/useRecentDocuments";
 import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 
-
-// -------------------------
-// UI Components
-// -------------------------
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
 import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
-
-import { toUiLang } from "@/app/i18n/messages";
+import { ContinueReadingCard } from "./feature/components/ContinueReadingCard";
 
 
 export default function Library() {
@@ -59,11 +51,10 @@ export default function Library() {
 
   return (
     <div className="min-h-screen mx-auto max-w-6xl py-12 px-8">
-      {/* -------------------------
-      * Hero / Reading Stats
-      * ------------------------- */}
       <div className="flex items-end justify-between">
-        {/* Hero */}
+        {/* -------------------------
+        * Hero
+        * ------------------------- */}
         <div>
           <h1 className="font-reading text-4xl tracking-tight">
             Your library
@@ -72,17 +63,44 @@ export default function Library() {
             Texts, translations, and vocabulary you've collected.
           </p>
         </div>
-        {/* Reading Stats */}
-        <div>
-          <h2 className="font-reading text-xl tracking-tight">
-            Texts
-          </h2>
+
+        {/* -------------------------
+        * Reading Stats
+        * ------------------------- */}
+        <div className="flex items-center gap-8">
+          {/* Texts */}
+          <div className="flex flex-col items-end">
+            <h2 className="font-reading text-xl font-semibold">
+              {documents.length}
+            </h2>
+            <h3 className="font-ui text-xs text-muted-foreground uppercase">
+              Texts
+            </h3>
+          </div>
+
+          <div aria-hidden="true" className="h-10 w-[2px] bg-border" />
+
+          {/* Words Saved */}
+          <div className="flex flex-col items-end">
+            <h2 className="font-reading text-xl font-semibold">
+              {glossaryItems.length}
+            </h2>
+            <h3 className="font-ui text-xs text-muted-foreground uppercase">
+              Words saved
+            </h3>
+          </div>
         </div>
       </div>
+
+      {/* -------------------------
+      * Continue Reading
+      * ------------------------- */}
+      {documents[0] && <ContinueReadingCard document={documents[0]} />}
+
       {/* -------------------------
       * Library Page
       * ------------------------- */}
-      <div className="font-ui mt-10">
+      <div className="font-ui mt-6">
         {documents.length === 0 ? (
           <div className="
             rounded-xl 

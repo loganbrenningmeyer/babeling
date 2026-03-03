@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Gutenberg Search</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Mono:wght@300;400;500&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --ink: #1a1208;
+    --paper: #f5f0e8;
+    --paper-dark: #ede7d6;
+    --sepia: #8b6914;
+    --rust: #c0392b;
+    --gold: #c9922a;
+    --gold-light: #e8c86a;
+    --muted: #7a6a50;
+    --border: #c8b99a;
+  }
+
+  body {
+    font-family: 'Lora', serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Aged paper texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 100;
+    opacity: 0.6;
+  }
+
+  /* Decorative corner lines */
+  .page-frame {
+    position: fixed;
+    inset: 16px;
+    border: 1px solid var(--border);
+    pointer-events: none;
+    z-index: 99;
+  }
+  .page-frame::before, .page-frame::after {
+    content: '';
+    position: absolute;
+    inset: 4px;
+    border: 1px solid rgba(200,185,154,0.4);
+  }
+  .page-frame::after { inset: 8px; border-color: rgba(200,185,154,0.2); }
+
+  .app {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 40px;
+  }
+
+  /* ── Header ── */
+  .header {
+    text-align: center;
+    margin-bottom: 48px;
+    position: relative;
+  }
+  .header-eyebrow {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .header h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--ink);
+    margin-bottom: 6px;
+  }
+  .header h1 span { font-style: italic; color: var(--gold); }
+  .header-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 20px auto 0;
+    max-width: 320px;
+  }
+  .header-rule::before, .header-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--border));
+  }
+  .header-rule::after { background: linear-gradient(to left, transparent, var(--border)); }
+  .header-rule-ornament {
+    font-size: 16px;
+    color: var(--gold);
+    line-height: 1;
+  }
+
+  /* ── Tabs (context) ── */
+  .tab-bar {
+    display: flex;
+    border-bottom: 2px solid var(--border);
+    margin-bottom: 36px;
+    gap: 0;
+  }
+  .tab {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 12px 24px;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: color 0.2s;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .tab:hover { color: var(--ink); }
+  .tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+    font-weight: 500;
+  }
+
+  /* ── Search Panel ── */
+  .search-panel {
+    animation: fadeUp 0.5s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Main search row */
+  .search-main {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+    font-size: 16px;
+  }
+  .search-input {
+    width: 100%;
+    padding: 16px 120px 16px 50px;
+    font-family: 'Lora', serif;
+    font-size: 16px;
+    font-style: italic;
+    color: var(--ink);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .search-input::placeholder { color: #b5a88a; font-style: italic; }
+  .search-input:focus {
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,146,42,0.12), inset 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .search-btn {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 9px 20px;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    border: none;
+    border-radius: 1px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .search-btn:hover { background: var(--sepia); }
+
+  /* Filter row */
+  .filter-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .filter-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* Language chips */
+  .lang-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .chip {
+    padding: 5px 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  .chip:hover { border-color: var(--gold); color: var(--ink); }
+  .chip.selected {
+    background: var(--ink);
+    border-color: var(--ink);
+    color: var(--paper-dark);
+  }
+
+  /* Author input */
+  .author-input-wrap {
+    position: relative;
+  }
+  .author-input-wrap svg {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .author-input {
+    width: 100%;
+    padding: 10px 12px 10px 36px;
+    font-family: 'Lora', serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fff;
+    border: 1.5px solid var(--border);
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .author-input::placeholder { color: #b5a88a; font-style: italic; }
+  .author-input:focus { border-color: var(--gold); }
+
+  /* Sort row */
+  .sort-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 28px;
+  }
+  .sort-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .sort-options { display: flex; gap: 4px; }
+  .sort-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    padding: 4px 12px;
+    border: 1px solid transparent;
+    background: none;
+    cursor: pointer;
+    color: var(--muted);
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+  .sort-btn:hover { color: var(--ink); }
+  .sort-btn.active { border-color: var(--border); color: var(--ink); background: rgba(255,255,255,0.6); }
+
+  /* Results grid */
+  .results-meta {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .results-meta span { color: var(--gold); font-weight: 500; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+  }
+
+  .book-card {
+    background: #fff;
+    border: 1px solid var(--border);
+    padding: 20px;
+    cursor: pointer;
+    position: relative;
+    transition: box-shadow 0.2s, transform 0.2s;
+    overflow: hidden;
+  }
+  .book-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--border);
+    transition: background 0.2s;
+  }
+  .book-card:hover {
+    box-shadow: 4px 6px 20px rgba(26,18,8,0.1);
+    transform: translateY(-2px);
+  }
+  .book-card:hover::before { background: var(--gold); }
+
+  .book-subject-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .book-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--ink);
+    margin-bottom: 4px;
+  }
+  .book-author {
+    font-family: 'Lora', serif;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--sepia);
+    margin-bottom: 12px;
+  }
+  .book-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 12px;
+    border-top: 1px solid var(--paper-dark);
+  }
+  .book-langs {
+    display: flex;
+    gap: 4px;
+  }
+  .book-lang {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    padding: 2px 6px;
+    background: var(--paper-dark);
+    color: var(--muted);
+    border-radius: 1px;
+  }
+  .book-downloads {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .book-downloads svg { color: var(--gold-light); }
+
+  .add-btn {
+    position: absolute;
+    bottom: 20px;
+    right: 20px;
+    width: 28px;
+    height: 28px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 28px;
+    text-align: center;
+    opacity: 0;
+    transition: opacity 0.2s, background 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .book-card:hover .add-btn { opacity: 1; }
+  .add-btn:hover { background: var(--gold); }
+
+  /* Pagination */
+  .pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-top: 36px;
+    padding-top: 24px;
+    border-top: 1px solid var(--border);
+  }
+  .page-btn {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    background: none;
+    cursor: pointer;
+    color: var(--muted);
+    transition: all 0.15s;
+  }
+  .page-btn:hover { border-color: var(--ink); color: var(--ink); }
+  .page-btn.active { background: var(--ink); border-color: var(--ink); color: var(--paper); }
+  .page-btn.arrow { border: none; font-size: 14px; }
+  .page-ellipsis {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 0 4px;
+  }
+
+  /* Empty state */
+  .empty-state {
+    text-align: center;
+    padding: 64px 0;
+    display: none;
+  }
+  .empty-ornament { font-size: 36px; margin-bottom: 16px; color: var(--border); }
+  .empty-state h3 {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    margin-bottom: 8px;
+    color: var(--ink);
+  }
+  .empty-state p {
+    font-size: 13px;
+    color: var(--muted);
+    font-style: italic;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-frame"></div>
+
+<div class="app">
+
+  <header class="header">
+    <p class="header-eyebrow">Upload Library</p>
+    <h1>Find Your <span>Next Volume</span></h1>
+    <div class="header-rule">
+      <span class="header-rule-ornament">❧</span>
+    </div>
+  </header>
+
+  <!-- Tab bar for context -->
+  <nav class="tab-bar">
+    <button class="tab">My Uploads</button>
+    <button class="tab active">Search Gutenberg</button>
+    <button class="tab">Collections</button>
+  </nav>
+
+  <!-- Search Panel -->
+  <div class="search-panel">
+
+    <!-- Full-text search -->
+    <div class="search-main">
+      <span class="search-icon">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+      </span>
+      <input class="search-input" type="text" placeholder="Search by title, keyword, or subject…" value="Adventures of Sherlock Holmes">
+      <button class="search-btn">Search</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="filter-row">
+      <!-- Language filter -->
+      <div class="filter-group">
+        <span class="filter-label">Language</span>
+        <div class="lang-chips">
+          <button class="chip selected">English</button>
+          <button class="chip">French</button>
+          <button class="chip">German</button>
+          <button class="chip">Spanish</button>
+          <button class="chip">Latin</button>
+          <button class="chip selected">Italian</button>
+          <button class="chip">Finnish</button>
+          <button class="chip">+ More</button>
+        </div>
+      </div>
+
+      <!-- Author filter -->
+      <div class="filter-group">
+        <span class="filter-label">Author</span>
+        <div class="author-input-wrap">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          <input class="author-input" type="text" placeholder="e.g. Arthur Conan Doyle…" value="Doyle">
+        </div>
+      </div>
+    </div>
+
+    <!-- Sort + results meta -->
+    <div class="sort-row">
+      <span class="sort-label">Sort by</span>
+      <div class="sort-options">
+        <button class="sort-btn active">Popularity</button>
+        <button class="sort-btn">Title A–Z</button>
+        <button class="sort-btn">Author A–Z</button>
+        <button class="sort-btn">Newest</button>
+      </div>
+    </div>
+
+    <p class="results-meta"><span>1,847</span> books found · showing 1–6</p>
+
+    <!-- Results -->
+    <div class="results-grid">
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.05s both">
+        <p class="book-subject-tag">Fiction · Mystery</p>
+        <p class="book-title">The Adventures of Sherlock Holmes</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            48,291
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.10s both">
+        <p class="book-subject-tag">Fiction · Mystery</p>
+        <p class="book-title">The Hound of the Baskervilles</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+            <span class="book-lang">FR</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            39,104
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.15s both">
+        <p class="book-subject-tag">Fiction · Mystery</p>
+        <p class="book-title">A Study in Scarlet</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            31,650
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.20s both">
+        <p class="book-subject-tag">Fiction · Mystery</p>
+        <p class="book-title">The Sign of the Four</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+            <span class="book-lang">DE</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            27,883
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.25s both">
+        <p class="book-subject-tag">Fiction · Mystery</p>
+        <p class="book-title">The Memoirs of Sherlock Holmes</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            22,471
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+      <div class="book-card" style="animation: fadeUp 0.4s ease 0.30s both">
+        <p class="book-subject-tag">Fiction · Adventure</p>
+        <p class="book-title">The Lost World</p>
+        <p class="book-author">Arthur Conan Doyle</p>
+        <div class="book-footer">
+          <div class="book-langs">
+            <span class="book-lang">EN</span>
+            <span class="book-lang">IT</span>
+          </div>
+          <span class="book-downloads">
+            <svg width="11" height="11" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M12 5v14m-7-7 7 7 7-7"/></svg>
+            18,905
+          </span>
+        </div>
+        <button class="add-btn" title="Add to library">
+          <svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Pagination -->
+    <nav class="pagination">
+      <button class="page-btn arrow">‹</button>
+      <button class="page-btn active">1</button>
+      <button class="page-btn">2</button>
+      <button class="page-btn">3</button>
+      <span class="page-ellipsis">…</span>
+      <button class="page-btn">308</button>
+      <button class="page-btn arrow">›</button>
+    </nav>
+
+  </div><!-- /.search-panel -->
+
+</div><!-- /.app -->
+
+<script>
+  // Language chip toggle
+  document.querySelectorAll('.chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      if (chip.textContent.trim() !== '+ More') {
+        chip.classList.toggle('selected');
+      }
+    });
+  });
+
+  // Sort buttons
+  document.querySelectorAll('.sort-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Add button feedback
+  document.querySelectorAll('.add-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      btn.style.background = '#2ecc71';
+      btn.innerHTML = `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>`;
+      setTimeout(() => {
+        btn.style.background = '';
+        btn.innerHTML = `<svg width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>`;
+      }, 1500);
+    });
+  });
+
+  // Page buttons
+  document.querySelectorAll('.page-btn:not(.arrow)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>

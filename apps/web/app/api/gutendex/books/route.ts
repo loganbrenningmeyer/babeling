@@ -9,25 +9,34 @@ const GUTENDEX_BOOKS_URL = "https://gutendex.com/books";
 // -- Proxies a filtered Gutendex book search for EPUB imports
 // -------------------------
 export async function GET(req: NextRequest) {
+  // -------------------------
+  // Parse URL search params
+  // -------------------------
   const url = new URL(req.url);
 
   const search = url.searchParams.get("search")?.trim() ?? "";
+  const author = url.searchParams.get("author")?.trim() ?? "";
   const languages = url.searchParams.get("languages")?.trim() ?? "";
-  const topic = url.searchParams.get("topic")?.trim() ?? "";
   const pageParam = url.searchParams.get("page")?.trim() ?? "1";
 
   const page = /^\d+$/.test(pageParam) ? pageParam : "1";
 
+  // -------------------------
+  // Set Gutendex API URL search params
+  // -------------------------
   const upstreamParams = new URLSearchParams();
+  const upstreamSearch = [search, author].filter(Boolean).join(" ");
 
-  if (search) upstreamParams.set("search", search);
+  if (upstreamSearch) upstreamParams.set("search", upstreamSearch);
   if (languages) upstreamParams.set("languages", languages);
-  if (topic) upstreamParams.set("topic", topic);
   upstreamParams.set("page", page);
 
   // Restrict results to EPUB-capable books for your import flow
   upstreamParams.set("mime_type", "application/epub+zip");
 
+  // -------------------------
+  // Fetch gutendex.com/books?{upstreamParams}
+  // -------------------------
   try {
     const res = await fetch(`${GUTENDEX_BOOKS_URL}?${upstreamParams.toString()}`, {
       method: "GET",
@@ -50,6 +59,9 @@ export async function GET(req: NextRequest) {
       );
     }
 
+  // -------------------------
+  // Get book info for each result
+  // -------------------------
   const books = data.results
     .map((book) => {
       const epubUrl = book.formats["application/epub+zip"] ?? null;
@@ -60,6 +72,7 @@ export async function GET(req: NextRequest) {
         title: book.title,
         authors: book.authors.map((author) => author.name),
         languages: book.languages,
+        summaries: book.summaries,
         downloadCount: book.download_count,
         epubUrl,
         coverUrl,

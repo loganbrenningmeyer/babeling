@@ -41,7 +41,7 @@ export function FilterItem({
         text-sm font-medium
         border
         ${LibraryFilterColors[value]}
-        data-[state=off]:bg-muted
+        data-[state=off]:bg-zinc-50/60
         data-[state=off]:text-foreground/50
         data-[state=off]:border-border
         data-[state=off]:hover:text-foreground/70

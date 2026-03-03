@@ -19,8 +19,7 @@ import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
 
-import { capitalizeWords } from "@/lib/string";
-import { LangLabels, toUiLang } from "@/app/i18n/messages";
+import { LangLabels } from "@/app/i18n/messages";
 
 
 function isCurrentSection(
@@ -85,6 +84,7 @@ export function TOCSheet({
           className="
             font-ui text-muted-foreground
             border border-border
+            bg-zinc-50
             hover:text-foreground
             hover:border-foreground/20
           "
@@ -97,7 +97,9 @@ export function TOCSheet({
         side="left"
         viewportTopClassName="top-32"
         showOverlay={false}
-        onOpenAutoFocus={(event) => event.preventDefault()}
+        onOpenAutoFocus={(e) => {
+          e.preventDefault();
+        }}
         className="
           w-[20rem] font-ui 
           border border-border
@@ -115,7 +117,7 @@ export function TOCSheet({
             </SheetTitle>
             <div>
               <h2 className="font-reading text-xl font-semibold leading-tight text-foreground">
-                {capitalizeWords(documentTitle)}
+                {documentTitle}
               </h2>
               {documentAuthor && (
                 <span className="min-w-0 font-ui text-sm text-muted-foreground">
@@ -136,7 +138,7 @@ export function TOCSheet({
             <div className="mb-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
               <span>Reading progress</span>
               <span className="shrink-0">
-                Page {displayPageNumber} of {pageCount}
+                p. {displayPageNumber} of {pageCount}
               </span>
             </div>
             <Progress

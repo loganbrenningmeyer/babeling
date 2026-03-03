@@ -5,8 +5,7 @@ import { LangBadge } from "@/app/components/LangBadge";
 import { Maximize2 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
-import { LibraryGlossaryItem } from "../../types/glossaryItem";
-import { capitalizeWords } from "@/lib/string";
+import type { LibraryGlossaryItem } from "../../types/glossaryItem";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
@@ -84,7 +83,7 @@ export function GlossaryItemFront({
               <p className="font-ui text-xs text-muted-foreground">
                 {"from "} 
                 <span className="italic">
-                  {capitalizeWords(glossaryItem.documentTitle)}
+                  {glossaryItem.documentTitle}
                 </span>
               </p>
               {/* Expand affordance on hover */}

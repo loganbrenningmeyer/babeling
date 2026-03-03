@@ -12,15 +12,15 @@ import { searchGutendexBooks } from "../api/gutendex";
  **************************/
 export function useGutendexBooks(args: {
   search: string;
+  author?: string;
   languages?: string[];
-  topic?: string | null;
   page?: number;
   debounceMs?: number;
 }) {
   const {
     search,
+    author = "",
     languages = [],
-    topic = null,
     page = 1,
     debounceMs = 400,
   } = args;
@@ -36,7 +36,8 @@ export function useGutendexBooks(args: {
 
   useEffect(() => {
     const trimmedSearch = search.trim();
-    const hasFilters = languages.length > 0 || Boolean(topic?.trim());
+    const trimmedAuthor = author.trim();
+    const hasFilters = languages.length > 0 || Boolean(trimmedAuthor);
 
     // Avoid firing on every empty render unless filters are set
     if (!trimmedSearch && !hasFilters) {
@@ -53,12 +54,15 @@ export function useGutendexBooks(args: {
     setLoading(true);
     setError(null);
 
+    // -------------------------
+    // Debounce requests by debounceMs to avoid searching over and over
+    // -------------------------
     const timeoutId = window.setTimeout(async () => {
       try {
         const res = await searchGutendexBooks({
           search: trimmedSearch,
+          author: trimmedAuthor,
           languages,
-          topic,
           page,
         });
 
@@ -68,6 +72,7 @@ export function useGutendexBooks(args: {
         setCount(res.count);
         setNext(res.next);
         setPrevious(res.previous);
+
       } catch (e: any) {
         if (requestIdRef.current !== reqId) return;
 
@@ -76,6 +81,7 @@ export function useGutendexBooks(args: {
         setNext(null);
         setPrevious(null);
         setError(e?.message ?? "Failed to search eBooks");
+
       } finally {
         if (requestIdRef.current === reqId) {
           setLoading(false);
@@ -86,7 +92,7 @@ export function useGutendexBooks(args: {
     return () => {
       window.clearTimeout(timeoutId);
     };
-  }, [search, languages, topic, page, debounceMs]);
+  }, [search, author, languages, page, debounceMs]);
 
   return {
     books,

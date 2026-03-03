@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Book, Clock, RotateCcw } from "lucide-react";
+import { Clock, RotateCcw } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -13,7 +13,7 @@ import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
-import { capitalizeWords, formatRelativeTime, truncate } from "@/lib/string";
+import { formatRelativeTime, truncate } from "@/lib/string";
 
 import { LangLabels, toUiLang } from "@/app/i18n/messages";
 
@@ -52,7 +52,7 @@ export function DocumentFront({
       className="
         relative h-full w-full overflow-hidden
 
-        rounded-xl border bg-card p-5 pb-2 shadow-sm
+        rounded-xl border bg-card p-5 shadow-sm
         
         transform-gpu will-change-transform
         transition duration-200 ease-out
@@ -95,7 +95,7 @@ export function DocumentFront({
             * ------------------------- */}
             <div>
               <h2 className="line-clamp-2 text-md font-reading font-medium leading-tight">
-                {capitalizeWords(document.title)}
+                {document.title}
               </h2>
               <h3 className="text-sm font-ui text-muted-foreground">
                 {document.author}
@@ -147,7 +147,7 @@ export function DocumentFront({
               gap-4 whitespace-nowrap
             "
           >
-            <div className="flex flex-col gap-2">
+            <div className="flex w-full items-end justify-between gap-4">
               <ResumeTranslationButton
                 document={document}
                 translation={recentTranslation}
@@ -160,18 +160,14 @@ export function DocumentFront({
                   </span>
                 </span>
               </ResumeTranslationButton>
-            
+
               {recentTranslation && (
                 <div 
                   className="
-                    w-full flex justify-center gap-4
+                    flex items-center gap-1
                     text-xs text-muted-foreground/60
                   "
                 >
-                  <span className="flex items-center gap-1">
-                    <Book size={12}/> 
-                    p. {recentTranslation.currentPageNumber} / {document.totalPages}
-                  </span>
                   <span className="flex items-center gap-1">
                     <Clock size={12} /> 
                     {formatRelativeTime(recentTranslation.lastOpenedAt)}
@@ -182,25 +178,6 @@ export function DocumentFront({
           </div>
         </div>
       </CardContent>
-      <span 
-        className="
-          absolute bottom-2 right-4
-          inline-flex gap-1 items-center 
-          text-xs text-muted-foreground
-          pointer-events-none
-          opacity-0 group-hover/doc-front:opacity-60
-          transition-opacity duration-150
-        "
-      >
-        Translations
-        <RotateCcw 
-          className="
-            h-4 w-4
-            transition-transform duration-300 ease-out
-            group-hover/doc-front:-rotate-180
-          "
-        />
-      </span>
     </Card>
   )
 }

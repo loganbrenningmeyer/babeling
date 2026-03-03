@@ -181,12 +181,9 @@ export function ReaderShell({
             {/* -------------------------
             * Source Langugage Header
             * ------------------------- */}
-            <div className="pt-4 pb-3 flex justify-center">
-              <div className="relative flex justify-center w-full items-center">
-                <div>
-                  {renderLoading ? (
-                    <span className="inline-block h-6 w-28 animate-pulse rounded bg-muted-foreground/20" />
-                  ) : (
+            <div className="pt-4 pb-3">
+              <div className="relative flex items-center justify-center">
+                <div className="flex justify-center">
                   <div 
                     className={`
                       rounded-md border px-2 py-1
@@ -197,12 +194,11 @@ export function ReaderShell({
                   >
                     {sourcePane.label}
                   </div>
-                  )}
                 </div>
                 {/* -------------------------
                 * Source Show / Hide Button
                 * ------------------------- */}
-                <div className="absolute right-0">
+                <div className="absolute right-0 top-1/2 -translate-y-1/2">
                   <SourceBlurButton
                     value={sourceBlurEnabled}
                     onChange={onSourceBlurEnabledChange}
@@ -215,23 +211,19 @@ export function ReaderShell({
             {/* -------------------------
             * Target Language Header
             * ------------------------- */}
-            <div className="pt-4 pb-3 flex justify-center">
-              <div>
-                {renderLoading ? (
-                  <span className="inline-block h-6 w-24 animate-pulse rounded bg-muted-foreground/20" />
-                ) : (
-                  <div 
-                    className={`
-                      inline-flex items-center
-                      rounded-md border px-2 py-1
-                      text-md font-ui
-                      ${targetPane.colors.bg} ${targetPane.colors.text}
-                      ${targetPane.colors.border}
-                    `}
-                  >
-                    {targetPane.label}
-                  </div>
-                )}
+            <div className="pt-4 pb-3">
+              <div className="flex justify-center">
+                <div 
+                  className={`
+                    inline-flex items-center
+                    rounded-md border px-2 py-1
+                    text-md font-ui
+                    ${targetPane.colors.bg} ${targetPane.colors.text}
+                    ${targetPane.colors.border}
+                  `}
+                >
+                  {targetPane.label}
+                </div>
               </div>
             </div>
           </div>

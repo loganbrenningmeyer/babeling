@@ -15,7 +15,6 @@ import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 import { saveReadProgress } from "../feature/api/readProgress";
-import { capitalizeWords } from "@/lib/string";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 import { useReaderInteraction } from "../feature/hooks/useReaderInteraction";
@@ -297,7 +296,7 @@ export default function ReaderPageClient({
             * ------------------------- */}
             <div className="flex flex-col">
               <span className="font-reading text-md font-bold leading-tight">
-                {capitalizeWords(document?.title ?? "")}
+                {document?.title ?? ""}
               </span>
 
               {document?.author && (
