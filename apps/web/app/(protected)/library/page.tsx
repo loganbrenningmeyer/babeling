@@ -56,10 +56,10 @@ export default function Library() {
         * Hero
         * ------------------------- */}
         <div>
-          <h1 className="font-reading text-4xl tracking-tight">
+          <h1 className="font-reading font-semibold text-4xl tracking-tight">
             Your library
           </h1>
-          <p className="font-ui mt-2 text-sm text-muted-foreground">
+          <p className="font-ui mt-4 text-sm text-muted-foreground">
             Texts, translations, and vocabulary you've collected.
           </p>
         </div>

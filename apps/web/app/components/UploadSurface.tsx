@@ -59,9 +59,9 @@ export function UploadSurface({
           onFiles={(files) => handleFiles(files)}
           className={cn(
             "h-full rounded-lg border-2 border-dashed border-foreground/10",
-            "bg-muted/35 transition-colors",
-            "hover:border-primary/35 hover:bg-muted/55",
-            "dark:hover:border-primary/25 dark:hover:bg-muted/45"
+            "bg-card transition-colors",
+            "hover:border-primary/35 hover:bg-accent/60",
+            "dark:hover:border-primary/25 dark:hover:bg-accent/45"
           )}
         >
           <div className="flex h-full items-center justify-center p-10">

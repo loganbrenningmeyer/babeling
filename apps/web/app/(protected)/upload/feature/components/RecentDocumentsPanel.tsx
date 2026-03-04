@@ -96,7 +96,7 @@ export function RecentDocumentsPanel({
               key={doc.id}
               className="
                 flex h-full flex-col
-                rounded-2xl border border-foreground/10 bg-card px-4 py-3 text-left shadow-sm
+                rounded-2xl border border-border bg-card px-4 py-3 text-left shadow-sm
                 transition-colors
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               "
@@ -135,8 +135,8 @@ export function RecentDocumentsPanel({
                       className="
                           group
                           rounded-full px-6
-                          bg-blue-600/10 text-blue-700
-                          border border-blue-700
+                          bg-primary/15 text-primary
+                          border border-primary/35
                           cursor-pointer
                           transition-[transform, colors] duration-200 ease-out
                           hover:bg-blue-600/20

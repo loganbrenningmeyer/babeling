@@ -133,7 +133,7 @@ export function ReaderShell({
     32: "gap-x-32 px-16",
   } as const;
 
-  const gap = 24;
+  const gap = 28;
   const gapAndPad = layoutPresets[gap] ?? layoutPresets[16];
 
 
@@ -243,7 +243,7 @@ export function ReaderShell({
                 </div>
               ) : (
                 <ParagraphGrid
-                  className="text-[20px] leading-[1.7]"
+                  className="text-[18px] leading-[1.7]"
                   session={session}
                   documentId={documentId ?? 0}
                   pageBlocks={currentPage?.blocks ?? []}

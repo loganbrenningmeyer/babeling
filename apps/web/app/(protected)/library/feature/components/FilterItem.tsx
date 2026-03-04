@@ -41,11 +41,11 @@ export function FilterItem({
         text-sm font-medium
         border
         ${LibraryFilterColors[value]}
-        data-[state=off]:bg-muted/60
-        data-[state=off]:text-foreground/50
-        data-[state=off]:border-border
-        data-[state=off]:hover:text-foreground/70
-        data-[state=off]:hover:border-foreground/40
+        data-[state=off]:bg-muted/20
+        data-[state=off]:text-muted-foreground/60
+        data-[state=off]:border-border/60
+        data-[state=off]:hover:text-muted-foreground
+        data-[state=off]:hover:border-border
         transition-colors
         cursor-pointer
       `}
@@ -56,7 +56,7 @@ export function FilterItem({
           className="
             rounded-full px-2
             font-ui font-bold text-xs
-            bg-muted-foreground/10
+            bg-muted/40
           "
         >
           {count}

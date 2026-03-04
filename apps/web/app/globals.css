@@ -193,6 +193,7 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
   --color-popover-foreground: var(--popover-foreground); 
   --color-primary: var(--primary); 
   --color-primary-foreground: var(--primary-foreground); 
+  --color-primary-border: var(--primary-border);
   --color-secondary: var(--secondary); 
   --color-secondary-foreground: var(--secondary-foreground); 
   --color-muted: var(--muted); 
@@ -232,15 +233,16 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 
   --border: #E6E2DA;
 
-  --primary: #3B6EA8;
+  --primary: #548ac9;
   --primary-foreground: #FFFFFF;
+  --primary-border: #4784ca;
 
   --popover: #FFFFFF;
   --popover-foreground: #1F1F1F;
   --accent: #E6E2DA;
   --accent-foreground: #1F1F1F;
   --input: #E6E2DA;
-  --ring: #3B6EA8;
+  --ring: #548ac9;
 }
 
 .dark { 
@@ -259,6 +261,7 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 
   --primary: #6FA8FF;
   --primary-foreground: #0B1220;
+  --primary-border: #4784ca;
   
   --popover: #1B1B1B;
   --popover-foreground: #F2F2F2;

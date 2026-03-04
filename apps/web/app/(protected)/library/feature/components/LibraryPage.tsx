@@ -120,13 +120,13 @@ export function LibraryPage({
           {/* -------------------------
           //* Search Bar
           //* ------------------------- */}
-          <div className="relative w-72 bg-background">
+          <div className="relative w-72">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search library..."
-              className="pl-9 focus-visible:ring-0 border border-border"
+              className="pl-9 focus-visible:ring-0 bg-card border border-border"
             />
           </div>
           {/* -------------------------
@@ -180,7 +180,7 @@ export function LibraryPage({
                 value={documentSort} 
                 onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
               >
-                <SelectTrigger className="w-56 bg-zinc-50">
+                <SelectTrigger className="w-56 bg-card">
                   <SelectValue placeholder="Sort documents" />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
@@ -235,7 +235,7 @@ export function LibraryPage({
                 value={glossarySort} 
                 onValueChange={(v) => setGlossarySort(v as GlossarySortKey)}
               >
-                <SelectTrigger className="w-56 bg-zinc-50">
+                <SelectTrigger className="w-56 bg-card">
                   <SelectValue placeholder="Sort glossary" />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">

@@ -306,7 +306,7 @@ export default function UploadPage() {
               SOURCE LANGUAGE
             </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
-              <SelectTrigger className="w-full bg-muted/60">
+              <SelectTrigger className="w-full bg-card">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
@@ -333,7 +333,7 @@ export default function UploadPage() {
               size="icon"
               className="
                 h-9 w-9 rounded-full
-                border-border/80 bg-muted/80
+                border-border bg-card
                 text-muted-foreground shadow-sm
                 transition duration-300 ease-out
                 hover:text-foreground
@@ -357,7 +357,7 @@ export default function UploadPage() {
               TARGET LANGUAGE
             </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
-              <SelectTrigger className="w-full bg-muted/60">
+              <SelectTrigger className="w-full bg-card">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
@@ -402,12 +402,12 @@ export default function UploadPage() {
           disabled={!canTranslate || creating}
           className="
             group h-12 rounded-xl px-6 font-semibold
-            bg-blue-600 text-white
-            border border-blue-700
-            shadow-lg shadow-blue-900/40
+            bg-primary/90 text-primary-foreground
+            border border-primary/60
+            shadow-lg shadow-primary/40
             cursor-pointer
             transition-transform duration-200 ease-out
-            hover:bg-blue-600/90
+            hover:bg-primary
             hover:-translate-y-0.5
             motion-reduce:transform-none
           "
@@ -433,7 +433,7 @@ export default function UploadPage() {
       {/* -------------------------
       * Recent Documents
       * ------------------------- */} 
-      <div className="font-ui mt-8 flex items-center justify-between">
+      {/* <div className="font-ui mt-8 flex items-center justify-between">
         <RecentDocumentsPanel
           documents={recentDocuments}
           loading={recentLoading}
@@ -449,7 +449,7 @@ export default function UploadPage() {
             router.push(`/documents/${doc.id}?${sp.toString()}`);
           }}
         />
-      </div>
+      </div> */}
     </div>
   );
 }

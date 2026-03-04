@@ -73,30 +73,30 @@ export function ResumeTranslationButton({
           }} 
           className={cn(`
               group
-              rounded-full px-6 
-              bg-blue-600/10 text-blue-700 
-              border border-blue-600/35
-              dark:bg-blue-500/10 dark:text-blue-300
-              dark:border-blue-400/25
+              rounded-sm px-6 
+              bg-primary/20 text-primary
+              border border-primary/40
+              font-ui
               cursor-pointer
               transition-[transform, colors] duration-200 ease-out
-              hover:bg-blue-600/20
+              hover:bg-primary/35
+              hover:border-primary/60
               hover:-translate-y-0.5
               motion-reduce:transform-none
             `, className
           )}
         >
-          <Play 
-            size={12} 
-            className="
-              transition-transform duration-300 ease-out
-              group-hover:translate-x-0.5
-              motion-reduce:transition-none
-            "
-          />
-          <span className="inline-flex items-center gap-2">
-            {children}
-          </span>
+          <div className="flex items-center gap-2 leading-none">
+            <Play 
+              size={12} 
+              className="
+                transition-transform duration-300 ease-out
+                group-hover:translate-x-0.5
+                motion-reduce:transition-none
+              "
+            />
+            <span className="leading-none">{children}</span>
+          </div>
         </Button>
       ) : (
         <Button

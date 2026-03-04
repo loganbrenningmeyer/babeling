@@ -175,11 +175,10 @@ export function TOCSheet({
               disabled={!canGoToPage}
               className="
                 h-8 shrink-0 rounded-xl px-4 font-semibold
-                bg-blue-600 text-white
-                border border-blue-700
-                shadow-sm shadow-blue-900/40
+                bg-primary/80 text-primary-foreground
+                shadow-sm shadow-primary/40
                 transition-transform duration-200 ease-out
-                hover:bg-blue-600/90
+                hover:bg-primary
                 hover:-translate-y-0.5
                 motion-reduce:transform-none
               "

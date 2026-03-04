@@ -313,7 +313,7 @@ export default function ReaderPageClient({
         * ------------------------- */}
         {currentSectionTitle && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-20">
-            <span className="font-ui truncate text-lg text-muted-foreground tracking-wider">
+            <span className="font-reading font-semibold truncate text-xl text-foreground">
               {currentSectionTitle}
             </span>
           </div>

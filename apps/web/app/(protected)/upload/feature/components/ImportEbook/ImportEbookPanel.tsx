@@ -124,7 +124,7 @@ export function ImportEbookPanel({
         e.preventDefault();
         handleSubmitSearch();
       }}
-      className="flex-1 p-6 flex flex-col gap-6 bg-muted/60 overflow-y-auto no-scrollbar"
+      className="flex-1 p-6 flex flex-col gap-6 bg-muted/20 overflow-y-auto no-scrollbar"
     >
       {/* -------------------------
       * Searching / Filtering
@@ -147,7 +147,7 @@ export function ImportEbookPanel({
             <Input
               placeholder="Search by book title or author name..."
               onChange={(e) => setSearchDraft(e.target.value)}
-              className="h-12 pl-10 rounded-full border border-foreground/10 font-ui focus-visible:ring-0"
+              className="h-12 pl-10 rounded-full bg-card border border-border font-ui focus-visible:ring-0"
             />
             <button
               type="submit"
@@ -197,9 +197,9 @@ export function ImportEbookPanel({
                     "inline-flex h-10 items-center justify-center rounded-full border px-3",
                     "font-ui text-xs font-medium tracking-wide",
                     "cursor-pointer select-none transition-colors duration-200 ease-out",
-                    "border-border bg-background text-muted-foreground hover:border-foreground/30 hover:text-foreground",
+                    "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     selectedLanguagesDraft.includes(lang["code"]) &&
-                      "border-foreground bg-foreground text-background hover:border-foreground hover:text-background",
+                      "border-primary/30 bg-primary/10 text-foreground hover:border-primary/40 hover:text-foreground",
                   )}
                   onClick={() => toggleLanguage(lang["code"])}
                 >
@@ -225,7 +225,7 @@ export function ImportEbookPanel({
               <Input 
                 placeholder="Filter by author..."
                 onChange={(e) => setAuthorDraft(e.target.value)}
-                className="h-10 pl-10 rounded-none border border-border font-ui focus-visible:ring-0"
+                className="h-10 pl-10 rounded-none bg-card border border-border font-ui focus-visible:ring-0"
               />
               <div
                 className="
@@ -295,8 +295,9 @@ export function ImportEbookPanel({
                       onClick={() => setPage((current) => Math.max(1, current - 1))}
                       className="
                         h-8 rounded-full px-3
-                        bg-background/80
+                        bg-card
                         border-border text-muted-foreground
+                        font-ui
                         hover:bg-muted/60 hover:text-foreground
                         disabled:opacity-40
                       "
@@ -313,8 +314,9 @@ export function ImportEbookPanel({
                       onClick={() => setPage((current) => current + 1)}
                       className="
                         h-8 rounded-full px-3
-                        bg-background/80
+                        bg-card
                         border-border text-muted-foreground
+                        font-ui
                         hover:bg-muted/60 hover:text-foreground
                         disabled:opacity-40
                       "
@@ -326,7 +328,7 @@ export function ImportEbookPanel({
                 </div>
 
                 {filteredBooks.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-border bg-background/40 p-6 text-sm text-muted-foreground">
+                  <div className="rounded-xl border border-dashed border-border bg-card/70 p-6 text-sm text-muted-foreground">
                     No books match the current filters on this page.
                   </div>
                 ) : (

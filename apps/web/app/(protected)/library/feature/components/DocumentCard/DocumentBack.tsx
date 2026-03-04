@@ -112,7 +112,7 @@ export function DocumentBack({
               text-muted-foreground
               opacity-0 group-hover/doc-back:opacity-60
               transition-opacity duration-150
-              cursor-pointer
+              cursor-pointer select-none
             "
           >
             Back

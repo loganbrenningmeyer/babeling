@@ -134,7 +134,7 @@ export function GlossaryItemBack({
                   {/* -------------------------
                   //* Source Sentence
                   //* ------------------------- */}
-                  <div className="rounded-xl border bg-muted/30 p-3">
+                  <div className="border bg-muted/30 p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
@@ -157,7 +157,7 @@ export function GlossaryItemBack({
                   {/* -------------------------
                   //* Target Sentence
                   //* ------------------------- */}
-                  <div className="rounded-xl border bg-muted/30 p-3">
+                  <div className="border bg-muted/30 p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">

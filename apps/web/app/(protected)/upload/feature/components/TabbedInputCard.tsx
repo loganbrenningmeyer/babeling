@@ -74,7 +74,7 @@ export function TabbedInputCard({
 
   // Define tab heights depending on tab type
   const tabHeightClass = 
-    tab === "import" ? "h-[560px]" : "h-[320px]";
+    tab === "import" ? "h-[520px]" : "h-[320px]";
 
   return (
     <div className={className}>
@@ -84,7 +84,7 @@ export function TabbedInputCard({
           {/* -------------------------
           * Top Bar (input type tabs)
           * ------------------------- */}
-          <div className="font-ui h-12 px-2 border-b">
+          <div className="font-ui h-12 px-2 bg-card/20 border-b">
             <TabsList className="h-full bg-transparent p-0 gap-4 items-stretch">
               {/* -------------------------
               * Paste
@@ -131,7 +131,7 @@ export function TabbedInputCard({
                   flex-1
                   resize-none p-4
                   rounded-none
-                  border-0 bg-muted/60
+                  border-0 bg-card
                   shadow-none focus-visible:ring-0
                   font-ui placeholder:text-muted-foreground/60
                 "
@@ -148,7 +148,7 @@ export function TabbedInputCard({
                   if (!file) return;
                 }}
                 text="Drag and drop"
-                className="h-full bg-muted/60 flex-1 p-6 rounded-none"
+                className="h-full bg-muted/20 flex-1 p-6 rounded-none font-ui"
               />
             </TabsContent>
             {/* -------------------------

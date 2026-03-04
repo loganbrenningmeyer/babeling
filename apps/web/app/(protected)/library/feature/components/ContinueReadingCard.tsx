@@ -48,7 +48,7 @@ export function ContinueReadingCard({
           flex items-center justify-center 
           size-16 shrink-0
           rounded-lg 
-          border border-border bg-muted/70
+          border border-border bg-muted/60
         "
       >
         <Book className="h-8 w-8 text-muted-foreground"/>
@@ -105,9 +105,10 @@ export function ContinueReadingCard({
           translation={recentTranslation}
           loading={loading}
           className="
-            rounded-md
-            bg-background text-foreground/80 border-none
-            hover:bg-background/95 text-foreground
+            rounded-full
+            bg-primary/80 text-primary-foreground
+            hover:bg-primary
+            shadow-md shadow-primary/20
           "
         >
           Continue
