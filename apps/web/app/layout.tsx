@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next";
 
 import { UserPreferencesProvider } from "@/components/UserPreferencesProvider";
 import { AppNav } from "@/components/AppNav";
+import { getInitialTheme } from "@/lib/server-api";
 
 import { DM_Sans, Lora } from "next/font/google";
 
@@ -29,18 +30,23 @@ const dm_sans = DM_Sans({
   variable: "--font-dm_sans",
 });
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const initialTheme = await getInitialTheme();
+
   return (
-    <html lang="en" className={`${lora.variable} ${dm_sans.variable}`}>
+    <html
+      lang="en"
+      className={`${lora.variable} ${dm_sans.variable}${initialTheme === "dark" ? " dark" : ""}`}
+    >
       <body className="font-ui min-h-screen antialiased">
         <ClerkProvider
           afterSignOutUrl="/"
         >
-          <UserPreferencesProvider>
+          <UserPreferencesProvider initialTheme={initialTheme ?? "system"}>
             <AppNav />
 
             <main className="w-full h-full">{children}</main>

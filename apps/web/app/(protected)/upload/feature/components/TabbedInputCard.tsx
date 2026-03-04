@@ -35,7 +35,7 @@ export function TabbedInputCard({
   onPayloadChange?: (payload: InputPaylod) => void;
   langLabels: LangLabels;
 }) {
-  const [tab, setTab] = useState<TabKey>("paste");
+  const [tab, setTab] = useState<TabKey>("import");
 
   const [text, setText] = useState("");
   const [file, setFile] = useState<File | null>(null);
@@ -87,11 +87,11 @@ export function TabbedInputCard({
           <div className="font-ui h-12 px-2 bg-card/20 border-b">
             <TabsList className="h-full bg-transparent p-0 gap-4 items-stretch">
               {/* -------------------------
-              * Paste
+              * Gutenberg Ebook Import
               * ------------------------- */}
-              <TabsTrigger value="paste" className={tabClassName}>
-                <Clipboard className="h-4 w-4" />
-                Paste text
+              <TabsTrigger value="import" className={tabClassName}>
+                <BookDown className="h-4 w-4" />
+                Import eBook
               </TabsTrigger>
               {/* -------------------------
               * File Upload
@@ -101,11 +101,11 @@ export function TabbedInputCard({
                 Upload file
               </TabsTrigger>
               {/* -------------------------
-              * Gutenberg Ebook Import
+              * Paste
               * ------------------------- */}
-              <TabsTrigger value="import" className={tabClassName}>
-                <BookDown className="h-4 w-4" />
-                Import eBook
+              <TabsTrigger value="paste" className={tabClassName}>
+                <Clipboard className="h-4 w-4" />
+                Paste text
               </TabsTrigger>
             </TabsList>
           </div>
@@ -120,21 +120,18 @@ export function TabbedInputCard({
             )}
           >
             {/* -------------------------
-            * ( Paste ): Text input
+            * ( Import Ebook )
             * ------------------------- */}
-            <TabsContent value="paste" className="m-0 h-full flex">
-              <Textarea 
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                placeholder="Paste or type your text here..."
-                className="
-                  flex-1
-                  resize-none p-4
-                  rounded-none
-                  border-0 bg-card
-                  shadow-none focus-visible:ring-0
-                  font-ui placeholder:text-muted-foreground/60
-                "
+            <TabsContent value="import" className="m-0 h-full min-w-0 overflow-hidden flex">
+              <ImportEbookPanel
+                selectedBookId={bookId}
+                onSelectBook={({ bookId, format, title, epubUrl }) => {
+                  setBookId(bookId);
+                  setFormat(format);
+                  setBookTitle(title);
+                  setEpubUrl(epubUrl);
+                }}
+                langLabels={langLabels}
               />
             </TabsContent>
             {/* -------------------------
@@ -152,18 +149,21 @@ export function TabbedInputCard({
               />
             </TabsContent>
             {/* -------------------------
-            * ( Import Ebook )
+            * ( Paste ): Text input
             * ------------------------- */}
-            <TabsContent value="import" className="m-0 h-full min-w-0 overflow-hidden flex">
-              <ImportEbookPanel
-                selectedBookId={bookId}
-                onSelectBook={({ bookId, format, title, epubUrl }) => {
-                  setBookId(bookId);
-                  setFormat(format);
-                  setBookTitle(title);
-                  setEpubUrl(epubUrl);
-                }}
-                langLabels={langLabels}
+            <TabsContent value="paste" className="m-0 h-full flex">
+              <Textarea 
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Paste or type your text here..."
+                className="
+                  flex-1
+                  resize-none p-4
+                  rounded-none
+                  border-0 bg-card
+                  shadow-none focus-visible:ring-0
+                  font-ui placeholder:text-muted-foreground/60
+                "
               />
             </TabsContent>
           </div>

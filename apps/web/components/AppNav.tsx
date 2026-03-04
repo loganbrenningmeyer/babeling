@@ -1,40 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Book, Languages, Moon, Sun } from "lucide-react";
+import { Book, Languages } from "lucide-react";
 
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { UiLanguageSelect } from "@/components/UiLanguageSelect";
 import { UserMenu } from "@/components/UserMenu";
-import { Button } from "@/components/ui/button";
-import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useMessages } from "@/app/hooks/useMessages";
 
 export function AppNav() {
   const m = useMessages();
-  const { theme, setTheme } = useUserPreferences();
-  const [systemPrefersDark, setSystemPrefersDark] = useState(false);
-
-  useEffect(() => {
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-
-    const syncTheme = () => {
-      setSystemPrefersDark(media.matches);
-    };
-
-    syncTheme();
-    media.addEventListener("change", syncTheme);
-
-    return () => {
-      media.removeEventListener("change", syncTheme);
-    };
-  }, []);
-
-  const isDark = theme === "system" ? systemPrefersDark : theme === "dark";
-
-  const toggleTheme = () => {
-    setTheme(isDark ? "light" : "dark");
-  };
 
   return (
     <nav className="z-50 border-b border-border/80 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
@@ -92,16 +67,7 @@ export function AppNav() {
         </div>
 
         <div className="flex items-center justify-end gap-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            type="button"
-            onClick={toggleTheme}
-            aria-label={isDark ? "Switch to light mode" : "Switch to dark mode"}
-            title={isDark ? "Switch to light mode" : "Switch to dark mode"}
-          >
-            {isDark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-          </Button>
+          <ThemeToggle />
           <UiLanguageSelect />
           <UserMenu />
         </div>

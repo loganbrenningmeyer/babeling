@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 
+type ThemePref = "system" | "light" | "dark";
+
 // -------------------------
 // Get Clerk token
 // -------------------------
@@ -37,4 +39,51 @@ export function getApiBaseUrl() {
     };
   }
   return { API_BASE_URL };
+}
+
+// -------------------------
+// Get saved theme for initial SSR
+// -------------------------
+export async function getInitialTheme(): Promise<ThemePref | null> {
+  const { userId, getToken } = await auth();
+  if (!userId) {
+    return null;
+  }
+
+  const token = await getToken({ template: "backend" });
+  if (!token) {
+    return null;
+  }
+
+  const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+  if (!API_BASE_URL) {
+    return null;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/user_preferences`, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      cache: "no-store",
+    });
+
+    if (!res.ok) {
+      return null;
+    }
+
+    const data = (await res.json()) as { theme?: unknown };
+    if (
+      data.theme === "system" ||
+      data.theme === "light" ||
+      data.theme === "dark"
+    ) {
+      return data.theme;
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
 }

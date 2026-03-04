@@ -4,7 +4,6 @@ import React, {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useState,
 } from "react";
 
@@ -27,14 +26,16 @@ type UserPrefsState = {
 const UserPrefsContext = createContext<UserPrefsState | null>(null);
 
 export function UserPreferencesProvider({
+  initialTheme = "system",
   children,
 }: {
+  initialTheme?: ThemePref;
   children: React.ReactNode;
 }) {
   const [uiLang, setUiLangState] = useState("en");
   const [srcLang, setSrcLangState] = useState<string | null>(null);
   const [tgtLang, setTgtLangState] = useState<string | null>(null);
-  const [theme, setThemeState] = useState<ThemePref>("system");
+  const [theme, setThemeState] = useState<ThemePref>(initialTheme);
   const [loading, setLoading] = useState(true);
 
   // -------------------------
@@ -156,20 +157,17 @@ export function UserPreferencesProvider({
     patchPrefs({ theme: next });
   };
 
-  const value = useMemo(
-    () => ({
-      uiLang,
-      srcLang,
-      tgtLang,
-      theme,
-      setUiLang,
-      setSrcLang,
-      setTgtLang,
-      setTheme,
-      loading,
-    }),
-    [uiLang, srcLang, tgtLang, theme, loading]
-  );
+  const value = {
+    uiLang,
+    srcLang,
+    tgtLang,
+    theme,
+    setUiLang,
+    setSrcLang,
+    setTgtLang,
+    setTheme,
+    loading,
+  };
 
   return (
     <UserPrefsContext.Provider value={value}>
