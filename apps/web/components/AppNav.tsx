@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
 import { Book, Languages } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -10,6 +11,13 @@ import { useMessages } from "@/app/hooks/useMessages";
 
 export function AppNav() {
   const m = useMessages();
+  const navItemClassName = `
+    group
+    inline-flex w-full items-center justify-center gap-2
+    rounded-md px-3 py-2
+    font-ui font-medium text-muted-foreground
+    transition-colors hover:bg-accent hover:text-accent-foreground
+  `;
 
   return (
     <nav className="z-50 border-b border-border/80 bg-background/85 backdrop-blur-xl supports-[backdrop-filter]:bg-background/70">
@@ -34,36 +42,39 @@ export function AppNav() {
         </div>
 
         <div className="hidden grid-flow-col auto-cols-fr gap-2 text-sm sm:grid">
-          <Link
-            className="
-              group
-              inline-flex w-full items-center justify-center gap-2
-              rounded-md px-3 py-2
-              font-ui font-medium text-muted-foreground
-              transition-colors hover:bg-accent hover:text-accent-foreground
-            "
-            href="/upload"
-          >
-            <span className="inline-flex items-center justify-center">
-              <Languages className="size-4" />
-            </span>
-            {m.nav.translate}
-          </Link>
-          <Link
-            className="
-              group
-              inline-flex w-full items-center justify-center gap-2
-              rounded-md px-3 py-2
-              font-ui font-medium text-muted-foreground
-              transition-colors hover:bg-accent hover:text-accent-foreground
-            "
-            href="/library"
-          >
-            <span className="inline-flex items-center justify-center">
-              <Book className="size-4" />
-            </span>
-            {m.nav.library}
-          </Link>
+          <SignedIn>
+            <Link className={navItemClassName} href="/upload">
+              <span className="inline-flex items-center justify-center">
+                <Languages className="size-4" />
+              </span>
+              {m.nav.translate}
+            </Link>
+            <Link className={navItemClassName} href="/library">
+              <span className="inline-flex items-center justify-center">
+                <Book className="size-4" />
+              </span>
+              {m.nav.library}
+            </Link>
+          </SignedIn>
+
+          <SignedOut>
+            <SignUpButton mode="modal" forceRedirectUrl="/upload" signInForceRedirectUrl="/upload">
+              <button type="button" className={navItemClassName}>
+                <span className="inline-flex items-center justify-center">
+                  <Languages className="size-4" />
+                </span>
+                {m.nav.translate}
+              </button>
+            </SignUpButton>
+            <SignUpButton mode="modal" forceRedirectUrl="/library" signInForceRedirectUrl="/library">
+              <button type="button" className={navItemClassName}>
+                <span className="inline-flex items-center justify-center">
+                  <Book className="size-4" />
+                </span>
+                {m.nav.library}
+              </button>
+            </SignUpButton>
+          </SignedOut>
         </div>
 
         <div className="flex items-center justify-end gap-3">

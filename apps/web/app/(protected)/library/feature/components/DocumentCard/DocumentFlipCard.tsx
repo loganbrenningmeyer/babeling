@@ -40,7 +40,7 @@ export function DocumentFlipCard({
       onClick={() => setFlipped((v) => !v)}
       className="w-full max-w-sm justify-self-start text-left"
     >
-      <div className="relative aspect-[4/3] w-full [perspective:800px]">
+      <div className="relative aspect-[5/4] w-full [perspective:800px]">
         <motion.div
           animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
@@ -62,7 +62,7 @@ export function DocumentFlipCard({
           {/* -------------------------
           * ( Back ): Translations Info
           * ------------------------- */}
-          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(-180deg)]">
+          <div className="absolute inset-0 cursor-pointer [backface-visibility:hidden] [transform:rotateY(-180deg)]">
             <div className={`h-full w-full ${!flipped ? "" : "group/doc-back"}`}>
               <DocumentBack 
                 document={document}

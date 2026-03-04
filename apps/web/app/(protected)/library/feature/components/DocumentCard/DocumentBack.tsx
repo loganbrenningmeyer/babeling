@@ -101,7 +101,7 @@ export function DocumentBack({
             gap-3 mb-3
           "
         >
-          <h2 className="text-md font-reading font-medium leading-tight">
+          <h2 className="text-md font-reading font-semibold leading-tight line-clamp-2">
             {document.title}
           </h2>
 
@@ -136,16 +136,18 @@ export function DocumentBack({
           }}
           className="w-full flex-1 flex flex-col"
         >
-          <div className="w-full border-b-2 border-border">
-            <TabsList className="
-              !inline-flex !w-fit
-              !justify-start !items-end
-              !bg-transparent !p-0 !rounded-none !h-auto
-              gap-2
-            ">
+          <div className="w-full border-b border-border">
+            <TabsList
+              className="
+                !inline-flex !w-fit
+                !justify-start !items-end
+                !bg-transparent !p-0 !rounded-none !h-auto
+                gap-2
+              "
+            >
               {sortedTranslations.map((t) => (
-                <TabsTrigger 
-                  key={t.pageTranslationId} 
+                <TabsTrigger
+                  key={t.pageTranslationId}
                   value={String(t.pageTranslationId)}
                   className="
                     group/tab relative
@@ -154,23 +156,25 @@ export function DocumentBack({
                     px-2 py-1
                     cursor-pointer
                     bg-transparent
-                    border border-transparent
-                    -mb-0.5
 
-                    data-[state=active]:!bg-transparent dark:data-[state=active]:!bg-transparent
-                    border-2
+                    border-x border-t border-b-0
+                    border-border/50
+
+                    data-[state=active]:-mb-px
+                    data-[state=active]:!bg-card
                     data-[state=active]:!border-border
-                    dark:data-[state=active]:!border-border
                     data-[state=active]:!border-b-transparent
                     data-[state=active]:shadow-none
                   "
                   onClick={(e) => e.stopPropagation()}
                 >
-                  <div className="
-                    opacity-30
-                    transition-opacity
-                    group-data-[state=active]/tab:opacity-100
-                  ">
+                  <div
+                    className="
+                      opacity-30
+                      transition-opacity
+                      group-data-[state=active]/tab:opacity-100
+                    "
+                  >
                     <h3 className={`${getLangColors(t.tgtLang).text} font-bold font-ui`}>
                       {t.tgtLang.toUpperCase()}
                     </h3>
@@ -180,11 +184,12 @@ export function DocumentBack({
             </TabsList>
           </div>
 
+
           {sortedTranslations.map((t) => (
             <TabsContent 
               key={t.pageTranslationId} 
               value={String(t.pageTranslationId)} 
-              className="mt-2 flex flex-col h-full space-y-4"
+              className="flex h-full flex-col"
             >
               {/* -------------------------
               //* Reading Progress
@@ -192,20 +197,20 @@ export function DocumentBack({
               <div className="flex items-center gap-2">
                 <RadialProgress 
                   value={t.completionPercent} 
-                  size={50} 
-                  strokeWidth={4} 
+                  size={40} 
+                  strokeWidth={3} 
                   strokeColor={getLangColors(t.tgtLang).stroke}
                 />  
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-baseline gap-2">
                     <div>
-                      <h2 className="font-ui text-xs text-muted-foreground tracking-wider">
+                      <h3 className="font-ui text-xs text-muted-foreground tracking-wider">
                         {"Progress".toUpperCase()}
-                      </h2>
+                      </h3>
                       <div>
-                        <span className="text-lg font-reading font-semibold">p. {t.currentPageNumber}</span>
-                        <span className="text-sm font-reading font-normal"> of {document.totalPages}</span>
+                        <span className="text-md font-reading font-semibold">p. {t.currentPageNumber}</span>
+                        <span className="text-xs font-reading font-normal"> of {document.totalPages}</span>
                       </div>
                     </div>
                   </div>
@@ -217,46 +222,42 @@ export function DocumentBack({
                 </div>
               </div>
 
-              <Separator />
+              <div className="mt-auto flex flex-col gap-2">
+                <Separator />
 
-              <div 
-                className="
-                  flex items-center justify-between 
-                  mt-auto gap-4 whitespace-nowrap
-                "
-              >
-                <div className="flex items-end">
-                  <div className="flex w-full items-center justify-between gap-4">
-                    <ResumeTranslationButton 
-                      document={document}
-                      translation={t}
-                      loading={false}
-                    >
-                      <span>
-                        Continue in{" "}
-                        <span 
-                          className={`
-                            rounded-xl border px-1 
-                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
-                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
-                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
-                          `}
-                        >
-                          {langLabels[toUiLang(t.tgtLang)]}
-                        </span>
+                <div className="border border-border bg-muted/35 p-2">
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between gap-3 text-[11px] font-medium tracking-wide text-muted-foreground/80">
+                      <span className="rounded-xs border border-border px-2">
+                        p. {t.currentPageNumber}
                       </span>
-                    </ResumeTranslationButton>
-
-                    <div
-                      className="
-                        flex items-center gap-1
-                        text-xs text-muted-foreground/60
-                      "
-                    >
-                      <span className="flex items-center gap-1">
-                        <Clock size={12}/>
+                      <span className="inline-flex items-center gap-1">
+                        <Clock size={12} />
                         {formatRelativeTime(t.lastOpenedAt)}
                       </span>
+                    </div>
+
+                    <div className="flex w-full">
+                      <ResumeTranslationButton
+                        document={document}
+                        translation={t}
+                        loading={false}
+                        className="w-full rounded-none"
+                      >
+                        <span>
+                          Continue in{" "}
+                          <span
+                            className={`
+                              rounded-xl border px-1 
+                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
+                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
+                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
+                            `}
+                          >
+                            {langLabels[toUiLang(t.tgtLang)]}
+                          </span>
+                        </span>
+                      </ResumeTranslationButton>
                     </div>
                   </div>
                 </div>

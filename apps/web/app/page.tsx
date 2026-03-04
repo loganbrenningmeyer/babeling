@@ -1,8 +1,11 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
+import { SignUpButton } from "@clerk/nextjs";
+import { auth } from "@clerk/nextjs/server";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { AuthModalLauncher } from "@/app/components/AuthModalLauncher";
 import {
   ArrowRight,
   AudioLines,
@@ -58,15 +61,30 @@ const workflowSteps = [
   },
 ];
 
-export default function Home() {
+export default async function Home({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
+}) {
+  const { userId } = await auth();
+  const sp = await searchParams;
   const surfaceTheme = {
     "--home-accent-a": "rgba(14, 116, 144, 0.24)",
     "--home-accent-b": "rgba(245, 158, 11, 0.24)",
     "--home-accent-c": "rgba(15, 23, 42, 0.08)",
   } as CSSProperties;
+  const redirectedModalTarget =
+    typeof sp.redirect_to === "string" && sp.redirect_to.startsWith("/")
+      ? sp.redirect_to
+      : "/upload";
+  const authRequestKey = typeof sp.auth_request === "string" ? sp.auth_request : redirectedModalTarget;
+  const shouldAutoOpenSignUp = !userId && sp.auth === "sign-up";
 
   return (
     <div className="relative overflow-hidden bg-background" style={surfaceTheme}>
+      {shouldAutoOpenSignUp ? (
+        <AuthModalLauncher key={authRequestKey} forceRedirectUrl={redirectedModalTarget} />
+      ) : null}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -left-28 -top-16 h-[24rem] w-[24rem] rounded-full bg-[radial-gradient(circle,var(--home-accent-a)_0%,transparent_70%)] opacity-100 blur-2xl dark:opacity-45" />
         <div className="absolute -right-20 top-24 h-[20rem] w-[20rem] rounded-full bg-[radial-gradient(circle,var(--home-accent-b)_0%,transparent_68%)] opacity-100 blur-2xl dark:opacity-45" />
@@ -89,12 +107,21 @@ export default function Home() {
                 and pronunciation. Move from guessing to seeing exactly how meaning maps across languages.
               </p>
               <div className="mt-8 flex flex-wrap gap-3">
-                <Button asChild size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
-                  <Link href="/upload">
-                    Start Reading
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
+                {userId ? (
+                  <Button asChild size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+                    <Link href="/upload">
+                      Start Reading
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <SignUpButton mode="modal" forceRedirectUrl="/upload" signInForceRedirectUrl="/upload">
+                    <Button size="lg" className="gap-2 bg-foreground text-background hover:bg-foreground/90">
+                      Sign Up to Start Reading
+                      <ArrowRight className="size-4" />
+                    </Button>
+                  </SignUpButton>
+                )}
                 {/* -------------------------
                 //* Clerk /me test
                 //* ------------------------- */}
@@ -216,12 +243,21 @@ export default function Home() {
                 </p>
               </div>
               <div className="flex flex-col gap-3 md:items-end">
-                <Button asChild size="lg" className="w-full gap-2 md:w-auto">
-                  <Link href="/upload">
-                    Open Translator
-                    <ArrowRight className="size-4" />
-                  </Link>
-                </Button>
+                {userId ? (
+                  <Button asChild size="lg" className="w-full gap-2 md:w-auto">
+                    <Link href="/upload">
+                      Open Translator
+                      <ArrowRight className="size-4" />
+                    </Link>
+                  </Button>
+                ) : (
+                  <SignUpButton mode="modal" forceRedirectUrl="/upload" signInForceRedirectUrl="/upload">
+                    <Button size="lg" className="w-full gap-2 md:w-auto">
+                      Sign Up to Start Reading
+                      <ArrowRight className="size-4" />
+                    </Button>
+                  </SignUpButton>
+                )}
                 <p className="text-sm text-muted-foreground md:text-right">
                   Works best when you translate first, then inspect alignment and explanations.
                 </p>

@@ -1,7 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, func, and_
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
 
 from api.database.db import get_db
 from api.auth.users import get_current_app_user
@@ -66,26 +65,18 @@ def get_library_documents(
 
     # -------------------------
     # Load most recent target language
-    # -- Most recent PageTranslation whose document_page_id -> document_id / src_lang
+    # -- Only show target language that this specific user has opened/read
     # -------------------------
     for doc, user_doc in rows:
         latest_tgt_lang = db.execute(
-            select(PageTranslation.tgt_lang)
-            .join(DocumentPage, DocumentPage.id == PageTranslation.document_page_id)
+            select(DocumentReadProgress.tgt_lang)
             .where(
-                DocumentPage.document_id == doc.id,
-                PageTranslation.src_lang == doc.src_lang,
-                PageTranslation.tgt_lang
-                != doc.src_lang,  # Source / Target languages cannot be the same
+                DocumentReadProgress.user_id == user.id,
+                DocumentReadProgress.document_id == doc.id,
             )
-            .group_by(PageTranslation.tgt_lang)
             .order_by(
-                func.count(
-                    PageTranslation.id
-                ).desc(),  # 1. coverage first (most translations)
-                func.max(
-                    PageTranslation.created_at
-                ).desc(),  # 2. recency second (date created)
+                DocumentReadProgress.last_read_at.desc(),
+                DocumentReadProgress.id.desc(),
             )
             .limit(1)  # return single target language
         ).scalar_one_or_none()
@@ -129,33 +120,27 @@ def get_library_document_translations(
         raise HTTPException(status_code=404, detail="Document not found")
     
     # -------------------------
-    # 2) Base translation summary
-    # -- one row per tgt_lang for this document
-    # -- defines which translation cards exist in the library
+    # 2) Read progress rows for this user/document (per tgt_lang)
+    # -- Defines which translation cards are visible in this user's library
     # -------------------------
-    summary_rows = db.execute(
-        select(
-            PageTranslation.tgt_lang.label("tgt_lang"),
-            func.count(PageTranslation.id).label("translated_pages_count"),
-            func.max(PageTranslation.created_at).label("latest_translation_at"),
+    progress_rows = db.execute(
+        select(DocumentReadProgress).where(
+            DocumentReadProgress.user_id == user.id,
+            DocumentReadProgress.document_id == doc.id,
         )
-        .join(DocumentPage, DocumentPage.id == PageTranslation.document_page_id)
-        .where(
-            DocumentPage.document_id == doc.id,
-            PageTranslation.src_lang == doc.src_lang,
-            PageTranslation.tgt_lang != doc.src_lang,
-        )
-        .group_by(PageTranslation.tgt_lang)
-        .order_by(func.max(PageTranslation.created_at).desc())
-    ).all()
+        .order_by(DocumentReadProgress.last_read_at.desc(), DocumentReadProgress.id.desc())
+    ).scalars().all()
 
-    # -- No translations saved for this document yet
-    if not summary_rows:
+    # -- User has not opened/read any translations for this document yet
+    if not progress_rows:
         return LibraryTranslationResponse(translations=[])
-    
+
+    visible_tgt_langs = [row.tgt_lang for row in progress_rows]
+
     # -------------------------
     # 3) Latest preview per target language
-    # -- Use row_number() to pick on PageTranslation row per tgt_lang
+    # -- Shared cached translations are still reusable across users
+    # -- Restrict to target languages this user has actually opened/read
     # -------------------------
     latest_ranked_sq = (
         select(
@@ -173,7 +158,7 @@ def get_library_document_translations(
         .where(
             DocumentPage.document_id == doc.id,
             PageTranslation.src_lang == doc.src_lang,
-            PageTranslation.tgt_lang != doc.src_lang,
+            PageTranslation.tgt_lang.in_(visible_tgt_langs),
         )
         .subquery()
     )
@@ -189,19 +174,7 @@ def get_library_document_translations(
     latest_preview_by_lang = {row.tgt_lang: row for row in latest_preview_rows}
 
     # -------------------------
-    # 4) Read progress rows for this user/document (per tgt_lang)
-    # -------------------------
-    progress_rows = db.execute(
-        select(DocumentReadProgress).where(
-            DocumentReadProgress.user_id == user.id,
-            DocumentReadProgress.document_id == doc.id,
-        )
-    ).scalars().all()
-
-    progress_by_lang = {row.tgt_lang: row for row in progress_rows}
-
-    # -------------------------
-    # 5) Current-page preview per language 
+    # 4) Current-page preview per language 
     # -- Join progress -> document_pages[current_page_number] -> page_translations for same tgt_lang
     # -------------------------
     current_preview_rows = db.execute(
@@ -238,13 +211,13 @@ def get_library_document_translations(
     }
 
     # -------------------------
-    # 6) Assemble library response rows
+    # 5) Assemble library response rows
+    # -- Use read-progress ordering so the most recently opened languages appear first
     # -------------------------
     translations: list[LibraryTranslationOut] = []
 
-    for summary in summary_rows:
-        tgt_lang = summary.tgt_lang
-        progress = progress_by_lang.get(tgt_lang)
+    for progress in progress_rows:
+        tgt_lang = progress.tgt_lang
 
         preview_row = current_preview_by_lang.get(tgt_lang) or latest_preview_by_lang.get(tgt_lang)
         if preview_row is None:
@@ -256,16 +229,10 @@ def get_library_document_translations(
                 tgt_text=preview_row.tgt_text,
                 tgt_lang=tgt_lang,
                 last_opened_at=(
-                    progress.last_read_at.isoformat()
-                    if progress and progress.last_read_at
-                    else None
+                    progress.last_read_at.isoformat() if progress.last_read_at else None
                 ),
-                completion_percent=(
-                    int(progress.completion_percent) if progress else 0
-                ),
-                current_page_number=(
-                    int(progress.current_page_number) if progress else 1
-                ),
+                completion_percent=int(progress.completion_percent),
+                current_page_number=int(progress.current_page_number),
                 total_pages=doc.total_pages,
             )
         )

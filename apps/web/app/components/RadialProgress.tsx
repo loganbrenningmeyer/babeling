@@ -50,7 +50,7 @@ export function RadialProgress({
       //* Center Label
       //* ------------------------- */}
       <div className="absolute inset-0 grid place-items-center">
-        <span className="text-sm font-semibold">
+        <span className="text-xs font-semibold">
           {label ?? `${Math.round(val)}%`}
         </span>
       </div>

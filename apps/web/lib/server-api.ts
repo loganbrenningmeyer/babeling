@@ -12,7 +12,13 @@ export async function getBackendToken() {
     return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
   }
 
-  const token = await getToken({ template: "backend" });
+  let token: string | null = null;
+  try {
+    token = await getToken({ template: "backend" });
+  } catch {
+    return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };
+  }
+
   if (!token) {
     return {
       error: NextResponse.json(
@@ -50,7 +56,13 @@ export async function getInitialTheme(): Promise<ThemePref | null> {
     return null;
   }
 
-  const token = await getToken({ template: "backend" });
+  let token: string | null = null;
+  try {
+    token = await getToken({ template: "backend" });
+  } catch {
+    return null;
+  }
+
   if (!token) {
     return null;
   }

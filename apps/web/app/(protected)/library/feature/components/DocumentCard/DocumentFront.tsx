@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Clock, RotateCcw } from "lucide-react";
+import { BookText, Clock } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -42,7 +42,14 @@ export function DocumentFront({
 
   const sampleLangCode = recentTranslation ? recentTranslation.tgtLang : document.srcLang;
   const sampleLangLabel = langLabels[toUiLang(sampleLangCode)];
-  const sampleLangColors = LANG_COLOR_BY_CODE[toUiLang(sampleLangCode)]
+  const sampleLangColors = LANG_COLOR_BY_CODE[toUiLang(sampleLangCode)];
+  const sampleText = truncate(recentTranslation ? recentTranslation.tgtText : document.srcText, 100);
+  const sampleMetaLabel = recentTranslation ? `p. ${recentTranslation.currentPageNumber}` : `${document.totalPages} pages`;
+  const sampleTime = recentTranslation
+    ? formatRelativeTime(recentTranslation.lastOpenedAt)
+    : document.lastOpenedAt
+      ? formatRelativeTime(document.lastOpenedAt)
+      : null;
 
   {/* -------------------------
   * ( Front ): Document Info
@@ -67,7 +74,7 @@ export function DocumentFront({
     >
       {/* Source Language Accent Strip */}
       <div className={`absolute inset-y-0 left-0 w-1.5 ${srcAccent}`} />
-      <CardContent className="h-full p-0 space-y-4 flex flex-col">
+      <CardContent className="flex h-full flex-col gap-4 p-0">
         {/* -------------------------
         * Title + Source Language Badge
         * ------------------------- */}
@@ -89,12 +96,23 @@ export function DocumentFront({
                 unoptimized
                 className="h-16 w-12 shrink-0 rounded-md border border-border/60 object-cover shadow-sm"
               />
-            ) : null}
+            ) : (
+              <div
+                className="
+                  flex h-16 w-12 shrink-0 items-center justify-center
+                  rounded-md border border-border/60 bg-muted/40 text-muted-foreground/70
+                  shadow-sm
+                "
+                aria-hidden="true"
+              >
+                <BookText className="h-6 w-6" />
+              </div>
+            )}
             {/* -------------------------
             * Title / Author
             * ------------------------- */}
             <div>
-              <h2 className="line-clamp-2 text-md font-reading font-medium leading-tight">
+              <h2 className="line-clamp-2 text-md font-reading font-semibold leading-tight">
                 {document.title}
               </h2>
               <h3 className="text-sm font-ui text-muted-foreground">
@@ -104,77 +122,60 @@ export function DocumentFront({
           </div>
           <LangBadge lang={document.srcLang}/>
         </div>
-        {/* -------------------------
-        * Continue Button + Tap to view translations
-        * ------------------------- */}
-        <div className="mt-auto space-y-3">
-          {/* -------------------------
-          * Text Sample
-          * ------------------------- */}
-          <div className="border border-border/50 bg-muted/35 px-3 py-2">
-            <div className="flex items-stretch gap-3">
-              <p className="
-                  min-w-0 flex-1
-                  font-reading text-sm italic
-                  text-muted-foreground leading-relaxed line-clamp-2
-                "
-              >
-                {truncate(recentTranslation ? recentTranslation.tgtText : document.srcText, 100)}…
-              </p>
-              <div className="flex shrink-0 flex-col items-center justify-center gap-1 border-l border-border/50 pl-3">
-                <LangBadge 
-                  lang={sampleLangCode}
-                />
-                {recentTranslation && (
-                  <span
-                    className="
-                      inline-flex items-center
-                      font-ui text-[11px]
-                      text-muted-foreground
-                    "
-                  >
-                    p. {recentTranslation.currentPageNumber}
-                  </span>
-                )}
-              </div>
-            </div>
-          </div>
-          <Separator />
-          <div 
-            className="
-              flex items-center justify-between 
-              gap-4 whitespace-nowrap
-            "
-          >
-            <div className="flex items-end">
-              <div className="flex w-full items-center justify-between gap-4">
-                <ResumeTranslationButton
-                  document={document}
-                  translation={recentTranslation}
-                  loading={translationsLoading}
-                >
-                  <span>
-                    Continue in{" "}
-                    <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
-                      {sampleLangLabel}
-                    </span>
-                  </span>
-                </ResumeTranslationButton>
 
-                {recentTranslation && (
-                  <div 
-                    className="
-                      flex items-center gap-1
-                      text-xs text-muted-foreground/60
-                    "
-                  >
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> 
-                      {formatRelativeTime(recentTranslation.lastOpenedAt)}
-                    </span>
-                  </div>
-                )}
-              </div>
+        <Separator />
+
+        <div className="mt-auto flex flex-1 flex-col">
+          {/* -------------------------
+          * Continue Recent Translation Info
+          * ------------------------- */}
+          <div className="flex flex-1 flex-col gap-2 border border-border/50 bg-muted/35 p-2">
+            <div className="flex items-center justify-between gap-3 text-[11px] font-medium tracking-wide text-muted-foreground/80">
+              {/* -------------------------
+              * Page Number / Last Opened Time
+              * ------------------------- */}
+              <span className="border border-border px-2">
+                {sampleMetaLabel}
+              </span>
+              {sampleTime ? (
+                <span className="inline-flex items-center gap-1">
+                  <Clock size={12} />
+                  {sampleTime}
+                </span>
+              ) : null}
+            </div>
+            {/* -------------------------
+            * Sample Text
+            * ------------------------- */}
+            <p
+              className="
+                min-w-0 flex-1
+                font-reading text-xs italic
+                text-muted-foreground leading-relaxed 
+                line-clamp-2
+              "
+            >
+              {sampleText}…
+            </p>
+            {/* -------------------------
+            * Resume Translation Button
+            * ------------------------- */}
+            <Separator />
+
+            <div className="flex w-full">
+              <ResumeTranslationButton
+                document={document}
+                translation={recentTranslation}
+                loading={translationsLoading}
+                className="w-full rounded-none"
+              >
+                <span>
+                  Continue in{" "}
+                  <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
+                    {sampleLangLabel}
+                  </span>
+                </span>
+              </ResumeTranslationButton>
             </div>
           </div>
         </div>

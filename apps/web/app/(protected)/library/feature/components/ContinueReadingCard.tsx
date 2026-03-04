@@ -89,7 +89,7 @@ export function ContinueReadingCard({
         <p className="font-ui font-bold text-xs text-muted-foreground uppercase">
           Continue reading
         </p>
-        <p className="truncate font-reading text-lg text-foreground">
+        <p className="truncate font-reading font-semibold text-lg text-foreground">
           {document.title}
         </p>
         <div className="inline-flex items-center gap-2 font-ui text-sm text-muted-foreground">
