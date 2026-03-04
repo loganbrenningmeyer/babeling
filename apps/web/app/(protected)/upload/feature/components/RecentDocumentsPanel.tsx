@@ -77,7 +77,7 @@ export function RecentDocumentsPanel({
           {Array.from({ length: 3 }).map((_, i) => (
             <div
               key={i}
-              className="h-40 rounded-2xl border border-foreground/10 bg-zinc-200/70 shadow-sm animate-pulse"
+              className="h-40 rounded-2xl border border-foreground/10 bg-muted/80 shadow-sm animate-pulse"
             />
           ))}
         </div>
@@ -96,7 +96,7 @@ export function RecentDocumentsPanel({
               key={doc.id}
               className="
                 flex h-full flex-col
-                rounded-2xl border border-foreground/10 bg-zinc-50 px-4 py-3 text-left shadow-sm
+                rounded-2xl border border-foreground/10 bg-card px-4 py-3 text-left shadow-sm
                 transition-colors
                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring
               "
@@ -125,45 +125,47 @@ export function RecentDocumentsPanel({
 
               <div className="mt-auto flex flex-col justify-between gap-4 whitespace-nowrap">
                 <Separator />
-                <div className="flex items-end justify-between gap-4">
-                  <Button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenDocument(doc);
-                    }}
-                    className="
-                        group
-                        rounded-full px-6
-                        bg-blue-600/10 text-blue-700
-                        border border-blue-700
-                        cursor-pointer
-                        transition-[transform, colors] duration-200 ease-out
-                        hover:bg-blue-600/20
-                        hover:-translate-y-0.5
-                        motion-reduce:transform-none
+                <div className="flex items-end">
+                  <div className="flex w-full items-center justify-between gap-4">
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenDocument(doc);
+                      }}
+                      className="
+                          group
+                          rounded-full px-6
+                          bg-blue-600/10 text-blue-700
+                          border border-blue-700
+                          cursor-pointer
+                          transition-[transform, colors] duration-200 ease-out
+                          hover:bg-blue-600/20
+                          hover:-translate-y-0.5
+                          motion-reduce:transform-none
+                        "
+                      >
+                      <Play 
+                        size={12}
+                        className="
+                            transition-transform duration-300 ease-out
+                            group-hover:translate-x-0.5
+                            motion-reduce:transition-none
+                          "
+                        />
+                      Resume reading
+                    </Button>
+
+                    <div 
+                      className="
+                        flex items-center gap-1
+                        text-xs text-muted-foreground/60
                       "
                     >
-                    <Play 
-                      size={12}
-                      className="
-                          transition-transform duration-300 ease-out
-                          group-hover:translate-x-0.5
-                          motion-reduce:transition-none
-                        "
-                      />
-                    Resume reading
-                  </Button>
-
-                  <div 
-                    className="
-                      flex items-center gap-1
-                      text-xs text-muted-foreground/60
-                    "
-                  >
-                    <span className="flex items-center gap-1">
-                      <Clock size={12} /> 
-                      {formatRelativeTime(doc.lastOpenedAt)}
-                    </span>
+                      <span className="flex items-center gap-1">
+                        <Clock size={12} /> 
+                        {formatRelativeTime(doc.lastOpenedAt)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

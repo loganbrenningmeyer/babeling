@@ -15,10 +15,10 @@ export function LangBadge({
   className?: string, 
 }) {
   const langColors = LANG_COLOR_BY_CODE[lang as keyof typeof LANG_COLOR_BY_CODE] ?? {
-    bg: "bg-zinc-50",
-    text: "text-zinc-700",
-    accent: "bg-zinc-500/40",
-    border: "border-zinc-700/60",
+    bg: "bg-muted/60",
+    text: "text-muted-foreground",
+    accent: "bg-muted",
+    border: "border-border",
   };
 
   const text = (useLabel && labels) ? labels[toUiLang(lang)] : lang.toUpperCase();

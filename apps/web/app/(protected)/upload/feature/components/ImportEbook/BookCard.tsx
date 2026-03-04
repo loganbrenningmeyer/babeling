@@ -25,8 +25,8 @@ export function BookCard({
         "border transition-[border-color,box-shadow,transform] duration-200 ease-out",
         "hover:-translate-y-0.5",
         selected
-          ? "bg-blue-50 border-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.18)]"
-          : "bg-zinc-50 border-zinc-500/60",
+          ? "bg-blue-50 border-blue-500 shadow-[0_0_0_2px_rgba(59,130,246,0.18)] dark:bg-blue-500/10 dark:border-blue-400/30 dark:shadow-[0_0_0_1px_rgba(96,165,250,0.18)]"
+          : "bg-card border-border",
       )}
       onClick={() => onClick(book)}
     >

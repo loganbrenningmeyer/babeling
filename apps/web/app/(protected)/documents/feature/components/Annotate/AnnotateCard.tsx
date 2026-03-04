@@ -2,7 +2,6 @@
 
 import ReactMarkdown from "react-markdown";
 import { Star } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,
@@ -66,7 +65,12 @@ export function AnnotateCard({
       {onToggleBookmark && (
         <button
           type="button"
-          className="absolute top-6 right-8 z-10 p-0 focus-visible:outline-none"
+          className="
+            absolute top-6 right-6 z-10 rounded-md p-1
+            transition-colors
+            hover:bg-muted/50
+            focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring/30
+          "
           aria-label={m.reader.annotationCard.saveDefinition}
           title={m.reader.annotationCard.saveDefinition}
           onClick={onToggleBookmark}
@@ -78,8 +82,8 @@ export function AnnotateCard({
               // make sure BOTH stroke and fill animate
               "[transition-color,fill,stroke,transform]",
               isBookmarked
-                ? "text-yellow-500 fill-yellow-300"
-                : "text-yellow-300 fill-white hover:text-yellow-500"
+                ? "text-amber-500 fill-amber-500 dark:text-amber-300 dark:fill-amber-300"
+                : "text-amber-300/80 fill-transparent hover:text-amber-500 dark:text-amber-500/55 dark:hover:text-amber-300"
             )}
           />
         </button>
@@ -134,7 +138,19 @@ export function AnnotateCard({
       //* Explain Card
       //* ------------------------- */}
       {explainData && (
-        <div className={cn("prose prose-sm max-w-none font-ui")}>
+        <div
+          className={cn(`
+            prose prose-sm max-w-none font-ui
+            text-foreground
+            prose-headings:text-foreground
+            prose-p:text-foreground
+            prose-li:text-foreground
+            prose-strong:text-foreground
+            prose-em:text-foreground/90
+            prose-code:text-foreground
+            [&_li::marker]:text-muted-foreground
+          `)}
+        >
           <ReactMarkdown>{explainData.explanation}</ReactMarkdown>
 
           <TooltipProvider delayDuration={200}>
@@ -143,7 +159,7 @@ export function AnnotateCard({
                 <li key={i}>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="cursor-help">
+                      <span className="cursor-help text-foreground">
                         <ReactMarkdown
                           components={{
                             p: ({ children }) => <span>{children}</span>,
@@ -154,10 +170,10 @@ export function AnnotateCard({
                       </span>
                     </TooltipTrigger>
 
-                    <TooltipContent className="text-sm font-ui">
+                    <TooltipContent className="text-sm font-ui text-background">
                       <ReactMarkdown
                         components={{
-                          p: ({ children }) => <p className="m-0">{children}</p>,
+                          p: ({ children }) => <p className="m-0 text-background">{children}</p>,
                         }}
                       >
                         {ex.source}

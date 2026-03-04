@@ -84,7 +84,7 @@ export function TOCSheet({
           className="
             font-ui text-muted-foreground
             border border-border
-            bg-zinc-50
+            bg-muted/60
             hover:text-foreground
             hover:border-foreground/20
           "

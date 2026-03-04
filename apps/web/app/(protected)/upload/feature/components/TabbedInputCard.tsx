@@ -63,10 +63,12 @@ export function TabbedInputCard({
   const tabClassName = cn(
     "h-full inline-flex items-center",
     "gap-2 py-2 text-sm",
-    "rounded-none shadow-none border-b-2 border-transparent",
+    "!rounded-none shadow-none",
+    "!border-x-0 !border-t-0 !border-b-2 border-transparent",
     "data-[state=inactive]:text-muted-foreground/60",
-    "data-[state=active]:bg-transparent",
-    "data-[state=active]:border-b-foreground",
+    "data-[state=active]:!bg-transparent dark:data-[state=active]:!bg-transparent",
+    "data-[state=active]:!border-x-0 data-[state=active]:!border-t-0 data-[state=active]:!border-b-2",
+    "data-[state=active]:border-b-foreground dark:data-[state=active]:border-b-foreground/70",
     "data-[state=active]:shadow-none",
   );
 
@@ -129,7 +131,7 @@ export function TabbedInputCard({
                   flex-1
                   resize-none p-4
                   rounded-none
-                  border-0 bg-zinc-50
+                  border-0 bg-muted/60
                   shadow-none focus-visible:ring-0
                   font-ui placeholder:text-muted-foreground/60
                 "
@@ -146,7 +148,7 @@ export function TabbedInputCard({
                   if (!file) return;
                 }}
                 text="Drag and drop"
-                className="h-full bg-zinc-50 flex-1 p-6 rounded-none"
+                className="h-full bg-muted/60 flex-1 p-6 rounded-none"
               />
             </TabsContent>
             {/* -------------------------

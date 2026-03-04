@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { SendHorizonal, BookSearch, Loader2, Search, UserRoundPen } from "lucide-react";
+import { BookSearch, ChevronLeft, ChevronRight, Loader2, Search, UserRoundPen } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { Button } from "@/components/ui/button";
 
 import { BookCard } from "./BookCard";
 
@@ -22,6 +23,8 @@ const LANGUAGE_OPTIONS = [
   { code: "de", label: "DE" },
   { code: "it", label: "IT" },
 ];
+
+const GUTENDEX_PAGE_SIZE = 32;
 
 export function ImportEbookPanel({
   selectedBookId,
@@ -108,13 +111,20 @@ export function ImportEbookPanel({
     setPage(1);
   }
 
+  const showingStart =
+    filteredBooks.length === 0 ? 0 : (page - 1) * GUTENDEX_PAGE_SIZE + 1;
+  const showingEnd =
+    filteredBooks.length === 0
+      ? 0
+      : Math.min(count, showingStart + filteredBooks.length - 1);
+
   return (
     <form 
       onSubmit={(e) => {
         e.preventDefault();
         handleSubmitSearch();
       }}
-      className="flex-1 p-6 flex flex-col gap-6 bg-zinc-50 overflow-y-auto"
+      className="flex-1 p-6 flex flex-col gap-6 bg-muted/60 overflow-y-auto no-scrollbar"
     >
       {/* -------------------------
       * Searching / Filtering
@@ -137,20 +147,28 @@ export function ImportEbookPanel({
             <Input
               placeholder="Search by book title or author name..."
               onChange={(e) => setSearchDraft(e.target.value)}
-              className="h-12 pl-10 rounded-full font-ui"
+              className="h-12 pl-10 rounded-full border border-foreground/10 font-ui focus-visible:ring-0"
             />
             <button
               type="submit"
               className="
+                group
                 absolute right-2 top-1/2 -translate-y-1/2
                 rounded-full bg-foreground p-2
-                text-zinc-100
+                text-background
                 cursor-pointer
                 hover:bg-foreground/80
                 transition duration-300 ease-out
               "
             >
-              <Search className="h-5 w-5" />
+              <Search
+                className="
+                  h-5 w-5
+                  transition-transform duration-200 ease-out
+                  group-hover:rotate-90
+                  motion-reduce:transform-none
+                "
+              />
             </button>
           </div>
         </div>
@@ -207,7 +225,7 @@ export function ImportEbookPanel({
               <Input 
                 placeholder="Filter by author..."
                 onChange={(e) => setAuthorDraft(e.target.value)}
-                className="h-10 pl-10 rounded-none font-ui"
+                className="h-10 pl-10 rounded-none border border-border font-ui focus-visible:ring-0"
               />
               <div
                 className="
@@ -251,22 +269,78 @@ export function ImportEbookPanel({
               <div className="flex h-full items-center justify-center -mt-4">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/>
               </div>
+            ) : error ? (
+              <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-500/20 dark:bg-red-500/10 dark:text-red-300">
+                {error}
+              </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <div className="font-ui text-sm tracking-widest uppercase">
-                  <span className="font-bold">{filteredBooks.length}</span> 
-                  {" "}book{filteredBooks.length === 1 ? "" : "s"} found
+                <div className="flex items-center justify-between gap-4">
+                  <div className="font-ui text-sm tracking-widest uppercase text-foreground/80">
+                    <span className="font-bold">{count.toLocaleString()}</span>
+                    {" "}book{count === 1 ? "" : "s"} found
+                    {count > 0 ? (
+                      <>
+                        {" "}•{" "}showing {showingStart}-{showingEnd}
+                      </>
+                    ) : null}
+                  </div>
+
+                  <div className="inline-flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!previous || loading}
+                      onClick={() => setPage((current) => Math.max(1, current - 1))}
+                      className="
+                        h-8 rounded-full px-3
+                        bg-background/80
+                        border-border text-muted-foreground
+                        hover:bg-muted/60 hover:text-foreground
+                        disabled:opacity-40
+                      "
+                    >
+                      <ChevronLeft className="h-4 w-4" />
+                      Prev
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      disabled={!next || loading}
+                      onClick={() => setPage((current) => current + 1)}
+                      className="
+                        h-8 rounded-full px-3
+                        bg-background/80
+                        border-border text-muted-foreground
+                        hover:bg-muted/60 hover:text-foreground
+                        disabled:opacity-40
+                      "
+                    >
+                      Next
+                      <ChevronRight className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {filteredBooks.map((book) => (
-                    <BookCard 
-                    key={book.id}
-                    book={book}
-                    selected={selectedBookId === book.id}
-                    onClick={handleSelectBook}
-                    />
-                  ))}
-                </div>
+
+                {filteredBooks.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-border bg-background/40 p-6 text-sm text-muted-foreground">
+                    No books match the current filters on this page.
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-3 gap-4 pb-6">
+                    {filteredBooks.map((book) => (
+                      <BookCard 
+                        key={book.id}
+                        book={book}
+                        selected={selectedBookId === book.id}
+                        onClick={handleSelectBook}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
             )}
         </>

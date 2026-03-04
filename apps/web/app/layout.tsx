@@ -43,7 +43,7 @@ export default function RootLayout({
           <UserPreferencesProvider>
             <AppNav />
 
-            <main className="w-full h-full pt-16">{children}</main>
+            <main className="w-full h-full">{children}</main>
           </UserPreferencesProvider>
         </ClerkProvider>
         {/* -------------------------

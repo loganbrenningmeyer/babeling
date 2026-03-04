@@ -17,9 +17,9 @@ type UploadSurfaceProps = {
 function FileChip({ children }: { children: React.ReactNode }) {
   return (
     <span className="
-        rounded-md border bg-background 
+        rounded-md border border-border bg-background/80
         px-2 py-0.5 
-        text-[11px] font-medium text-muted-foreground/80
+        text-[11px] font-medium text-muted-foreground
       "
     >
       {children}
@@ -58,15 +58,17 @@ export function UploadSurface({
         <Dropzone
           onFiles={(files) => handleFiles(files)}
           className={cn(
-            "h-full rounded-lg border-2 border-dashed border-border",
-            "bg-muted/30 transition-colors hover:border-ring hover:bg-muted/50"
+            "h-full rounded-lg border-2 border-dashed border-foreground/10",
+            "bg-muted/35 transition-colors",
+            "hover:border-primary/35 hover:bg-muted/55",
+            "dark:hover:border-primary/25 dark:hover:bg-muted/45"
           )}
         >
           <div className="flex h-full items-center justify-center p-10">
             {!file ? (
               <div className="flex w-full max-w-sm flex-col items-center text-center">
                 {/* Icon */}
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border bg-background shadow-sm">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-background/85 shadow-sm">
                   <Upload className="h-5 w-5 text-muted-foreground" />
                 </div>
 
@@ -81,13 +83,16 @@ export function UploadSurface({
                 {/* Browse button */}
                 <Button
                   type="button"
+                  variant="outline"
                   size="sm"
                   className="
                     mt-3 rounded-xl
-                    bg-indigo-50 text-indigo-600
-                    border border-indigo-100
-                    hover:bg-indigo-100 hover:border-indigo-300
-                    focus-visible:ring-indigo-500
+                    bg-primary/10 text-primary
+                    border border-primary/20
+                    hover:bg-primary/15 hover:border-primary/35
+                    dark:bg-primary/12 dark:hover:bg-primary/18
+                    dark:border-primary/25 dark:hover:border-primary/40
+                    focus-visible:ring-primary/30
                     cursor-pointer
                   "
                   // keep it a label-driven click; prevent Dropzone click handlers from interfering
@@ -105,7 +110,7 @@ export function UploadSurface({
             ) : (
               // Selected state
               <div className="flex w-full max-w-sm flex-col items-center text-center">
-                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border bg-background shadow-sm">
+                <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg border border-border bg-background/85 shadow-sm">
                   <Upload className="h-5 w-5 text-muted-foreground" />
                 </div>
 
@@ -118,14 +123,16 @@ export function UploadSurface({
 
                 <Button
                   type="button"
-                  variant="secondary"
+                  variant="outline"
                   size="sm"
                   className="
                     mt-3 rounded-xl
-                    bg-indigo-50 text-indigo-600
-                    border border-indigo-100
-                    hover:bg-indigo-100 hover:border-indigo-300
-                    focus-visible:ring-indigo-500
+                    bg-primary/10 text-primary
+                    border border-primary/20
+                    hover:bg-primary/15 hover:border-primary/35
+                    dark:bg-primary/12 dark:hover:bg-primary/18
+                    dark:border-primary/25 dark:hover:border-primary/40
+                    focus-visible:ring-primary/30
                     cursor-pointer
                   "
                   onClick={() => inputRef.current?.click()}

@@ -9,6 +9,7 @@ Status snapshot based on the current codebase.
 - Paste raw text into the app and create a saved reading document.
 - Upload `.txt` files and convert them into saved reading documents.
 - Upload `.epub` files and parse them into saved reading documents.
+- Search Project Gutenberg by title, author, and language, then import EPUB titles through the upload flow into saved reading documents.
 - Split long documents into page-sized chunks for reading.
 - Select source and target languages before starting a reading session.
 - Swap source and target languages in the upload flow.
@@ -41,8 +42,11 @@ Status snapshot based on the current codebase.
 - Navigate source reveal state with arrow keys.
 - Navigate reader pages with previous/next controls.
 - Navigate reader pages with keyboard shortcuts.
+- Jump directly to any page from the table of contents sheet.
 - Show page count and current page in the reader footer.
 - Open a table of contents sheet and jump to section starts.
+- Show reading progress inside the table of contents sheet.
+- Swap source and target pane roles inside the reader.
 - Show in-product reader help for navigation and interactions.
 
 ### Library And Persistence
@@ -54,6 +58,7 @@ Status snapshot based on the current codebase.
 - Resume reading from the latest saved target-language session.
 - Show recent documents on the upload page for quick resume.
 - Show a saved library of documents for the current user.
+- Show a continue-reading card for the most recent document with saved progress.
 - Show library document cards with title, source language, preview text, and recency.
 - Flip document cards to show saved translations for that document.
 - Show one translation tab per target language on the back of each document card.
@@ -78,6 +83,8 @@ Status snapshot based on the current codebase.
 - Extract EPUB text into page blocks.
 - Ingest EPUB images and cover images into storage.
 - Serve saved EPUB images from an authenticated backend route.
+- Render inline EPUB image blocks in the reader.
+- Show stored cover art in the reader header when available.
 
 ### Account, Settings, And App Shell
 
@@ -100,8 +107,6 @@ These features exist in the codebase but are not fully productized yet.
 
 - Preferences page route exists, but the page is still a placeholder and does not expose real controls.
 - Theme preference is stored, but there is no user-facing theme switcher in the current UI.
-- Upload includes an `Import eBook` tab, but the import workflow is still placeholder-only.
-- EPUB images are stored and can be fetched, but the current reader UI does not render image blocks.
 - The landing page still links to `/translate`, but the active implemented workflow is `/upload`.
 
 ## Next
@@ -111,9 +116,8 @@ These are the most natural next milestones based on what is already implemented.
 ### Finish Existing Surfaces
 
 - Build a real preferences screen for language defaults, UI language, and theme.
-- Replace the placeholder `Import eBook` tab with a real Gutenberg import flow.
 - Update landing-page CTA links to the active upload flow or restore a dedicated `/translate` route.
-- Render EPUB image blocks in the reader so illustrated books are fully supported.
+- Add a visible document-title editing control in the upload flow before starting a reading session.
 
 ### Deepen Reading Workflows
 
@@ -131,7 +135,7 @@ These are the most natural next milestones based on what is already implemented.
 
 ### Strengthen Content Ingestion
 
-- Add first-class Gutenberg search and import.
+- Expand Gutenberg import beyond the current Gutendex EPUB flow.
 - Add more supported input formats beyond `.txt` and `.epub`.
 - Add document metadata editing after import, especially title and author cleanup.
 - Add OCR or image-to-text ingestion if scanned content becomes a target use case.

@@ -10,7 +10,7 @@ import { RadialProgress } from "@/app/components/RadialProgress";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-import { ResumeTranslationButton } from "./ResumeTranslationButton";
+import { ResumeTranslationButton } from "../../../../../components/ResumeTranslationButton";
 
 import { LibraryDocument } from "../../types/document";
 import { LibraryTranslation } from "../../types/translation";
@@ -157,9 +157,11 @@ export function DocumentBack({
                     border border-transparent
                     -mb-0.5
 
-                    data-[state=active]:bg-transparent
-                    data-[state=active]:border-border border-2
-                    data-[state=active]:border-b-transparent
+                    data-[state=active]:!bg-transparent dark:data-[state=active]:!bg-transparent
+                    border-2
+                    data-[state=active]:!border-border
+                    dark:data-[state=active]:!border-border
+                    data-[state=active]:!border-b-transparent
                     data-[state=active]:shadow-none
                   "
                   onClick={(e) => e.stopPropagation()}
@@ -223,37 +225,39 @@ export function DocumentBack({
                   mt-auto gap-4 whitespace-nowrap
                 "
               >
-                <div className="flex w-full items-end justify-between gap-4">
-                  <ResumeTranslationButton 
-                    document={document}
-                    translation={t}
-                    loading={false}
-                  >
-                    <span>
-                      Continue in{" "}
-                      <span 
-                        className={`
-                          rounded-xl border px-1 
-                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
-                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
-                          ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
-                        `}
-                      >
-                        {langLabels[toUiLang(t.tgtLang)]}
+                <div className="flex items-end">
+                  <div className="flex w-full items-center justify-between gap-4">
+                    <ResumeTranslationButton 
+                      document={document}
+                      translation={t}
+                      loading={false}
+                    >
+                      <span>
+                        Continue in{" "}
+                        <span 
+                          className={`
+                            rounded-xl border px-1 
+                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
+                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
+                            ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
+                          `}
+                        >
+                          {langLabels[toUiLang(t.tgtLang)]}
+                        </span>
                       </span>
-                    </span>
-                  </ResumeTranslationButton>
+                    </ResumeTranslationButton>
 
-                  <div
-                    className="
-                      flex items-center gap-1
-                      text-xs text-muted-foreground/60
-                    "
-                  >
-                    <span className="flex items-center gap-1">
-                      <Clock size={12}/>
-                      {formatRelativeTime(t.lastOpenedAt)}
-                    </span>
+                    <div
+                      className="
+                        flex items-center gap-1
+                        text-xs text-muted-foreground/60
+                      "
+                    >
+                      <span className="flex items-center gap-1">
+                        <Clock size={12}/>
+                        {formatRelativeTime(t.lastOpenedAt)}
+                      </span>
+                    </div>
                   </div>
                 </div>
               </div>

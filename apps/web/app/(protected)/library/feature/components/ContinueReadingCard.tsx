@@ -6,7 +6,7 @@ import { Progress } from "@/components/ui/progress";
 import { LangBadge } from "@/app/components/LangBadge";
 
 import { useRecentTranslations } from "../hooks/useRecentTranslations";
-import { ResumeTranslationButton } from "./DocumentCard/ResumeTranslationButton";
+import { ResumeTranslationButton } from "../../../../components/ResumeTranslationButton";
 
 import { LibraryDocument } from "../types/document";
 
@@ -38,7 +38,8 @@ export function ContinueReadingCard({
         items-center
         gap-4 p-4 mt-6
         rounded-xl
-        bg-zinc-800
+        bg-card
+        border border-border
       "
     >
       {/* Book Icon */}
@@ -47,10 +48,10 @@ export function ContinueReadingCard({
           flex items-center justify-center 
           size-16 shrink-0
           rounded-lg 
-          border border-zinc-500 bg-zinc-700/80
+          border border-border bg-muted/70
         "
       >
-        <Book className="h-8 w-8 text-zinc-500"/>
+        <Book className="h-8 w-8 text-muted-foreground"/>
       </div>
 
       {/* Continue Reading / Title + Author */}
@@ -60,13 +61,13 @@ export function ContinueReadingCard({
           h-16 gap-0
         "
       >
-        <p className="font-ui font-bold text-xs text-zinc-400 uppercase">
+        <p className="font-ui font-bold text-xs text-muted-foreground uppercase">
           Continue reading
         </p>
-        <p className="truncate font-reading text-lg text-zinc-100">
+        <p className="truncate font-reading text-lg text-foreground">
           {document.title}
         </p>
-        <div className="inline-flex items-center gap-2 font-ui text-sm text-zinc-400">
+        <div className="inline-flex items-center gap-2 font-ui text-sm text-muted-foreground">
           {document.author ? (
             <>
               <span className="truncate">{document.author}</span>
@@ -88,13 +89,13 @@ export function ContinueReadingCard({
         <div className="flex-1 w-40">
           <div className="flex items-baseline gap-2">
             <div>
-              <span className="text-lg text-zinc-100 font-reading font-semibold">p. {currentPageNumber}</span>
-              <span className="text-sm text-zinc-100 font-reading font-normal"> of {document.totalPages}</span>
+              <span className="text-lg text-foreground font-reading font-semibold">p. {currentPageNumber}</span>
+              <span className="text-sm text-foreground font-reading font-normal"> of {document.totalPages}</span>
             </div>
           </div>
           <Progress 
             value={completionPercent}
-            className="h-1 w-full bg-zinc-600"
+            className="h-1 w-full bg-muted"
             indicatorClassName={tgtLang ? getLangColors(tgtLang).progress : undefined}
           />
         </div>

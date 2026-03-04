@@ -120,14 +120,14 @@ export function LibraryPage({
           {/* -------------------------
           //* Search Bar
           //* ------------------------- */}
-          <div className="relative w-72 bg-zinc-50">
+          <div className="relative w-72 bg-background">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search library..."
-              className="pl-9"
-              />
+              className="pl-9 focus-visible:ring-0 border border-border"
+            />
           </div>
           {/* -------------------------
           * Library Filter
@@ -183,7 +183,7 @@ export function LibraryPage({
                 <SelectTrigger className="w-56 bg-zinc-50">
                   <SelectValue placeholder="Sort documents" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" align="end">
                   <SelectItem value="recent">Recently read</SelectItem>
                   <SelectItem value="title">Title (A-Z)</SelectItem>
                   <SelectItem value="srcLang">Original language (A-Z)</SelectItem>
@@ -238,7 +238,7 @@ export function LibraryPage({
                 <SelectTrigger className="w-56 bg-zinc-50">
                   <SelectValue placeholder="Sort glossary" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent position="popper" align="end">
                   <SelectItem value="recent">Recently added</SelectItem>
                   <SelectItem value="word">Word (A-Z)</SelectItem>
                   <SelectItem value="language">Language (A-Z)</SelectItem>

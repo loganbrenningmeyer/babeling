@@ -21,8 +21,9 @@ export function Dropzone({
     <div
       className={cn(
         "transition-colors",
-        over && "ring-1 ring-ring bg-muted/40",
-        className
+        className,
+        over &&
+          "ring-1 ring-primary/30 border-primary/30 bg-muted/55 dark:ring-primary/25 dark:border-primary/25 dark:bg-muted/45"
       )}
       onDragEnter={(e) => {
         e.preventDefault();

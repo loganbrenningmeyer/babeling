@@ -12,7 +12,8 @@ import { PronounceButton } from "@/app/(protected)/documents/feature/components/
 import { UsageInfo } from "./UsageInfo";
 
 import type { LibraryGlossaryItem } from "../../types/glossaryItem";
-import type { LangLabels } from "@/app/i18n/messages";
+import { LangLabels, toUiLang } from "@/app/i18n/messages";
+import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 
 
@@ -25,6 +26,9 @@ export function GlossaryItemBack({
   langLabels: LangLabels,
   onClose: () => void;
 }) {
+  const srcHighlightClass = LANG_COLOR_BY_CODE[toUiLang(glossaryItem.srcLang)].highlight;
+  const tgtHighlightClass = LANG_COLOR_BY_CODE[toUiLang(glossaryItem.tgtLang)].highlight;
+
   return (
     <div 
       className="
@@ -145,8 +149,8 @@ export function GlossaryItemBack({
                     </div>
                     <HighlightedTokenSlice
                       slice={glossaryItem.definition.contextAlignment.sentence.src}
-                      className="text-sm leading-6 text-foreground/80"
-                      highlightClassName="bg-blue-500/20"
+                      className="font-ui text-sm leading-6 text-foreground/80"
+                      highlightClassName={srcHighlightClass}
                     />
                   </div>
 
@@ -168,8 +172,8 @@ export function GlossaryItemBack({
                     </div>
                     <HighlightedTokenSlice
                       slice={glossaryItem.definition.contextAlignment.sentence.tgt}
-                      className="text-sm leading-6 text-foreground/80"
-                      highlightClassName="bg-orange-500/20"
+                      className="font-ui text-sm leading-6 text-foreground/80"
+                      highlightClassName={tgtHighlightClass}
                     />
                   </div>
                 </div>

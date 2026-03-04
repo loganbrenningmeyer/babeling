@@ -17,7 +17,19 @@ export function UsageInfo({
   examples: LibraryGlossaryItem["usage"]["examples"],
 }) {
   return (
-    <div className="prose prose-md max-w-none font-ui">
+    <div
+      className="
+        prose prose-md max-w-none font-ui
+        text-foreground
+        prose-headings:text-foreground
+        prose-p:text-foreground
+        prose-li:text-foreground
+        prose-strong:text-foreground
+        prose-em:text-foreground/90
+        prose-code:text-foreground
+        [&_li::marker]:text-muted-foreground
+      "
+    >
       {/* -------------------------
       //* Explanation
       //* ------------------------- */}
@@ -33,7 +45,7 @@ export function UsageInfo({
               <Tooltip>
                 {/* ( Example ): Target Language */}
                 <TooltipTrigger asChild>
-                  <span className="cursor-help">
+                  <span className="cursor-help text-foreground">
                     <ReactMarkdown
                       components={{
                         p: ({ children }) => <span>{children}</span>
@@ -44,10 +56,10 @@ export function UsageInfo({
                   </span>
                 </TooltipTrigger>
                 {/* ( Hover Tooltip ): Source Language */}
-                <TooltipContent className="text-sm font-ui">
+                <TooltipContent className="text-sm font-ui text-background">
                   <ReactMarkdown
                     components={{
-                      p: ({ children }) => <p className="m-0">{children}</p>
+                      p: ({ children }) => <p className="m-0 text-background">{children}</p>
                     }}
                     >
                     {ex.source}

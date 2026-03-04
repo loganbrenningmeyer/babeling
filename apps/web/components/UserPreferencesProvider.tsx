@@ -103,6 +103,33 @@ export function UserPreferencesProvider({
   }, [uiLang]);
 
   // -------------------------
+  // Set light / dark theme
+  // -------------------------
+  useEffect(() => {
+    const root = document.documentElement;
+    const media = window.matchMedia("(prefers-color-scheme: dark)");
+
+    const applyTheme = () => {
+      const isDark =
+        theme === "system" ? media.matches : theme === "dark";
+
+      root.classList.toggle("dark", isDark);
+    };
+
+    applyTheme();
+
+    if (theme !== "system") {
+      return;
+    }
+
+    media.addEventListener("change", applyTheme);
+
+    return () => {
+      media.removeEventListener("change", applyTheme);
+    };
+  }, [theme]);
+
+  // -------------------------
   // Preference setters
   // -- Optimistic: Updates UI render immediately, then patches backend
   // -------------------------

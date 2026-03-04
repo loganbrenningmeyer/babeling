@@ -5,10 +5,10 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import { LangBadge } from "../../../../../components/LangBadge";
+import { LangBadge } from "./LangBadge";
 
-import { LibraryDocument } from "../../types/document";
-import { LibraryTranslation } from "../../types/translation";
+import { LibraryDocument } from "../(protected)/library/feature/types/document";
+import { LibraryTranslation } from "../(protected)/library/feature/types/translation";
 
 
 export function ResumeTranslationButton({
@@ -51,15 +51,17 @@ export function ResumeTranslationButton({
           className={cn(`            
               rounded-full px-6
               bg-blue-600/10 text-blue-700
-              border border-blue-700/60
+              border border-blue-600/35
+              dark:bg-blue-500/10 dark:text-blue-300
+              dark:border-blue-400/25
               opacity-100
             `, className
           )}
         >
-          <span className="inline-flex items-center gap-1.5" aria-hidden="true">
-            <span className="dot h-1 w-[3px] rounded-full" />
-            <span className="dot h-1 w-[3px] rounded-full" />
-            <span className="dot h-1 w-[3px] rounded-full" />
+          <span className="inline-flex items-end gap-[3px] leading-none" aria-hidden="true">
+            <span className="dot block size-[4px] rounded-full" />
+            <span className="dot block size-[4px] rounded-full" />
+            <span className="dot block size-[4px] rounded-full" />
           </span>
           Loading
         </Button>
@@ -73,7 +75,9 @@ export function ResumeTranslationButton({
               group
               rounded-full px-6 
               bg-blue-600/10 text-blue-700 
-              border border-blue-700
+              border border-blue-600/35
+              dark:bg-blue-500/10 dark:text-blue-300
+              dark:border-blue-400/25
               cursor-pointer
               transition-[transform, colors] duration-200 ease-out
               hover:bg-blue-600/20

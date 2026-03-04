@@ -6,7 +6,7 @@ import { Clock, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
-import { ResumeTranslationButton } from "./ResumeTranslationButton";
+import { ResumeTranslationButton } from "../../../../../components/ResumeTranslationButton";
 import { LangBadge } from "@/app/components/LangBadge";
 
 import { LibraryDocument } from "../../types/document";
@@ -147,33 +147,35 @@ export function DocumentFront({
               gap-4 whitespace-nowrap
             "
           >
-            <div className="flex w-full items-end justify-between gap-4">
-              <ResumeTranslationButton
-                document={document}
-                translation={recentTranslation}
-                loading={translationsLoading}
-              >
-                <span>
-                  Continue in{" "}
-                  <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
-                    {sampleLangLabel}
-                  </span>
-                </span>
-              </ResumeTranslationButton>
-
-              {recentTranslation && (
-                <div 
-                  className="
-                    flex items-center gap-1
-                    text-xs text-muted-foreground/60
-                  "
+            <div className="flex items-end">
+              <div className="flex w-full items-center justify-between gap-4">
+                <ResumeTranslationButton
+                  document={document}
+                  translation={recentTranslation}
+                  loading={translationsLoading}
                 >
-                  <span className="flex items-center gap-1">
-                    <Clock size={12} /> 
-                    {formatRelativeTime(recentTranslation.lastOpenedAt)}
+                  <span>
+                    Continue in{" "}
+                    <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
+                      {sampleLangLabel}
+                    </span>
                   </span>
-                </div>
-              )}
+                </ResumeTranslationButton>
+
+                {recentTranslation && (
+                  <div 
+                    className="
+                      flex items-center gap-1
+                      text-xs text-muted-foreground/60
+                    "
+                  >
+                    <span className="flex items-center gap-1">
+                      <Clock size={12} /> 
+                      {formatRelativeTime(recentTranslation.lastOpenedAt)}
+                    </span>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>

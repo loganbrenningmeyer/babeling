@@ -89,8 +89,6 @@ export function PronounceButton({
       <span
         className="
           text-muted-foreground
-          underline underline-offset-3
-          decoration-dotted decoration-1 decoration-muted-foreground
           transition-colors
           group-hover:text-foreground
         "

@@ -156,7 +156,7 @@ export function ReaderShell({
             className="
               absolute left-1/2 top-3 z-10 h-9 w-9
               -translate-x-1/2 rounded-full
-              border-border/80 bg-background/95
+              border-border/80 bg-background dark:bg-background
               text-muted-foreground shadow-sm
               transition duration-300 ease-out
               hover:text-foreground
@@ -281,11 +281,11 @@ export function ReaderShell({
               onClick={onPrevPage} 
               disabled={pageIndex <= 0}
               className="
-                bg-zinc-50
-                border border-primary/30
-                text-zinc-500
-                hover:bg-zinc-100
-                hover:text-zinc-700
+                bg-muted/60
+                border border-foreground/20
+                text-muted-foreground
+                hover:bg-muted
+                hover:text-foreground
                 transition-colors"
             >
               <ChevronLeft className="h-4 w-4" />
@@ -323,11 +323,11 @@ export function ReaderShell({
               onClick={onNextPage} 
               disabled={pageIndex >= pageCount - 1}
               className="
-                bg-zinc-50
-                border border-primary/30
-                text-zinc-500
-                hover:bg-zinc-100
-                hover:text-zinc-700
+                bg-muted/60
+                border border-foreground/20
+                text-muted-foreground
+                hover:bg-muted
+                hover:text-foreground
                 transition-colors
               "
             >

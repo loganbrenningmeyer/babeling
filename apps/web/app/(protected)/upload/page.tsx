@@ -306,7 +306,7 @@ export default function UploadPage() {
               SOURCE LANGUAGE
             </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
-              <SelectTrigger className="w-full bg-zinc-50">
+              <SelectTrigger className="w-full bg-muted/60">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
@@ -333,7 +333,7 @@ export default function UploadPage() {
               size="icon"
               className="
                 h-9 w-9 rounded-full
-                border-border/80 bg-zinc-50/90
+                border-border/80 bg-muted/80
                 text-muted-foreground shadow-sm
                 transition duration-300 ease-out
                 hover:text-foreground
@@ -357,7 +357,7 @@ export default function UploadPage() {
               TARGET LANGUAGE
             </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
-              <SelectTrigger className="w-full bg-zinc-50">
+              <SelectTrigger className="w-full bg-muted/60">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent position="popper" align="start">
