@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import Image from "next/image";
 import { Book, MoveRight } from "lucide-react";
 
 import { Progress } from "@/components/ui/progress";
@@ -18,6 +20,17 @@ export function ContinueReadingCard({
 }: {
   document: LibraryDocument;
 }) {
+  const [coverLoadFailed, setCoverLoadFailed] = useState(false);
+
+  const coverImageSrc = document.coverImageId != null
+    ? `/api/documents/${document.id}/images/${document.coverImageId}`
+    : null;
+  const showCoverImage = coverImageSrc && !coverLoadFailed;
+
+  useEffect(() => {
+    setCoverLoadFailed(false);
+  }, [document.id, document.coverImageId]);
+
   // -------------------------
   // Get document's most recent translation
   // -------------------------
@@ -42,17 +55,29 @@ export function ContinueReadingCard({
         border border-border
       "
     >
-      {/* Book Icon */}
-      <div 
-        className="
-          flex items-center justify-center 
-          size-16 shrink-0
-          rounded-lg 
-          border border-border bg-muted/60
-        "
-      >
-        <Book className="h-8 w-8 text-muted-foreground"/>
-      </div>
+      {/* Cover Image / Fallback Icon */}
+      {showCoverImage ? (
+        <Image
+          src={coverImageSrc}
+          alt={document.title ? `${document.title} cover` : "Document cover"}
+          width={48}
+          height={64}
+          unoptimized
+          onError={() => setCoverLoadFailed(true)}
+          className="h-16 w-12 shrink-0 rounded-md border border-border/60 object-cover shadow-sm"
+        />
+      ) : (
+        <div 
+          className="
+            flex items-center justify-center 
+            size-16 shrink-0
+            rounded-lg 
+            border border-border bg-muted/60
+          "
+        >
+          <Book className="h-8 w-8 text-muted-foreground"/>
+        </div>
+      )}
 
       {/* Continue Reading / Title + Author */}
       <div 
@@ -108,7 +133,7 @@ export function ContinueReadingCard({
             rounded-full
             bg-primary/80 text-primary-foreground
             hover:bg-primary
-            shadow-md shadow-primary/20
+            shadow-sm shadow-primary/20
           "
         >
           Continue
