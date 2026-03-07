@@ -163,7 +163,7 @@ export function ReaderShell({
               hover:rotate-180
               motion-reduce:transition-none
             "
-            aria-label="Swap source and target roles"
+            aria-label={msgs.footer.swapSourceTarget}
           >
             <Repeat className="h-4 w-4" />
           </Button>
@@ -297,7 +297,7 @@ export function ReaderShell({
               <span
                 className="text-sm text-muted-foreground"
               >
-                Blur
+                {msgs.footer.blur}
               </span>
               <BlurModeToggle value={blurMode} onChange={onBlurModeChange} />
             </div>

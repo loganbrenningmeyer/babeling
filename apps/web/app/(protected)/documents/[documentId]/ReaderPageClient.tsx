@@ -263,11 +263,12 @@ export default function ReaderPageClient({
         <div className="flex h-full min-w-0 items-center">
           <TOCSheet 
             sections={document?.sections ?? []}
-            documentTitle={document?.title ?? "Untitled document"}
+            documentTitle={document?.title ?? m.reader.toc.untitledDocument}
             documentAuthor={document?.author}
             srcLang={document?.srcLang ?? "en"}
             tgtLang={tgtLang}
             langLabels={m.langs}
+            msgs={m.reader}
             currentPageNumber={pageIndex + 1}
             pageCount={pageCount}
             onSelectSection={(section) => setPage(section.firstPageNumber - 1)}

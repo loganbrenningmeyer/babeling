@@ -11,10 +11,23 @@ import { Button } from "@/components/ui/button";
 
 import { BookCard } from "./BookCard";
 
-import { LangLabels } from "@/app/i18n/messages";
+import type { LangLabels } from "@/app/i18n/messages";
 import { useGutendexBooks } from "../../hooks/useGutendexBooks";
 import { toUiLang } from "@/app/i18n/messages";
 import type { GutendexBook } from "../../types/gutendex";
+
+type ImportEbookMsgs = {
+  searchBy: string;
+  language: string;
+  author: string;
+  filterByAuthor: string;
+  searchGutenberg: string;
+  enterTitle: string;
+  booksFound: string;
+  showing: string;
+  prev: string;
+  next: string;
+};
 
 const LANGUAGE_OPTIONS = [
   { code: "en", label: "EN" },
@@ -30,6 +43,7 @@ export function ImportEbookPanel({
   selectedBookId,
   onSelectBook,
   langLabels,
+  msgs,
 }: {
   selectedBookId: number | null;
   onSelectBook: (args: {
@@ -39,6 +53,7 @@ export function ImportEbookPanel({
     epubUrl: string | null;
   }) => void;
   langLabels: LangLabels;
+  msgs: ImportEbookMsgs;
 }) {
   const [search, setSearch] = useState("");
   const [author, setAuthor] = useState("");
@@ -145,7 +160,7 @@ export function ImportEbookPanel({
               <BookSearch className="h-4 w-4" />
             </div>
             <Input
-              placeholder="Search by book title or author name..."
+              placeholder={msgs.searchBy}
               onChange={(e) => setSearchDraft(e.target.value)}
               className="h-12 pl-10 rounded-full bg-card border border-border font-ui focus-visible:ring-0"
             />
@@ -186,7 +201,7 @@ export function ImportEbookPanel({
                 text-xs text-foreground/80
               "
             >
-              Language
+              {msgs.language}
             </div>
             {/* Language Buttons Grid */}
             <div className="flex flex-wrap gap-2">
@@ -219,11 +234,11 @@ export function ImportEbookPanel({
                 text-xs text-foreground/80
               "
             >
-              Author
+              {msgs.author}
             </div>
             <div className="relative">
               <Input 
-                placeholder="Filter by author..."
+                placeholder={msgs.filterByAuthor}
                 onChange={(e) => setAuthorDraft(e.target.value)}
                 className="h-10 pl-10 rounded-none bg-card border border-border font-ui focus-visible:ring-0"
               />
@@ -255,11 +270,11 @@ export function ImportEbookPanel({
               </div>
 
               <div className="font-ui text-sm font-semibold text-foreground/80">
-                Search Project Gutenberg
+                {msgs.searchGutenberg}
               </div>
 
               <div className="font-ui text-sm text-muted-foreground max-w-sm">
-                Enter a title or author, then press <span className="font-medium">Enter</span>.
+                {msgs.enterTitle}
               </div>
             </div>
           </div>
@@ -278,10 +293,10 @@ export function ImportEbookPanel({
                 <div className="flex items-center justify-between gap-4">
                   <div className="font-ui text-sm tracking-widest uppercase text-foreground/80">
                     <span className="font-bold">{count.toLocaleString()}</span>
-                    {" "}book{count === 1 ? "" : "s"} found
+                    {" "}{msgs.booksFound}
                     {count > 0 ? (
                       <>
-                        {" "}•{" "}showing {showingStart}-{showingEnd}
+                        {" "}•{" "}{msgs.showing} {showingStart}-{showingEnd}
                       </>
                     ) : null}
                   </div>
@@ -303,7 +318,7 @@ export function ImportEbookPanel({
                       "
                     >
                       <ChevronLeft className="h-4 w-4" />
-                      Prev
+                      {msgs.prev}
                     </Button>
 
                     <Button
@@ -321,7 +336,7 @@ export function ImportEbookPanel({
                         disabled:opacity-40
                       "
                     >
-                      Next
+                      {msgs.next}
                       <ChevronRight className="h-4 w-4" />
                     </Button>
                   </div>

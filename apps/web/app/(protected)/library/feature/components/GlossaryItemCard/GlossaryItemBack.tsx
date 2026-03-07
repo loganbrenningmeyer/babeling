@@ -14,6 +14,7 @@ import { UsageInfo } from "./UsageInfo";
 import type { LibraryGlossaryItem } from "../../types/glossaryItem";
 import { LangLabels, toUiLang } from "@/app/i18n/messages";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 
@@ -26,6 +27,7 @@ export function GlossaryItemBack({
   langLabels: LangLabels,
   onClose: () => void;
 }) {
+  const m = useMessages();
   const srcHighlightClass = LANG_COLOR_BY_CODE[toUiLang(glossaryItem.srcLang)].highlight;
   const tgtHighlightClass = LANG_COLOR_BY_CODE[toUiLang(glossaryItem.tgtLang)].highlight;
 
@@ -101,7 +103,7 @@ export function GlossaryItemBack({
                 group-hover/gloss-back:bg-muted-foreground/10
                 hover:opacity-100
               "
-              aria-label="Close"
+              aria-label={m.library.close}
             >
               <Minimize2 
                 className="
@@ -138,7 +140,7 @@ export function GlossaryItemBack({
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
-                          Original
+                          {m.library.original}
                         </span>
                         <LangBadge 
                           lang={glossaryItem.srcLang} 
@@ -161,7 +163,7 @@ export function GlossaryItemBack({
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
-                          Translation
+                          {m.library.translation}
                         </span>
                         <LangBadge 
                           lang={glossaryItem.tgtLang} 

@@ -13,6 +13,34 @@ import { ImportEbookPanel } from "./ImportEbook/ImportEbookPanel";
 
 import type { LangLabels } from "@/app/i18n/messages";
 
+type UploadMsgs = {
+  tabs: {
+    importEbook: string;
+    uploadFile: string;
+    pasteText: string;
+  };
+  importEbook: {
+    searchBy: string;
+    language: string;
+    author: string;
+    filterByAuthor: string;
+    searchGutenberg: string;
+    enterTitle: string;
+    booksFound: string;
+    showing: string;
+    prev: string;
+    next: string;
+  };
+  uploadFile: {
+    dragAndDrop: string;
+    or: string;
+    browseFiles: string;
+  };
+  pasteText: {
+    pasteOrType: string;
+  };
+};
+
 type TabKey = "paste" | "upload" | "import";
 
 type InputPaylod = 
@@ -30,10 +58,12 @@ export function TabbedInputCard({
   className,
   onPayloadChange,
   langLabels,
+  uploadMsgs,
 }: {
   className?: string;
   onPayloadChange?: (payload: InputPaylod) => void;
   langLabels: LangLabels;
+  uploadMsgs: UploadMsgs;
 }) {
   const [tab, setTab] = useState<TabKey>("import");
 
@@ -91,21 +121,21 @@ export function TabbedInputCard({
               * ------------------------- */}
               <TabsTrigger value="import" className={tabClassName}>
                 <BookDown className="h-4 w-4" />
-                Import eBook
+                {uploadMsgs.tabs.importEbook}
               </TabsTrigger>
               {/* -------------------------
               * File Upload
               * ------------------------- */}
               <TabsTrigger value="upload" className={tabClassName}>
                 <FileUp className="h-4 w-4" />
-                Upload file
+                {uploadMsgs.tabs.uploadFile}
               </TabsTrigger>
               {/* -------------------------
               * Paste
               * ------------------------- */}
               <TabsTrigger value="paste" className={tabClassName}>
                 <Clipboard className="h-4 w-4" />
-                Paste text
+                {uploadMsgs.tabs.pasteText}
               </TabsTrigger>
             </TabsList>
           </div>
@@ -132,6 +162,7 @@ export function TabbedInputCard({
                   setEpubUrl(epubUrl);
                 }}
                 langLabels={langLabels}
+                msgs={uploadMsgs.importEbook}
               />
             </TabsContent>
             {/* -------------------------
@@ -144,7 +175,9 @@ export function TabbedInputCard({
                   setFile(file);
                   if (!file) return;
                 }}
-                text="Drag and drop"
+                text={uploadMsgs.uploadFile.dragAndDrop}
+                orLabel={uploadMsgs.uploadFile.or}
+                browseFilesLabel={uploadMsgs.uploadFile.browseFiles}
                 className="h-full bg-muted/20 flex-1 p-6 rounded-none font-ui"
               />
             </TabsContent>
@@ -155,7 +188,7 @@ export function TabbedInputCard({
               <Textarea 
                 value={text}
                 onChange={(e) => setText(e.target.value)}
-                placeholder="Paste or type your text here..."
+                placeholder={uploadMsgs.pasteText.pasteOrType}
                 className="
                   flex-1
                   resize-none p-4

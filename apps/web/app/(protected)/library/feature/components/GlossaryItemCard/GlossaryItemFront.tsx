@@ -7,6 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 import type { LibraryGlossaryItem } from "../../types/glossaryItem";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export function GlossaryItemFront({
@@ -14,6 +15,7 @@ export function GlossaryItemFront({
 }: {
   glossaryItem: LibraryGlossaryItem,
 }) {
+  const m = useMessages();
   // Language color
   const langAccent = LANG_COLOR_BY_CODE[glossaryItem.tgtLang as keyof typeof LANG_COLOR_BY_CODE].accent;
 
@@ -81,7 +83,7 @@ export function GlossaryItemFront({
             <div className="flex items-center justify-between">
               {/* from {document title} */}
               <p className="font-ui text-xs text-muted-foreground">
-                {"from "} 
+                {`${m.library.from} `}
                 <span className="italic">
                   {glossaryItem.documentTitle}
                 </span>

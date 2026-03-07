@@ -16,6 +16,7 @@ import { LANG_COLOR_BY_CODE } from "@/types/langs";
 import { formatRelativeTime, truncate } from "@/lib/string";
 
 import { LangLabels, toUiLang } from "@/app/i18n/messages";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export function DocumentFront({
@@ -29,6 +30,7 @@ export function DocumentFront({
   translationsLoading: boolean,
   langLabels: LangLabels,
 }) {
+  const m = useMessages();
   // Source language color
   const srcAccent = LANG_COLOR_BY_CODE[document.srcLang as keyof typeof LANG_COLOR_BY_CODE].accent;
 
@@ -44,7 +46,9 @@ export function DocumentFront({
   const sampleLangLabel = langLabels[toUiLang(sampleLangCode)];
   const sampleLangColors = LANG_COLOR_BY_CODE[toUiLang(sampleLangCode)];
   const sampleText = truncate(recentTranslation ? recentTranslation.tgtText : document.srcText, 100);
-  const sampleMetaLabel = recentTranslation ? `p. ${recentTranslation.currentPageNumber}` : `${document.totalPages} pages`;
+  const sampleMetaLabel = recentTranslation
+    ? `${m.library.pageAbbrev} ${recentTranslation.currentPageNumber}`
+    : `${document.totalPages} ${m.library.pages}`;
   const sampleTime = recentTranslation
     ? formatRelativeTime(recentTranslation.lastOpenedAt)
     : document.lastOpenedAt
@@ -89,7 +93,7 @@ export function DocumentFront({
                 alt={
                   document.title
                     ? `${document.title} cover`
-                    : "Document cover"
+                    : m.library.documentCover
                 }
                 width={48}
                 height={64}
@@ -170,7 +174,7 @@ export function DocumentFront({
                 className="w-full rounded-none"
               >
                 <span>
-                  Continue in{" "}
+                  {m.library.continueIn}{" "}
                   <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
                     {sampleLangLabel}
                   </span>

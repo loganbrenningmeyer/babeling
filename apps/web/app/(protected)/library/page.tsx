@@ -1,7 +1,5 @@
 "use client";
 
-import { Book } from "lucide-react";
-
 import { useAppUser } from "@/components/AppUserProvider";
 import { useRecentDocuments } from "./feature/hooks/useRecentDocuments";
 import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
@@ -9,9 +7,12 @@ import { useRecentGlossaryItems } from "./feature/hooks/useRecentGlossaryItems";
 import { LibrarySkeleton } from "@/app/(protected)/library/feature/components/LibrarySkeleton";
 import { LibraryPage } from "@/app/(protected)/library/feature/components/LibraryPage";
 import { ContinueReadingCard } from "./feature/components/ContinueReadingCard";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export default function Library() {
+  const m = useMessages();
+
   // -------------------------
   // Load user information
   // -------------------------
@@ -46,7 +47,7 @@ export default function Library() {
   }
 
   if (userError || docsError || glossaryError) {
-    return <div className="px-12">Error: {userError ?? docsError ?? glossaryError}</div>;
+    return <div className="px-12">{m.library.error}: {userError ?? docsError ?? glossaryError}</div>;
   }
 
   return (
@@ -57,10 +58,10 @@ export default function Library() {
         * ------------------------- */}
         <div>
           <h1 className="font-reading font-semibold text-4xl tracking-tight">
-            Your library
+            {m.library.hero}
           </h1>
           <p className="font-ui mt-4 text-sm text-muted-foreground">
-            Texts, translations, and vocabulary you've collected.
+            {m.library.heroInfo}
           </p>
         </div>
 
@@ -74,7 +75,7 @@ export default function Library() {
               {documents.length}
             </h2>
             <h3 className="font-ui text-xs text-muted-foreground uppercase">
-              Texts
+              {m.library.texts}
             </h3>
           </div>
 
@@ -86,7 +87,7 @@ export default function Library() {
               {glossaryItems.length}
             </h2>
             <h3 className="font-ui text-xs text-muted-foreground uppercase">
-              Words saved
+              {m.library.wordsSaved}
             </h3>
           </div>
         </div>
@@ -107,8 +108,7 @@ export default function Library() {
             border border-dashed bg-muted/40 p-8 
             font-ui text-sm text-muted-foreground
           ">
-            No documents yet. Start a reading session to save your first
-            document.
+            {m.library.noDocuments}
           </div>
         ) : (
           <LibraryPage 

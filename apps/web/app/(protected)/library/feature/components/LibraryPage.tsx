@@ -125,7 +125,7 @@ export function LibraryPage({
             <Input 
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search library..."
+              placeholder={m.library.searchLibrary}
               className="pl-9 focus-visible:ring-0 bg-card border border-border"
             />
           </div>
@@ -143,13 +143,13 @@ export function LibraryPage({
             spacing={2}
             >
             <FilterItem value="all" count={documents.length + glossaryItems.length}>
-              All
+              {m.library.all}
             </FilterItem>
             <FilterItem value="texts" count={documents.length}>
-              <Book className="size-3" /> Texts
+              <Book className="size-3" /> {m.library.texts}
             </FilterItem>
             <FilterItem value="glossary" count={glossaryItems.length}>
-              <Star className="size-3" /> Glossary
+              <Star className="size-3" /> {m.library.glossary}
             </FilterItem>
           </ToggleGroup>
         </div>
@@ -168,7 +168,7 @@ export function LibraryPage({
                 <div className="rounded-sm p-1 bg-blue-300/20">
                   <Book className="h-4 w-4 text-blue-500" />
                 </div>
-                <h3 className="font-ui text-md font-semibold">Texts</h3>
+                <h3 className="font-ui text-md font-semibold">{m.library.texts}</h3>
                 <Badge className="font-ui font-bold text-xs bg-muted-foreground/10 text-muted-foreground">
                   {documents.length}
                 </Badge>
@@ -181,12 +181,12 @@ export function LibraryPage({
                 onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
               >
                 <SelectTrigger className="w-56 bg-card">
-                  <SelectValue placeholder="Sort documents" />
+                  <SelectValue placeholder={m.library.sortDocuments} />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
-                  <SelectItem value="recent">Recently read</SelectItem>
-                  <SelectItem value="title">Title (A-Z)</SelectItem>
-                  <SelectItem value="srcLang">Original language (A-Z)</SelectItem>
+                  <SelectItem value="recent">{m.library.recentlyRead}</SelectItem>
+                  <SelectItem value="title">{m.library.titleAZ}</SelectItem>
+                  <SelectItem value="srcLang">{m.library.originalLanguageAZ}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -223,7 +223,7 @@ export function LibraryPage({
                 <div className="rounded-sm p-1 bg-orange-300/20">
                   <Languages className="h-4 w-4 text-orange-500"/>  
                 </div>
-                <h3 className="font-ui text-md font-semibold">Glossary</h3>
+                <h3 className="font-ui text-md font-semibold">{m.library.glossary}</h3>
                 <Badge className="font-ui font-bold bg-muted-foreground/10 text-muted-foreground">
                   {glossaryItems.length}
                 </Badge>
@@ -236,13 +236,13 @@ export function LibraryPage({
                 onValueChange={(v) => setGlossarySort(v as GlossarySortKey)}
               >
                 <SelectTrigger className="w-56 bg-card">
-                  <SelectValue placeholder="Sort glossary" />
+                  <SelectValue placeholder={m.library.sortGlossary} />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
-                  <SelectItem value="recent">Recently added</SelectItem>
-                  <SelectItem value="word">Word (A-Z)</SelectItem>
-                  <SelectItem value="language">Language (A-Z)</SelectItem>
-                  <SelectItem value="documentTitle">Document title (A-Z)</SelectItem>
+                  <SelectItem value="recent">{m.library.recentlyAdded}</SelectItem>
+                  <SelectItem value="word">{m.library.wordAZ}</SelectItem>
+                  <SelectItem value="language">{m.library.languageAZ}</SelectItem>
+                  <SelectItem value="documentTitle">{m.library.documentTitleAZ}</SelectItem>
                 </SelectContent>
               </Select>
             </div>

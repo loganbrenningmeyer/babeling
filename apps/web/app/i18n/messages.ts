@@ -34,16 +34,37 @@ type MessagesSchema = {
   // Upload Page
   // -------------------------
   upload: {
-    original: string;
-    translation: string;
-    sampleText: string;
-    selectSample: string;
-    title: string;
-    untitledDocument: string;
-    typeText: string;
-    dragDrop: string;
-    translate: string;
-    uploadHint: string;
+    hero: string;
+    heroInfo: string;
+    sourceLang: string;
+    targetLang: string;
+    translateAlignInfo: string;
+    startReading: string;
+    tabs: {
+      importEbook: string;
+      uploadFile: string;
+      pasteText: string;
+    },
+    importEbook: {
+      searchBy: string;
+      language: string;
+      author: string;
+      filterByAuthor: string;
+      searchGutenberg: string;
+      enterTitle: string;
+      booksFound: string;
+      showing: string;
+      prev: string;
+      next: string;
+    },
+    uploadFile: {
+      dragAndDrop: string;
+      or: string;
+      browseFiles: string;
+    },
+    pasteText: {
+      pasteOrType: string;
+    },
   },
 
   // -------------------------
@@ -61,6 +82,7 @@ type MessagesSchema = {
     // ---- ( Help Popover )
     helpPopover: {
       header: string;
+      helpLabel: string;
       // -- Page navigation
       pageNav: {
         header: string;
@@ -108,6 +130,50 @@ type MessagesSchema = {
       hideOriginal: string;
       page: string;
     },
+    toc: {
+      contents: string;
+      tableOfContents: string;
+      readingProgress: string;
+      of: string;
+      goToPage: string;
+      go: string;
+      untitledDocument: string;
+    },
+    footer: {
+      blur: string;
+      swapSourceTarget: string;
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: string;
+    heroInfo: string;
+    summarySource: string;
+    summaryTarget: string;
+    summaryTheme: string;
+    languageDefaultsTitle: string;
+    languageDefaultsInfo: string;
+    preferredSourceLabel: string;
+    preferredSourceDescription: string;
+    preferredTargetLabel: string;
+    preferredTargetDescription: string;
+    interfaceLanguageLabel: string;
+    interfaceLanguageDescription: string;
+    appearanceTitle: string;
+    appearanceInfo: string;
+    quickSwitchTitle: string;
+    quickSwitchDescription: string;
+    noPreference: string;
+    auto: string;
+    themeSystem: string;
+    themeLight: string;
+    themeDark: string;
+    themeSystemDescription: string;
+    themeLightDescription: string;
+    themeDarkDescription: string;
   },
 
   // -------------------------
@@ -119,6 +185,36 @@ type MessagesSchema = {
     texts: string;
     translations: string;
     glossary: string;
+    hero: string;
+    heroInfo: string;
+    wordsSaved: string;
+    continueReading: string;
+    continue: string;
+    continueIn: string;
+    loading: string;
+    searchLibrary: string;
+    sortDocuments: string;
+    sortGlossary: string;
+    recentlyRead: string;
+    titleAZ: string;
+    originalLanguageAZ: string;
+    recentlyAdded: string;
+    wordAZ: string;
+    languageAZ: string;
+    documentTitleAZ: string;
+    noDocuments: string;
+    noTranslationsYet: string;
+    progress: string;
+    back: string;
+    from: string;
+    close: string;
+    original: string;
+    translation: string;
+    pageAbbrev: string;
+    of: string;
+    pages: string;
+    documentCover: string;
+    error: string;
   }
 }
 
@@ -151,16 +247,37 @@ export const en = {
   // Upload Page
   // -------------------------
   upload: {
-    original: "Original",
-    translation: "Translation",
-    sampleText: "Sample Text",
-    selectSample: "Select a sample",
-    title: "Title",
-    untitledDocument: "Untitled Document",
-    typeText: "Type some {lang} text...",
-    dragDrop: "Drag & drop files here, or click to browse",
-    translate: "Translate",
-    uploadHint: "Paste text or upload a file to translate",
+    hero: "New reading",
+    heroInfo: "Paste text, upload a file, or import an eBook to begin.",
+    sourceLang: "Source language",
+    targetLang: "Target language",
+    translateAlignInfo: "Translation and alignment usually takes 15-30 seconds",
+    startReading: "Start reading",
+    tabs: {
+      importEbook: "Import eBook",
+      uploadFile: "Upload file",
+      pasteText: "Paste text",
+    },
+    importEbook: {
+      searchBy: "Search by book title or author name...",
+      language: "Language",
+      author: "Author",
+      filterByAuthor: "Filter by author...",
+      searchGutenberg: "Search Project Gutenberg",
+      enterTitle: "Enter a title or author, then press Enter.",
+      booksFound: "Books found",
+      showing: "Showing",
+      prev: "Prev",
+      next: "Next",
+    },
+    uploadFile: {
+      dragAndDrop: "Drag and drop",
+      or: "or",
+      browseFiles: "Browse files",
+    },
+    pasteText: {
+      pasteOrType: "Paste or type your text here...",
+    }
   },
 
   // -------------------------
@@ -182,6 +299,7 @@ export const en = {
     // ---- ( Help Popover )
     helpPopover: {
       header: "Navigation and Interactions",
+      helpLabel: "Help",
       // -- Page navigation
       pageNav: {
         header: "Page navigation",
@@ -245,6 +363,50 @@ export const en = {
       hideOriginal: "Hide original",
       page: "Page",
     },
+    toc: {
+      contents: "Contents",
+      tableOfContents: "Table of Contents",
+      readingProgress: "Reading progress",
+      of: "of",
+      goToPage: "Go to page",
+      go: "Go",
+      untitledDocument: "Untitled document",
+    },
+    footer: {
+      blur: "Blur",
+      swapSourceTarget: "Swap source and target roles",
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: "Personalize",
+    heroInfo: "Set the default languages and appearance Babeling should use whenever you start a new reading session.",
+    summarySource: "Source",
+    summaryTarget: "Target",
+    summaryTheme: "Theme",
+    languageDefaultsTitle: "Language Defaults",
+    languageDefaultsInfo: "These selections prefill the app for future uploads, reader sessions, and interface copy.",
+    preferredSourceLabel: "Preferred source language",
+    preferredSourceDescription: "Choose the language your original text usually starts in.",
+    preferredTargetLabel: "Preferred target language",
+    preferredTargetDescription: "Set the translation language you want preselected most often.",
+    interfaceLanguageLabel: "Interface language",
+    interfaceLanguageDescription: "This changes menus, controls, and labels throughout the app.",
+    appearanceTitle: "Appearance",
+    appearanceInfo: "Keep the interface synced to your device or pin it to a specific theme.",
+    quickSwitchTitle: "Quick light or dark switch",
+    quickSwitchDescription: "Use the toggle for fast changes, or pick a fixed mode below.",
+    noPreference: "No preference",
+    auto: "Auto",
+    themeSystem: "System",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystemDescription: "Follow your computer or phone preference automatically.",
+    themeLightDescription: "Keep the warmer daylight palette on every visit.",
+    themeDarkDescription: "Use the darker contrast palette everywhere in the app.",
   },
 
   // -------------------------
@@ -256,6 +418,36 @@ export const en = {
     texts: "Texts",
     translations: "Translations",
     glossary: "Glossary",
+    hero: "Your library",
+    heroInfo: "Texts, translations, and vocabulary you've collected.",
+    wordsSaved: "Words saved",
+    continueReading: "Continue reading",
+    continue: "Continue",
+    continueIn: "Continue in",
+    loading: "Loading",
+    searchLibrary: "Search library...",
+    sortDocuments: "Sort documents",
+    sortGlossary: "Sort glossary",
+    recentlyRead: "Recently read",
+    titleAZ: "Title (A-Z)",
+    originalLanguageAZ: "Original language (A-Z)",
+    recentlyAdded: "Recently added",
+    wordAZ: "Word (A-Z)",
+    languageAZ: "Language (A-Z)",
+    documentTitleAZ: "Document title (A-Z)",
+    noDocuments: "No documents yet. Start a reading session to save your first document.",
+    noTranslationsYet: "No translations yet",
+    progress: "Progress",
+    back: "Back",
+    from: "from",
+    close: "Close",
+    original: "Original",
+    translation: "Translation",
+    pageAbbrev: "p.",
+    of: "of",
+    pages: "pages",
+    documentCover: "Document cover",
+    error: "Error",
   }
 } satisfies MessagesSchema;
 
@@ -288,16 +480,37 @@ export const es = {
   // Upload Page
   // -------------------------
   upload: {
-    original: "Original",
-    translation: "Traducción",
-    sampleText: "Texto de muestra",
-    selectSample: "Selecciona una muestra",
-    title: "Título",
-    untitledDocument: "Documento sin título",
-    typeText: "Escribe un texto en {lang}...",
-    dragDrop: "Arrastra y suelta archivos aquí, o haz clic para explorar",
-    translate: "Traducir",
-    uploadHint: "Pega texto o sube un archivo para traducir",
+    hero: "Nueva lectura",
+    heroInfo: "Pega texto, sube un archivo o importa un eBook para comenzar.",
+    sourceLang: "Idioma de origen",
+    targetLang: "Idioma de destino",
+    translateAlignInfo: "La traducción y la alineación suelen tardar entre 15 y 30 segundos",
+    startReading: "Empezar a leer",
+    tabs: {
+      importEbook: "Importar eBook",
+      uploadFile: "Subir archivo",
+      pasteText: "Pegar texto",
+    },
+    importEbook: {
+      searchBy: "Buscar por título del libro o nombre del autor...",
+      language: "Idioma",
+      author: "Autor",
+      filterByAuthor: "Filtrar por autor...",
+      searchGutenberg: "Buscar en Project Gutenberg",
+      enterTitle: "Ingresa un título o autor y luego presiona Enter.",
+      booksFound: "Libros encontrados",
+      showing: "Mostrando",
+      prev: "Anterior",
+      next: "Siguiente",
+    },
+    uploadFile: {
+      dragAndDrop: "Arrastrar y soltar",
+      or: "o",
+      browseFiles: "Explorar archivos",
+    },
+    pasteText: {
+      pasteOrType: "Pega o escribe tu texto aquí...",
+    },
   },
 
   // -------------------------
@@ -319,6 +532,7 @@ export const es = {
     // ---- ( Help Popover )
     helpPopover: {
       header: "Navegación e Interacciones",
+      helpLabel: "Ayuda",
       // -- Page navigation
       pageNav: {
         header: "Navegación de páginas",
@@ -382,6 +596,50 @@ export const es = {
       hideOriginal: "Ocultar original",
       page: "Página",
     },
+    toc: {
+      contents: "Contenido",
+      tableOfContents: "Tabla de contenido",
+      readingProgress: "Progreso de lectura",
+      of: "de",
+      goToPage: "Ir a la página",
+      go: "Ir",
+      untitledDocument: "Documento sin título",
+    },
+    footer: {
+      blur: "Desenfoque",
+      swapSourceTarget: "Intercambiar origen y destino",
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: "Personaliza",
+    heroInfo: "Configura los idiomas y la apariencia predeterminados que Babeling debe usar cada vez que inicies una nueva sesión de lectura.",
+    summarySource: "Origen",
+    summaryTarget: "Destino",
+    summaryTheme: "Tema",
+    languageDefaultsTitle: "Idiomas predeterminados",
+    languageDefaultsInfo: "Estas selecciones rellenan la app para futuras cargas, sesiones de lectura y el texto de la interfaz.",
+    preferredSourceLabel: "Idioma de origen preferido",
+    preferredSourceDescription: "Elige el idioma en el que suele comenzar tu texto original.",
+    preferredTargetLabel: "Idioma de destino preferido",
+    preferredTargetDescription: "Define el idioma de traducción que quieres tener preseleccionado con más frecuencia.",
+    interfaceLanguageLabel: "Idioma de la interfaz",
+    interfaceLanguageDescription: "Esto cambia menús, controles y etiquetas en toda la app.",
+    appearanceTitle: "Apariencia",
+    appearanceInfo: "Mantén la interfaz sincronizada con tu dispositivo o fíjala en un tema específico.",
+    quickSwitchTitle: "Cambio rápido entre claro y oscuro",
+    quickSwitchDescription: "Usa el interruptor para cambios rápidos o elige un modo fijo abajo.",
+    noPreference: "Sin preferencia",
+    auto: "Automático",
+    themeSystem: "Sistema",
+    themeLight: "Claro",
+    themeDark: "Oscuro",
+    themeSystemDescription: "Sigue automáticamente la preferencia de tu computadora o teléfono.",
+    themeLightDescription: "Mantén la paleta cálida de luz diurna en cada visita.",
+    themeDarkDescription: "Usa la paleta de mayor contraste oscuro en toda la app.",
   },
 
   // -------------------------
@@ -393,6 +651,36 @@ export const es = {
     texts: "Textos",
     translations: "Traducciones",
     glossary: "Glosario",
+    hero: "Tu biblioteca",
+    heroInfo: "Textos, traducciones y vocabulario que has guardado.",
+    wordsSaved: "Palabras guardadas",
+    continueReading: "Seguir leyendo",
+    continue: "Continuar",
+    continueIn: "Continuar en",
+    loading: "Cargando",
+    searchLibrary: "Buscar en la biblioteca...",
+    sortDocuments: "Ordenar textos",
+    sortGlossary: "Ordenar glosario",
+    recentlyRead: "Leídos recientemente",
+    titleAZ: "Título (A-Z)",
+    originalLanguageAZ: "Idioma original (A-Z)",
+    recentlyAdded: "Añadidos recientemente",
+    wordAZ: "Palabra (A-Z)",
+    languageAZ: "Idioma (A-Z)",
+    documentTitleAZ: "Título del texto (A-Z)",
+    noDocuments: "Aún no hay documentos. Inicia una sesión de lectura para guardar tu primer documento.",
+    noTranslationsYet: "Aún no hay traducciones",
+    progress: "Progreso",
+    back: "Volver",
+    from: "de",
+    close: "Cerrar",
+    original: "Original",
+    translation: "Traducción",
+    pageAbbrev: "p.",
+    of: "de",
+    pages: "páginas",
+    documentCover: "Portada del documento",
+    error: "Error",
   }
 } satisfies MessagesSchema;
 
@@ -425,16 +713,37 @@ export const fr = {
   // Upload Page
   // -------------------------
   upload: {
-    original: "Original",
-    translation: "Traduction",
-    sampleText: "Texte d'exemple",
-    selectSample: "Sélectionnez un exemple",
-    title: "Titre",
-    untitledDocument: "Document sans titre",
-    typeText: "Saisissez du texte en {lang}...",
-    dragDrop: "Glissez-déposez des fichiers ici, ou cliquez pour parcourir",
-    translate: "Traduire",
-    uploadHint: "Collez du texte ou importez un fichier à traduire",
+    hero: "Nouvelle lecture",
+    heroInfo: "Collez du texte, téléversez un fichier ou importez un eBook pour commencer.",
+    sourceLang: "Langue source",
+    targetLang: "Langue cible",
+    translateAlignInfo: "La traduction et l'alignement prennent généralement entre 15 et 30 secondes",
+    startReading: "Commencer la lecture",
+    tabs: {
+      importEbook: "Importer un eBook",
+      uploadFile: "Importer un fichier",
+      pasteText: "Coller du texte",
+    },
+    importEbook: {
+      searchBy: "Rechercher par titre de livre ou nom d'auteur...",
+      language: "Langue",
+      author: "Auteur",
+      filterByAuthor: "Filtrer par auteur...",
+      searchGutenberg: "Rechercher dans Project Gutenberg",
+      enterTitle: "Entrez un titre ou un auteur, puis appuyez sur Entrée.",
+      booksFound: "Livres trouvés",
+      showing: "Affichage",
+      prev: "Préc.",
+      next: "Suiv.",
+    },
+    uploadFile: {
+      dragAndDrop: "Glisser-déposer",
+      or: "ou",
+      browseFiles: "Parcourir les fichiers",
+    },
+    pasteText: {
+      pasteOrType: "Collez ou saisissez votre texte ici...",
+    },
   },
 
   // -------------------------
@@ -456,6 +765,7 @@ export const fr = {
     // ---- ( Help Popover )
     helpPopover: {
       header: "Navigation et Interactions",
+      helpLabel: "Aide",
       // -- Page navigation
       pageNav: {
         header: "Navigation des pages",
@@ -519,6 +829,50 @@ export const fr = {
       hideOriginal: "Masquer l'original",
       page: "Page",
     },
+    toc: {
+      contents: "Sommaire",
+      tableOfContents: "Table des matières",
+      readingProgress: "Progression de lecture",
+      of: "sur",
+      goToPage: "Aller à la page",
+      go: "Aller",
+      untitledDocument: "Document sans titre",
+    },
+    footer: {
+      blur: "Flou",
+      swapSourceTarget: "Inverser source et cible",
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: "Personnalisez",
+    heroInfo: "Définissez les langues et l'apparence par défaut que Babeling doit utiliser à chaque nouvelle session de lecture.",
+    summarySource: "Source",
+    summaryTarget: "Cible",
+    summaryTheme: "Thème",
+    languageDefaultsTitle: "Langues par défaut",
+    languageDefaultsInfo: "Ces choix préremplissent l'application pour les futurs imports, sessions de lecture et textes d'interface.",
+    preferredSourceLabel: "Langue source préférée",
+    preferredSourceDescription: "Choisissez la langue dans laquelle votre texte original commence le plus souvent.",
+    preferredTargetLabel: "Langue cible préférée",
+    preferredTargetDescription: "Définissez la langue de traduction que vous voulez voir préselectionnée le plus souvent.",
+    interfaceLanguageLabel: "Langue de l'interface",
+    interfaceLanguageDescription: "Cela modifie les menus, contrôles et libellés dans toute l'application.",
+    appearanceTitle: "Apparence",
+    appearanceInfo: "Gardez l'interface synchronisée avec votre appareil ou fixez-la sur un thème spécifique.",
+    quickSwitchTitle: "Bascule rapide clair/sombre",
+    quickSwitchDescription: "Utilisez l'interrupteur pour un changement rapide, ou choisissez un mode fixe ci-dessous.",
+    noPreference: "Aucune préférence",
+    auto: "Auto",
+    themeSystem: "Système",
+    themeLight: "Clair",
+    themeDark: "Sombre",
+    themeSystemDescription: "Suivez automatiquement la préférence de votre ordinateur ou téléphone.",
+    themeLightDescription: "Conservez la palette plus chaude en mode clair à chaque visite.",
+    themeDarkDescription: "Utilisez la palette sombre à contraste renforcé dans toute l'application.",
   },
 
   // -------------------------
@@ -530,6 +884,36 @@ export const fr = {
     texts: "Textes",
     translations: "Traductions",
     glossary: "Glossaire",
+    hero: "Votre bibliothèque",
+    heroInfo: "Textes, traductions et vocabulaire que vous avez enregistrés.",
+    wordsSaved: "Mots enregistrés",
+    continueReading: "Continuer la lecture",
+    continue: "Continuer",
+    continueIn: "Continuer en",
+    loading: "Chargement",
+    searchLibrary: "Rechercher dans la bibliothèque...",
+    sortDocuments: "Trier les textes",
+    sortGlossary: "Trier le glossaire",
+    recentlyRead: "Récemment lus",
+    titleAZ: "Titre (A-Z)",
+    originalLanguageAZ: "Langue d'origine (A-Z)",
+    recentlyAdded: "Ajoutés récemment",
+    wordAZ: "Mot (A-Z)",
+    languageAZ: "Langue (A-Z)",
+    documentTitleAZ: "Titre du texte (A-Z)",
+    noDocuments: "Aucun document pour l'instant. Commencez une session de lecture pour enregistrer votre premier document.",
+    noTranslationsYet: "Aucune traduction pour le moment",
+    progress: "Progression",
+    back: "Retour",
+    from: "de",
+    close: "Fermer",
+    original: "Original",
+    translation: "Traduction",
+    pageAbbrev: "p.",
+    of: "sur",
+    pages: "pages",
+    documentCover: "Couverture du document",
+    error: "Erreur",
   }
 } satisfies MessagesSchema;
 
@@ -562,16 +946,37 @@ export const de = {
   // Upload Page
   // -------------------------
   upload: {
-    original: "Original",
-    translation: "Übersetzung",
-    sampleText: "Beispieltext",
-    selectSample: "Wähle ein Beispiel",
-    title: "Titel",
-    untitledDocument: "Unbenanntes Dokument",
-    typeText: "Gib einen Text auf {lang} ein...",
-    dragDrop: "Dateien hierher ziehen und ablegen oder klicken, um auszuwählen",
-    translate: "Übersetzen",
-    uploadHint: "Text einfügen oder eine Datei hochladen, um zu übersetzen",
+    hero: "Neue Lektüre",
+    heroInfo: "Füge Text ein, lade eine Datei hoch oder importiere ein eBook, um zu starten.",
+    sourceLang: "Ausgangssprache",
+    targetLang: "Zielsprache",
+    translateAlignInfo: "Übersetzung und Ausrichtung dauern in der Regel 15 bis 30 Sekunden",
+    startReading: "Mit dem Lesen beginnen",
+    tabs: {
+      importEbook: "eBook importieren",
+      uploadFile: "Datei hochladen",
+      pasteText: "Text einfügen",
+    },
+    importEbook: {
+      searchBy: "Nach Buchtitel oder Autorennamen suchen...",
+      language: "Sprache",
+      author: "Autor",
+      filterByAuthor: "Nach Autor filtern...",
+      searchGutenberg: "Project Gutenberg durchsuchen",
+      enterTitle: "Gib einen Titel oder Autor ein und drücke dann Enter.",
+      booksFound: "Bücher gefunden",
+      showing: "Angezeigt",
+      prev: "Zurück",
+      next: "Weiter",
+    },
+    uploadFile: {
+      dragAndDrop: "Ziehen und ablegen",
+      or: "oder",
+      browseFiles: "Dateien durchsuchen",
+    },
+    pasteText: {
+      pasteOrType: "Füge hier deinen Text ein oder tippe ihn ein...",
+    },
   },
 
   // -------------------------
@@ -593,6 +998,7 @@ export const de = {
     // ---- ( Help Popover )
     helpPopover: {
       header: "Navigation und Interaktionen",
+      helpLabel: "Hilfe",
       // -- Page navigation
       pageNav: {
         header: "Seitennavigation",
@@ -656,6 +1062,50 @@ export const de = {
       hideOriginal: "Original ausblenden",
       page: "Seite",
     },
+    toc: {
+      contents: "Inhalt",
+      tableOfContents: "Inhaltsverzeichnis",
+      readingProgress: "Lesefortschritt",
+      of: "von",
+      goToPage: "Gehe zu Seite",
+      go: "Los",
+      untitledDocument: "Unbenanntes Dokument",
+    },
+    footer: {
+      blur: "Unschärfe",
+      swapSourceTarget: "Quell- und Zielrolle tauschen",
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: "Personalisieren",
+    heroInfo: "Lege die Standardsprachen und das Erscheinungsbild fest, die Babeling bei jeder neuen Lesesitzung verwenden soll.",
+    summarySource: "Quelle",
+    summaryTarget: "Ziel",
+    summaryTheme: "Design",
+    languageDefaultsTitle: "Sprachstandards",
+    languageDefaultsInfo: "Diese Einstellungen füllen die App bei künftigen Uploads, Lesesitzungen und Oberflächentexten vorab aus.",
+    preferredSourceLabel: "Bevorzugte Ausgangssprache",
+    preferredSourceDescription: "Wähle die Sprache, in der dein Originaltext normalerweise beginnt.",
+    preferredTargetLabel: "Bevorzugte Zielsprache",
+    preferredTargetDescription: "Lege die Übersetzungssprache fest, die am häufigsten vorausgewählt sein soll.",
+    interfaceLanguageLabel: "Oberflächensprache",
+    interfaceLanguageDescription: "Dadurch ändern sich Menüs, Bedienelemente und Beschriftungen in der gesamten App.",
+    appearanceTitle: "Erscheinungsbild",
+    appearanceInfo: "Halte die Oberfläche mit deinem Gerät synchron oder setze sie auf ein festes Design.",
+    quickSwitchTitle: "Schneller Hell/Dunkel-Wechsel",
+    quickSwitchDescription: "Nutze den Schalter für schnelle Änderungen oder wähle unten einen festen Modus.",
+    noPreference: "Keine Präferenz",
+    auto: "Automatisch",
+    themeSystem: "System",
+    themeLight: "Hell",
+    themeDark: "Dunkel",
+    themeSystemDescription: "Übernimm automatisch die Einstellung deines Computers oder Telefons.",
+    themeLightDescription: "Behalte die hellere Tageslicht-Palette bei jedem Besuch.",
+    themeDarkDescription: "Verwende die dunklere, kontrastreiche Palette in der gesamten App.",
   },
 
   // -------------------------
@@ -667,6 +1117,36 @@ export const de = {
     texts: "Texte",
     translations: "Übersetzungen",
     glossary: "Glossar",
+    hero: "Deine Bibliothek",
+    heroInfo: "Texte, Übersetzungen und Vokabeln, die du gesammelt hast.",
+    wordsSaved: "Gespeicherte Wörter",
+    continueReading: "Weiterlesen",
+    continue: "Weiter",
+    continueIn: "Weiter auf",
+    loading: "Wird geladen",
+    searchLibrary: "Bibliothek durchsuchen...",
+    sortDocuments: "Texte sortieren",
+    sortGlossary: "Glossar sortieren",
+    recentlyRead: "Zuletzt gelesen",
+    titleAZ: "Titel (A-Z)",
+    originalLanguageAZ: "Originalsprache (A-Z)",
+    recentlyAdded: "Zuletzt hinzugefügt",
+    wordAZ: "Wort (A-Z)",
+    languageAZ: "Sprache (A-Z)",
+    documentTitleAZ: "Dokumenttitel (A-Z)",
+    noDocuments: "Noch keine Dokumente. Starte eine Lesesitzung, um dein erstes Dokument zu speichern.",
+    noTranslationsYet: "Noch keine Übersetzungen",
+    progress: "Fortschritt",
+    back: "Zurück",
+    from: "aus",
+    close: "Schließen",
+    original: "Original",
+    translation: "Übersetzung",
+    pageAbbrev: "S.",
+    of: "von",
+    pages: "Seiten",
+    documentCover: "Dokumentcover",
+    error: "Fehler",
   }
 } satisfies MessagesSchema;
 
@@ -699,16 +1179,37 @@ export const it = {
   // Upload Page
   // -------------------------
   upload: {
-    original: "Originale",
-    translation: "Traduzione",
-    sampleText: "Testo di esempio",
-    selectSample: "Seleziona un esempio",
-    title: "Titolo",
-    untitledDocument: "Documento senza titolo",
-    typeText: "Scrivi del testo in {lang}...",
-    dragDrop: "Trascina e rilascia i file qui, oppure fai clic per sfogliare",
-    translate: "Traduci",
-    uploadHint: "Incolla del testo o carica un file da tradurre",
+    hero: "Nuova lettura",
+    heroInfo: "Incolla testo, carica un file o importa un eBook per iniziare.",
+    sourceLang: "Lingua di origine",
+    targetLang: "Lingua di destinazione",
+    translateAlignInfo: "La traduzione e l'allineamento richiedono di solito tra 15 e 30 secondi",
+    startReading: "Inizia a leggere",
+    tabs: {
+      importEbook: "Importa eBook",
+      uploadFile: "Carica file",
+      pasteText: "Incolla testo",
+    },
+    importEbook: {
+      searchBy: "Cerca per titolo del libro o nome dell'autore...",
+      language: "Lingua",
+      author: "Autore",
+      filterByAuthor: "Filtra per autore...",
+      searchGutenberg: "Cerca su Project Gutenberg",
+      enterTitle: "Inserisci un titolo o un autore, poi premi Invio.",
+      booksFound: "Libri trovati",
+      showing: "Mostrati",
+      prev: "Prec.",
+      next: "Succ.",
+    },
+    uploadFile: {
+      dragAndDrop: "Trascina e rilascia",
+      or: "o",
+      browseFiles: "Sfoglia file",
+    },
+    pasteText: {
+      pasteOrType: "Incolla o scrivi qui il tuo testo...",
+    },
   },
 
   // -------------------------
@@ -730,6 +1231,7 @@ export const it = {
     // ---- ( Help Popover )
     helpPopover: {
       header: "Navigazione e Interazioni",
+      helpLabel: "Aiuto",
       // -- Page navigation
       pageNav: {
         header: "Navigazione delle pagine",
@@ -793,6 +1295,50 @@ export const it = {
       hideOriginal: "Nascondi originale",
       page: "Pagina",
     },
+    toc: {
+      contents: "Contenuti",
+      tableOfContents: "Indice",
+      readingProgress: "Avanzamento lettura",
+      of: "di",
+      goToPage: "Vai alla pagina",
+      go: "Vai",
+      untitledDocument: "Documento senza titolo",
+    },
+    footer: {
+      blur: "Sfocatura",
+      swapSourceTarget: "Scambia ruoli origine e destinazione",
+    },
+  },
+
+  // -------------------------
+  // Preferences Page
+  // -------------------------
+  preferences: {
+    badgePersonalize: "Personalizza",
+    heroInfo: "Imposta le lingue predefinite e l'aspetto che Babeling deve usare ogni volta che inizi una nuova sessione di lettura.",
+    summarySource: "Origine",
+    summaryTarget: "Destinazione",
+    summaryTheme: "Tema",
+    languageDefaultsTitle: "Lingue predefinite",
+    languageDefaultsInfo: "Queste selezioni precompilano l'app per futuri caricamenti, sessioni di lettura e testo dell'interfaccia.",
+    preferredSourceLabel: "Lingua di origine preferita",
+    preferredSourceDescription: "Scegli la lingua in cui di solito inizia il tuo testo originale.",
+    preferredTargetLabel: "Lingua di destinazione preferita",
+    preferredTargetDescription: "Imposta la lingua di traduzione che vuoi trovare preselezionata più spesso.",
+    interfaceLanguageLabel: "Lingua dell'interfaccia",
+    interfaceLanguageDescription: "Questo cambia menu, controlli ed etichette in tutta l'app.",
+    appearanceTitle: "Aspetto",
+    appearanceInfo: "Mantieni l'interfaccia sincronizzata con il tuo dispositivo oppure fissala su un tema specifico.",
+    quickSwitchTitle: "Cambio rapido chiaro/scuro",
+    quickSwitchDescription: "Usa l'interruttore per cambi rapidi oppure scegli sotto una modalità fissa.",
+    noPreference: "Nessuna preferenza",
+    auto: "Auto",
+    themeSystem: "Sistema",
+    themeLight: "Chiaro",
+    themeDark: "Scuro",
+    themeSystemDescription: "Segui automaticamente la preferenza del tuo computer o telefono.",
+    themeLightDescription: "Mantieni la palette più calda in modalità chiara a ogni visita.",
+    themeDarkDescription: "Usa la palette scura ad alto contrasto in tutta l'app.",
   },
 
   // -------------------------
@@ -804,6 +1350,36 @@ export const it = {
     texts: "Testi",
     translations: "Traduzioni",
     glossary: "Glossario",
+    hero: "La tua biblioteca",
+    heroInfo: "Testi, traduzioni e vocabolario che hai raccolto.",
+    wordsSaved: "Parole salvate",
+    continueReading: "Continua a leggere",
+    continue: "Continua",
+    continueIn: "Continua in",
+    loading: "Caricamento",
+    searchLibrary: "Cerca nella biblioteca...",
+    sortDocuments: "Ordina testi",
+    sortGlossary: "Ordina glossario",
+    recentlyRead: "Letti di recente",
+    titleAZ: "Titolo (A-Z)",
+    originalLanguageAZ: "Lingua originale (A-Z)",
+    recentlyAdded: "Aggiunti di recente",
+    wordAZ: "Parola (A-Z)",
+    languageAZ: "Lingua (A-Z)",
+    documentTitleAZ: "Titolo del testo (A-Z)",
+    noDocuments: "Nessun documento ancora. Avvia una sessione di lettura per salvare il tuo primo documento.",
+    noTranslationsYet: "Nessuna traduzione ancora",
+    progress: "Avanzamento",
+    back: "Indietro",
+    from: "da",
+    close: "Chiudi",
+    original: "Originale",
+    translation: "Traduzione",
+    pageAbbrev: "p.",
+    of: "di",
+    pages: "pagine",
+    documentCover: "Copertina del documento",
+    error: "Errore",
   }
 } satisfies MessagesSchema;
 

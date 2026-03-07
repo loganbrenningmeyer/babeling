@@ -13,6 +13,7 @@ import { ResumeTranslationButton } from "../../../../components/ResumeTranslatio
 import { LibraryDocument } from "../types/document";
 
 import { getLangColors } from "@/lib/langs";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export function ContinueReadingCard({
@@ -20,6 +21,7 @@ export function ContinueReadingCard({
 }: {
   document: LibraryDocument;
 }) {
+  const m = useMessages();
   const [coverLoadFailed, setCoverLoadFailed] = useState(false);
 
   const coverImageSrc = document.coverImageId != null
@@ -59,7 +61,7 @@ export function ContinueReadingCard({
       {showCoverImage ? (
         <Image
           src={coverImageSrc}
-          alt={document.title ? `${document.title} cover` : "Document cover"}
+          alt={document.title ? `${document.title} cover` : m.library.documentCover}
           width={48}
           height={64}
           unoptimized
@@ -87,7 +89,7 @@ export function ContinueReadingCard({
         "
       >
         <p className="font-ui font-bold text-xs text-muted-foreground uppercase">
-          Continue reading
+          {m.library.continueReading}
         </p>
         <p className="truncate font-reading font-semibold text-lg text-foreground">
           {document.title}
@@ -114,8 +116,8 @@ export function ContinueReadingCard({
         <div className="flex-1 w-40">
           <div className="flex items-baseline gap-2">
             <div>
-              <span className="text-lg text-foreground font-reading font-semibold">p. {currentPageNumber}</span>
-              <span className="text-sm text-foreground font-reading font-normal"> of {document.totalPages}</span>
+              <span className="text-lg text-foreground font-reading font-semibold">{m.library.pageAbbrev} {currentPageNumber}</span>
+              <span className="text-sm text-foreground font-reading font-normal"> {m.library.of} {document.totalPages}</span>
             </div>
           </div>
           <Progress 
@@ -136,7 +138,7 @@ export function ContinueReadingCard({
             shadow-sm shadow-primary/20
           "
         >
-          Continue
+          {m.library.continue}
         </ResumeTranslationButton>
       </div>
     </div>

@@ -10,6 +10,7 @@ import { GlossaryItemBack } from "./GlossaryItemBack";
 import { LibraryGlossaryItem } from "../../types/glossaryItem";
 
 import type { LangLabels } from "@/app/i18n/messages";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export function GlossaryItemFlipCard({
@@ -19,6 +20,7 @@ export function GlossaryItemFlipCard({
   glossaryItem: LibraryGlossaryItem,
   langLabels: LangLabels,
 }) {
+  const m = useMessages();
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
 
@@ -113,7 +115,7 @@ export function GlossaryItemFlipCard({
               {open && (
                 <motion.button
                   type="button"
-                  aria-label="Close"
+                  aria-label={m.library.close}
                   className="fixed inset-0 z-50 bg-black/30 backdrop-blur-[2px]"
                   onClick={closeCard}
                   initial={{ opacity: 0 }}

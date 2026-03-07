@@ -19,6 +19,7 @@ import { formatRelativeTime } from "@/lib/string";
 import { getLangColors } from "@/lib/langs";
 import { LangLabels, toUiLang } from "@/app/i18n/messages";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
+import { useMessages } from "@/app/hooks/useMessages";
 
 
 export function DocumentBack({
@@ -34,6 +35,7 @@ export function DocumentBack({
   loading: boolean,
   error: string | null,
 }) {
+  const m = useMessages();
   // -------------------------
   // Sort translations by lastOpenedAt / Set default active tab
   // -------------------------
@@ -82,7 +84,7 @@ export function DocumentBack({
     return (
       <Card className="h-full w-full rounded-xl border bg-card p-5 shadow-sm">
         <CardContent className="p-0">
-          No translations yet
+          {m.library.noTranslationsYet}
         </CardContent>
       </Card>
     );
@@ -115,7 +117,7 @@ export function DocumentBack({
               cursor-pointer select-none
             "
           >
-            Back
+            {m.library.back}
             <RotateCw 
               className="
                 h-4 w-4
@@ -206,11 +208,11 @@ export function DocumentBack({
                   <div className="flex items-baseline gap-2">
                     <div>
                       <h3 className="font-ui text-xs text-muted-foreground tracking-wider">
-                        {"Progress".toUpperCase()}
+                        {m.library.progress.toUpperCase()}
                       </h3>
                       <div>
-                        <span className="text-md font-reading font-semibold">p. {t.currentPageNumber}</span>
-                        <span className="text-xs font-reading font-normal"> of {document.totalPages}</span>
+                        <span className="text-md font-reading font-semibold">{m.library.pageAbbrev} {t.currentPageNumber}</span>
+                        <span className="text-xs font-reading font-normal"> {m.library.of} {document.totalPages}</span>
                       </div>
                     </div>
                   </div>
@@ -229,7 +231,7 @@ export function DocumentBack({
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3 text-[11px] font-medium tracking-wide text-muted-foreground/80">
                       <span className="rounded-xs border border-border px-2">
-                        p. {t.currentPageNumber}
+                        {m.library.pageAbbrev} {t.currentPageNumber}
                       </span>
                       <span className="inline-flex items-center gap-1">
                         <Clock size={12} />
@@ -245,7 +247,7 @@ export function DocumentBack({
                         className="w-full rounded-none"
                       >
                         <span>
-                          Continue in{" "}
+                          {m.library.continueIn}{" "}
                           <span
                             className={`
                               rounded-xl border px-1 

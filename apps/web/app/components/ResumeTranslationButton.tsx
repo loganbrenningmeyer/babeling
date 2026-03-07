@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
 import { Play } from "lucide-react";
-import { LangBadge } from "./LangBadge";
+import { useMessages } from "@/app/hooks/useMessages";
 
 import { LibraryDocument } from "../(protected)/library/feature/types/document";
 import { LibraryTranslation } from "../(protected)/library/feature/types/translation";
@@ -28,6 +28,7 @@ export function ResumeTranslationButton({
   // API Router Usage
   // -------------------------
   const router = useRouter();
+  const m = useMessages();
 
   function openRecentTranslation() {
     if (!translation) return;
@@ -63,7 +64,7 @@ export function ResumeTranslationButton({
             <span className="dot block size-[4px] rounded-full" />
             <span className="dot block size-[4px] rounded-full" />
           </span>
-          Loading
+          {m.library.loading}
         </Button>
       ) : translation ? (
         <Button
@@ -106,7 +107,7 @@ export function ResumeTranslationButton({
           }}
           className="rounded-full px-6 opacity-70"
         >
-          Continue
+          {m.library.continue}
         </Button>
       )}
     </>

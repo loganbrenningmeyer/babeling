@@ -13,7 +13,6 @@ import { SourceClickInfo } from "./SourceClickInfo";
 import { TargetClickInfo } from "./TargetClickInfo";
 import { PageNavInfo } from "./PageNavInfo";
 import { IPAClickInfo } from "./IPAClickInfo";
-import { messages, UiLang } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 
 
@@ -48,7 +47,7 @@ export function HelpPopover() {
           onMouseEnter={openPopover}
           onMouseLeave={closePopoverWithDelay}
           className="inline-flex items-center text-muted-foreground hover:text-blue-600 cursor-default"
-          aria-label="Help"
+          aria-label={msgs.helpLabel}
         >
           <HelpCircle className="h-4 w-4" />
         </span>

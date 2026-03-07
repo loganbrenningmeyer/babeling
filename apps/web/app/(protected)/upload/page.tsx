@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,7 +20,6 @@ import { useRecentDocuments } from "../library/feature/hooks/useRecentDocuments"
 // =========================
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useMessages } from "@/app/hooks/useMessages";
-import { getLangLabel, getUiLangsMap, toUiLang } from "@/app/i18n/messages";
 
 // =========================
 // ( Components )
@@ -34,18 +33,11 @@ export default function UploadPage() {
   const {
     srcLang: prefSrcLang,
     tgtLang: prefTgtLang,
-    uiLang: prefUiLang,
   } = useUserPreferences();
 
   type LangCode = "en" | "fr" | "es" | "de" | "it";
 
-  const LANGS: { code: LangCode; label: string }[] = [
-    { code: "en", label: "English" },
-    { code: "fr", label: "French" },
-    { code: "es", label: "Spanish" },
-    { code: "de", label: "German" },
-    { code: "it", label: "Italian" },
-  ];
+  const LANGS: LangCode[] = ["en", "fr", "es", "de", "it"];
 
   // -------------------------
   // Use UI language messages from user preferences
@@ -70,15 +62,6 @@ export default function UploadPage() {
 
   const srcLang = localSrcLang ?? prefSrcLang ?? "en";
   const tgtLang = localTgtLang ?? prefTgtLang ?? "es";
-
-  const srcLabel = getLangLabel(srcLang, m.langs);
-  const tgtLabel = getLangLabel(tgtLang, m.langs);
-
-  // -------------------------
-  // Ensure UI lang is supported (-> UiLang type)
-  // -------------------------
-  const uiLang = toUiLang(prefUiLang);
-  const UI_LANGS_MAP = getUiLangsMap(uiLang); // e.g., UI_LANGS_MAP["en"] = "English"
 
   // -------------------------
   // Upload File Information
@@ -286,10 +269,10 @@ export default function UploadPage() {
        * ------------------------- */}
       <div className="">
         <h1 className="font-reading font-semibold text-4xl tracking-tight">
-          New reading
+          {m.upload.hero}
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">
-          Paste text, upload a file, or import an eBook to begin.
+          {m.upload.heroInfo}
         </p>
       </div>
 
@@ -302,8 +285,8 @@ export default function UploadPage() {
            * Source Language
            * ------------------------- */}
           <div className="w-full">
-            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground">
-              SOURCE LANGUAGE
+            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+              {m.upload.sourceLang}
             </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
               <SelectTrigger className="w-full bg-card">
@@ -312,11 +295,11 @@ export default function UploadPage() {
               <SelectContent position="popper" align="start">
                 {LANGS.map((l) => (
                   <SelectItem
-                    key={l.code}
-                    value={l.code}
-                    disabled={l.code === tgtLang}
+                    key={l}
+                    value={l}
+                    disabled={l === tgtLang}
                   >
-                    {l.label}
+                    {m.langs[l]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -353,8 +336,8 @@ export default function UploadPage() {
            * Target Language
            * ------------------------- */}
           <div className="w-full">
-            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground">
-              TARGET LANGUAGE
+            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+              {m.upload.targetLang}
             </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
               <SelectTrigger className="w-full bg-card">
@@ -363,11 +346,11 @@ export default function UploadPage() {
               <SelectContent position="popper" align="start">
                 {LANGS.map((l) => (
                   <SelectItem
-                    key={l.code}
-                    value={l.code}
-                    disabled={l.code === srcLang}
+                    key={l}
+                    value={l}
+                    disabled={l === srcLang}
                   >
-                    {l.label}
+                    {m.langs[l]}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -383,6 +366,7 @@ export default function UploadPage() {
         <TabbedInputCard
           onPayloadChange={handleInputPayloadChange}
           langLabels={m.langs}
+          uploadMsgs={m.upload}
         />
       </div>
 
@@ -393,7 +377,7 @@ export default function UploadPage() {
         {/* Translation / Alignment Hint */}
         <span className="inline-flex gap-2 items-center text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
-          <span>Translation and alignment usually takes 15-30 seconds</span>
+          <span>{m.upload.translateAlignInfo}</span>
         </span>
         {/* Start Reading Button */}
         <Button
@@ -416,7 +400,7 @@ export default function UploadPage() {
             "Uploading document..."
           ) : (
             <span className="inline-flex gap-3 items-center text-[16px]">
-              <span>Start reading</span>
+              <span>{m.upload.startReading}</span>
               <ArrowRight
                 className="
                   h-6 w-6

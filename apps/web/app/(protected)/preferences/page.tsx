@@ -128,7 +128,6 @@ function ThemeOptionButton({
 
 export default function PreferencesPage() {
   const {
-    loading,
     srcLang,
     tgtLang,
     theme,
@@ -139,6 +138,7 @@ export default function PreferencesPage() {
     setUiLang,
   } = useUserPreferences();
   const m = useMessages();
+  const p = m.preferences;
 
   const resolvedUiLang = toUiLang(uiLang);
   const uiLanguageOptions = getUiLangsMap(resolvedUiLang).map((lang) => ({
@@ -146,7 +146,7 @@ export default function PreferencesPage() {
     label: lang.label,
   }));
   const contentLanguageOptions = [
-    { value: "none", label: "No preference" },
+    { value: "none", label: p.noPreference },
     ...CONTENT_LANGS.map((code) => ({
       value: code,
       label: m.langs[code],
@@ -156,9 +156,14 @@ export default function PreferencesPage() {
   const sourceValue = srcLang ?? "none";
   const targetValue = tgtLang ?? "none";
   const sourceLabel =
-    sourceValue === "none" ? "Auto" : getLangLabel(sourceValue, m.langs);
+    sourceValue === "none" ? p.auto : getLangLabel(sourceValue, m.langs);
   const targetLabel =
-    targetValue === "none" ? "Auto" : getLangLabel(targetValue, m.langs);
+    targetValue === "none" ? p.auto : getLangLabel(targetValue, m.langs);
+  const themeLabel = {
+    system: p.themeSystem,
+    light: p.themeLight,
+    dark: p.themeDark,
+  }[theme];
 
   return (
     <div className="min-h-screen bg-background">
@@ -177,21 +182,20 @@ export default function PreferencesPage() {
             <div className="max-w-2xl">
               <div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-ui font-semibold uppercase tracking-[0.18em] text-muted-foreground">
                 <Sparkles className="size-3.5" />
-                Personalize
+                {p.badgePersonalize}
               </div>
               <h1 className="mt-4 font-reading text-4xl font-semibold tracking-tight text-foreground sm:text-5xl">
                 {m.nav.preferences}
               </h1>
               <p className="mt-3 max-w-xl font-ui text-sm leading-6 text-muted-foreground sm:text-base">
-                Set the default languages and appearance Babeling should use
-                whenever you start a new reading session.
+                {p.heroInfo}
               </p>
             </div>
 
             <div className="grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 shadow-sm">
                 <p className="text-[11px] font-ui font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Source
+                  {p.summarySource}
                 </p>
                 <p className="mt-2 font-reading text-xl font-semibold">
                   {sourceLabel}
@@ -199,7 +203,7 @@ export default function PreferencesPage() {
               </div>
               <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 shadow-sm">
                 <p className="text-[11px] font-ui font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Target
+                  {p.summaryTarget}
                 </p>
                 <p className="mt-2 font-reading text-xl font-semibold">
                   {targetLabel}
@@ -207,10 +211,10 @@ export default function PreferencesPage() {
               </div>
               <div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-3 shadow-sm">
                 <p className="text-[11px] font-ui font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-                  Theme
+                  {p.summaryTheme}
                 </p>
                 <p className="mt-2 font-reading text-xl font-semibold capitalize">
-                  {theme}
+                  {themeLabel}
                 </p>
               </div>
             </div>
@@ -226,11 +230,10 @@ export default function PreferencesPage() {
                 </span>
                 <div>
                   <CardTitle className="font-reading text-2xl">
-                    Language Defaults
+                    {p.languageDefaultsTitle}
                   </CardTitle>
                   <CardDescription className="mt-1 font-ui">
-                    These selections prefill the app for future uploads, reader
-                    sessions, and interface copy.
+                    {p.languageDefaultsInfo}
                   </CardDescription>
                 </div>
               </div>
@@ -238,9 +241,9 @@ export default function PreferencesPage() {
 
             <CardContent className="grid gap-4 pt-6 sm:grid-cols-2">
               <PreferenceField
-                description="Choose the language your original text usually starts in."
+                description={p.preferredSourceDescription}
                 id="preferred-src-lang"
-                label="Preferred source language"
+                label={p.preferredSourceLabel}
                 onValueChange={(value) =>
                   setSrcLang(value === "none" ? null : value)
                 }
@@ -249,9 +252,9 @@ export default function PreferencesPage() {
               />
 
               <PreferenceField
-                description="Set the translation language you want preselected most often."
+                description={p.preferredTargetDescription}
                 id="preferred-tgt-lang"
-                label="Preferred target language"
+                label={p.preferredTargetLabel}
                 onValueChange={(value) =>
                   setTgtLang(value === "none" ? null : value)
                 }
@@ -261,9 +264,9 @@ export default function PreferencesPage() {
 
               <div className="sm:col-span-2">
                 <PreferenceField
-                  description="This changes menus, controls, and labels throughout the app."
+                  description={p.interfaceLanguageDescription}
                   id="preferred-ui-lang"
-                  label="Interface language"
+                  label={p.interfaceLanguageLabel}
                   onValueChange={setUiLang}
                   options={uiLanguageOptions}
                   value={resolvedUiLang}
@@ -280,11 +283,10 @@ export default function PreferencesPage() {
                 </span>
                 <div>
                   <CardTitle className="font-reading text-2xl">
-                    Appearance
+                    {p.appearanceTitle}
                   </CardTitle>
                   <CardDescription className="mt-1 font-ui">
-                    Keep the interface synced to your device or pin it to a
-                    specific theme.
+                    {p.appearanceInfo}
                   </CardDescription>
                 </div>
               </div>
@@ -295,10 +297,10 @@ export default function PreferencesPage() {
                 <div className="flex items-center justify-between gap-4">
                   <div>
                     <p className="font-ui text-sm font-semibold text-foreground">
-                      Quick light or dark switch
+                      {p.quickSwitchTitle}
                     </p>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Use the toggle for fast changes, or pick a fixed mode below.
+                      {p.quickSwitchDescription}
                     </p>
                   </div>
                   <ThemeToggle />
@@ -307,25 +309,25 @@ export default function PreferencesPage() {
 
               <div className="mt-4 grid gap-3">
                 <ThemeOptionButton
-                  description="Follow your computer or phone preference automatically."
+                  description={p.themeSystemDescription}
                   icon={<Monitor className="size-4" />}
-                  label="System"
+                  label={p.themeSystem}
                   onSelect={setTheme}
                   selected={theme === "system"}
                   value="system"
                 />
                 <ThemeOptionButton
-                  description="Keep the warmer daylight palette on every visit."
+                  description={p.themeLightDescription}
                   icon={<Sun className="size-4" />}
-                  label="Light"
+                  label={p.themeLight}
                   onSelect={setTheme}
                   selected={theme === "light"}
                   value="light"
                 />
                 <ThemeOptionButton
-                  description="Use the darker contrast palette everywhere in the app."
+                  description={p.themeDarkDescription}
                   icon={<Moon className="size-4" />}
-                  label="Dark"
+                  label={p.themeDark}
                   onSelect={setTheme}
                   selected={theme === "dark"}
                   value="dark"

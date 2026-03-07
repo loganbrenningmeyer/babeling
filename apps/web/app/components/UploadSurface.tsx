@@ -12,6 +12,8 @@ type UploadSurfaceProps = {
   file: File | null;
   onFileChange: (file: File | null) => void;
   text?: string;
+  orLabel?: string;
+  browseFilesLabel?: string;
 };
 
 function FileChip({ children }: { children: React.ReactNode }) {
@@ -32,6 +34,8 @@ export function UploadSurface({
   file,
   onFileChange,
   text = "Drop your file here",
+  orLabel = "or",
+  browseFilesLabel = "Browse files",
 }: UploadSurfaceProps) {
 
   const inputId = React.useId();
@@ -78,7 +82,7 @@ export function UploadSurface({
                 </div>
 
                 {/* Or */}
-                <div className="mt-2 text-xs text-muted-foreground">or</div>
+                <div className="mt-2 text-xs text-muted-foreground">{orLabel}</div>
 
                 {/* Browse button */}
                 <Button
@@ -98,7 +102,7 @@ export function UploadSurface({
                   // keep it a label-driven click; prevent Dropzone click handlers from interfering
                   onClick={() => inputRef.current?.click()}
                 >
-                  Browse files
+                  {browseFilesLabel}
                 </Button>
 
                 {/* Filetype chips */}
@@ -137,7 +141,7 @@ export function UploadSurface({
                   "
                   onClick={() => inputRef.current?.click()}
                 >
-                  Change file
+                  {browseFilesLabel}
                 </Button>
 
                 {/* Filetype chips */}

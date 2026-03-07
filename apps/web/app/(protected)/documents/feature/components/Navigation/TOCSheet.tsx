@@ -19,7 +19,9 @@ import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
 
-import { LangLabels } from "@/app/i18n/messages";
+import { LangLabels, type UiLang, type messages } from "@/app/i18n/messages";
+
+type TOCMsgs = (typeof messages)[UiLang]["reader"];
 
 
 function isCurrentSection(
@@ -40,6 +42,7 @@ export function TOCSheet({
   srcLang,
   tgtLang,
   langLabels,
+  msgs,
   currentPageNumber,
   pageCount,
   onSelectSection,
@@ -51,6 +54,7 @@ export function TOCSheet({
   srcLang: string,
   tgtLang: string,
   langLabels: LangLabels,
+  msgs: TOCMsgs,
   currentPageNumber: number,
   pageCount: number,
   onSelectSection: (section: LoadedSection) => void;
@@ -89,7 +93,7 @@ export function TOCSheet({
             hover:border-foreground/20
           "
         >
-          <TableOfContents /> Contents
+          <TableOfContents /> {msgs.toc.contents}
         </Button>
       </SheetTrigger>
 
@@ -113,7 +117,7 @@ export function TOCSheet({
                 tracking-wider uppercase
               "
             >
-              Table of Contents
+              {msgs.toc.tableOfContents}
             </SheetTitle>
             <div>
               <h2 className="font-reading text-xl font-semibold leading-tight text-foreground">
@@ -136,9 +140,9 @@ export function TOCSheet({
         <div className="flex min-h-0 flex-1 flex-col">
           <div className="shrink-0 border-b px-4 pt-0 pb-4">
             <div className="mb-2 flex items-center justify-between gap-3 text-sm text-muted-foreground">
-              <span>Reading progress</span>
+              <span>{msgs.toc.readingProgress}</span>
               <span className="shrink-0">
-                p. {displayPageNumber} of {pageCount}
+                {msgs.general.page} {displayPageNumber} {msgs.toc.of} {pageCount}
               </span>
             </div>
             <Progress
@@ -154,7 +158,7 @@ export function TOCSheet({
           >
             <span className="flex items-center gap-2">
               <span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">
-                Go to page
+                {msgs.toc.goToPage}
               </span>
               <Input
                 type="number"
@@ -163,7 +167,7 @@ export function TOCSheet({
                 inputMode="numeric"
                 value={pageInput}
                 onChange={(e) => setPageInputOverride(e.target.value)}
-                aria-label="Go to page"
+                aria-label={msgs.toc.goToPage}
                 className="h-8 w-16 shrink-0 px-2 text-center"
               />
               <span className="shrink-0 text-sm text-muted-foreground">
@@ -183,7 +187,7 @@ export function TOCSheet({
                 motion-reduce:transform-none
               "
             >
-              Go
+              {msgs.toc.go}
             </Button>
           </form>
 
@@ -216,8 +220,8 @@ export function TOCSheet({
                       <span>{section.title}</span>
                       <span className="text-xs text-muted-foreground">
                         {section.firstPageNumber === section.lastPageNumber
-                          ? `p. ${section.firstPageNumber}`
-                          : `pp. ${section.firstPageNumber}-${section.lastPageNumber}`
+                          ? `${msgs.general.page} ${section.firstPageNumber}`
+                          : `${msgs.general.page} ${section.firstPageNumber}-${section.lastPageNumber}`
                         }
                       </span>
                     </span>
