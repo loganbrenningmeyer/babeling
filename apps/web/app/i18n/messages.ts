@@ -26,6 +26,7 @@ type MessagesSchema = {
   nav: {
     translate: string;
     library: string;
+    review: string;
     preferences: string;
     signIn: string;
   },
@@ -239,6 +240,7 @@ export const en = {
   nav: {
     translate: "Translate",
     library: "Library",
+    review: "Review",
     preferences: "Preferences",
     signIn: "Sign In",
   },
@@ -472,6 +474,7 @@ export const es = {
   nav: {
     translate: "Traducir",
     library: "Biblioteca",
+    review: "Repasar",
     preferences: "Preferencias",
     signIn: "Iniciar sesión",
   },
@@ -705,6 +708,7 @@ export const fr = {
   nav: {
     translate: "Traduire",
     library: "Bibliothèque",
+    review: "Révision",
     preferences: "Préférences",
     signIn: "Se connecter",
   },
@@ -938,6 +942,7 @@ export const de = {
   nav: {
     translate: "Übersetzen",
     library: "Bibliothek",
+    review: "Wiederholen",
     preferences: "Einstellungen",
     signIn: "Anmelden",
   },
@@ -1171,6 +1176,7 @@ export const it = {
   nav: {
     translate: "Traduci",
     library: "Biblioteca",
+    review: "Ripasso",
     preferences: "Preferenze",
     signIn: "Accedi",
   },

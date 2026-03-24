@@ -8,7 +8,6 @@ import { GlossaryItemFront } from "./GlossaryItemFront";
 import { GlossaryItemBack } from "./GlossaryItemBack";
 
 import { LibraryGlossaryItem } from "../../types/glossaryItem";
-
 import type { LangLabels } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 

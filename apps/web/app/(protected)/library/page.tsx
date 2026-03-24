@@ -54,8 +54,8 @@ export default function Library() {
     <div className="min-h-screen mx-auto max-w-6xl py-12 px-8">
       <div className="flex items-end justify-between">
         {/* -------------------------
-        * Hero
-        * ------------------------- */}
+        //* Hero
+        //* ------------------------- */}
         <div>
           <h1 className="font-reading font-semibold text-4xl tracking-tight">
             {m.library.hero}
@@ -66,8 +66,8 @@ export default function Library() {
         </div>
 
         {/* -------------------------
-        * Reading Stats
-        * ------------------------- */}
+        //* Reading Stats
+        //* ------------------------- */}
         <div className="flex items-center gap-8">
           {/* Texts */}
           <div className="flex flex-col items-end">
@@ -94,8 +94,8 @@ export default function Library() {
       </div>
 
       {/* -------------------------
-      * Continue Reading
-      * ------------------------- */}
+      //* Continue Reading
+      //* ------------------------- */}
       {documents[0] && <ContinueReadingCard document={documents[0]} />}
 
       {/* -------------------------

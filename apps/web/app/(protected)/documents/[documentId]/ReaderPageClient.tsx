@@ -257,68 +257,72 @@ export default function ReaderPageClient({
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
       <div className="relative h-16 shrink-0 px-4">
-        {/* -------------------------
-        * Left: TOC + Cover Image + Title/Author
-        * ------------------------- */}
-        <div className="flex h-full min-w-0 items-center">
-          <TOCSheet 
-            sections={document?.sections ?? []}
-            documentTitle={document?.title ?? m.reader.toc.untitledDocument}
-            documentAuthor={document?.author}
-            srcLang={document?.srcLang ?? "en"}
-            tgtLang={tgtLang}
-            langLabels={m.langs}
-            msgs={m.reader}
-            currentPageNumber={pageIndex + 1}
-            pageCount={pageCount}
-            onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
-            onGoToPage={(pageNumber) => setPage(pageNumber - 1)}
-          />
-          <div className="ml-4 flex min-w-0 items-center gap-3">
-            {/* -------------------------
-            * Cover Image
-            * ------------------------- */}
-            {coverImageSrc ? (
-              <Image
-                src={coverImageSrc}
-                alt={
-                  document?.title
-                    ? `${document.title} cover`
-                    : "Document cover"
-                }
-                width={36}
-                height={48}
-                unoptimized
-                className="h-12 w-9 shrink-0 rounded-sm border border-border/60 object-cover shadow-sm"
-              />
-            ) : null}
-            {/* -------------------------
-            * Title / Author
-            * ------------------------- */}
-            <div className="flex flex-col">
-              <span className="font-reading text-md font-bold leading-tight">
-                {document?.title ?? ""}
-              </span>
-
-              {document?.author && (
-                <span className="font-ui text-sm font-thin text-muted-foreground leading-tight">
-                  {document.author}
+        <div className="grid h-full grid-cols-[minmax(0,1fr)_minmax(0,42rem)_minmax(0,1fr)] items-center gap-4">
+          {/* -------------------------
+          * Left: TOC + Cover Image + Title/Author
+          * ------------------------- */}
+          <div className="flex min-w-0 items-center">
+            <TOCSheet 
+              sections={document?.sections ?? []}
+              documentTitle={document?.title ?? m.reader.toc.untitledDocument}
+              documentAuthor={document?.author}
+              srcLang={document?.srcLang ?? "en"}
+              tgtLang={tgtLang}
+              langLabels={m.langs}
+              msgs={m.reader}
+              currentPageNumber={pageIndex + 1}
+              pageCount={pageCount}
+              onSelectSection={(section) => setPage(section.firstPageNumber - 1)}
+              onGoToPage={(pageNumber) => setPage(pageNumber - 1)}
+            />
+            <div className="ml-4 flex min-w-0 items-center gap-3">
+              {/* -------------------------
+              * Cover Image
+              * ------------------------- */}
+              {coverImageSrc ? (
+                <Image
+                  src={coverImageSrc}
+                  alt={
+                    document?.title
+                      ? `${document.title} cover`
+                      : "Document cover"
+                  }
+                  width={36}
+                  height={48}
+                  unoptimized
+                  className="h-12 w-9 shrink-0 rounded-sm border border-border/60 object-cover shadow-sm"
+                />
+              ) : null}
+              {/* -------------------------
+              * Title / Author
+              * ------------------------- */}
+              <div className="flex min-w-0 flex-col">
+                <span className="truncate font-reading text-md font-bold leading-tight">
+                  {document?.title ?? ""}
                 </span>
-              )}
+
+                {document?.author && (
+                  <span className="truncate font-ui text-sm font-thin leading-tight text-muted-foreground">
+                    {document.author}
+                  </span>
+                )}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* -------------------------
-        * Center: Current Section
-        * ------------------------- */}
-        {currentSectionTitle && (
-          <div className="pointer-events-none absolute inset-0 flex items-center justify-center px-20">
-            <span className="font-reading font-semibold truncate text-xl text-foreground">
-              {currentSectionTitle}
-            </span>
+          {/* -------------------------
+          * Center: Current Section
+          * ------------------------- */}
+          <div className="pointer-events-none min-w-0">
+            {currentSectionTitle ? (
+              <span className="block truncate text-center font-reading text-xl font-semibold text-foreground">
+                {currentSectionTitle}
+              </span>
+            ) : null}
           </div>
-        )}
+
+          <div aria-hidden="true" />
+        </div>
       </div>
 
       <Separator />

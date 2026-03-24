@@ -51,6 +51,7 @@ export function ImportEbookPanel({
     format: string;
     title: string;
     epubUrl: string | null;
+    languages: string[];
   }) => void;
   langLabels: LangLabels;
   msgs: ImportEbookMsgs;
@@ -116,6 +117,7 @@ export function ImportEbookPanel({
       format: "application/epub+zip",
       title: book.title,
       epubUrl: book.epubUrl,
+      languages: book.languages ?? [],
     });
   }
 

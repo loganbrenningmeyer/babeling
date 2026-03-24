@@ -52,6 +52,7 @@ type InputPaylod =
       format: string;
       title: string;
       epubUrl: string | null;
+      languages: string[];
     };
 
 export function TabbedInputCard({
@@ -77,6 +78,7 @@ export function TabbedInputCard({
   const [format, setFormat] = useState<string>("application/epub+zip");
   const [bookTitle, setBookTitle] = useState("");
   const [epubUrl, setEpubUrl] = useState<string | null>(null);
+  const [bookLanguages, setBookLanguages] = useState<string[]>([]);
 
   // -------------------------
   // Keep parent in sync with active tab
@@ -86,9 +88,16 @@ export function TabbedInputCard({
     if (tab === "paste") onPayloadChange({ type: "text", text });
     if (tab === "upload") onPayloadChange({ type: "file", file });
     if (tab === "import") {
-      onPayloadChange({ type: "gutenberg", bookId, format, title: bookTitle, epubUrl });
+      onPayloadChange({
+        type: "gutenberg",
+        bookId,
+        format,
+        title: bookTitle,
+        epubUrl,
+        languages: bookLanguages,
+      });
     }
-  }, [tab, text, file, bookId, format, bookTitle, epubUrl, onPayloadChange]);
+  }, [tab, text, file, bookId, format, bookTitle, epubUrl, bookLanguages, onPayloadChange]);
 
   const tabClassName = cn(
     "h-full inline-flex items-center",
@@ -155,11 +164,12 @@ export function TabbedInputCard({
             <TabsContent value="import" className="m-0 h-full min-w-0 overflow-hidden flex">
               <ImportEbookPanel
                 selectedBookId={bookId}
-                onSelectBook={({ bookId, format, title, epubUrl }) => {
+                onSelectBook={({ bookId, format, title, epubUrl, languages }) => {
                   setBookId(bookId);
                   setFormat(format);
                   setBookTitle(title);
                   setEpubUrl(epubUrl);
+                  setBookLanguages(languages);
                 }}
                 langLabels={langLabels}
                 msgs={uploadMsgs.importEbook}

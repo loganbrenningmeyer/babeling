@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { SignedIn, SignedOut, SignUpButton } from "@clerk/nextjs";
-import { Book, Languages } from "lucide-react";
+import { Book, Languages, Layers } from "lucide-react";
 
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { UiLanguageSelect } from "@/components/UiLanguageSelect";
@@ -43,17 +43,32 @@ export function AppNav() {
 
         <div className="hidden grid-flow-col auto-cols-fr gap-2 text-sm sm:grid">
           <SignedIn>
+            {/* -------------------------
+            //* Translate
+            //* ------------------------- */}
             <Link className={navItemClassName} href="/upload">
               <span className="inline-flex items-center justify-center">
                 <Languages className="size-4" />
               </span>
               {m.nav.translate}
             </Link>
+            {/* -------------------------
+            //* Library
+            //* ------------------------- */}
             <Link className={navItemClassName} href="/library">
               <span className="inline-flex items-center justify-center">
                 <Book className="size-4" />
               </span>
               {m.nav.library}
+            </Link>
+            {/* -------------------------
+            //* Review
+            //* ------------------------- */}
+            <Link className={navItemClassName} href="/review">
+              <span className="inline-flex items-center justify-center">
+                <Layers className="size-4" />
+              </span>
+              {m.nav.review}
             </Link>
           </SignedIn>
 

@@ -97,6 +97,19 @@ export default function UploadPage() {
     setLocalTgtLang(nextTgt);
   }
 
+  const syncLanguagesForImportedBook = useCallback((bookLanguages: string[]) => {
+    const importedSrcLang = LANGS.find((lang) => bookLanguages.includes(lang));
+    if (!importedSrcLang) return;
+
+    setLocalSrcLang(importedSrcLang);
+
+    if (tgtLang === importedSrcLang) {
+      const nextTgtLang =
+        LANGS.find((lang) => lang !== importedSrcLang) ?? importedSrcLang;
+      setLocalTgtLang(nextTgtLang);
+    }
+  }, [tgtLang]);
+
   /**************************
    * `fetchSelectedGutenbergFile()`
    * -- Downloads the selected Gutendex EPUB through a local proxy route
@@ -232,6 +245,7 @@ export default function UploadPage() {
     format: string;
     title: string;
     epubUrl: string | null;
+    languages: string[];
   }) => {
     if (payload.type === "text") {
       setSrcText(payload.text);
@@ -256,11 +270,12 @@ export default function UploadPage() {
           title: payload.title,
           epubUrl: payload.epubUrl,
         });
+        syncLanguagesForImportedBook(payload.languages);
       } else {
         setSelectedGutenbergBook(null);
       }
     }
-  }, []);
+  }, [syncLanguagesForImportedBook]);
 
   return (
     <div className="min-h-screen mx-auto w-full max-w-6xl py-12">
