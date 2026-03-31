@@ -1,6 +1,6 @@
 "use client";
 
-import { Minimize2 } from "lucide-react";
+import { X } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -48,11 +48,30 @@ export function GlossaryItemBack({
           rounded-xl border bg-card shadow-sm
         "
       >
-        <CardContent className="h-full p-0 space-y-4 flex flex-col">
+        <CardContent className="relative flex h-full flex-col space-y-4 p-0">
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onClose();
+            }}
+            className="
+              absolute right-0 top-0 z-10
+              inline-flex h-7 w-7 items-center justify-center
+              rounded-full border border-border/70 bg-background/80
+              text-muted-foreground
+              transition-colors duration-150
+              hover:bg-background hover:text-foreground
+            "
+            aria-label={m.library.close}
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+
           {/* -------------------------
           //* ( Top: Non-scrollable ): Form + POS + IPA + Definition
           //* ------------------------- */}
-          <div className="flex items-start justify-between">
+          <div className="flex items-start justify-between pr-10">
             <div className="space-y-2">
               <div className="inline-flex items-center gap-2">
                 {/* Form */}
@@ -85,36 +104,6 @@ export function GlossaryItemBack({
                 )}
               </div>
             </div>
-            <button
-              type="button"
-              onClick={(e) => {
-                e.stopPropagation();
-                onClose();
-              }}
-              className="
-              group
-                inline-flex items-center justify-center
-                rounded-full p-1
-                border border-muted-foreground
-                opacity-0
-                cursor-pointer
-                transition duration-300 ease-out
-                group-hover/gloss-back:opacity-60
-                group-hover/gloss-back:bg-muted-foreground/10
-                hover:opacity-100
-              "
-              aria-label={m.library.close}
-            >
-              <Minimize2 
-                className="
-                  h-4 w-4
-                  transform-gpu
-                  transition-transform duration-150 ease-out
-                  group-hover:scale-85
-                  active:scale-80
-                " 
-              />
-            </button>
           </div>
           {/* Definition */}
           <p className="text-md leading-6 font-ui">

@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 import { Card, CardContent } from "@/components/ui/card";
 
+import { GlossaryItemBack } from "@/app/(protected)/library/feature/components/GlossaryItemCard/GlossaryItemBack";
 import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
-import type { LangLabels } from "@/app/i18n/messages";
 import { useMessages } from "@/app/hooks/useMessages";
 
 
@@ -17,14 +17,18 @@ export function RecognitionCard({
 }) {
   const m = useMessages();
   const [flipped, setFlipped] = useState(false);
+  const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   return (
     <div
       role="button"
-      onClick={() => setFlipped((v) => !v)}
+      onClick={() => {
+        setFlipped((v) => !v);
+        setDetailsExpanded(false);
+      }}
       className="mx-auto w-full max-w-xl text-left"
     >
-      <div className="relative w-full aspect-[5/4] w-full [perspective:1200px]">
+      <div className="relative aspect-[5/4] w-full [perspective:1200px]">
         <motion.div
           animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
@@ -60,7 +64,7 @@ export function RecognitionCard({
           </div>
 
           {/* -------------------------
-          //* ( Back ): Definition
+          //* ( Back ): Definition / Glossary Info
           //* ------------------------- */}
           <div
             className="
@@ -69,24 +73,68 @@ export function RecognitionCard({
               [transform:rotateY(-180deg)]
             "
           >
-            <Card
-              className="
-                relative rounded-xl h-full w-full overflow-hidden
-                border bg-card p-5 shadow-sm
-                transform-gpu will-change-transform
-                transition duration-200 ease-out
-              "
-            >
-              <CardContent 
+            <div className="relative h-full w-full">
+              <Card
                 className="
-                  flex items-center justify-center text-center
-                  h-full p-0 space-y-2 
-                  font-ui font-normal text-2xl
+                  relative rounded-xl h-full w-full overflow-hidden
+                  border bg-card p-5 shadow-sm
+                  transform-gpu will-change-transform
+                  transition duration-200 ease-out
                 "
               >
-                {glossaryItem.definition.gloss}
-              </CardContent>
-            </Card>
+                <CardContent className="relative h-full p-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setDetailsExpanded(true);
+                    }}
+                    className="
+                      absolute right-0 top-0 z-10
+                      inline-flex h-7 w-7 items-center justify-center
+                      rounded-full border border-border/70 bg-background/80
+                      font-ui text-sm font-semibold text-muted-foreground
+                      transition-colors duration-150
+                      hover:bg-background hover:text-foreground
+                    "
+                    aria-label={m.library.glossary}
+                  >
+                    ?
+                  </button>
+
+                  <div
+                    className="
+                      flex h-full items-center justify-center text-center
+                      font-ui text-4xl font-normal
+                    "
+                  >
+                    {glossaryItem.definition.gloss}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <AnimatePresence>
+                {detailsExpanded && (
+                  <motion.div
+                    className="
+                      group/gloss-back
+                      absolute inset-0 overflow-hidden rounded-xl
+                    "
+                    onClick={(e) => e.stopPropagation()}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.3, ease: [0.2, 0.8, 0.2, 1] }}
+                  >
+                    <GlossaryItemBack
+                      glossaryItem={glossaryItem}
+                      langLabels={m.langs}
+                      onClose={() => setDetailsExpanded(false)}
+                    />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </motion.div>
       </div>
