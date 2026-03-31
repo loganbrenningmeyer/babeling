@@ -160,6 +160,7 @@ export function ReaderShell({
               text-muted-foreground shadow-sm
               transition duration-300 ease-out
               hover:text-foreground
+              hover:bg-background dark:hover:bg-background
               hover:rotate-180
               motion-reduce:transition-none
             "
@@ -306,7 +307,7 @@ export function ReaderShell({
             * ------------------------- */}
             <div className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground">
               <Book size={14}/>
-              {msgs.general.page} {pageCount > 0 ? pageIndex + 1 : 0} / {pageCount}
+              {msgs.toc.pageSingleAbbrev} {pageCount > 0 ? pageIndex + 1 : 0} / {pageCount}
             </div>
             {/* -------------------------
             * Help Popover

@@ -136,6 +136,8 @@ type MessagesSchema = {
       tableOfContents: string;
       readingProgress: string;
       of: string;
+      pageSingleAbbrev: string;
+      pageRangeAbbrev: string;
       goToPage: string;
       go: string;
       untitledDocument: string;
@@ -370,6 +372,8 @@ export const en = {
       tableOfContents: "Table of Contents",
       readingProgress: "Reading progress",
       of: "of",
+      pageSingleAbbrev: "p.",
+      pageRangeAbbrev: "pp.",
       goToPage: "Go to page",
       go: "Go",
       untitledDocument: "Untitled document",
@@ -604,6 +608,8 @@ export const es = {
       tableOfContents: "Tabla de contenido",
       readingProgress: "Progreso de lectura",
       of: "de",
+      pageSingleAbbrev: "p.",
+      pageRangeAbbrev: "pp.",
       goToPage: "Ir a la página",
       go: "Ir",
       untitledDocument: "Documento sin título",
@@ -838,6 +844,8 @@ export const fr = {
       tableOfContents: "Table des matières",
       readingProgress: "Progression de lecture",
       of: "sur",
+      pageSingleAbbrev: "p.",
+      pageRangeAbbrev: "pp.",
       goToPage: "Aller à la page",
       go: "Aller",
       untitledDocument: "Document sans titre",
@@ -1072,6 +1080,8 @@ export const de = {
       tableOfContents: "Inhaltsverzeichnis",
       readingProgress: "Lesefortschritt",
       of: "von",
+      pageSingleAbbrev: "S.",
+      pageRangeAbbrev: "S.",
       goToPage: "Gehe zu Seite",
       go: "Los",
       untitledDocument: "Unbenanntes Dokument",
@@ -1306,6 +1316,8 @@ export const it = {
       tableOfContents: "Indice",
       readingProgress: "Avanzamento lettura",
       of: "di",
+      pageSingleAbbrev: "p.",
+      pageRangeAbbrev: "pp.",
       goToPage: "Vai alla pagina",
       go: "Vai",
       untitledDocument: "Documento senza titolo",

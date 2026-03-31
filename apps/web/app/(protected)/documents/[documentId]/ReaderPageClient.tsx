@@ -315,7 +315,7 @@ export default function ReaderPageClient({
           * ------------------------- */}
           <div className="pointer-events-none min-w-0">
             {currentSectionTitle ? (
-              <span className="block truncate text-center font-reading text-xl font-semibold text-foreground">
+              <span className="block truncate text-center font-reading text-lg font-semibold text-foreground">
                 {currentSectionTitle}
               </span>
             ) : null}

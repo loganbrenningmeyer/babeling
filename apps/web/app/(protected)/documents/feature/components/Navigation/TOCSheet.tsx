@@ -220,8 +220,8 @@ export function TOCSheet({
                       <span>{section.title}</span>
                       <span className="text-xs text-muted-foreground">
                         {section.firstPageNumber === section.lastPageNumber
-                          ? `${msgs.general.page} ${section.firstPageNumber}`
-                          : `${msgs.general.page} ${section.firstPageNumber}-${section.lastPageNumber}`
+                          ? `${msgs.toc.pageSingleAbbrev} ${section.firstPageNumber}`
+                          : `${msgs.toc.pageRangeAbbrev} ${section.firstPageNumber}-${section.lastPageNumber}`
                         }
                       </span>
                     </span>
