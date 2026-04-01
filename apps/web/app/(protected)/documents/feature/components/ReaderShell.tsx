@@ -155,39 +155,39 @@ export function ReaderShell({
             className="pointer-events-none absolute inset-y-0 left-1/2 border-l border-border/60"
           />
           {/* -------------------------
-           * Swap Source / Target Languages Button
-           * ------------------------- */}
-          <Button
-            type="button"
-            variant="outline"
-            size="icon"
-            onClick={onSwapSides}
-            className="
-              absolute left-1/2 top-3 z-10 h-9 w-9
-              -translate-x-1/2 rounded-full
-              border-border/80 bg-background dark:bg-background
-              text-muted-foreground shadow-sm
-              transition duration-300 ease-out
-              hover:text-foreground
-              hover:bg-background dark:hover:bg-background
-              hover:rotate-180
-              motion-reduce:transition-none
-            "
-            aria-label={msgs.footer.swapSourceTarget}
-          >
-            <Repeat className="h-4 w-4" />
-          </Button>
-          {/* -------------------------
            * Source / Target Language Headers
            * ------------------------- */}
           <div
             className={`
-              shrink-0 grid grid-cols-2 border-b
+              relative shrink-0 grid grid-cols-2 border-b
               text-[16px] font-medium font-ui
               leading-none text-foreground/90
               ${gapAndPad}
             `}
           >
+            {/* -------------------------
+             * Swap Source / Target Languages Button
+             * ------------------------- */}
+            <Button
+              type="button"
+              variant="outline"
+              size="icon"
+              onClick={onSwapSides}
+              className="
+                absolute left-1/2 top-1/2 z-10 h-9 w-9
+                -translate-x-1/2 -translate-y-1/2 rounded-full
+                border-border/80 bg-background dark:bg-background
+                text-muted-foreground shadow-sm
+                transition duration-300 ease-out
+                hover:text-foreground
+                hover:bg-background dark:hover:bg-background
+                hover:rotate-180
+                motion-reduce:transition-none
+              "
+              aria-label={msgs.footer.swapSourceTarget}
+            >
+              <Repeat className="h-4 w-4" />
+            </Button>
             {/* -------------------------
              * Source Langugage Header
              * ------------------------- */}

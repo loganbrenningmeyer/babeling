@@ -4,8 +4,6 @@ import { useState, useMemo, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 
-import { Separator } from "@/components/ui/separator";
-
 import { ReaderShell } from "../feature/components/ReaderShell";
 import { TOCSheet } from "../feature/components/Navigation/TOCSheet";
 
@@ -368,7 +366,7 @@ export default function ReaderPageClient({
         </div>
       </div>
 
-      <Separator />
+      <div aria-hidden="true" className="shrink-0 border-b-2 border-border" />
 
       <div className="min-h-0 flex-1 overflow-hidden">
         <div className="mx-auto h-full w-full max-w-[90rem] overflow-hidden">
