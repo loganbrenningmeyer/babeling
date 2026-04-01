@@ -69,8 +69,8 @@ export function UploadSurface({
           className={cn(
             "h-full rounded-lg border-2 border-dashed border-foreground/10",
             "bg-card transition-colors",
-            "hover:border-primary/35 hover:bg-accent/60",
-            "dark:hover:border-primary/25 dark:hover:bg-accent/45"
+            "hover:border-primary/35 hover:bg-primary/5",
+            "dark:hover:border-primary/25 dark:hover:bg-primary/10"
           )}
         >
           <div className="flex h-full items-center justify-center p-10">
@@ -96,12 +96,12 @@ export function UploadSurface({
                   size="sm"
                   className="
                     mt-3 rounded-xl
-                    bg-primary/10 text-primary
-                    border border-primary/20
-                    hover:bg-primary/15 hover:border-primary/35
-                    dark:bg-primary/12 dark:hover:bg-primary/18
-                    dark:border-primary/25 dark:hover:border-primary/40
-                    focus-visible:ring-primary/30
+                    bg-accent text-accent-foreground
+                    border border-accent-foreground/20
+                    hover:bg-accent/70 hover:border-accent-foreground/40
+                    dark:bg-accent dark:hover:bg-accent/70
+                    dark:border-accent-foreground/20 dark:hover:border-accent-foreground/40
+                    focus-visible:ring-accent/30
                     cursor-pointer
                   "
                   // keep it a label-driven click; prevent Dropzone click handlers from interfering
@@ -139,12 +139,12 @@ export function UploadSurface({
                   size="sm"
                   className="
                     mt-3 rounded-xl
-                    bg-primary/10 text-primary
-                    border border-primary/20
-                    hover:bg-primary/15 hover:border-primary/35
-                    dark:bg-primary/12 dark:hover:bg-primary/18
-                    dark:border-primary/25 dark:hover:border-primary/40
-                    focus-visible:ring-primary/30
+                    bg-accent text-accent-foreground
+                    border border-accent-foreground/20
+                    hover:bg-accent/70 hover:border-accent-foreground/40
+                    dark:bg-accent dark:hover:bg-accent/70
+                    dark:border-accent-foreground/20 dark:hover:border-accent-foreground/40
+                    focus-visible:ring-accent/30
                     cursor-pointer
                   "
                   onClick={() => inputRef.current?.click()}

@@ -216,7 +216,7 @@ export function ImportEbookPanel({
                     "cursor-pointer select-none transition-colors duration-200 ease-out",
                     "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     selectedLanguagesDraft.includes(lang["code"]) &&
-                      "border-primary/30 bg-primary/10 text-foreground hover:border-primary/40 hover:text-foreground",
+                      "border-primary/30 bg-primary/5 text-foreground hover:border-primary/40 hover:text-foreground",
                   )}
                   onClick={() => toggleLanguage(lang["code"])}
                 >

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 
 import { MoveRight } from "lucide-react";
 
@@ -19,7 +19,10 @@ import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
 import { READER_OVERLAY_TOP_CLASS } from "../../lib/layout-constants";
-import { getCurrentDisplaySectionIds } from "../../lib/sections";
+import {
+  getCurrentDisplaySectionId,
+  getCurrentDisplaySectionIds,
+} from "../../lib/sections";
 
 import { LangLabels, type UiLang, type messages } from "@/app/i18n/messages";
 
@@ -58,7 +61,10 @@ export function TOCSheet({
   onSelectSection: (section: LoadedSection) => void;
   onGoToPage: (pageNumber: number) => void;
 }) {
+  const [open, setOpen] = useState(false);
   const [pageInputOverride, setPageInputOverride] = useState<string | null>(null);
+  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
+  const currentSectionRef = useRef<HTMLButtonElement | null>(null);
   const pageInput = pageInputOverride ?? (pageCount > 0 ? String(currentPageNumber) : "");
 
   const requestedPageNumber = Number(pageInput);
@@ -68,7 +74,36 @@ export function TOCSheet({
     requestedPageNumber <= pageCount;
   const displayPageNumber = pageCount > 0 ? currentPageNumber : 0;
   const progressPercent = pageCount > 0 ? (currentPageNumber / pageCount) * 100 : 0;
+  const currentDisplaySectionId = getCurrentDisplaySectionId(currentPageNumber, sections);
   const currentSectionIds = getCurrentDisplaySectionIds(currentPageNumber, sections);
+
+  useEffect(() => {
+    if (!open) return;
+
+    const frame = window.requestAnimationFrame(() => {
+      const container = scrollContainerRef.current;
+      const currentSection = currentSectionRef.current;
+
+      if (!container || !currentSection) return;
+
+      const containerRect = container.getBoundingClientRect();
+      const currentSectionRect = currentSection.getBoundingClientRect();
+      const nextScrollTop =
+        container.scrollTop +
+        (currentSectionRect.top - containerRect.top) -
+        container.clientHeight / 2 +
+        currentSectionRect.height / 2;
+
+      container.scrollTo({
+        top: Math.max(nextScrollTop, 0),
+        behavior: "auto",
+      });
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, [open, currentDisplaySectionId]);
 
   const handleGoToPage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -80,7 +115,7 @@ export function TOCSheet({
   };
 
   return (
-    <Sheet>
+    <Sheet open={open} onOpenChange={setOpen}>
       <SheetTrigger asChild>
         <Button 
           variant="outline" 
@@ -190,7 +225,7 @@ export function TOCSheet({
             </Button>
           </form>
 
-          <div className="min-h-0 flex-1 overflow-y-auto">
+          <div ref={scrollContainerRef} className="min-h-0 flex-1 overflow-y-auto">
             <div className="grid grid-cols">
               {sections.map((section) => {
                 {/* -------------------------
@@ -206,6 +241,7 @@ export function TOCSheet({
                 return (
                   <Button 
                     key={section.id}
+                    ref={section.id === currentDisplaySectionId ? currentSectionRef : undefined}
                     onClick={() => {
                       setPageInputOverride(null);
                       onSelectSection(section);
