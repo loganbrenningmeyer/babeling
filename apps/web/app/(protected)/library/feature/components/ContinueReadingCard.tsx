@@ -133,8 +133,8 @@ export function ContinueReadingCard({
           loading={loading}
           className="
             rounded-full
-            bg-primary/80 text-primary-foreground
-            hover:bg-primary
+            bg-blue-600 text-primary-foreground
+            hover:bg-blue-600/80
             shadow-sm shadow-primary/20
           "
         >

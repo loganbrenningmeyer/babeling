@@ -18,6 +18,8 @@ import { Progress } from "@/components/ui/progress"
 import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
+import { READER_OVERLAY_TOP_CLASS } from "../../lib/layout";
+import { getCurrentDisplaySectionIds } from "../../lib/sections";
 
 import { LangLabels, type UiLang, type messages } from "@/app/i18n/messages";
 
@@ -25,15 +27,11 @@ type TOCMsgs = (typeof messages)[UiLang]["reader"];
 
 
 function isCurrentSection(
-  currentPageNumber: number,
+  currentSectionIds: Set<number>,
   section: LoadedSection,
 ): boolean {
-  return (
-    currentPageNumber >= section.firstPageNumber && 
-    currentPageNumber <= section.lastPageNumber
-  );
+  return currentSectionIds.has(section.id);
 }
-
 
 export function TOCSheet({
   sections,
@@ -70,6 +68,7 @@ export function TOCSheet({
     requestedPageNumber <= pageCount;
   const displayPageNumber = pageCount > 0 ? currentPageNumber : 0;
   const progressPercent = pageCount > 0 ? (currentPageNumber / pageCount) * 100 : 0;
+  const currentSectionIds = getCurrentDisplaySectionIds(currentPageNumber, sections);
 
   const handleGoToPage = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -99,7 +98,7 @@ export function TOCSheet({
 
       <SheetContent
         side="left"
-        viewportTopClassName="top-32"
+        viewportTopClassName={READER_OVERLAY_TOP_CLASS}
         showOverlay={false}
         onOpenAutoFocus={(e) => {
           e.preventDefault();
@@ -148,7 +147,7 @@ export function TOCSheet({
             <Progress
               value={progressPercent}
               className="h-1.5 bg-border/80"
-              indicatorClassName="bg-blue-600"
+              indicatorClassName="bg-primary"
             />
           </div>
 
@@ -179,7 +178,7 @@ export function TOCSheet({
               disabled={!canGoToPage}
               className="
                 h-8 shrink-0 rounded-xl px-4 font-semibold
-                bg-primary/80 text-primary-foreground
+                bg-blue-600 text-primary-foreground
                 shadow-sm shadow-primary/40
                 transition-transform duration-200 ease-out
                 hover:bg-primary
@@ -194,6 +193,16 @@ export function TOCSheet({
           <div className="min-h-0 flex-1 overflow-y-auto">
             <div className="grid grid-cols">
               {sections.map((section) => {
+                {/* -------------------------
+                //* Weight section fonts by depth
+                //* ------------------------- */}
+                const titleWeightClass =
+                  section.depth === 0
+                    ? "font-bold text-foreground"
+                    : section.depth === 1
+                    ? "font-medium text-foreground/95"
+                    : "font-normal italic text-foreground/85";
+
                 return (
                   <Button 
                     key={section.id}
@@ -202,27 +211,55 @@ export function TOCSheet({
                       onSelectSection(section);
                     }}
                     className={`
-                        w-full min-h-12 h-auto rounded-none text-foreground
-                        bg-transparent
-                        justify-start whitespace-normal break-words
-                        text-left items-start py-3
-                        hover:bg-muted-foreground/10
-                        ${isCurrentSection(currentPageNumber, section) 
-                          ? "bg-blue-300/20 text-blue-60 hover:bg-blue-300/20" 
-                          : ""
-                        }
-                      `}
-                    style={{
-                      paddingLeft: `${1 + section.depth * 0.75}rem`
-                    }}
+                      flex items-start gap-2
+                      w-full min-h-12 h-auto rounded-none text-foreground
+                      border-b border-border last:border-b-0
+                      bg-transparent
+                      justify-start whitespace-normal break-words
+                      text-left py-3
+                      hover:bg-muted-foreground/10
+                      ${isCurrentSection(currentSectionIds, section) 
+                        ? "bg-blue-300/20 text-blue-60 hover:bg-blue-300/20" 
+                        : ""
+                      }
+                    `}
                   >
-                    <span className="flex flex-col items-start">
-                      <span>{section.title}</span>
-                      <span className="text-xs text-muted-foreground">
+                    <span
+                      className="grid w-full items-start gap-x-2"
+                      style={{
+                        gridTemplateColumns:
+                          section.depth > 0 ? "auto minmax(0, 1fr)" : "minmax(0, 1fr)",
+                      }}
+                    >
+                      {section.depth > 0 && (
+                        <span className="row-start-1 flex items-center gap-1 self-center">
+                          {Array.from({ length: section.depth * 4 }).map((_, i) => (
+                            <span
+                              key={i}
+                              className="h-0.5 w-0.5 rounded-full bg-muted-foreground/40"
+                            />
+                          ))}
+                        </span>
+                      )}
+                      {/* -------------------------
+                      //* Section Title
+                      //* ------------------------- */}
+                      <span
+                        className={`min-w-0 row-start-1 ${titleWeightClass}`}
+                        style={{ gridColumnStart: section.depth > 0 ? 2 : 1 }}
+                      >
+                        {section.title}
+                      </span>
+                      {/* -------------------------
+                      //* Page Range
+                      //* ------------------------- */}
+                      <span
+                        className="row-start-2 text-xs text-muted-foreground"
+                        style={{ gridColumnStart: section.depth > 0 ? 2 : 1 }}
+                      >
                         {section.firstPageNumber === section.lastPageNumber
                           ? `${msgs.toc.pageSingleAbbrev} ${section.firstPageNumber}`
-                          : `${msgs.toc.pageRangeAbbrev} ${section.firstPageNumber}-${section.lastPageNumber}`
-                        }
+                          : `${msgs.toc.pageRangeAbbrev} ${section.firstPageNumber}-${section.lastPageNumber}`}
                       </span>
                     </span>
                   </Button>

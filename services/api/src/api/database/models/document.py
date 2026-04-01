@@ -18,6 +18,7 @@ from api.database.db import Base
 class DocumentSourceKind(str, enum.Enum):
     TXT = "txt"
     EPUB = "epub"
+    PDF = "pdf"
 
 
 class Document(Base):
@@ -30,12 +31,17 @@ class Document(Base):
     __tablename__ = "documents"
     __table_args__ = (
         # text-based dedupe
-        UniqueConstraint("src_lang", "src_text_hash", name="uq_documents_text_hash"),
+        UniqueConstraint(
+            "source_kind",
+            "src_lang", 
+            "src_text_hash", 
+            name="uq_documents_source_text_hash",
+        ),
         # file-based dedupe (for epub uploads)
         UniqueConstraint("source_kind", "source_file_hash", name="uq_documents_file_hash"),
         CheckConstraint(
             "(source_kind = 'txt' AND source_file_hash IS NULL) OR "
-            "(source_kind = 'epub' AND source_file_hash IS NOT NULL)",
+            "(source_kind in ('epub', 'pdf') AND source_file_hash IS NOT NULL)",
             name="ck_documents_source_kind_file_hash",
         ),
     )
@@ -96,9 +102,9 @@ class Document(Base):
     # -------------------------
     # Optional EPUB metadata
     # -------------------------
-    epub_title: Mapped[str | None] = mapped_column(Text, nullable=True)
-    epub_author: Mapped[str | None] = mapped_column(Text, nullable=True)
-    epub_language: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_file_title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_file_author: Mapped[str | None] = mapped_column(Text, nullable=True)
+    source_file_language: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     # -------------------------
     # Cover Image ID: Maps to DocumentImage.id

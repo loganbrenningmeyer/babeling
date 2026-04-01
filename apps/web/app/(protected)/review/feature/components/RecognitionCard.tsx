@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { Info } from "lucide-react";
 
+import { LangBadge } from "@/app/components/LangBadge";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { GlossaryItemBack } from "@/app/(protected)/library/feature/components/GlossaryItemCard/GlossaryItemBack";
@@ -51,11 +53,14 @@ export function RecognitionCard({
                 transition duration-200 ease-out
               "
             >
+              <div className="pointer-events-none absolute left-5 top-5 z-10">
+                <LangBadge lang={glossaryItem.tgtLang} className="text-sm" />
+              </div>
               <CardContent 
                 className="
                   flex items-center justify-center text-center
                   h-full p-0 space-y-2 
-                  font-reading font-semibold text-4xl
+                  font-reading font-semibold text-6xl
                 "
               >
                 {glossaryItem.definition.form}
@@ -99,13 +104,13 @@ export function RecognitionCard({
                     "
                     aria-label={m.library.glossary}
                   >
-                    ?
+                    <Info className="h-5 w-5" />
                   </button>
 
                   <div
                     className="
                       flex h-full items-center justify-center text-center
-                      font-ui text-4xl font-normal
+                      font-ui text-3xl font-normal
                     "
                   >
                     {glossaryItem.definition.gloss}

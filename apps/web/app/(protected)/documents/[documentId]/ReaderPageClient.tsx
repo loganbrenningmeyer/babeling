@@ -15,6 +15,7 @@ import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 import { saveReadProgress } from "../feature/api/readProgress";
+import { getCurrentDisplaySection } from "../feature/lib/sections";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 import { useReaderInteraction } from "../feature/hooks/useReaderInteraction";
@@ -84,12 +85,10 @@ export default function ReaderPageClient({
   }, [document, pageIndex]);
 
   const currentSectionTitle = useMemo(() => {
-    if (!document || currentPage?.sectionId == null) return null;
+    if (!document) return null;
 
-    return (
-      document.sections.find((section) => section.id === currentPage.sectionId)?.title ?? null
-    );
-  }, [document, currentPage]);
+    return getCurrentDisplaySection(pageIndex + 1, document.sections)?.title ?? null;
+  }, [document, pageIndex]);
 
   // -------------------------
   // Get document cover image from database

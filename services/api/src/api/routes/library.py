@@ -85,7 +85,7 @@ def get_library_documents(
             LibraryDocumentOut(
                 id=doc.id,
                 title=doc.title,
-                author=doc.epub_author,
+                author=doc.source_file_author,
                 src_text=doc.src_text,
                 src_lang=doc.src_lang,
                 total_pages=doc.total_pages,

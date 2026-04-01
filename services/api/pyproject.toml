@@ -22,6 +22,7 @@ dependencies = [
   "EbookLib",
   "beautifulsoup4",
   "python-multipart",
+  "pymupdf",
 ]
 
 [tool.setuptools]

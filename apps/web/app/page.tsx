@@ -29,6 +29,18 @@ export default async function Home({
   const authRequestKey =
     typeof sp.auth_request === "string" ? sp.auth_request : redirectedModalTarget;
   const shouldAutoOpenSignUp = !userId && sp.auth === "sign-up";
+  const startReadingButtonClassName =
+    "group relative h-12 overflow-hidden rounded-full border border-black/10 bg-slate-950 px-6 font-ui text-sm text-stone-50 shadow-[0_14px_34px_rgba(15,23,42,0.14)] transition-[transform,box-shadow,background-color,border-color] duration-300 ease-out hover:-translate-y-0.5 hover:border-black/20 hover:bg-slate-900 hover:shadow-[0_20px_44px_rgba(15,23,42,0.2)] motion-reduce:transform-none motion-reduce:transition-none dark:border-white/10 dark:bg-stone-100 dark:text-slate-950 dark:shadow-none dark:hover:border-white/20 dark:hover:bg-stone-200 dark:hover:shadow-none";
+  const startReadingButtonContent = (
+    <>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 -translate-x-10 bg-[linear-gradient(120deg,transparent_15%,rgba(255,255,255,0.18)_48%,transparent_82%)] opacity-0 transition-[opacity,transform] duration-500 ease-out group-hover:translate-x-6 group-hover:opacity-100 motion-reduce:transform-none motion-reduce:transition-none dark:bg-[linear-gradient(120deg,transparent_15%,rgba(15,23,42,0.08)_48%,transparent_82%)]"
+      />
+      <span className="relative z-10">Start Reading</span>
+      <ArrowRight className="relative z-10 size-4 transition-transform duration-300 ease-out group-hover:translate-x-1 motion-reduce:transition-none" />
+    </>
+  );
 
   return (
     <div
@@ -65,12 +77,9 @@ export default async function Home({
               <Button
                 asChild
                 size="lg"
-                className="h-12 rounded-full bg-slate-950 px-6 text-sm uppercase tracking-[0.16em] text-stone-50 shadow-[0_14px_34px_rgba(15,23,42,0.14)] hover:bg-slate-800 dark:bg-stone-100 dark:text-slate-950 dark:shadow-none dark:hover:bg-stone-300"
+                className={startReadingButtonClassName}
               >
-                <Link href="/upload">
-                  Start Reading
-                  <ArrowRight className="size-4" />
-                </Link>
+                <Link href="/upload">{startReadingButtonContent}</Link>
               </Button>
             ) : (
               <SignUpButton
@@ -80,10 +89,9 @@ export default async function Home({
               >
                 <Button
                   size="lg"
-                  className="h-12 rounded-full bg-slate-950 px-6 text-sm uppercase tracking-[0.16em] text-stone-50 shadow-[0_14px_34px_rgba(15,23,42,0.14)] hover:bg-slate-800 dark:bg-stone-100 dark:text-slate-950 dark:shadow-none dark:hover:bg-stone-300"
+                  className={startReadingButtonClassName}
                 >
-                  Start Reading
-                  <ArrowRight className="size-4" />
+                  {startReadingButtonContent}
                 </Button>
               </SignUpButton>
             )}

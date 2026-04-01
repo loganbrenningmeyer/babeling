@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { Separator } from "@/components/ui/separator";
@@ -59,6 +59,9 @@ type ReaderRow =
       imageId: number;
       alt: string | null;
     };
+
+const IMAGE_MAX_HEIGHT_PX = 400;
+const IMAGE_MAX_WIDTH_RATIO = 0.8;
 
 // -------------------------
 // Slice words/spaces by word index range
@@ -228,13 +231,39 @@ export function ParagraphGrid({
     () => new Set(documentImages.map((image) => image.id)),
     [documentImages],
   );
+  const rootRef = useRef<HTMLDivElement | null>(null);
+  const [gridWidth, setGridWidth] = useState<number | null>(null);
+  const [imageNaturalSizes, setImageNaturalSizes] = useState<
+    Record<number, { width: number; height: number }>
+  >({});
   const rows = useMemo(
     () => buildRows(pageBlocks, orderedParIds),
     [pageBlocks, orderedParIds],
   );
+  const maxImageWidth = gridWidth
+    ? Math.max(gridWidth * IMAGE_MAX_WIDTH_RATIO, 0)
+    : null;
+
+  useEffect(() => {
+    const node = rootRef.current;
+    if (!node) return;
+
+    const updateGridWidth = () => {
+      setGridWidth(node.clientWidth);
+    };
+
+    updateGridWidth();
+
+    const observer = new ResizeObserver(updateGridWidth);
+    observer.observe(node);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   return (
-    <div className={cn("relative min-h-full py-8", className)}>
+    <div ref={rootRef} className={cn("relative min-h-full py-8", className)}>
       {rows.map((row, idx) => {
         // -------------------------
         // Image row
@@ -243,17 +272,29 @@ export function ParagraphGrid({
           // Skip stale references if the page points at an image that was not loaded
           if (!imageIds.has(row.imageId)) return null;
 
+          const naturalSize = imageNaturalSizes[row.imageId];
+          const renderedWidth =
+            naturalSize && maxImageWidth
+              ? Math.round(
+                  naturalSize.width *
+                    Math.min(
+                      maxImageWidth / naturalSize.width,
+                      IMAGE_MAX_HEIGHT_PX / naturalSize.height,
+                    ),
+                )
+              : null;
+
           return (
             <React.Fragment key={row.key}>
               <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
                 <div className="col-span-2 flex justify-center py-2">
                   <figure 
                     className="
-                      mx-auto inline-flex flex-col 
-                      gap-3 p-3 
-                      overflow-hidden rounded-xl 
-                      border border-border bg-background
+                      mx-auto flex max-w-full flex-col
+                      gap-3 overflow-hidden rounded-xl
+                      border border-border bg-background p-3
                     "
+                    style={renderedWidth ? { width: `${renderedWidth}px` } : undefined}
                   >
                     {/* -------------------------
                     * Get image data from database by imageId
@@ -263,7 +304,29 @@ export function ParagraphGrid({
                       src={`/api/documents/${documentId}/images/${row.imageId}`}
                       alt={row.alt ?? ""}
                       loading="lazy"
-                      className="h-auto max-h-[32rem] w-auto max-w-full rounded-md object-contain"
+                      onLoad={(event) => {
+                        const { naturalWidth, naturalHeight } = event.currentTarget;
+                        if (!naturalWidth || !naturalHeight) return;
+
+                        setImageNaturalSizes((prev) => {
+                          const prevSize = prev[row.imageId];
+                          if (
+                            prevSize?.width === naturalWidth &&
+                            prevSize?.height === naturalHeight
+                          ) {
+                            return prev;
+                          }
+
+                          return {
+                            ...prev,
+                            [row.imageId]: {
+                              width: naturalWidth,
+                              height: naturalHeight,
+                            },
+                          };
+                        });
+                      }}
+                      className="mx-auto block h-auto max-h-[25rem] w-full rounded-md"
                     />
                   </figure>
                 </div>

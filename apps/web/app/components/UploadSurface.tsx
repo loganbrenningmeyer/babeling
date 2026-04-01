@@ -14,6 +14,7 @@ type UploadSurfaceProps = {
   text?: string;
   orLabel?: string;
   browseFilesLabel?: string;
+  allowedFiles: string[];
 };
 
 function FileChip({ children }: { children: React.ReactNode }) {
@@ -36,10 +37,14 @@ export function UploadSurface({
   text = "Drop your file here",
   orLabel = "or",
   browseFilesLabel = "Browse files",
+  allowedFiles,
 }: UploadSurfaceProps) {
 
   const inputId = React.useId();
   const inputRef = React.useRef<HTMLInputElement | null>(null);
+
+  // Allowed files as a single string
+  const accept = allowedFiles.map(ext => `.${ext}`).join(",")
 
   function handleFiles(files: FileList | null) {
     const f = files?.[0] ?? null;
@@ -53,7 +58,7 @@ export function UploadSurface({
         id={inputId}
         type="file"
         className="sr-only"
-        accept=".epub,.txt"
+        accept={accept}
         onChange={(e) => handleFiles(e.target.files)}
       />
 
@@ -107,8 +112,11 @@ export function UploadSurface({
 
                 {/* Filetype chips */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  <FileChip>TXT</FileChip>
-                  <FileChip>EPUB</FileChip>
+                  {allowedFiles.map(ext => (
+                    <FileChip key={ext}>
+                      {ext.toUpperCase()}
+                    </FileChip>
+                  ))}
                 </div>
               </div>
             ) : (
@@ -146,8 +154,11 @@ export function UploadSurface({
 
                 {/* Filetype chips */}
                 <div className="mt-4 flex flex-wrap justify-center gap-2">
-                  <FileChip>TXT</FileChip>
-                  <FileChip>EPUB</FileChip>
+                  {allowedFiles.map(ext => (
+                    <FileChip key={ext}>
+                      {ext.toUpperCase()}
+                    </FileChip>
+                  ))}
                 </div>
               </div>
             )}

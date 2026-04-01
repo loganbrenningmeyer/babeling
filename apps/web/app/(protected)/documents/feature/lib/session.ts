@@ -31,3 +31,49 @@ export function makeReaderSession(args: {
     ui: makeInitialUiState(srcWordsCount),
   };
 }
+
+/**************************
+ * `makeEmptyAlignment()`
+ * -- Creates empty AlignmentPayload data when text is missing
+ **************************/
+function makeEmptyAlignment(): AlignmentPayload {
+  return {
+    src: {
+      words: [],
+      spaces: [],
+      sentIds: [],
+      parIds: [],
+      sentToParIds: {},
+      sentToWordIds: {},
+      parToSentIds: {},
+      parToWordIds: {},
+    },
+    tgt: {
+      words: [],
+      spaces: [],
+      sentIds: [],
+      parIds: [],
+      sentToParIds: {},
+      sentToWordIds: {},
+      parToSentIds: {},
+      parToWordIds: {},
+    },
+    align: {
+      srcToTgt: {},
+      tgtToSrc: {},
+    },
+  };
+}
+
+/**************************
+ * `makeEmptyReaderSession()`
+ * -- Build a no-text ReaderSession for image-only / empty pages
+ **************************/
+export function makeEmptyReaderSession(): ReaderSession {
+  return {
+    srcText: "",
+    tgtText: "",
+    alignment: makeEmptyAlignment(),
+    ui: makeInitialUiState(0),
+  };
+}

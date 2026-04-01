@@ -188,6 +188,7 @@ export function TabbedInputCard({
                 text={uploadMsgs.uploadFile.dragAndDrop}
                 orLabel={uploadMsgs.uploadFile.or}
                 browseFilesLabel={uploadMsgs.uploadFile.browseFiles}
+                allowedFiles={["txt", "epub", "pdf"]}
                 className="h-full bg-muted/20 flex-1 p-6 rounded-none font-ui"
               />
             </TabsContent>

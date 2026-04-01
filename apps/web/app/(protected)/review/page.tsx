@@ -67,7 +67,7 @@ export default function Review() {
           Review
         </h1>
 
-        <p className="mt-3 text-sm text-muted-foreground">
+        <p className="mt-3 font-ui text-sm text-muted-foreground">
           {queue.length} remaining
         </p>
 

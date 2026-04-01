@@ -128,9 +128,6 @@ export function GlossaryItemBack({
                   <div className="border bg-muted/30 p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
-                          {m.library.original}
-                        </span>
                         <LangBadge 
                           lang={glossaryItem.srcLang} 
                           labels={langLabels}
@@ -151,9 +148,6 @@ export function GlossaryItemBack({
                   <div className="border bg-muted/30 p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <span className="text-[11px] font-ui uppercase tracking-wide text-muted-foreground">
-                          {m.library.translation}
-                        </span>
                         <LangBadge 
                           lang={glossaryItem.tgtLang} 
                           labels={langLabels}

@@ -5,7 +5,7 @@ import { cache, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import type { LoadedDocument } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
 
-import { makeReaderSession } from "../lib/session";
+import { makeReaderSession, makeEmptyReaderSession } from "../lib/session";
 import { getPageTranslation, savePageTranslation } from "../api/pageTranslations";
 import { translate } from "../api/translate";
 import { align } from "../api/align";
@@ -56,6 +56,19 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
   const load = useCallback(async () => {
     if (!document || !documentPageId || !srcLang || !tgtLang) {
       setSession(null);
+      setLoading(false);
+      setError(null);
+      return;
+    }
+
+    // -------------------------
+    // Avoid translating image-only pages
+    // -------------------------
+    if (!pageText.trim()) {
+      const sess = makeEmptyReaderSession();
+
+      if (cacheKey) cacheRef.current.set(cacheKey, sess);
+      setSession(sess);
       setLoading(false);
       setError(null);
       return;

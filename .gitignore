@@ -12,3 +12,6 @@ Icon?
 delete_tables.sh
 init_db.sh
 reset_db.sh
+*.pdf
+*.epub
+*.Identifier
