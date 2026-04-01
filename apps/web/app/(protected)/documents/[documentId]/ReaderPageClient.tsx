@@ -15,7 +15,10 @@ import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useDocumentLoader } from "../feature/hooks/useDocumentLoader";
 import { usePageSession } from "../feature/hooks/usePageSession";
 import { saveReadProgress } from "../feature/api/readProgress";
-import { getCurrentDisplaySection } from "../feature/lib/sections";
+import {
+  getCurrentDisplaySection,
+  getSectionParent,
+} from "../feature/lib/sections";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 import { useReaderInteraction } from "../feature/hooks/useReaderInteraction";
@@ -84,11 +87,19 @@ export default function ReaderPageClient({
     return document.pages[pageIndex] ?? null;
   }, [document, pageIndex]);
 
-  const currentSectionTitle = useMemo(() => {
+  const currentSection = useMemo(() => {
     if (!document) return null;
 
-    return getCurrentDisplaySection(pageIndex + 1, document.sections)?.title ?? null;
+    return getCurrentDisplaySection(pageIndex + 1, document.sections);
   }, [document, pageIndex]);
+
+  const currentSectionTitle = currentSection?.title ?? null;
+
+  const currentSectionParentTitle = useMemo(() => {
+    if (!document || !currentSection) return null;
+
+    return getSectionParent(currentSection, document.sections)?.title ?? null;
+  }, [document, currentSection]);
 
   // -------------------------
   // Get document cover image from database
@@ -158,6 +169,26 @@ export default function ReaderPageClient({
   const pageCount = document?.pages.length ?? 0;
 
   const blurSyncKeyRef = useRef<string | null>(null);
+  const headerMetaRef = useRef<HTMLDivElement | null>(null);
+  const [headerMetaWidth, setHeaderMetaWidth] = useState(0);
+
+  useEffect(() => {
+    const headerMeta = headerMetaRef.current;
+    if (!headerMeta) return;
+
+    const syncWidth = () => {
+      setHeaderMetaWidth(headerMeta.getBoundingClientRect().width);
+    };
+
+    syncWidth();
+
+    const observer = new ResizeObserver(syncWidth);
+    observer.observe(headerMeta);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
 
   useEffect(() => {
     if (!session || !currentPage?.id) return;
@@ -255,12 +286,12 @@ export default function ReaderPageClient({
 
   return (
     <div className="flex h-full min-h-0 flex-col overflow-hidden">
-      <div className="relative h-16 shrink-0 px-4">
-        <div className="grid h-full grid-cols-[minmax(0,1fr)_minmax(0,42rem)_minmax(0,1fr)] items-center gap-4">
+      <div className="relative h-20 shrink-0 px-4">
+        <div className="grid h-full grid-cols-[max-content_minmax(0,1fr)_max-content] items-center gap-4">
           {/* -------------------------
           * Left: TOC + Cover Image + Title/Author
           * ------------------------- */}
-          <div className="flex min-w-0 items-center">
+          <div ref={headerMetaRef} className="flex shrink-0 items-center">
             <TOCSheet 
               sections={document?.sections ?? []}
               documentTitle={document?.title ?? m.reader.toc.untitledDocument}
@@ -313,14 +344,27 @@ export default function ReaderPageClient({
           * Center: Current Section
           * ------------------------- */}
           <div className="pointer-events-none min-w-0">
-            {currentSectionTitle ? (
-              <span className="block truncate text-center font-reading text-lg font-semibold text-foreground">
-                {currentSectionTitle}
-              </span>
+            {(currentSectionParentTitle || currentSectionTitle) ? (
+              <div className="mx-auto flex max-w-[42rem] flex-col items-center justify-center">
+                {currentSectionParentTitle ? (
+                  <span className="block w-full truncate text-center font-ui text-xs tracking-[0.18em] text-muted-foreground uppercase">
+                    {currentSectionParentTitle}
+                  </span>
+                ) : null}
+                {currentSectionTitle ? (
+                  <span className="block w-full truncate text-center font-reading text-lg font-semibold text-foreground">
+                    {currentSectionTitle}
+                  </span>
+                ) : null}
+              </div>
             ) : null}
           </div>
 
-          <div aria-hidden="true" />
+          <div
+            aria-hidden="true"
+            className="shrink-0"
+            style={{ width: `${headerMetaWidth}px` }}
+          />
         </div>
       </div>
 

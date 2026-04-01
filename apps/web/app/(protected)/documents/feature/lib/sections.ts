@@ -41,6 +41,15 @@ export function getCurrentDisplaySection(
   })[0] ?? null;
 }
 
+export function getSectionParent(
+  section: LoadedSection,
+  sections: LoadedSection[],
+): LoadedSection | null {
+  if (!section.parentSectionId) return null;
+
+  return sections.find((candidate) => candidate.id === section.parentSectionId) ?? null;
+}
+
 export function getCurrentDisplaySectionId(
   currentPageNumber: number,
   sections: LoadedSection[],
