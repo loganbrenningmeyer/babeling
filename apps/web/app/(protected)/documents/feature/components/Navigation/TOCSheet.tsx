@@ -18,7 +18,7 @@ import { Progress } from "@/components/ui/progress"
 import { LangBadge } from "@/app/components/LangBadge"
 
 import { LoadedSection } from "../../types/document"
-import { READER_OVERLAY_TOP_CLASS } from "../../lib/layout";
+import { READER_OVERLAY_TOP_CLASS } from "../../lib/layout-constants";
 import { getCurrentDisplaySectionIds } from "../../lib/sections";
 
 import { LangLabels, type UiLang, type messages } from "@/app/i18n/messages";
