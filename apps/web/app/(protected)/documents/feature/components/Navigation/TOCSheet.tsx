@@ -140,7 +140,7 @@ export function TOCSheet({
         }}
         className="
           w-[20rem] font-ui 
-          border-2 border-border
+          border-t-2 border-r-2 border-border
         "
       >
         <SheetHeader className="shrink-0 border-b">
