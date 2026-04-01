@@ -5,6 +5,9 @@ from typing import Any
 
 from .document import PdfBlock, PdfDocument, PdfImage, PdfPage, PdfSection
 
+FALLBACK_IMAGE_RENDER_SCALE = 2.0
+IMAGE_ASPECT_RATIO_TOLERANCE = 0.02
+
 
 class PdfParser:
     """
@@ -281,7 +284,13 @@ class PdfParser:
             # -------------------------
             if block_type == 1:
                 try:
-                    image = self.extract_image(page, page.number + 1, block_index, raw_block)
+                    image = self.extract_image(
+                        doc=doc,
+                        page=page,
+                        page_number=page.number + 1,
+                        block_index=block_index,
+                        block=raw_block,
+                    )
                 except Exception as exc:
                     print(
                         f"Skipping PDF image block on page {page.number + 1}, block {block_index}: {exc}",
@@ -327,6 +336,7 @@ class PdfParser:
 
     def extract_image(
         self,
+        doc,
         page,
         page_number: int,
         block_index: int,
@@ -359,8 +369,22 @@ class PdfParser:
             return None
 
         rect = self._load_fitz().Rect(clipped_bbox)
+        embedded_image = self._extract_embedded_image(
+            doc=doc,
+            page_number=page_number,
+            block_index=block_index,
+            block=block,
+            bbox=clipped_bbox,
+        )
+        if embedded_image is not None:
+            return embedded_image
+
         pix = page.get_pixmap(
             clip=rect,
+            matrix=self._load_fitz().Matrix(
+                FALLBACK_IMAGE_RENDER_SCALE,
+                FALLBACK_IMAGE_RENDER_SCALE,
+            ),
             alpha=False,
         )
 
@@ -380,6 +404,86 @@ class PdfParser:
             byte_length=len(image_bytes),
             data=image_bytes,
         )
+
+    def _extract_embedded_image(
+        self,
+        *,
+        doc,
+        page_number: int,
+        block_index: int,
+        block: dict[str, Any],
+        bbox: tuple[float, float, float, float],
+    ) -> PdfImage | None:
+        if not self._block_matches_embedded_aspect_ratio(block, bbox):
+            return None
+
+        xref = self._parse_positive_int(block.get("xref"))
+        if xref is not None:
+            try:
+                extracted = doc.extract_image(xref)
+            except Exception:
+                extracted = None
+
+            if extracted:
+                image_bytes = extracted.get("image")
+                if image_bytes:
+                    ext = extracted.get("ext")
+                    image_key = f"xref:{xref}"
+                    return PdfImage(
+                        image_key=image_key,
+                        href=image_key,
+                        media_type=self._guess_media_type(ext),
+                        byte_length=len(image_bytes),
+                        data=image_bytes,
+                    )
+
+        raw_image_bytes = block.get("image")
+        if isinstance(raw_image_bytes, (bytes, bytearray)) and raw_image_bytes:
+            ext = block.get("ext")
+            image_key = f"page:{page_number}:block:{block_index}:embedded"
+            return PdfImage(
+                image_key=image_key,
+                href=image_key,
+                media_type=self._guess_media_type(str(ext) if ext else None),
+                byte_length=len(raw_image_bytes),
+                data=bytes(raw_image_bytes),
+            )
+
+        return None
+
+    def _block_matches_embedded_aspect_ratio(
+        self,
+        block: dict[str, Any],
+        bbox: tuple[float, float, float, float],
+    ) -> bool:
+        source_width = self._parse_positive_float(block.get("width"))
+        source_height = self._parse_positive_float(block.get("height"))
+        if source_width is None or source_height is None:
+            return True
+
+        bbox_width = max(float(bbox[2] - bbox[0]), 0.0)
+        bbox_height = max(float(bbox[3] - bbox[1]), 0.0)
+        if bbox_width <= 0 or bbox_height <= 0:
+            return False
+
+        source_ratio = source_width / source_height
+        bbox_ratio = bbox_width / bbox_height
+
+        return abs(source_ratio - bbox_ratio) <= IMAGE_ASPECT_RATIO_TOLERANCE
+
+    def _parse_positive_int(self, value: Any) -> int | None:
+        try:
+            parsed = int(value)
+        except (TypeError, ValueError):
+            return None
+        return parsed if parsed > 0 else None
+
+    def _parse_positive_float(self, value: Any) -> float | None:
+        try:
+            parsed = float(value)
+        except (TypeError, ValueError):
+            return None
+        return parsed if parsed > 0 else None
 
     def render_cover_image(
         self,

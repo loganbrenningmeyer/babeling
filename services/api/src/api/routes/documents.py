@@ -36,6 +36,7 @@ from api.schemas.documents import (
     DocumentSectionOut,
     DocumentTextSaveRequest,
 )
+from api.utils import strip_control_chars
 
 from api.parsing.epub import EpubDocument, EpubParser, EpubPage
 from api.parsing.pdf import PdfDocument, PdfParser, PdfPage
@@ -43,13 +44,8 @@ from api.parsing.pdf import PdfDocument, PdfParser, PdfPage
 
 router = APIRouter(prefix="/documents", tags=["documents"])
 
-def _strip_nul_bytes(text: str | None) -> str | None:
-    if text is None:
-        return None
-    return text.replace("\x00", "")
-
 def _normalize_text_for_hash(text: str) -> str:
-    return _strip_nul_bytes(text).replace("\r\n", "\n").replace("\r", "\n").strip()
+    return (strip_control_chars(text) or "").replace("\r\n", "\n").replace("\r", "\n").strip()
 
 
 def _text_sha256(text: str) -> str:
@@ -551,12 +547,12 @@ def _save_pdf_document(
     # -------------------------
     pdf_pages = pdf_doc.pages
 
-    full_src_text = _strip_nul_bytes(pdf_doc.get_full_text()) or ""
-    sanitized_title = _strip_nul_bytes(title) or title
-    sanitized_source_filename = _strip_nul_bytes(source_filename)
-    sanitized_source_file_title = _strip_nul_bytes(pdf_doc.title)
-    sanitized_source_file_author = _strip_nul_bytes(pdf_doc.author)
-    sanitized_source_file_language = _strip_nul_bytes(pdf_doc.language)
+    full_src_text = strip_control_chars(pdf_doc.get_full_text()) or ""
+    sanitized_title = strip_control_chars(title) or title
+    sanitized_source_filename = strip_control_chars(source_filename)
+    sanitized_source_file_title = strip_control_chars(pdf_doc.title)
+    sanitized_source_file_author = strip_control_chars(pdf_doc.author)
+    sanitized_source_file_language = strip_control_chars(pdf_doc.language)
 
     # -------------------------
     # Compute text / file hashes
@@ -668,7 +664,7 @@ def _save_pdf_document(
             row = DocumentSection(
                 document_id=doc.id,
                 section_key=sec.key,
-                title=_strip_nul_bytes(sec.title) or "",
+                title=strip_control_chars(sec.title) or "",
                 depth=sec.depth,
                 parent_section_id=None,
                 order_index=sec.order_index,
@@ -703,7 +699,7 @@ def _save_pdf_document(
             page_row = DocumentPage(
                 document_id=doc.id,
                 page_number=page.page_number,
-                src_text=_strip_nul_bytes(page.get_page_text()) or "",
+                src_text=strip_control_chars(page.get_page_text()) or "",
                 section_id=sec_id_by_key.get(page.section_key),
                 section_page_index=page.section_page_index,
             )
@@ -725,7 +721,7 @@ def _save_pdf_document(
                 # Text block
                 # -------------------------
                 if block.type == "text":
-                    text = (_strip_nul_bytes(block.text) or "").strip()
+                    text = (strip_control_chars(block.text) or "").strip()
                     if not text:
                         continue
 
@@ -763,7 +759,7 @@ def _save_pdf_document(
                             tag=None,
                             text=None,
                             document_image_id=img_fk,
-                            alt=_strip_nul_bytes(block.alt),
+                            alt=strip_control_chars(block.alt),
                             char_start=None,
                             char_end=None,
                         )

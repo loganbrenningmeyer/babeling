@@ -6,14 +6,23 @@ import { ChevronLeft, ChevronRight, Book, Repeat } from "lucide-react";
 import type { LoadedDocumentImage, SavedPage } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
-import { LangLabels, toUiLang, type UiLang, type messages } from "@/app/i18n/messages";
+import {
+  LangLabels,
+  toUiLang,
+  type UiLang,
+  type messages,
+} from "@/app/i18n/messages";
 
 import { ParagraphGrid } from "@/app/(protected)/documents/feature/components/Reader/ParagraphGrid";
 import { TextSurface } from "@/app/components/TextSurface";
 import { TextSkeleton } from "@/app/(protected)/documents/feature/components/Reader/TextSkeleton";
 import { AnchoredPopover } from "@/app/(protected)/documents/feature/components/Annotate/AnchoredPopover";
 import { ExplainSkeleton } from "@/app/(protected)/documents/feature/components/Annotate/AnnotateSkeleton";
-import { AnnotateCard, type DefineEntry, type ExplainEntry } from "@/app/(protected)/documents/feature/components/Annotate/AnnotateCard";
+import {
+  AnnotateCard,
+  type DefineEntry,
+  type ExplainEntry,
+} from "@/app/(protected)/documents/feature/components/Annotate/AnnotateCard";
 import { SourceBlurButton } from "@/app/(protected)/documents/feature/components/SourceBlur/SourceBlurButton";
 import { BlurModeToggle } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import { HelpPopover } from "@/app/(protected)/documents/feature/components/HelpInfo/HelpPopover";
@@ -44,14 +53,16 @@ type ReaderShellProps = {
   blurMode: BlurMode;
   onBlurModeChange: (m: BlurMode) => void;
 
-  // Show / hide original 
+  // Show / hide original
   sourceBlurEnabled: boolean;
   onSourceBlurEnabledChange: (v: boolean) => void;
 
   interaction: {
     // ParagraphGrid
     blurredSource: Set<number>;
-    setBlurredSource: (updater: Set<number> | ((prev: Set<number>) => Set<number>)) => void;
+    setBlurredSource: (
+      updater: Set<number> | ((prev: Set<number>) => Set<number>)
+    ) => void;
 
     sourceHighlightIndices: number[];
     targetHighlightIndices: number[];
@@ -77,7 +88,6 @@ type ReaderShellProps = {
   // UI language messages
   msgs: ReaderMsgs;
 };
-
 
 export function ReaderShell({
   srcLang,
@@ -136,7 +146,6 @@ export function ReaderShell({
   const gap = 28;
   const gapAndPad = layoutPresets[gap] ?? layoutPresets[16];
 
-
   return (
     <div className="h-full flex flex-col overflow-hidden">
       <TextSurface className="flex-1 min-h-0 flex flex-col overflow-hidden">
@@ -146,8 +155,8 @@ export function ReaderShell({
             className="pointer-events-none absolute inset-y-0 left-1/2 border-l border-border/60"
           />
           {/* -------------------------
-          * Swap Source / Target Languages Button
-          * ------------------------- */}
+           * Swap Source / Target Languages Button
+           * ------------------------- */}
           <Button
             type="button"
             variant="outline"
@@ -169,8 +178,8 @@ export function ReaderShell({
             <Repeat className="h-4 w-4" />
           </Button>
           {/* -------------------------
-          * Source / Target Language Headers
-          * ------------------------- */}
+           * Source / Target Language Headers
+           * ------------------------- */}
           <div
             className={`
               shrink-0 grid grid-cols-2 border-b
@@ -180,12 +189,12 @@ export function ReaderShell({
             `}
           >
             {/* -------------------------
-            * Source Langugage Header
-            * ------------------------- */}
+             * Source Langugage Header
+             * ------------------------- */}
             <div className="pt-4 pb-3">
               <div className="relative flex items-center justify-center">
                 <div className="flex justify-center">
-                  <div 
+                  <div
                     className={`
                       rounded-md border px-2 py-1
                       text-md font-ui
@@ -197,8 +206,8 @@ export function ReaderShell({
                   </div>
                 </div>
                 {/* -------------------------
-                * Source Show / Hide Button
-                * ------------------------- */}
+                 * Source Show / Hide Button
+                 * ------------------------- */}
                 <div className="absolute right-0 top-1/2 -translate-y-1/2">
                   <SourceBlurButton
                     value={sourceBlurEnabled}
@@ -210,11 +219,11 @@ export function ReaderShell({
               </div>
             </div>
             {/* -------------------------
-            * Target Language Header
-            * ------------------------- */}
+             * Target Language Header
+             * ------------------------- */}
             <div className="pt-4 pb-3">
               <div className="flex justify-center">
-                <div 
+                <div
                   className={`
                     inline-flex items-center
                     rounded-md border px-2 py-1
@@ -230,17 +239,25 @@ export function ReaderShell({
           </div>
 
           {/* -------------------------
-          * [Source] | [Target] ParagraphGrid
-          * ------------------------- */}
-          <div className="relative flex-1 min-w-0 min-h-0 overflow-y-auto no-scrollbar">
+           * [Source] | [Target] ParagraphGrid
+           * ------------------------- */}
+          <div className="relative flex-1 min-w-0 min-h-0 overflow-hidden">
             {/* -------------------------
             //* Loading Skeleton || Translation Preview || ParagraphGrid
             //* ------------------------- */}
-            <div className="min-h-full">
+            <div className="h-full">
               {renderLoading ? (
-                <div className={`grid grid-cols-2 pt-4 pb-8 ${gapAndPad}`}>
-                  <div><TextSkeleton blurClassName="blur-sm" /></div>
-                  <div><TextSkeleton /></div>
+                <div className="h-full overflow-y-auto overscroll-y-contain no-scrollbar">
+                  <div
+                    className={`grid min-h-full grid-cols-2 pt-4 pb-8 ${gapAndPad}`}
+                  >
+                    <div>
+                      <TextSkeleton blurClassName="blur-sm" />
+                    </div>
+                    <div>
+                      <TextSkeleton />
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <ParagraphGrid
@@ -250,8 +267,12 @@ export function ReaderShell({
                   pageBlocks={currentPage?.blocks ?? []}
                   documentImages={documentImages}
                   blurMode={blurMode}
-                  blurredSource={sourceBlurEnabled ? interaction.blurredSource : new Set()}
-                  setBlurredSource={sourceBlurEnabled ? interaction.setBlurredSource : () => {}}
+                  blurredSource={
+                    sourceBlurEnabled ? interaction.blurredSource : new Set()
+                  }
+                  setBlurredSource={
+                    sourceBlurEnabled ? interaction.setBlurredSource : () => {}
+                  }
                   sourceHighlightIndices={interaction.sourceHighlightIndices}
                   targetHighlightIndices={interaction.targetHighlightIndices}
                   sourceHighlightClassName={sourcePane.colors.highlight}
@@ -269,17 +290,17 @@ export function ReaderShell({
         </div>
 
         {/* -------------------------
-        * Footer
-        * ------------------------- */}
+         * Footer
+         * ------------------------- */}
         <div className="shrink-0 border-t px-4 py-3">
           <div className="grid grid-cols-[auto_1fr_auto_1fr_auto] items-center gap-3">
             {/* -------------------------
-            * Previous Page
-            * ------------------------- */}
-            <Button 
-              type="button" 
-              size="icon" 
-              onClick={onPrevPage} 
+             * Previous Page
+             * ------------------------- */}
+            <Button
+              type="button"
+              size="icon"
+              onClick={onPrevPage}
               disabled={pageIndex <= 0}
               className="
                 bg-muted/60
@@ -292,36 +313,35 @@ export function ReaderShell({
               <ChevronLeft className="h-4 w-4" />
             </Button>
             {/* -------------------------
-            * Blur-mode Toggle
-            * ------------------------- */}
+             * Blur-mode Toggle
+             * ------------------------- */}
             <div className="inline-flex items-center justify-center gap-3">
-              <span
-                className="text-sm text-muted-foreground"
-              >
+              <span className="text-sm text-muted-foreground">
                 {msgs.footer.blur}
               </span>
               <BlurModeToggle value={blurMode} onChange={onBlurModeChange} />
             </div>
             {/* -------------------------
-            * Page Counter
-            * ------------------------- */}
+             * Page Counter
+             * ------------------------- */}
             <div className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground">
-              <Book size={14}/>
-              {msgs.toc.pageSingleAbbrev} {pageCount > 0 ? pageIndex + 1 : 0} / {pageCount}
+              <Book size={14} />
+              {msgs.toc.pageSingleAbbrev} {pageCount > 0 ? pageIndex + 1 : 0} /{" "}
+              {pageCount}
             </div>
             {/* -------------------------
-            * Help Popover
-            * ------------------------- */}
+             * Help Popover
+             * ------------------------- */}
             <div className="flex justify-start">
               <HelpPopover />
             </div>
             {/* -------------------------
-            * Next Page
-            * ------------------------- */}
-            <Button 
-              type="button" 
-              size="icon" 
-              onClick={onNextPage} 
+             * Next Page
+             * ------------------------- */}
+            <Button
+              type="button"
+              size="icon"
+              onClick={onNextPage}
               disabled={pageIndex >= pageCount - 1}
               className="
                 bg-muted/60
@@ -339,8 +359,8 @@ export function ReaderShell({
       </TextSurface>
 
       {/* -------------------------
-      * Annotation Popover
-      * ------------------------- */}
+       * Annotation Popover
+       * ------------------------- */}
       <AnchoredPopover
         open={interaction.popoverOpen}
         onOpenChange={interaction.onPopoverOpenChange}

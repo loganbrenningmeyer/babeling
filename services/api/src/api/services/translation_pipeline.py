@@ -1,5 +1,3 @@
-from pydantic import BaseModel
-
 from api.services.segmenter import get_segmenter
 from api.services.gemini import get_gemini
 from babeling_nlp.schemas.translate import (
@@ -13,6 +11,7 @@ from api.schemas.translate import (
     TranslateParagraph,
     TranslateResponse,
 )
+from api.utils import strip_control_chars
 
 
 def build_target_text(response: TranslationResponsePayload) -> str:
@@ -120,13 +119,17 @@ def run_translation_pipeline(source_text: str, src_lang: str, tgt_lang: str) -> 
     # -------------------------
     # Build TranslationRequestPayload
     # -------------------------
-    request = build_translation_request(source_text, src_lang)
+    sanitized_source_text = strip_control_chars(source_text) or ""
+    request = build_translation_request(sanitized_source_text, src_lang)
 
     # -------------------------
     # Load Gemini model / translate
     # -------------------------
     gemini = get_gemini(src_lang, tgt_lang)
     response: TranslationResponsePayload = gemini.translate_segmented(request)
+
+    if response is None:
+        raise ValueError("Gemini returned no structured translation payload")
 
     # -------------------------
     # Validate paragraph / sentence alignment
@@ -142,7 +145,7 @@ def run_translation_pipeline(source_text: str, src_lang: str, tgt_lang: str) -> 
     paragraphs = build_translate_paragraphs(request, response)
 
     return TranslateResponse(
-        source_text=source_text,
+        source_text=sanitized_source_text,
         target_text=target_text,
         paragraphs=paragraphs,
     )

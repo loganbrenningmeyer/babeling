@@ -11,11 +11,8 @@ export default async function ReaderPage({
   const sp = await searchParams;
 
   return (
-    <div className="mx-auto h-[calc(100dvh-4rem)] w-full overflow-hidden">
-      <ReaderPageClient
-        documentId={documentId}
-        searchParams={sp}
-      />
+    <div className="fixed inset-x-0 bottom-0 top-[65px] overflow-hidden bg-background">
+      <ReaderPageClient documentId={documentId} searchParams={sp} />
     </div>
-  )
+  );
 }

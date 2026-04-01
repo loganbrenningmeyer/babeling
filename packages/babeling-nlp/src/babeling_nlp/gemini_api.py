@@ -2,7 +2,6 @@ import os
 import json
 from google import genai
 from google.genai import types
-from pydantic import BaseModel
 from textwrap import dedent
 
 from babeling_nlp.define import get_lemma_ipa, get_form_ipa
@@ -11,7 +10,7 @@ from babeling_nlp.schemas.translate import (
     TranslationRequestPayload,
     TranslationResponsePayload,
 )
-from babeling_nlp.schemas.annotate import ExplainExample, ExplainDefineOut
+from babeling_nlp.schemas.annotate import ExplainDefineOut
 
 
 class GeminiAPI:
@@ -34,7 +33,7 @@ class GeminiAPI:
 
         return response.text.strip()
     
-    def translate_segmented(self, request: TranslationRequestPayload):
+    def translate_segmented(self, request: TranslationRequestPayload) -> TranslationResponsePayload:
         response = self.client.models.generate_content(
             model="gemini-3-flash-preview",
             contents=request.model_dump_json(),
@@ -46,10 +45,17 @@ class GeminiAPI:
             ),
         )
 
-        if hasattr(response, "parsed"):
-            return response.parsed
-        else:
-            return TranslationResponsePayload.model_validate_json(response.text)
+        parsed = getattr(response, "parsed", None)
+        if parsed is not None:
+            if isinstance(parsed, TranslationResponsePayload):
+                return parsed
+            return TranslationResponsePayload.model_validate(parsed)
+
+        raw_text = getattr(response, "text", None)
+        if raw_text:
+            return TranslationResponsePayload.model_validate_json(raw_text)
+
+        raise ValueError("Gemini returned no translation payload")
 
     def annotate(
         self,

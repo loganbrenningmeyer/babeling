@@ -7,10 +7,7 @@ import { Separator } from "@/components/ui/separator";
 
 import { HoverText } from "@/app/(protected)/documents/feature/components/HoverText/HoverText";
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
-import type {
-  LoadedDocumentImage,
-  SavedPageBlock,
-} from "../../types/document";
+import type { LoadedDocumentImage, SavedPageBlock } from "../../types/document";
 import type { ReaderSession } from "../../types/readerSession";
 
 type ParagraphGridProps = {
@@ -70,7 +67,7 @@ const IMAGE_MAX_WIDTH_RATIO = 0.8;
 function sliceWordsSpaces(
   words: string[],
   spaces: string[],
-  idxs?: number[],
+  idxs?: number[]
 ): TextSlice | null {
   if (!idxs?.length) return null;
 
@@ -130,7 +127,7 @@ function buildTgtParToWordIds(session: ReaderSession) {
 
 function buildRows(
   pageBlocks: SavedPageBlock[],
-  orderedParIds: number[],
+  orderedParIds: number[]
 ): ReaderRow[] {
   // -------------------------
   // No saved page blocks:
@@ -145,7 +142,9 @@ function buildRows(
   }
 
   const rows: ReaderRow[] = [];
-  const sortedBlocks = [...pageBlocks].sort((a, b) => a.blockIndex - b.blockIndex);
+  const sortedBlocks = [...pageBlocks].sort(
+    (a, b) => a.blockIndex - b.blockIndex
+  );
   let textRowIndex = 0;
 
   // -------------------------
@@ -221,15 +220,15 @@ export function ParagraphGrid({
   // -------------------------
   // Derived render helpers
   // -------------------------
-  const orderedParIds = useMemo(
-    () => buildOrderedParIds(session),
-    [session],
-  );
+  const orderedParIds = useMemo(() => buildOrderedParIds(session), [session]);
 
-  const tgtParToWordIds = useMemo(() => buildTgtParToWordIds(session), [session]);
+  const tgtParToWordIds = useMemo(
+    () => buildTgtParToWordIds(session),
+    [session]
+  );
   const imageIds = useMemo(
     () => new Set(documentImages.map((image) => image.id)),
-    [documentImages],
+    [documentImages]
   );
   const rootRef = useRef<HTMLDivElement | null>(null);
   const [gridWidth, setGridWidth] = useState<number | null>(null);
@@ -238,7 +237,7 @@ export function ParagraphGrid({
   >({});
   const rows = useMemo(
     () => buildRows(pageBlocks, orderedParIds),
-    [pageBlocks, orderedParIds],
+    [pageBlocks, orderedParIds]
   );
   const maxImageWidth = gridWidth
     ? Math.max(gridWidth * IMAGE_MAX_WIDTH_RATIO, 0)
@@ -263,171 +262,186 @@ export function ParagraphGrid({
   }, []);
 
   return (
-    <div ref={rootRef} className={cn("relative min-h-full py-8", className)}>
-      {rows.map((row, idx) => {
-        // -------------------------
-        // Image row
-        // -------------------------
-        if (row.kind === "image") {
-          // Skip stale references if the page points at an image that was not loaded
-          if (!imageIds.has(row.imageId)) return null;
+    <div
+      ref={rootRef}
+      className={cn(
+        "relative h-full overflow-y-auto overscroll-y-contain no-scrollbar",
+        className
+      )}
+    >
+      <div className="min-h-full py-8">
+        {rows.map((row, idx) => {
+          // -------------------------
+          // Image row
+          // -------------------------
+          if (row.kind === "image") {
+            // Skip stale references if the page points at an image that was not loaded
+            if (!imageIds.has(row.imageId)) return null;
 
-          const naturalSize = imageNaturalSizes[row.imageId];
-          const renderedWidth =
-            naturalSize && maxImageWidth
-              ? Math.round(
-                  naturalSize.width *
-                    Math.min(
-                      maxImageWidth / naturalSize.width,
-                      IMAGE_MAX_HEIGHT_PX / naturalSize.height,
-                    ),
-                )
-              : null;
+            const naturalSize = imageNaturalSizes[row.imageId];
+            const renderedWidth =
+              naturalSize && maxImageWidth
+                ? Math.round(
+                    naturalSize.width *
+                      Math.min(
+                        maxImageWidth / naturalSize.width,
+                        IMAGE_MAX_HEIGHT_PX / naturalSize.height
+                      )
+                  )
+                : null;
 
-          return (
-            <React.Fragment key={row.key}>
-              <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-                <div className="col-span-2 flex justify-center py-2">
-                  <figure 
-                    className="
+            return (
+              <React.Fragment key={row.key}>
+                <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
+                  <div className="col-span-2 flex justify-center py-2">
+                    <figure
+                      className="
                       mx-auto flex max-w-full flex-col
                       gap-3 overflow-hidden rounded-xl
                       border border-border bg-background p-3
                     "
-                    style={renderedWidth ? { width: `${renderedWidth}px` } : undefined}
-                  >
-                    {/* -------------------------
-                    * Get image data from database by imageId
-                    * -- /api/documents/[documentId]/images/[imageId]
-                    * ------------------------- */}
-                    <img
-                      src={`/api/documents/${documentId}/images/${row.imageId}`}
-                      alt={row.alt ?? ""}
-                      loading="lazy"
-                      onLoad={(event) => {
-                        const { naturalWidth, naturalHeight } = event.currentTarget;
-                        if (!naturalWidth || !naturalHeight) return;
+                      style={
+                        renderedWidth
+                          ? { width: `${renderedWidth}px` }
+                          : undefined
+                      }
+                    >
+                      {/* -------------------------
+                       * Get image data from database by imageId
+                       * -- /api/documents/[documentId]/images/[imageId]
+                       * ------------------------- */}
+                      <img
+                        src={`/api/documents/${documentId}/images/${row.imageId}`}
+                        alt={row.alt ?? ""}
+                        loading="lazy"
+                        onLoad={(event) => {
+                          const { naturalWidth, naturalHeight } =
+                            event.currentTarget;
+                          if (!naturalWidth || !naturalHeight) return;
 
-                        setImageNaturalSizes((prev) => {
-                          const prevSize = prev[row.imageId];
-                          if (
-                            prevSize?.width === naturalWidth &&
-                            prevSize?.height === naturalHeight
-                          ) {
-                            return prev;
-                          }
+                          setImageNaturalSizes((prev) => {
+                            const prevSize = prev[row.imageId];
+                            if (
+                              prevSize?.width === naturalWidth &&
+                              prevSize?.height === naturalHeight
+                            ) {
+                              return prev;
+                            }
 
-                          return {
-                            ...prev,
-                            [row.imageId]: {
-                              width: naturalWidth,
-                              height: naturalHeight,
-                            },
-                          };
-                        });
-                      }}
-                      className="mx-auto block h-auto max-h-[25rem] w-full rounded-md"
-                    />
-                  </figure>
+                            return {
+                              ...prev,
+                              [row.imageId]: {
+                                width: naturalWidth,
+                                height: naturalHeight,
+                              },
+                            };
+                          });
+                        }}
+                        className="mx-auto block h-auto max-h-[25rem] w-full rounded-md"
+                      />
+                    </figure>
+                  </div>
+                </div>
+
+                {idx < rows.length - 1 && (
+                  <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
+                    <div className="col-span-2 py-4">
+                      <Separator />
+                    </div>
+                  </div>
+                )}
+              </React.Fragment>
+            );
+          }
+
+          // -------------------------
+          // Text row
+          // -- Render the next aligned source/target paragraph pair
+          // -------------------------
+          const srcIdxs = session.alignment.src.parToWordIds[row.parId];
+          const srcSlice = sliceWordsSpaces(
+            session.alignment.src.words,
+            session.alignment.src.spaces,
+            srcIdxs
+          );
+
+          if (!srcSlice) return null;
+
+          // Paragraph spacing is handled by the grid row, not by trailing linebreaks
+          srcSlice.spaces = stripTrailingParagraphBreak(srcSlice.spaces);
+
+          const tgtSlice =
+            sliceWordsSpaces(
+              session.alignment.tgt.words,
+              session.alignment.tgt.spaces,
+              tgtParToWordIds[row.parId]
+            ) ?? emptyTextSlice();
+
+          tgtSlice.spaces = stripTrailingParagraphBreak(tgtSlice.spaces);
+
+          const sourceBlock = isSwapped
+            ? session.alignment.tgt
+            : session.alignment.src;
+          const sourceSlice = isSwapped ? tgtSlice : srcSlice;
+          const targetSlice = isSwapped ? srcSlice : tgtSlice;
+
+          return (
+            <React.Fragment key={row.key}>
+              <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
+                <div>
+                  <HoverText
+                    words={sourceSlice.words}
+                    spaces={sourceSlice.spaces}
+                    indexOffset={sourceSlice.offset}
+                    onHover={onSourceHover}
+                    highlightClassName={sourceHighlightClassName}
+                    highlightIndices={sourceHighlightIndices}
+                    blur={{
+                      mode: blurMode,
+                      sentIds: sourceBlock.sentIds,
+                      parIds: sourceBlock.parIds,
+                      sentToWordIds: sourceBlock.sentToWordIds,
+                      parToWordIds: sourceBlock.parToWordIds,
+                      blurred: blurredSource,
+                      setBlurred: setBlurredSource,
+                    }}
+                    indentFirstLine={true}
+                    className="text-muted-foreground"
+                  />
+                </div>
+
+                <div>
+                  <HoverText
+                    words={targetSlice.words}
+                    spaces={targetSlice.spaces}
+                    indexOffset={targetSlice.offset}
+                    disabled={targetDisabled}
+                    onHover={onTargetHover}
+                    highlightClassName={targetHighlightClassName}
+                    highlightIndices={targetHighlightIndices}
+                    onWordClick={onTargetWordClick}
+                    indentFirstLine={true}
+                  />
                 </div>
               </div>
 
+              {/* -------------------------
+               * Paragraph Separator Lines
+               * ------------------------- */}
               {idx < rows.length - 1 && (
                 <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-                  <div className="col-span-2 py-4">
+                  <div className="py-4">
+                    <Separator />
+                  </div>
+                  <div className="py-4">
                     <Separator />
                   </div>
                 </div>
               )}
             </React.Fragment>
           );
-        }
-
-        // -------------------------
-        // Text row
-        // -- Render the next aligned source/target paragraph pair
-        // -------------------------
-        const srcIdxs = session.alignment.src.parToWordIds[row.parId];
-        const srcSlice = sliceWordsSpaces(
-          session.alignment.src.words,
-          session.alignment.src.spaces,
-          srcIdxs,
-        );
-
-        if (!srcSlice) return null;
-
-        // Paragraph spacing is handled by the grid row, not by trailing linebreaks
-        srcSlice.spaces = stripTrailingParagraphBreak(srcSlice.spaces);
-
-        const tgtSlice =
-          sliceWordsSpaces(
-            session.alignment.tgt.words,
-            session.alignment.tgt.spaces,
-            tgtParToWordIds[row.parId],
-          ) ?? emptyTextSlice();
-
-        tgtSlice.spaces = stripTrailingParagraphBreak(tgtSlice.spaces);
-
-        const sourceBlock = isSwapped ? session.alignment.tgt : session.alignment.src;
-        const sourceSlice = isSwapped ? tgtSlice : srcSlice;
-        const targetSlice = isSwapped ? srcSlice : tgtSlice;
-
-        return (
-          <React.Fragment key={row.key}>
-            <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-              <div>
-                <HoverText
-                  words={sourceSlice.words}
-                  spaces={sourceSlice.spaces}
-                  indexOffset={sourceSlice.offset}
-                  onHover={onSourceHover}
-                  highlightClassName={sourceHighlightClassName}
-                  highlightIndices={sourceHighlightIndices}
-                  blur={{
-                    mode: blurMode,
-                    sentIds: sourceBlock.sentIds,
-                    parIds: sourceBlock.parIds,
-                    sentToWordIds: sourceBlock.sentToWordIds,
-                    parToWordIds: sourceBlock.parToWordIds,
-                    blurred: blurredSource,
-                    setBlurred: setBlurredSource,
-                  }}
-                  indentFirstLine={true}
-                  className="text-muted-foreground"
-                />
-              </div>
-
-              <div>
-                <HoverText
-                  words={targetSlice.words}
-                  spaces={targetSlice.spaces}
-                  indexOffset={targetSlice.offset}
-                  disabled={targetDisabled}
-                  onHover={onTargetHover}
-                  highlightClassName={targetHighlightClassName}
-                  highlightIndices={targetHighlightIndices}
-                  onWordClick={onTargetWordClick}
-                  indentFirstLine={true}
-                />
-              </div>
-            </div>
-
-            {/* -------------------------
-            * Paragraph Separator Lines
-            * ------------------------- */}
-            {idx < rows.length - 1 && (
-              <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-                <div className="py-4">
-                  <Separator />
-                </div>
-                <div className="py-4">
-                  <Separator />
-                </div>
-              </div>
-            )}
-          </React.Fragment>
-        );
-      })}
+        })}
+      </div>
     </div>
   );
 }
