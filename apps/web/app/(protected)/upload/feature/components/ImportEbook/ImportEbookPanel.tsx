@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { BookSearch, ChevronLeft, ChevronRight, Loader2, Search, UserRoundPen } from "lucide-react";
+import { BookText, BookSearch, ChevronLeft, ChevronRight, Loader2, Search, UserRoundPen } from "lucide-react";
 
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
@@ -159,7 +159,7 @@ export function ImportEbookPanel({
                 pointer-events-none
               "
             >
-              <BookSearch className="h-4 w-4" />
+              <BookText className="h-4 w-4" />
             </div>
             <Input
               placeholder={msgs.searchBy}

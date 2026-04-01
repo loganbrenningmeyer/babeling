@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
-import { Clipboard, FileUp, BookDown } from "lucide-react";
+import { Clipboard, FileUp, BookDown, BookSearch } from "lucide-react";
 
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -129,7 +129,7 @@ export function TabbedInputCard({
               * Gutenberg Ebook Import
               * ------------------------- */}
               <TabsTrigger value="import" className={tabClassName}>
-                <BookDown className="h-4 w-4" />
+                <BookSearch className="h-4 w-4" />
                 {uploadMsgs.tabs.importEbook}
               </TabsTrigger>
               {/* -------------------------
