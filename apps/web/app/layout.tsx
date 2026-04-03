@@ -7,7 +7,7 @@ import { UserPreferencesProvider } from "@/components/UserPreferencesProvider";
 import { AppNav } from "@/components/AppNav";
 import { getInitialTheme } from "@/lib/server-api";
 
-import { DM_Sans, Lora } from "next/font/google";
+import { DM_Sans, Lora, Libre_Baskerville, IBM_Plex_Serif } from "next/font/google";
 
 
 // -------------------------

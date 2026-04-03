@@ -34,7 +34,7 @@ export function HighlightedTokenSlice({
             >
               {word}
             </span>
-              {space}
+            {space}
           </span>
         );
       })}

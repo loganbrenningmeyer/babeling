@@ -12,6 +12,10 @@ import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glo
 import { useMessages } from "@/app/hooks/useMessages";
 
 
+/**************************
+ * `RecognitionCard()`
+ * -- Simple flashcard with word on front, definition on back
+ **************************/
 export function RecognitionCard({
   glossaryItem,
 }: {
@@ -30,7 +34,7 @@ export function RecognitionCard({
       }}
       className="mx-auto w-full max-w-xl text-left"
     >
-      <div className="relative aspect-[5/4] w-full [perspective:1200px]">
+      <div className="relative aspect-[4/3] w-full [perspective:1200px]">
         <motion.div
           animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}

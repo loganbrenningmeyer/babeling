@@ -62,7 +62,7 @@ export function ThemeToggle() {
               -translate-y-1/2
             `,
             isDark
-              ? "translate-x-[1.5rem] bg-sky-500/60 text-slate-950"
+              ? "translate-x-[1.5rem] bg-blue-800/60 text-slate-400/70"
               : "translate-x-0 bg-amber-400/60 text-amber-950"
           )}
         >
