@@ -2,30 +2,32 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from "@/components/ui/select";
 import { ArrowRight, Clock, Repeat } from "lucide-react";
 
 import { CreateDocumentInput, useCreateDocument } from "./feature/hooks/useCreateDocument";
-import { useRecentDocuments } from "../library/feature/hooks/useRecentDocuments";
 
 // =========================
 // ( User Information / UI Language Providers & Helpers )
 // =========================
 import { useUserPreferences } from "@/components/UserPreferencesProvider";
 import { useMessages } from "@/app/hooks/useMessages";
+import { toUiLang } from "@/app/i18n/messages";
 
 // =========================
 // ( Components )
 // =========================
+import { LangBadge } from "@/app/components/LangBadge";
 import { TabbedInputCard } from "./feature/components/TabbedInputCard";
-import { RecentDocumentsPanel } from "./feature/components/RecentDocumentsPanel";
+import { Separator } from "@/components/ui/separator";
+import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
 export default function UploadPage() {
   const router = useRouter();
@@ -45,14 +47,9 @@ export default function UploadPage() {
   const m = useMessages();
 
   // -------------------------
-  // Load document creation hook / recent documents hook
+  // Load document creation hook
   // -------------------------
   const { create, creating, error: createError } = useCreateDocument();
-  const {
-    documents: recentDocuments,
-    loading: recentLoading,
-    error: recentError,
-  } = useRecentDocuments({ limit: 3 });
 
   // -------------------------
   // Set source / target language codes & labels
@@ -62,6 +59,20 @@ export default function UploadPage() {
 
   const srcLang = localSrcLang ?? prefSrcLang ?? "en";
   const tgtLang = localTgtLang ?? prefTgtLang ?? "es";
+  const fallbackLangColors = {
+    border: "border-foreground/20",
+    focusBorder: "focus-visible:border-foreground/20 dark:focus-visible:border-foreground/20",
+  };
+
+  function getSelectBorderClasses(lang: string) {
+    const colors = LANG_COLOR_BY_CODE[toUiLang(lang)];
+    if (!colors) return fallbackLangColors;
+
+    return {
+      border: colors.border,
+      focusBorder: colors.border.replaceAll("border-", "focus-visible:border-"),
+    };
+  }
 
   // -------------------------
   // Upload File Information
@@ -85,6 +96,9 @@ export default function UploadPage() {
     srcText.trim().length > 0 ||
     !!srcFile ||
     !!selectedGutenbergBook?.epubUrl;
+
+  const srcSelectColors = getSelectBorderClasses(srcLang);
+  const tgtSelectColors = getSelectBorderClasses(tgtLang);
 
   /**************************
    * `handleSwapLanguages()`
@@ -294,7 +308,27 @@ export default function UploadPage() {
       {/* -------------------------
        * Source / Target Language Selection
        * ------------------------- */}
-      <div className="font-ui mt-10">
+      <div 
+        className="
+          flex flex-col gap-4
+          rounded-xl p-4 
+          border border-foreground/20 shadow-sm
+          bg-card
+          font-ui mt-10
+        "
+      >
+        {/* -------------------------
+        //* Reading direction info
+        //* ------------------------- */} 
+        <div className="flex flex-col gap-2 font-ui">
+          <h2 className="text-sm font-semibold uppercase tracking-widest">
+            {m.upload.readingDirection}
+          </h2>
+          <p className="text-sm">{m.upload.readingDirectionInfo}</p>
+        </div>
+
+        <Separator />
+
         <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
           {/* -------------------------
            * Source Language
@@ -304,8 +338,24 @@ export default function UploadPage() {
               {m.upload.sourceLang}
             </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
-              <SelectTrigger className="w-full bg-card">
-                <SelectValue />
+              <SelectTrigger
+                className={cn(
+                  "w-full bg-background/60 py-8",
+                  srcSelectColors.border,
+                  srcSelectColors.focusBorder,
+                )}
+              >
+                <div className="flex w-full items-center justify-between gap-3 pr-2">
+                  <div className="flex min-w-0 flex-col items-start leading-4">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {m.upload.from}
+                    </span>
+                    <span className="truncate text-lg font-semibold">
+                      {m.langs[toUiLang(srcLang)]}
+                    </span>
+                  </div>
+                  <LangBadge lang={srcLang} className="shrink-0" />
+                </div>
               </SelectTrigger>
               <SelectContent position="popper" align="start">
                 {LANGS.map((l) => (
@@ -314,7 +364,10 @@ export default function UploadPage() {
                     value={l}
                     disabled={l === tgtLang}
                   >
-                    {m.langs[l]}
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span>{m.langs[toUiLang(l)]}</span>
+                      <LangBadge lang={l} className="shrink-0" />
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -355,8 +408,24 @@ export default function UploadPage() {
               {m.upload.targetLang}
             </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
-              <SelectTrigger className="w-full bg-card">
-                <SelectValue />
+              <SelectTrigger
+                className={cn(
+                  "w-full bg-background/60 py-8",
+                  tgtSelectColors.border,
+                  tgtSelectColors.focusBorder,
+                )}
+              >
+                <div className="flex w-full items-center justify-between gap-3 pr-2">
+                  <div className="flex min-w-0 flex-col items-start leading-4">
+                    <span className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      {m.upload.to}
+                    </span>
+                    <span className="truncate text-lg font-semibold">
+                      {m.langs[toUiLang(tgtLang)]}
+                    </span>
+                  </div>
+                  <LangBadge lang={tgtLang} className="shrink-0" />
+                </div>
               </SelectTrigger>
               <SelectContent position="popper" align="start">
                 {LANGS.map((l) => (
@@ -365,7 +434,10 @@ export default function UploadPage() {
                     value={l}
                     disabled={l === srcLang}
                   >
-                    {m.langs[l]}
+                    <span className="flex w-full items-center justify-between gap-3">
+                      <span>{m.langs[toUiLang(l)]}</span>
+                      <LangBadge lang={l} className="shrink-0" />
+                    </span>
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -428,27 +500,6 @@ export default function UploadPage() {
           )}
         </Button>
       </div>
-
-      {/* -------------------------
-      * Recent Documents
-      * ------------------------- */} 
-      {/* <div className="font-ui mt-8 flex items-center justify-between">
-        <RecentDocumentsPanel
-          documents={recentDocuments}
-          loading={recentLoading}
-          error={recentError}
-          onOpenDocument={(doc) => {
-            const sp = new URLSearchParams();
-            sp.set("page", "0");
-
-            if (doc.latestTgtLang) {
-              sp.set("tgt", doc.latestTgtLang);
-            }
-
-            router.push(`/documents/${doc.id}?${sp.toString()}`);
-          }}
-        />
-      </div> */}
     </div>
   );
 }

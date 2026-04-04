@@ -3,7 +3,7 @@ import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
-import { buildClusters } from "./clusterText";
+import { buildClusters } from "@/lib/textClusters";
 
 type IdToWords = Record<number, number[]>;
 
@@ -139,7 +139,8 @@ export function HoverText({
     return out;
   }
 
-  const clusters = buildClusters(words, spaces)
+  const clusters = buildClusters(words, spaces);
+  const highlightSet = new Set(highlightIndices);
 
   return (
     <p 
@@ -161,7 +162,10 @@ export function HoverText({
 
       {clusters.map((c) => {
         const baseIndex = c.anchorLocalIndex + indexOffset;
-        const isHighlighted = highlightIndices.includes(baseIndex);
+        const isHighlighted = Array.from(
+          { length: c.end - c.start + 1 },
+          (_, i) => c.start + i + indexOffset
+        ).some((idx) => highlightSet.has(idx));
         const isBlurred = blur ? blurred.has(baseIndex) : false;
 
         return (

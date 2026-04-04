@@ -313,8 +313,8 @@ export function ReaderShell({
               <ChevronLeft className="h-4 w-4" />
             </Button>
             {/* -------------------------
-             * Blur-mode Toggle
-             * ------------------------- */}
+            //* Blur-mode toggle
+            //* ------------------------- */}
             <div className="inline-flex items-center justify-center gap-3">
               <span className="text-sm text-muted-foreground">
                 {msgs.footer.blur}
@@ -322,22 +322,26 @@ export function ReaderShell({
               <BlurModeToggle value={blurMode} onChange={onBlurModeChange} />
             </div>
             {/* -------------------------
-             * Page Counter
-             * ------------------------- */}
+            //* Page counter / Help popover
+            //* ------------------------- */}
             <div className="inline-flex items-center justify-center gap-1 text-sm text-muted-foreground">
               <Book size={14} />
               {msgs.toc.pageSingleAbbrev} {pageCount > 0 ? pageIndex + 1 : 0} /{" "}
               {pageCount}
             </div>
-            {/* -------------------------
-             * Help Popover
-             * ------------------------- */}
-            <div className="flex justify-start">
+
+            <div className="items-center justify-center mx-auto">
               <HelpPopover />
             </div>
             {/* -------------------------
-             * Next Page
-             * ------------------------- */}
+            //* Practice page
+            //* ------------------------- */}
+            {/* <div className="inline-flex items-center justify-center">
+              Practice
+            </div> */}
+            {/* -------------------------
+            //* Next page
+            //* ------------------------- */}
             <Button
               type="button"
               size="icon"

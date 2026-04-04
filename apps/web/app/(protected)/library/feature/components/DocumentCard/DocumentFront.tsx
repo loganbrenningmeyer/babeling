@@ -31,8 +31,9 @@ export function DocumentFront({
   langLabels: LangLabels,
 }) {
   const m = useMessages();
-  // Source language color
-  const srcAccent = LANG_COLOR_BY_CODE[document.srcLang as keyof typeof LANG_COLOR_BY_CODE].accent;
+  const srcLangColors = LANG_COLOR_BY_CODE[toUiLang(document.srcLang)];
+  const srcAccent = srcLangColors.accent;
+  const srcHoverBorder = srcLangColors.hoverBorder;
 
   // -------------------------
   // Get cover image from database
@@ -60,7 +61,7 @@ export function DocumentFront({
   * ------------------------- */}
   return (
     <Card 
-      className="
+      className={`
         relative h-full w-full overflow-hidden
 
         rounded-xl border bg-card p-5 shadow-sm
@@ -69,12 +70,10 @@ export function DocumentFront({
         transition duration-200 ease-out
         
         group-hover/doc-front:-translate-y-1
-        group-hover/doc-front:border-blue-400/60
+        ${srcHoverBorder}
         group-hover/doc-front:shadow-md
-        group-focus-visible/doc-front:-translate-y-1
-        group-focus-visible/doc-front:border-orange-200
         group-focus-visible/doc-front:shadow-md
-      "
+      `}
     >
       {/* Source Language Accent Strip */}
       <div className={`absolute inset-y-0 left-0 w-1.5 ${srcAccent}`} />
@@ -119,7 +118,7 @@ export function DocumentFront({
               <h2 className="line-clamp-2 text-md font-reading font-semibold leading-tight">
                 {document.title}
               </h2>
-              <h3 className="text-sm font-ui text-muted-foreground">
+              <h3 className="text-xs font-ui text-muted-foreground">
                 {document.author}
               </h3>
             </div>

@@ -37,6 +37,10 @@ type MessagesSchema = {
   upload: {
     hero: string;
     heroInfo: string;
+    readingDirection: string;
+    readingDirectionInfo: string;
+    from: string;
+    to: string;
     sourceLang: string;
     targetLang: string;
     translateAlignInfo: string;
@@ -253,8 +257,12 @@ export const en = {
   upload: {
     hero: "New reading",
     heroInfo: "Find a book, upload a file, or enter text to begin.",
+    readingDirection: "Reading direction",
+    readingDirectionInfo: "Choose the language you're reading from and the one you'll read in.",
+    from: "From",
+    to: "To",
     sourceLang: "Source language",
-    targetLang: "Target language",
+    targetLang: "Reading language",
     translateAlignInfo: "Translation and alignment usually takes 15-30 seconds",
     startReading: "Start reading",
     tabs: {
@@ -423,7 +431,7 @@ export const en = {
     all: "All",
     texts: "Texts",
     translations: "Translations",
-    glossary: "Glossary",
+    glossary: "Vocabulary",
     hero: "Your library",
     heroInfo: "Texts, translations, and vocabulary you've collected.",
     wordsSaved: "Words saved",
@@ -433,7 +441,7 @@ export const en = {
     loading: "Loading",
     searchLibrary: "Search library...",
     sortDocuments: "Sort documents",
-    sortGlossary: "Sort glossary",
+    sortGlossary: "Sort vocabulary",
     recentlyRead: "Recently read",
     titleAZ: "Title (A-Z)",
     originalLanguageAZ: "Original language (A-Z)",
@@ -489,8 +497,12 @@ export const es = {
   upload: {
     hero: "Nueva lectura",
     heroInfo: "Busca un libro, sube un archivo o ingresa texto para comenzar.",
+    readingDirection: "Dirección de lectura",
+    readingDirectionInfo: "Elige el idioma desde el que lees y el idioma en el que vas a leer.",
+    from: "Desde",
+    to: "Hacia",
     sourceLang: "Idioma de origen",
-    targetLang: "Idioma de destino",
+    targetLang: "Idioma de lectura",
     translateAlignInfo: "La traducción y la alineación suelen tardar entre 15 y 30 segundos",
     startReading: "Empezar a leer",
     tabs: {
@@ -659,7 +671,7 @@ export const es = {
     all: "Todo",
     texts: "Textos",
     translations: "Traducciones",
-    glossary: "Glosario",
+    glossary: "Vocabulario",
     hero: "Tu biblioteca",
     heroInfo: "Textos, traducciones y vocabulario que has guardado.",
     wordsSaved: "Palabras guardadas",
@@ -669,7 +681,7 @@ export const es = {
     loading: "Cargando",
     searchLibrary: "Buscar en la biblioteca...",
     sortDocuments: "Ordenar textos",
-    sortGlossary: "Ordenar glosario",
+    sortGlossary: "Ordenar vocabulario",
     recentlyRead: "Leídos recientemente",
     titleAZ: "Título (A-Z)",
     originalLanguageAZ: "Idioma original (A-Z)",
@@ -725,8 +737,12 @@ export const fr = {
   upload: {
     hero: "Nouvelle lecture",
     heroInfo: "Trouvez un livre, téléversez un fichier ou saisissez du texte pour commencer.",
+    readingDirection: "Sens de lecture",
+    readingDirectionInfo: "Choisissez la langue depuis laquelle vous lisez et celle dans laquelle vous lirez.",
+    from: "Depuis",
+    to: "Vers",
     sourceLang: "Langue source",
-    targetLang: "Langue cible",
+    targetLang: "Langue de lecture",
     translateAlignInfo: "La traduction et l'alignement prennent généralement entre 15 et 30 secondes",
     startReading: "Commencer la lecture",
     tabs: {
@@ -895,7 +911,7 @@ export const fr = {
     all: "Tout",
     texts: "Textes",
     translations: "Traductions",
-    glossary: "Glossaire",
+    glossary: "Vocabulaire",
     hero: "Votre bibliothèque",
     heroInfo: "Textes, traductions et vocabulaire que vous avez enregistrés.",
     wordsSaved: "Mots enregistrés",
@@ -905,7 +921,7 @@ export const fr = {
     loading: "Chargement",
     searchLibrary: "Rechercher dans la bibliothèque...",
     sortDocuments: "Trier les textes",
-    sortGlossary: "Trier le glossaire",
+    sortGlossary: "Trier le vocabulaire",
     recentlyRead: "Récemment lus",
     titleAZ: "Titre (A-Z)",
     originalLanguageAZ: "Langue d'origine (A-Z)",
@@ -961,8 +977,12 @@ export const de = {
   upload: {
     hero: "Neue Lektüre",
     heroInfo: "Finde ein Buch, lade eine Datei hoch oder gib Text ein, um zu starten.",
+    readingDirection: "Leserichtung",
+    readingDirectionInfo: "Wähle die Sprache, aus der du liest, und die Sprache, in der du lesen wirst.",
+    from: "Von",
+    to: "Nach",
     sourceLang: "Ausgangssprache",
-    targetLang: "Zielsprache",
+    targetLang: "Lesesprache",
     translateAlignInfo: "Übersetzung und Ausrichtung dauern in der Regel 15 bis 30 Sekunden",
     startReading: "Mit dem Lesen beginnen",
     tabs: {
@@ -1131,7 +1151,7 @@ export const de = {
     all: "Alle",
     texts: "Texte",
     translations: "Übersetzungen",
-    glossary: "Glossar",
+    glossary: "Wortschatz",
     hero: "Deine Bibliothek",
     heroInfo: "Texte, Übersetzungen und Vokabeln, die du gesammelt hast.",
     wordsSaved: "Gespeicherte Wörter",
@@ -1141,7 +1161,7 @@ export const de = {
     loading: "Wird geladen",
     searchLibrary: "Bibliothek durchsuchen...",
     sortDocuments: "Texte sortieren",
-    sortGlossary: "Glossar sortieren",
+    sortGlossary: "Wortschatz sortieren",
     recentlyRead: "Zuletzt gelesen",
     titleAZ: "Titel (A-Z)",
     originalLanguageAZ: "Originalsprache (A-Z)",
@@ -1197,8 +1217,12 @@ export const it = {
   upload: {
     hero: "Nuova lettura",
     heroInfo: "Trova un libro, carica un file o inserisci del testo per iniziare.",
+    readingDirection: "Direzione di lettura",
+    readingDirectionInfo: "Scegli la lingua da cui stai leggendo e quella in cui leggerai.",
+    from: "Da",
+    to: "A",
     sourceLang: "Lingua di origine",
-    targetLang: "Lingua di destinazione",
+    targetLang: "Lingua di lettura",
     translateAlignInfo: "La traduzione e l'allineamento richiedono di solito tra 15 e 30 secondi",
     startReading: "Inizia a leggere",
     tabs: {
@@ -1367,7 +1391,7 @@ export const it = {
     all: "Tutto",
     texts: "Testi",
     translations: "Traduzioni",
-    glossary: "Glossario",
+    glossary: "Vocabolario",
     hero: "La tua biblioteca",
     heroInfo: "Testi, traduzioni e vocabolario che hai raccolto.",
     wordsSaved: "Parole salvate",
@@ -1377,7 +1401,7 @@ export const it = {
     loading: "Caricamento",
     searchLibrary: "Cerca nella biblioteca...",
     sortDocuments: "Ordina testi",
-    sortGlossary: "Ordina glossario",
+    sortGlossary: "Ordina vocabolario",
     recentlyRead: "Letti di recente",
     titleAZ: "Titolo (A-Z)",
     originalLanguageAZ: "Lingua originale (A-Z)",

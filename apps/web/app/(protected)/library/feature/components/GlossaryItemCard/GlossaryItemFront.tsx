@@ -8,6 +8,7 @@ import { Separator } from "@/components/ui/separator";
 import type { LibraryGlossaryItem } from "../../types/glossaryItem";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 import { useMessages } from "@/app/hooks/useMessages";
+import { toUiLang } from "@/app/i18n/messages";
 
 
 export function GlossaryItemFront({
@@ -16,8 +17,9 @@ export function GlossaryItemFront({
   glossaryItem: LibraryGlossaryItem,
 }) {
   const m = useMessages();
-  // Language color
-  const langAccent = LANG_COLOR_BY_CODE[glossaryItem.tgtLang as keyof typeof LANG_COLOR_BY_CODE].accent;
+  const langColors = LANG_COLOR_BY_CODE[toUiLang(glossaryItem.tgtLang)];
+  const langAccent = langColors.accent;
+  const glossaryHoverBorder = langColors.glossaryHoverBorder;
 
   return (
     <div 
@@ -28,7 +30,7 @@ export function GlossaryItemFront({
       "
     >
       <Card 
-        className="
+        className={`
           relative rounded-xl h-full w-full overflow-hidden
           
           border bg-card p-5 pb-2 shadow-sm
@@ -37,12 +39,11 @@ export function GlossaryItemFront({
           transition duration-200 ease-out
           
           group-hover/gloss-front:-translate-y-1
-          group-hover/gloss-front:border-orange-400/60
+          ${glossaryHoverBorder}
           group-hover/gloss-front:shadow-md
           group-focus-visible/gloss-front:-translate-y-1
-          group-focus-visible/gloss-front:border-orange-200
           group-focus-visible/gloss-front:shadow-md
-        "
+        `}
       >
         {/* Source Language Accent Strip */}
         <div className={`absolute inset-y-0 left-0 w-1.5 ${langAccent}`} />

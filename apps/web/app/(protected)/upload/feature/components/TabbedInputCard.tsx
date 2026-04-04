@@ -123,7 +123,7 @@ export function TabbedInputCard({
           {/* -------------------------
           * Top Bar (input type tabs)
           * ------------------------- */}
-          <div className="font-ui h-12 px-2 bg-card/20 border-b">
+          <div className="font-ui h-12 px-2 bg-card border-b">
             <TabsList className="h-full bg-transparent p-0 gap-4 items-stretch">
               {/* -------------------------
               * Gutenberg Ebook Import
