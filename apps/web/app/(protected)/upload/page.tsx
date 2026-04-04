@@ -62,6 +62,8 @@ export default function UploadPage() {
   const fallbackLangColors = {
     border: "border-foreground/20",
     focusBorder: "focus-visible:border-foreground/20 dark:focus-visible:border-foreground/20",
+    bg: "bg-background/20",
+    hoverBg: "hover:bg-background/20 dark:hover:bg-background/20",
   };
 
   function getSelectBorderClasses(lang: string) {
@@ -71,6 +73,11 @@ export default function UploadPage() {
     return {
       border: colors.border,
       focusBorder: colors.border.replaceAll("border-", "focus-visible:border-"),
+      bg: colors.bg,
+      hoverBg: colors.bg
+        .replaceAll("bg-", "hover:bg-")
+        .replaceAll("dark:hover:bg-", "dark:bg-")
+        .replaceAll("dark:bg-", "dark:hover:bg-"),
     };
   }
 
@@ -329,20 +336,27 @@ export default function UploadPage() {
 
         <Separator />
 
-        <div className="grid grid-cols-[1fr_auto_1fr] items-end gap-3">
+        <div className="grid grid-cols-[1fr_auto_1fr] grid-rows-[auto_auto] gap-x-3 gap-y-2">
           {/* -------------------------
            * Source Language
            * ------------------------- */}
+          <div className="w-full text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+            {m.upload.sourceLang}
+          </div>
+          <div />
+          <div className="w-full text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
+            {m.upload.targetLang}
+          </div>
+
           <div className="w-full">
-            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-              {m.upload.sourceLang}
-            </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
               <SelectTrigger
                 className={cn(
-                  "w-full bg-background/60 py-8",
+                  "w-full py-8",
                   srcSelectColors.border,
                   srcSelectColors.focusBorder,
+                  srcSelectColors.bg,
+                  srcSelectColors.hoverBg,
                 )}
               >
                 <div className="flex w-full items-center justify-between gap-3 pr-2">
@@ -377,18 +391,20 @@ export default function UploadPage() {
           {/* -------------------------
            * Swap Languages
            * ------------------------- */}
-          <div className="flex items-center justify-center pb-[2px]">
+          <div className="flex items-center justify-center">
             <Button
               type="button"
               variant="outline"
               size="icon"
               className="
                 h-9 w-9 rounded-full
-                border-border bg-card
+                border-foreground/40 dark:border-foreground/40 
+                bg-card dark:bg-card
                 text-muted-foreground shadow-sm
                 transition duration-300 ease-out
                 hover:text-foreground
                 hover:rotate-180
+                hover:bg-background
                 motion-reduce:transition-none
               "
               onClick={handleSwapLanguages}
@@ -404,15 +420,14 @@ export default function UploadPage() {
            * Target Language
            * ------------------------- */}
           <div className="w-full">
-            <div className="mb-2 text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-              {m.upload.targetLang}
-            </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
               <SelectTrigger
                 className={cn(
                   "w-full bg-background/60 py-8",
                   tgtSelectColors.border,
                   tgtSelectColors.focusBorder,
+                  tgtSelectColors.bg,
+                  tgtSelectColors.hoverBg,
                 )}
               >
                 <div className="flex w-full items-center justify-between gap-3 pr-2">
