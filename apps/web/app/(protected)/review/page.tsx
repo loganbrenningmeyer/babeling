@@ -5,16 +5,22 @@ import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-import { RecognitionCard } from "./feature/components/RecognitionCard";
 import { ContextClozeCard } from "./feature/components/ContextClozeCard";
+import { DefinitionCard } from "./feature/components/DefinitionCard";
+import { RecognitionCard } from "./feature/components/RecognitionCard";
 
 import { useRecentGlossaryItems } from "../library/feature/hooks/useRecentGlossaryItems";
 import { Button } from "@/components/ui/button";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 
-type ReviewCardType = "context_cloze" | "recognition";
+type ReviewCardType = "context_cloze" | "definition" | "recognition";
 type ReviewTransitionAction = "again" | "known";
+
+const REVIEW_CARD_TRANSITION = {
+  duration: 0.8,
+  ease: [0.2, 0.8, 0.2, 1] as const,
+};
 
 
 /**************************
@@ -41,7 +47,13 @@ function shuffleIds(ids: number[]): number[] {
  * variant to render for a glossary item.
  **************************/
 function getRandomCardType(): ReviewCardType {
-  return Math.random() < 0.5 ? "context_cloze" : "recognition";
+  const cardTypes: ReviewCardType[] = [
+    "context_cloze",
+    "definition",
+    "recognition",
+  ];
+
+  return cardTypes[Math.floor(Math.random() * cardTypes.length)];
 }
 
 
@@ -53,11 +65,21 @@ function getRandomCardType(): ReviewCardType {
 function renderReviewCard(args: {
   cardType: ReviewCardType | null;
   glossaryItem: NonNullable<ReturnType<typeof useRecentGlossaryItems>["glossaryItems"]>[number];
+  glossaryItems: NonNullable<ReturnType<typeof useRecentGlossaryItems>["glossaryItems"]>;
 }) {
-  const { cardType, glossaryItem } = args;
+  const { cardType, glossaryItem, glossaryItems } = args;
 
   if (cardType === "recognition") {
-    return <RecognitionCard glossaryItem={glossaryItem} />;
+    return (
+      <RecognitionCard
+        glossaryItem={glossaryItem}
+        glossaryItems={glossaryItems}
+      />
+    );
+  }
+
+  if (cardType === "definition") {
+    return <DefinitionCard glossaryItem={glossaryItem} />;
   }
 
   return <ContextClozeCard glossaryItem={glossaryItem} />;
@@ -142,12 +164,18 @@ export default function Review() {
     useState<ReviewTransitionAction | null>(null);
 
   const isTransitioning = transitionAction != null;
+  const currentCardExitDirection =
+    transitionAction === "again"
+      ? -1
+      : transitionAction === "known"
+        ? 1
+        : 0;
 
   const currentCardExitX =
     transitionAction === "again"
-      ? -900
+      ? "-110vw"
       : transitionAction === "known"
-        ? 900
+        ? "110vw"
         : 0;
 
   /**************************
@@ -207,7 +235,8 @@ export default function Review() {
   }
 
   return (
-    <div className="min-h-screen mx-auto max-w-6xl py-12 px-8">
+    <div className="fixed inset-x-0 bottom-0 top-[65px] overflow-hidden bg-background">
+      <div className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden px-8 py-10">
         {/* -------------------------
         //* Hero
         //* ------------------------- */}
@@ -252,9 +281,9 @@ export default function Review() {
           </div>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-10 flex-1 min-h-0 overflow-hidden">
           {currentItem ? (
-            <div className="space-y-6">
+            <div className="flex h-full flex-col gap-6 overflow-hidden">
               <div className="grid">
                 {nextItem ? (
                   <motion.div
@@ -262,14 +291,15 @@ export default function Review() {
                     className="col-start-1 row-start-1 pointer-events-none"
                     animate={
                       isTransitioning
-                        ? { scale: 1, y: 0, opacity: 1 }
-                        : { scale: 0.97, y: 10, opacity: 0 }
+                        ? { scale: 1, opacity: 1 }
+                        : { scale: 0.97, opacity: 0 }
                     }
-                    transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+                    transition={REVIEW_CARD_TRANSITION}
                   >
                     {renderReviewCard({
                       cardType: nextCardType,
                       glossaryItem: nextItem,
+                      glossaryItems,
                     })}
                   </motion.div>
                 ) : null}
@@ -281,7 +311,7 @@ export default function Review() {
                     isTransitioning
                       ? {
                           x: currentCardExitX,
-                          rotate: currentCardExitX < 0 ? -8 : 8,
+                          rotate: currentCardExitDirection < 0 ? -8 : 8,
                           opacity: 0,
                         }
                       : {
@@ -290,7 +320,7 @@ export default function Review() {
                           opacity: 1,
                         }
                   }
-                  transition={{ duration: 0.28, ease: [0.2, 0.8, 0.2, 1] }}
+                  transition={REVIEW_CARD_TRANSITION}
                   onAnimationComplete={() => {
                     if (!isTransitioning) return;
                     commitTransition();
@@ -299,14 +329,15 @@ export default function Review() {
                   {renderReviewCard({
                     cardType: currentCardType,
                     glossaryItem: currentItem,
+                    glossaryItems,
                   })}
                 </motion.div>
               </div>
 
-              {/* -------------------------
-              //* ( X Button )
-              //* ------------------------- */}
               <div className="flex items-center justify-center gap-3">
+                {/* -------------------------
+                //* ( X Button )
+                //* ------------------------- */}
                 <Button 
                   type="button"
                   variant="outline"
@@ -318,6 +349,9 @@ export default function Review() {
                   <X className="w-5 h-5" />
                 </Button>
 
+                {/* -------------------------
+                //* ( Check Button )
+                //* ------------------------- */}
                 <Button 
                   type="button"
                   size="icon"
@@ -329,9 +363,6 @@ export default function Review() {
                 </Button>
               </div>
 
-              {/* -------------------------
-              //* ( Check Button )
-              //* ------------------------- */}
             </div>
           ) : (
             <div>
@@ -339,6 +370,7 @@ export default function Review() {
             </div>
           )}
         </div>
+      </div>
     </div>
   );
 }

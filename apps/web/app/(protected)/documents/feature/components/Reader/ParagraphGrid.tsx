@@ -9,6 +9,7 @@ import { HoverText } from "@/app/(protected)/documents/feature/components/HoverT
 import type { BlurMode } from "@/app/(protected)/documents/feature/components/SourceBlur/BlurModeToggle";
 import type { LoadedDocumentImage, SavedPageBlock } from "../../types/document";
 import type { ReaderSession } from "../../types/readerSession";
+import { getBlockStyle } from "./blockStyle";
 
 type ParagraphGridProps = {
   session: ReaderSession;
@@ -49,6 +50,7 @@ type ReaderRow =
       kind: "text";
       key: React.Key;
       parId: number;
+      tag: string | null;
     }
   | {
       kind: "image";
@@ -138,6 +140,7 @@ function buildRows(
       kind: "text",
       key: `par-${parId}`,
       parId,
+      tag: "p",
     }));
   }
 
@@ -174,6 +177,7 @@ function buildRows(
       kind: "text",
       key: `text-${block.id}`,
       parId,
+      tag: block.tag ?? "p",
     });
   }
 
@@ -188,6 +192,7 @@ function buildRows(
       kind: "text",
       key: `text-fallback-${parId}`,
       parId,
+      tag: "p",
     });
   }
 
@@ -358,6 +363,8 @@ export function ParagraphGrid({
           // Text row
           // -- Render the next aligned source/target paragraph pair
           // -------------------------
+          const blockStyle = getBlockStyle(row.tag);
+
           const srcIdxs = session.alignment.src.parToWordIds[row.parId];
           const srcSlice = sliceWordsSpaces(
             session.alignment.src.words,
@@ -388,7 +395,7 @@ export function ParagraphGrid({
           return (
             <React.Fragment key={row.key}>
               <div className={`grid grid-cols-2 ${gapAndPad ?? ""}`}>
-                <div>
+                <div className={blockStyle.wrapperClassName}>
                   <HoverText
                     words={sourceSlice.words}
                     spaces={sourceSlice.spaces}
@@ -405,12 +412,12 @@ export function ParagraphGrid({
                       blurred: blurredSource,
                       setBlurred: setBlurredSource,
                     }}
-                    indentFirstLine={true}
-                    className="text-muted-foreground"
+                    indentFirstLine={blockStyle.indentFirstLine}
+                    className={cn("text-muted-foreground", blockStyle.textClassName)}
                   />
                 </div>
 
-                <div>
+                <div className={blockStyle.wrapperClassName}>
                   <HoverText
                     words={targetSlice.words}
                     spaces={targetSlice.spaces}
@@ -420,7 +427,8 @@ export function ParagraphGrid({
                     highlightClassName={targetHighlightClassName}
                     highlightIndices={targetHighlightIndices}
                     onWordClick={onTargetWordClick}
-                    indentFirstLine={true}
+                    indentFirstLine={blockStyle.indentFirstLine}
+                    className={blockStyle.textClassName}
                   />
                 </div>
               </div>

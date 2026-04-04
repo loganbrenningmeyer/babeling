@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { LayoutGroup, motion } from "framer-motion";
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { LayoutGroup, motion, useAnimationControls } from "framer-motion";
 
 import { LangBadge } from "@/app/components/LangBadge";
 import { useMessages } from "@/app/hooks/useMessages";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { HighlightedTokenSlice } from "@/app/(protected)/library/feature/components/GlossaryItemCard/HighlightedTokenSlice";
+import { cn } from "@/lib/utils";
 import { TargetClozeSentence } from "./TargetClozeSentence";
 
 import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
@@ -38,29 +38,67 @@ const GRADE_REVEAL_DELAY_MS = 500;
 const INCORRECT_RETURN_DELAY_MS = 500;
 const MAX_SOURCE_CONTEXT_WORDS = 24;
 const MAX_TARGET_CONTEXT_WORDS = 18;
+const SUCCESS_CARD_CLASS_NAME =
+  "border-emerald-500 shadow-[0_0_28px_rgba(16,185,129,0.18)]";
 
+
+function isPunctuationToken(token: string): boolean {
+  return token.length > 0 && /^[\p{P}]+$/u.test(token);
+}
+
+function getClosestWordPosition(wordIds: number[], targetWordId: number): number {
+  let closestPosition = 0;
+  let smallestDistance = Number.POSITIVE_INFINITY;
+
+  for (let i = 0; i < wordIds.length; i += 1) {
+    const distance = Math.abs(wordIds[i] - targetWordId);
+
+    if (distance < smallestDistance) {
+      closestPosition = i;
+      smallestDistance = distance;
+    }
+  }
+
+  return closestPosition;
+}
 
 /**************************
  * `getBlankWordIds()`
- * -- Gets the word IDs of target words to blank centered
- * around the tgtIdx word
+ * -- Gets the target word IDs to blank,
+ * skipping punctuation-only tokens while
+ * staying centered around the highlighted word.
  **************************/
 function getBlankWordIds(
-  numWords: number,
+  words: string[],
   tgtIdx: number,
   numBlank: number,
 ): number[] {
-  const windowSize = Math.min(numBlank, numWords);
+  if (words.length === 0) return [];
+
+  const blankableWordIds = words.flatMap((word, index) =>
+    isPunctuationToken(word) ? [] : [index]
+  );
+
+  if (blankableWordIds.length === 0) {
+    return [Math.max(0, Math.min(tgtIdx, words.length - 1))];
+  }
+
+  const windowSize = Math.min(numBlank, blankableWordIds.length);
+  const highlightedWordPosition = blankableWordIds.indexOf(tgtIdx);
+  const focusPosition =
+    highlightedWordPosition >= 0
+      ? highlightedWordPosition
+      : getClosestWordPosition(blankableWordIds, tgtIdx);
 
   const start = Math.max(
     0,
     Math.min(
-      tgtIdx - Math.floor((windowSize - 1) / 2),
-      numWords - windowSize
+      focusPosition - Math.floor((windowSize - 1) / 2),
+      blankableWordIds.length - windowSize
     )
   );
 
-  return Array.from({ length: windowSize }, (_, i) => start + i);
+  return blankableWordIds.slice(start, start + windowSize);
 }
 
 
@@ -217,6 +255,8 @@ export function ContextClozeCard({
   glossaryItem: LibraryGlossaryItem,
 }) {
   const m = useMessages();
+  const layoutGroupId = useId();
+  const shakeControls = useAnimationControls();
 
   // -------------------------
   // Resolve target sentence state
@@ -230,8 +270,8 @@ export function ContextClozeCard({
   // Choose which words become blanks
   // -------------------------
   const blankWordIds = useMemo(
-    () => getBlankWordIds(tgtSlice.words.length, tgtIdx, numBlank),
-    [tgtSlice.words.length, tgtIdx, numBlank]
+    () => getBlankWordIds(tgtSlice.words, tgtIdx, numBlank),
+    [tgtSlice.words, tgtIdx, numBlank]
   );
 
   // -------------------------
@@ -411,13 +451,21 @@ export function ContextClozeCard({
    * original bank slots.
    **************************/
   useEffect(() => {
-    if (!gradingReady) return;
+    if (!allFilled || !gradingReady) return;
 
     const incorrectWordIds = blankWordIds.filter(
       (wordId) => filledWordByWordId[wordId] !== tgtSlice.words[wordId]
     );
 
     if (incorrectWordIds.length === 0) return;
+
+    void shakeControls.start({
+      x: [0, -5, 5, -4, 4, 0],
+      transition: {
+        duration: 0.28,
+        ease: "easeInOut",
+      },
+    });
 
     const timeoutId = window.setTimeout(() => {
       setFilledChoiceIndexByWordId((prev) => {
@@ -437,7 +485,15 @@ export function ContextClozeCard({
     }, INCORRECT_RETURN_DELAY_MS);
 
     return () => window.clearTimeout(timeoutId);
-  }, [blankWordIds, choices, filledWordByWordId, gradingReady, tgtSlice.words]);
+  }, [
+    allFilled,
+    blankWordIds,
+    choices,
+    filledWordByWordId,
+    gradingReady,
+    shakeControls,
+    tgtSlice.words,
+  ]);
 
   /**************************
    * Derive correctness state
@@ -456,6 +512,8 @@ export function ContextClozeCard({
       ) as Record<number, boolean>,
     [blankWordIds, filledWordByWordId, tgtSlice.words]
   );
+
+  const isCorrect = gradingReady && blankWordIds.every((wordId) => correctnessByWordId[wordId]);
 
   // -------------------------
   // Remap visible target state
@@ -535,9 +593,17 @@ export function ContextClozeCard({
   return (
     <div className="mx-auto w-full max-w-xl text-left">
       <div className="aspect-[4/3] w-full">
-        <Card className="h-full w-full rounded-xl border bg-card p-5 shadow-sm">
+        <Card
+          className={cn(
+            `
+              h-full w-full rounded-xl border bg-card p-5 shadow-sm
+              transition-[border-color,box-shadow] duration-300 ease-out
+            `,
+            isCorrect && SUCCESS_CARD_CLASS_NAME
+          )}
+        >
           <CardContent className="h-full p-0">
-            <LayoutGroup id={`context-cloze-${glossaryItem.glossaryItemId}`}>
+            <LayoutGroup id={layoutGroupId}>
               <div className="flex h-full flex-col gap-4">
 
                 {/* -------------------------
@@ -553,17 +619,35 @@ export function ContextClozeCard({
                       />
                     </div>
                   </div>
-                  <HighlightedTokenSlice
-                    slice={truncatedSourceSlice}
-                    className={`${srcFontSize} leading-7 text-muted-foreground`}
-                    highlightClassName="bg-muted"
-                  />
+                  <p
+                    className={`${srcFontSize} whitespace-pre-wrap leading-7 text-muted-foreground`}
+                  >
+                    {truncatedSourceSlice.words.map((word, i) => {
+                      const rawSpace = truncatedSourceSlice.spaces[i] ?? "";
+                      const space =
+                        i === truncatedSourceSlice.words.length - 1
+                          ? rawSpace.replace(/\s+$/, "")
+                          : rawSpace;
+
+                      return (
+                        <span
+                          key={`${truncatedSourceSlice.globalWordIds[i] ?? i}-${i}`}
+                        >
+                          {word}
+                          {space}
+                        </span>
+                      );
+                    })}
+                  </p>
                 </div>
 
                 {/* -------------------------
                 //* Target Sentence
                 //* ------------------------- */}
-                <div className="border bg-muted/30 p-3">
+                <motion.div
+                  animate={shakeControls}
+                  className="border bg-muted/30 p-3"
+                >
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <LangBadge
@@ -591,7 +675,7 @@ export function ContextClozeCard({
                     blankWidth={blankWidthPx}
                     className={`${tgtFontSize} font-ui leading-9`}
                   />
-                </div>
+                </motion.div>
 
                 {/* -------------------------
                 //* Choice Buttons
