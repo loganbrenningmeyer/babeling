@@ -1,6 +1,6 @@
 "use client";
 
-import { cache, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import type { LoadedDocument } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
@@ -29,6 +29,7 @@ type UiUpdate =
  **************************/
 export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionArgs) {
   const [session, setSession] = useState<ReaderSession | null>(null);
+  const [sessionCacheKey, setSessionCacheKey] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -48,6 +49,8 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
     return `${documentPageId}|${srcLang}|${tgtLang}`;
   }, [documentPageId, srcLang, tgtLang])
 
+  const activeSession = sessionCacheKey === cacheKey ? session : null;
+
   /**************************
    * `load()`
    * -- Build ReaderSession if cached, otherwise try to load saved translation 
@@ -56,6 +59,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
   const load = useCallback(async () => {
     if (!document || !documentPageId || !srcLang || !tgtLang) {
       setSession(null);
+      setSessionCacheKey(null);
       setLoading(false);
       setError(null);
       return;
@@ -69,6 +73,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
 
       if (cacheKey) cacheRef.current.set(cacheKey, sess);
       setSession(sess);
+      setSessionCacheKey(cacheKey);
       setLoading(false);
       setError(null);
       return;
@@ -81,6 +86,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
       const cached = cacheRef.current.get(cacheKey);
       if (cached) {
         setSession(cached);
+        setSessionCacheKey(cacheKey);
         setLoading(false);
         setError(null);
         return;
@@ -112,6 +118,7 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
       
         if (cacheKey) cacheRef.current.set(cacheKey, sess);
         setSession(sess);
+        setSessionCacheKey(cacheKey);
         return;
       }
 
@@ -156,10 +163,12 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
 
       if (cacheKey) cacheRef.current.set(cacheKey, sess);
       setSession(sess);
+      setSessionCacheKey(cacheKey);
 
     } catch (e: any) {
       if (requestIdRef.current !== reqId) return;
       setSession(null);
+      setSessionCacheKey(null);
       setError(e?.message ?? "Failed to load page session");
 
     } finally {
@@ -188,7 +197,9 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
     (nextUiOrUpdater: UiUpdate) => {
       if (!cacheKey) return;
 
-      const current = cacheRef.current.get(cacheKey) ?? session;
+      const current =
+        cacheRef.current.get(cacheKey) ??
+        (sessionCacheKey === cacheKey ? session : null);
       if (!current) return;
 
       const nextUi = 
@@ -199,12 +210,13 @@ export function usePageSession({ document, pageIndex, tgtLang }: UsePageSessionA
       const updated: ReaderSession = { ...current, ui: nextUi };
       cacheRef.current.set(cacheKey, updated);
       setSession(updated);
+      setSessionCacheKey(cacheKey);
     },
-    [session, cacheKey]
+    [session, sessionCacheKey, cacheKey]
   );
 
   return {
-    session,
+    session: activeSession,
     loading,
     error,
     reload: load,

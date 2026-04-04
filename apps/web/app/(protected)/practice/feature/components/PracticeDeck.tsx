@@ -9,7 +9,11 @@ import type { LibraryGlossaryItem } from "@/app/(protected)/library/feature/type
 
 import { ContextClozeCard } from "./cards/ContextCloze/ContextClozeCard";
 import { DefinitionCard } from "./cards/DefinitionCard";
-import { RecognitionCard } from "./cards/RecognitionCard";
+import {
+  RecognitionCard,
+  buildRecognitionChoices,
+  type RecognitionChoice,
+} from "./cards/RecognitionCard";
 import type { PracticeCardType } from "../types/practice";
 
 type PracticeTransitionAction = "again" | "known";
@@ -44,14 +48,25 @@ function renderPracticeCard(args: {
   cardType: PracticeCardType | null;
   glossaryItem: LibraryGlossaryItem;
   glossaryItems: LibraryGlossaryItem[];
+  recognitionChoicesById: Record<number, RecognitionChoice[]>;
 }) {
-  const { cardType, glossaryItem, glossaryItems } = args;
+  const {
+    cardType,
+    glossaryItem,
+    glossaryItems,
+    recognitionChoicesById,
+  } = args;
 
   if (cardType === "recognition") {
+    const recognitionChoices =
+      recognitionChoicesById[glossaryItem.glossaryItemId];
+
+    if (!recognitionChoices) return null;
+
     return (
       <RecognitionCard
         glossaryItem={glossaryItem}
-        glossaryItems={glossaryItems}
+        choices={recognitionChoices}
       />
     );
   }
@@ -76,18 +91,34 @@ export function PracticeDeck({
   const [cardTypeById, setCardTypeById] = useState<Record<number, PracticeCardType>>(
     {}
   );
+  const [recognitionChoicesById, setRecognitionChoicesById] = useState<
+    Record<number, RecognitionChoice[]>
+  >({});
   const [transitionAction, setTransitionAction] =
     useState<PracticeTransitionAction | null>(null);
 
   useEffect(() => {
     const ids = glossaryItems.map((item) => item.glossaryItemId);
     const shuffledIds = shuffleIds(ids);
+    const sessionSeed = Math.floor(Math.random() * 4294967296);
 
     setQueue(shuffledIds);
     setCardTypeById(
       Object.fromEntries(
         shuffledIds.map((id) => [id, getRandomCardType()])
       ) as Record<number, PracticeCardType>
+    );
+    setRecognitionChoicesById(
+      Object.fromEntries(
+        glossaryItems.map((item) => [
+          item.glossaryItemId,
+          buildRecognitionChoices({
+            glossaryItem: item,
+            glossaryItems,
+            choiceSeed: sessionSeed,
+          }),
+        ])
+      ) as Record<number, RecognitionChoice[]>
     );
     setTransitionAction(null);
   }, [glossaryItems]);
@@ -157,7 +188,7 @@ export function PracticeDeck({
   }
 
   return (
-    <div className="flex h-full flex-col gap-6 overflow-hidden">
+    <div className="flex h-full flex-col gap-6">
       <div className="grid py-8">
         {nextItem ? (
           <motion.div
@@ -174,6 +205,7 @@ export function PracticeDeck({
               cardType: nextCardType,
               glossaryItem: nextItem,
               glossaryItems,
+              recognitionChoicesById,
             })}
           </motion.div>
         ) : null}
@@ -204,6 +236,7 @@ export function PracticeDeck({
             cardType: currentCardType,
             glossaryItem: currentItem,
             glossaryItems,
+            recognitionChoicesById,
           })}
         </motion.div>
       </div>
@@ -233,4 +266,3 @@ export function PracticeDeck({
     </div>
   );
 }
-

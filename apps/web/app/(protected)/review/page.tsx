@@ -65,7 +65,7 @@ export default function Review() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 top-[65px] overflow-hidden bg-background">
-      <div className="mx-auto flex h-full max-w-6xl flex-col overflow-hidden px-8 py-10">
+      <div className="mx-auto flex h-full max-w-6xl flex-col px-8 py-10">
         {/* -------------------------
         //* Hero
         //* ------------------------- */}
@@ -110,7 +110,7 @@ export default function Review() {
           </div>
         </div>
 
-        <div className="mt-10 flex-1 min-h-0 overflow-hidden">
+        <div className="mt-10 flex-1 min-h-0">
           <PracticeDeck
             glossaryItems={filteredGlossaryItems}
             onRemainingChange={setRemainingCount}

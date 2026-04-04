@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 
 import { LangBadge } from "@/app/components/LangBadge";
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,7 @@ const MAX_CHOICES = 4;
 const SUCCESS_CARD_CLASS_NAME =
   "border-emerald-500 shadow-[0_0_28px_rgba(16,185,129,0.18)]";
 
-type RecognitionChoice = {
+export type RecognitionChoice = {
   gloss: string;
   isCorrect: boolean;
 };
@@ -58,7 +58,7 @@ function normalizeGloss(gloss: string): string {
  * -- Build one correct gloss plus
  * up to three plausible distractors.
  **************************/
-function buildRecognitionChoices(args: {
+export function buildRecognitionChoices(args: {
   glossaryItem: LibraryGlossaryItem;
   glossaryItems: LibraryGlossaryItem[];
   choiceSeed: number;
@@ -126,23 +126,12 @@ function buildRecognitionChoices(args: {
  **************************/
 export function RecognitionCard({
   glossaryItem,
-  glossaryItems,
+  choices,
 }: {
   glossaryItem: LibraryGlossaryItem;
-  glossaryItems: LibraryGlossaryItem[];
+  choices: RecognitionChoice[];
 }) {
   const [selectedChoiceIndex, setSelectedChoiceIndex] = useState<number | null>(null);
-  const [choiceSeed] = useState(() => Math.floor(Math.random() * 4294967296));
-
-  // -------------------------
-  // Build a one-time randomized choice
-  // bank that stays stable until the
-  // card unmounts.
-  // -------------------------
-  const choices = useMemo(
-    () => buildRecognitionChoices({ glossaryItem, glossaryItems, choiceSeed }),
-    [choiceSeed, glossaryItem, glossaryItems]
-  );
   const hasMadeFirstGuess = selectedChoiceIndex != null;
   const isCorrect =
     hasMadeFirstGuess && choices[selectedChoiceIndex]?.isCorrect === true;
