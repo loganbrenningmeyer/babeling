@@ -149,6 +149,11 @@ type MessagesSchema = {
     footer: {
       blur: string;
       swapSourceTarget: string;
+      practice: string;
+      newWords: string;
+      noPracticeItems: string;
+      practiceComplete: string;
+      practiceMoreWords: string;
     },
   },
 
@@ -389,6 +394,11 @@ export const en = {
     footer: {
       blur: "Blur",
       swapSourceTarget: "Swap source and target roles",
+      practice: "Learn new words",
+      newWords: "new words",
+      noPracticeItems: "No practice words on this page yet.",
+      practiceComplete: "You have practiced all available words on this page.",
+      practiceMoreWords: "Practice more words",
     },
   },
 
@@ -629,6 +639,11 @@ export const es = {
     footer: {
       blur: "Desenfoque",
       swapSourceTarget: "Intercambiar origen y destino",
+      practice: "Aprender palabras nuevas",
+      newWords: "palabras nuevas",
+      noPracticeItems: "Todavía no hay palabras para practicar en esta página.",
+      practiceComplete: "Ya has practicado todas las palabras disponibles de esta página.",
+      practiceMoreWords: "Practicar más palabras",
     },
   },
 
@@ -869,6 +884,11 @@ export const fr = {
     footer: {
       blur: "Flou",
       swapSourceTarget: "Inverser source et cible",
+      practice: "Apprendre de nouveaux mots",
+      newWords: "nouveaux mots",
+      noPracticeItems: "Il n'y a pas encore de mots à pratiquer sur cette page.",
+      practiceComplete: "Vous avez pratiqué tous les mots disponibles sur cette page.",
+      practiceMoreWords: "Pratiquer d'autres mots",
     },
   },
 
@@ -1109,6 +1129,11 @@ export const de = {
     footer: {
       blur: "Unschärfe",
       swapSourceTarget: "Quell- und Zielrolle tauschen",
+      practice: "Neue Wörter lernen",
+      newWords: "neue Wörter",
+      noPracticeItems: "Auf dieser Seite gibt es noch keine Übungswörter.",
+      practiceComplete: "Du hast alle verfügbaren Wörter auf dieser Seite geübt.",
+      practiceMoreWords: "Weitere Wörter üben",
     },
   },
 
@@ -1349,6 +1374,11 @@ export const it = {
     footer: {
       blur: "Sfocatura",
       swapSourceTarget: "Scambia ruoli origine e destinazione",
+      practice: "Impara nuove parole",
+      newWords: "nuove parole",
+      noPracticeItems: "Non ci sono ancora parole da praticare in questa pagina.",
+      practiceComplete: "Hai praticato tutte le parole disponibili in questa pagina.",
+      practiceMoreWords: "Pratica altre parole",
     },
   },
 

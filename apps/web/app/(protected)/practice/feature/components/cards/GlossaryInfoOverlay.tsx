@@ -7,16 +7,26 @@ import { Info } from "lucide-react";
 import { GlossaryItemBack } from "@/app/(protected)/library/feature/components/GlossaryItemCard/GlossaryItemBack";
 import type { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
 import { useMessages } from "@/app/hooks/useMessages";
+import type { PracticeItem } from "../../types/practiceItem";
 
 export function GlossaryInfoOverlay({
-  glossaryItem,
+  practiceItem,
   enabled,
 }: {
-  glossaryItem: LibraryGlossaryItem;
+  practiceItem: PracticeItem;
   enabled: boolean;
 }) {
   const m = useMessages();
   const [detailsExpanded, setDetailsExpanded] = useState(false);
+  const glossaryItem: LibraryGlossaryItem = {
+    glossaryItemId: practiceItem.savedGlossaryItemId ?? -1,
+    documentTitle: practiceItem.documentTitle,
+    srcLang: practiceItem.srcLang,
+    tgtLang: practiceItem.tgtLang,
+    definition: practiceItem.definition,
+    usage: practiceItem.usage,
+    createdAt: "",
+  };
 
   useEffect(() => {
     if (!enabled) {

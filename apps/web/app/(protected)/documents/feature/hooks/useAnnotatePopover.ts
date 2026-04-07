@@ -7,12 +7,15 @@ import type {
   DefineEntry,
   ExplainEntry,
 } from "@/app/(protected)/documents/feature/components/Annotate/AnnotateCard";
-import type { TokenBlock } from "../types/pageTranslation";
-import type { GlossaryItemSaveRequest, GlossaryContextAlignment, GlossaryContextTokenSlice } from "../types/glossaryItem";
+import type { GlossaryItemSaveRequest } from "../types/glossaryItem";
 
 import { annotate } from "../api/annotate";
 import { saveGlossaryItem, loadGlossaryItems, deleteGlossaryItem } from "../api/glossaryItems";
 import { makeAnnotateArgs, toAnnotateEntries } from "../types/annotate";
+import {
+  buildGlossaryItemSaveRequest,
+  makeAnnotationKey,
+} from "../lib/practiceItemBuilders";
 
 export type AnnotatePopoverController = {
   // Popover
@@ -133,21 +136,6 @@ export function useAnnotatePopover({
     : session?.alignment.align.tgtToSrc;
 
   /**************************
-   * `makeAnnotationKey()`
-   * -- Creates annotation cache key for the session, allowing recovering annotations
-   *    without having to save them
-   **************************/
-  function makeAnnotationKey(args: {
-    documentId: number | null;
-    pageId: number | null;
-    tgtLang: string;
-    wordId: number;
-  }) {
-    const { documentId, pageId, tgtLang, wordId } = args;
-    return `${documentId ?? "x"}|${pageId ?? "x"}|${tgtLang}|${wordId}`;
-  }
-
-  /**************************
    * `ensureSavedGlossaryKeysLoaded()`
    * -- Load persisted glossary items once and index them by annotation key
    **************************/
@@ -265,152 +253,34 @@ export function useAnnotatePopover({
   );
 
   /**************************
-   * `buildContextTokenSlice()`
-   * -- 
-   * 
-   * @param 
-   * @returns 
+   * `buildCurrentGlossaryItemSaveRequest()`
+   * -- Helper to construct glossary item save request data for the current annotation
    **************************/
-  function buildContextTokenSlice(args: {
-    block: TokenBlock;
-    sliceGlobalWordIds: number[];
-    highlightedGlobalWordIds: Set<number>;
-  }): GlossaryContextTokenSlice {
-    const { block, sliceGlobalWordIds, highlightedGlobalWordIds } = args;
-
-    // Filter out-of-bounds word IDs
-    const ids = sliceGlobalWordIds.filter(
-      (i) => i >= 0 && i < block.words.length && i < block.spaces.length
-    );
-
-    // Get the highlighted word IDs locally to the token slice
-    const highlightedLocalWordIds: number[] = [];
-    ids.forEach((globalIdx, localIdx) => {
-      if (highlightedGlobalWordIds.has(globalIdx)) {
-        highlightedLocalWordIds.push(localIdx);
-      }
-    });
-
-    return {
-      words: ids.map((i) => block.words[i]),
-      spaces: ids.map((i) => block.spaces[i]),
-      globalWordIds: ids,
-      highlightedLocalWordIds: ids.reduce<number[]>((acc, globalIdx, localIdx) => {
-        if (highlightedGlobalWordIds.has(globalIdx)) acc.push(localIdx);
-        return acc;
-      }, []),
-    };
-  }
-
-  /**************************
-   * `buildGlossaryContextAlignment()`
-   * -- 
-   * 
-   * @param 
-   * @returns 
-   **************************/
-  function buildGlossaryContextAlignment(args: {
-    session: ReaderSession;
-    tgtIdx: number;
-  }): GlossaryContextAlignment {
-    const { session, tgtIdx } = args;
-    const src = isSwapped ? session.alignment.tgt : session.alignment.src;
-    const tgt = isSwapped ? session.alignment.src : session.alignment.tgt;
-    const targetToSource = isSwapped
-      ? session.alignment.align.srcToTgt
-      : session.alignment.align.tgtToSrc;
-
-    const sentId = tgt.sentIds[tgtIdx];
-    const parId = tgt.parIds[tgtIdx];
-    
-    const srcAlignedGlobal = new Set(targetToSource[tgtIdx] ?? []);
-    const tgtClickedGlobal = new Set([tgtIdx]);
-
-    return {
-      sentence: {
-        src: buildContextTokenSlice({
-          block: src,
-          sliceGlobalWordIds: src.sentToWordIds[sentId],
-          highlightedGlobalWordIds: srcAlignedGlobal,
-        }),
-        tgt: buildContextTokenSlice({
-          block: tgt,
-          sliceGlobalWordIds: tgt.sentToWordIds[sentId],
-          highlightedGlobalWordIds: tgtClickedGlobal,
-        })
-      },
-      paragraph: {
-        src: buildContextTokenSlice({
-          block: src,
-          sliceGlobalWordIds: src.parToWordIds[parId],
-          highlightedGlobalWordIds: srcAlignedGlobal,
-        }),
-        tgt: buildContextTokenSlice({
-          block: tgt,
-          sliceGlobalWordIds: tgt.parToWordIds[parId],
-          highlightedGlobalWordIds: tgtClickedGlobal,
-        }),
-      },
-    };
-  }
-
-  /**************************
-   * `buildGlossarySaveRequest()`
-   * -- Helper to construct glossary item save request data
-   **************************/
-  const buildGlossaryItemSaveRequest = useCallback((): GlossaryItemSaveRequest | null => {
-    if (!session) return null;
-    if (!defineData || !explainData) return null;
-    if (documentId == null || pageId == null) return null;
-    if (lockedTargetIndex == null) return null;
-
-    const sentId = session.alignment.tgt.sentIds[lockedTargetIndex];
-    const parId = session.alignment.tgt.parIds[lockedTargetIndex];
-    if (sentId == null || parId == null) return null;
-
-    const contextAlignment = buildGlossaryContextAlignment({
-      session,
-      tgtIdx: lockedTargetIndex,
-    });
-
-    return {
-      srcLang: logicalSrcLang,
-      tgtLang: logicalTgtLang,
-      definition: {
-        form: defineData.form,
-        posForm: defineData.posForm || null,
-        ipaForm: defineData.ipaForm || null,
-        lemma: defineData.lemma || null,
-        posLemma: defineData.posLemma || null,
-        ipaLemma: defineData.ipaLemma || null,
-        gloss: defineData.gloss,
-        srcSentence: defineData.srcSentence,
-        srcParagraph: defineData.srcParagraph,
-        tgtSentence: defineData.tgtSentence,
-        tgtParagraph: defineData.tgtParagraph,
-        contextAlignment,
+  const buildCurrentGlossaryItemSaveRequest = useCallback(
+    (): GlossaryItemSaveRequest | null =>
+      buildGlossaryItemSaveRequest({
+        session,
+        defineData,
+        explainData,
         documentId,
         pageId,
-        parId,
-        sentId,
-        wordId: lockedTargetIndex,
-      },
-      usage: {
-        explanation: explainData.explanation,
-        examples: explainData.examples,
-      },
-    };
-  }, [
-    session,
-    defineData,
-    explainData,
-    documentId,
-    pageId,
-    lockedTargetIndex,
-    logicalSrcLang,
-    logicalTgtLang,
-    isSwapped,
-  ]);
+        lockedTargetIndex,
+        logicalSrcLang,
+        logicalTgtLang,
+        isSwapped,
+      }),
+    [
+      session,
+      defineData,
+      explainData,
+      documentId,
+      pageId,
+      lockedTargetIndex,
+      logicalSrcLang,
+      logicalTgtLang,
+      isSwapped,
+    ]
+  );
 
   /**************************
    * `syncBookmarkIntent()`
@@ -436,7 +306,7 @@ export function useAnnotatePopover({
       // -------------------------
       try {
         if (currentDesired) {
-          const payload = buildGlossaryItemSaveRequest();
+          const payload = buildCurrentGlossaryItemSaveRequest();
           if (!payload) throw new Error("Missing glossary save data");
 
           // Store annotation in cache
@@ -518,7 +388,7 @@ export function useAnnotatePopover({
 
     bookmarkSyncingRef.current = false;
     setBookmarkSyncing(false);
-  }, [buildGlossaryItemSaveRequest, setSavedGlossary]);
+  }, [buildCurrentGlossaryItemSaveRequest, setSavedGlossary]);
 
   /**************************
    * `onToggleBookmark()`
@@ -528,7 +398,7 @@ export function useAnnotatePopover({
     const next = !isBookmarked;
 
     // Don't toggle before annotation data exists
-    if (next && !buildGlossaryItemSaveRequest()) {
+    if (next && !buildCurrentGlossaryItemSaveRequest()) {
       return;
     }
 
@@ -536,7 +406,7 @@ export function useAnnotatePopover({
     setIsBookmarked(next);
     // Background sync
     void syncBookmarkIntent(next);
-  }, [isBookmarked, buildGlossaryItemSaveRequest, syncBookmarkIntent]);
+  }, [isBookmarked, buildCurrentGlossaryItemSaveRequest, syncBookmarkIntent]);
 
   /**************************
    * `onTargetWordClick()`

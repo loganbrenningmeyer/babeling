@@ -10,9 +10,9 @@ import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 import { TargetClozeSentence } from "./TargetClozeSentence";
 
-import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
 import type { GlossaryContextTokenSlice } from "@/app/(protected)/documents/feature/types/glossaryItem";
 import { GlossaryInfoOverlay } from "../GlossaryInfoOverlay";
+import type { PracticeItem } from "../../../types/practiceItem";
 
 const srcFontSize = "text-md";
 const tgtFontSize = "text-lg";
@@ -127,6 +127,16 @@ function getShuffledChoiceIndices(
   }
 
   return indices;
+}
+
+function hashStringSeed(value: string): number {
+  let hash = 0;
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+
+  return hash || 1;
 }
 
 
@@ -251,19 +261,20 @@ function truncateTokenSlice(args: {
  * put the target words into the sentence in order
  **************************/
 export function ContextClozeCard({
-  glossaryItem,
+  practiceItem,
 }: {
-  glossaryItem: LibraryGlossaryItem,
+  practiceItem: PracticeItem,
 }) {
   const m = useMessages();
   const layoutGroupId = useId();
   const shakeControls = useAnimationControls();
+  const showInfoFromStart = practiceItem.source === "page";
 
   // -------------------------
   // Resolve target sentence state
   // -------------------------
-  const srcSlice = glossaryItem.definition.contextAlignment.sentence.src;
-  const tgtSlice = glossaryItem.definition.contextAlignment.sentence.tgt;
+  const srcSlice = practiceItem.definition.contextAlignment.sentence.src;
+  const tgtSlice = practiceItem.definition.contextAlignment.sentence.tgt;
   const tgtIdx = tgtSlice.highlightedLocalWordIds[0];
   const numBlank = 3;
 
@@ -343,8 +354,8 @@ export function ContextClozeCard({
   // Shuffle visual choice order
   // -------------------------
   const shuffledChoiceIndices = useMemo(
-    () => getShuffledChoiceIndices(choices.length, glossaryItem.glossaryItemId),
-    [choices.length, glossaryItem.glossaryItemId]
+    () => getShuffledChoiceIndices(choices.length, hashStringSeed(practiceItem.practiceItemId)),
+    [choices.length, practiceItem.practiceItemId]
   );
 
   /**************************
@@ -615,7 +626,7 @@ export function ContextClozeCard({
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <LangBadge
-                        lang={glossaryItem.srcLang}
+                        lang={practiceItem.srcLang}
                         labels={m.langs}
                         useLabel={true}
                       />
@@ -653,7 +664,7 @@ export function ContextClozeCard({
                   <div className="mb-4 flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <LangBadge
-                        lang={glossaryItem.tgtLang}
+                        lang={practiceItem.tgtLang}
                         labels={m.langs}
                         useLabel={true}
                       />
@@ -734,15 +745,15 @@ export function ContextClozeCard({
                 <div className="mt-auto space-y-3">
                   <Separator className="bg-border/60" />
                   <p className="font-ui text-sm italic text-muted-foreground">
-                    {glossaryItem.documentTitle}
+                    {practiceItem.documentTitle}
                   </p>
                 </div>
               </div>
             </LayoutGroup>
           </CardContent>
           <GlossaryInfoOverlay
-            glossaryItem={glossaryItem}
-            enabled={isCorrect}
+            practiceItem={practiceItem}
+            enabled={showInfoFromStart || isCorrect}
           />
         </Card>
       </div>

@@ -7,8 +7,8 @@ import { RotateCw } from "lucide-react";
 import { LangBadge } from "@/app/components/LangBadge";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
 import { GlossaryInfoOverlay } from "./GlossaryInfoOverlay";
+import type { PracticeItem } from "../../types/practiceItem";
 
 
 /**************************
@@ -16,11 +16,12 @@ import { GlossaryInfoOverlay } from "./GlossaryInfoOverlay";
  * -- Simple flashcard with word on front, definition on back
  **************************/
 export function DefinitionCard({
-  glossaryItem,
+  practiceItem,
 }: {
-  glossaryItem: LibraryGlossaryItem,
+  practiceItem: PracticeItem,
 }) {
   const [flipped, setFlipped] = useState(false);
+  const showInfoFromStart = practiceItem.source === "page";
 
   return (
     <div
@@ -54,7 +55,7 @@ export function DefinitionCard({
                 "
               >
                 <div className="pointer-events-none absolute left-5 top-5 z-10">
-                  <LangBadge lang={glossaryItem.tgtLang} className="text-sm" />
+                  <LangBadge lang={practiceItem.tgtLang} className="text-sm" />
                 </div>
                 <div
                   className="
@@ -81,8 +82,12 @@ export function DefinitionCard({
                     font-reading font-semibold text-6xl
                   "
                 >
-                  {glossaryItem.definition.form}
+                  {practiceItem.definition.form}
                 </CardContent>
+                <GlossaryInfoOverlay
+                  practiceItem={practiceItem}
+                  enabled={showInfoFromStart}
+                />
               </Card>
             </div>
           </div>
@@ -112,10 +117,10 @@ export function DefinitionCard({
                       font-ui text-3xl font-normal
                     "
                   >
-                    {glossaryItem.definition.gloss}
+                    {practiceItem.definition.gloss}
                   </div>
                 </CardContent>
-                <GlossaryInfoOverlay glossaryItem={glossaryItem} enabled={true} />
+                <GlossaryInfoOverlay practiceItem={practiceItem} enabled={true} />
               </Card>
             </div>
           </div>

@@ -6,8 +6,8 @@ import { LangBadge } from "@/app/components/LangBadge";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-import { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
 import { GlossaryInfoOverlay } from "./GlossaryInfoOverlay";
+import type { PracticeItem } from "../../types/practiceItem";
 
 const MAX_CHOICES = 4;
 const SUCCESS_CARD_CLASS_NAME =
@@ -52,6 +52,16 @@ function normalizeGloss(gloss: string): string {
   return gloss.trim().toLocaleLowerCase();
 }
 
+function hashStringSeed(value: string): number {
+  let hash = 0;
+
+  for (let i = 0; i < value.length; i += 1) {
+    hash = (hash * 31 + value.charCodeAt(i)) >>> 0;
+  }
+
+  return hash || 1;
+}
+
 
 /**************************
  * `buildRecognitionChoices()`
@@ -59,32 +69,32 @@ function normalizeGloss(gloss: string): string {
  * up to three plausible distractors.
  **************************/
 export function buildRecognitionChoices(args: {
-  glossaryItem: LibraryGlossaryItem;
-  glossaryItems: LibraryGlossaryItem[];
+  practiceItem: PracticeItem;
+  practiceItems: PracticeItem[];
   choiceSeed: number;
 }): RecognitionChoice[] {
-  const { glossaryItem, glossaryItems, choiceSeed } = args;
-  const correctGloss = glossaryItem.definition.gloss.trim();
+  const { practiceItem, practiceItems, choiceSeed } = args;
+  const correctGloss = practiceItem.definition.gloss.trim();
   const correctGlossKey = normalizeGloss(correctGloss);
   const preferredDistractors: string[] = [];
   const fallbackDistractors: string[] = [];
   const seenGlosses = new Set<string>([correctGlossKey]);
-  const itemSeed = choiceSeed + glossaryItem.glossaryItemId * 31;
+  const itemSeed = choiceSeed + hashStringSeed(practiceItem.practiceItemId) * 31;
 
   // -------------------------
   // Prefer same-language and same-POS
   // distractors before falling back
   // to the rest of the glossary pool
   // -------------------------
-  const sameLanguageItems = glossaryItems.filter(
-    (item) => item.tgtLang === glossaryItem.tgtLang
+  const sameLanguageItems = practiceItems.filter(
+    (item) => item.tgtLang === practiceItem.tgtLang
   );
-  const fallbackItems = glossaryItems.filter(
-    (item) => item.tgtLang !== glossaryItem.tgtLang
+  const fallbackItems = practiceItems.filter(
+    (item) => item.tgtLang !== practiceItem.tgtLang
   );
 
   for (const item of [...sameLanguageItems, ...fallbackItems]) {
-    if (item.glossaryItemId === glossaryItem.glossaryItemId) continue;
+    if (item.practiceItemId === practiceItem.practiceItemId) continue;
 
     const gloss = item.definition.gloss.trim();
     const glossKey = normalizeGloss(gloss);
@@ -93,8 +103,8 @@ export function buildRecognitionChoices(args: {
     seenGlosses.add(glossKey);
 
     const hasMatchingPos =
-      item.definition.posLemma === glossaryItem.definition.posLemma ||
-      item.definition.posForm === glossaryItem.definition.posForm;
+      item.definition.posLemma === practiceItem.definition.posLemma ||
+      item.definition.posForm === practiceItem.definition.posForm;
 
     if (hasMatchingPos) {
       preferredDistractors.push(gloss);
@@ -125,13 +135,14 @@ export function buildRecognitionChoices(args: {
  * correct definition from multiple choices.
  **************************/
 export function RecognitionCard({
-  glossaryItem,
+  practiceItem,
   choices,
 }: {
-  glossaryItem: LibraryGlossaryItem;
+  practiceItem: PracticeItem;
   choices: RecognitionChoice[];
 }) {
   const [selectedChoiceIndex, setSelectedChoiceIndex] = useState<number | null>(null);
+  const showInfoFromStart = practiceItem.source === "page";
   const hasMadeFirstGuess = selectedChoiceIndex != null;
   const isCorrect =
     hasMadeFirstGuess && choices[selectedChoiceIndex]?.isCorrect === true;
@@ -156,7 +167,7 @@ export function RecognitionCard({
           )}
         >
           <div className="pointer-events-none absolute left-5 top-5 z-10">
-            <LangBadge lang={glossaryItem.tgtLang} className="text-sm" />
+            <LangBadge lang={practiceItem.tgtLang} className="text-sm" />
           </div>
 
           <CardContent className="flex h-full flex-col p-0">
@@ -165,7 +176,7 @@ export function RecognitionCard({
               //* Prompt
               //* ------------------------- */}
               <div className="font-reading text-center text-5xl font-semibold leading-none sm:text-6xl">
-                {glossaryItem.definition.form}
+                {practiceItem.definition.form}
               </div>
 
               {/* -------------------------
@@ -215,8 +226,8 @@ export function RecognitionCard({
             </div>
           </CardContent>
           <GlossaryInfoOverlay
-            glossaryItem={glossaryItem}
-            enabled={hasMadeFirstGuess}
+            practiceItem={practiceItem}
+            enabled={showInfoFromStart || hasMadeFirstGuess}
           />
         </Card>
       </div>

@@ -7,6 +7,7 @@ import { useRecentGlossaryItems } from "../library/feature/hooks/useRecentGlossa
 import { PracticeDeck } from "../practice/feature/components/PracticeDeck";
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
+import { fromLibraryGlossaryItem } from "../practice/feature/lib/toPracticeItem";
 
 
 export default function Review() {
@@ -44,9 +45,14 @@ export default function Review() {
     [glossaryItems, selectedTargetLanguages]
   );
 
+  const practiceItems = useMemo(
+    () => filteredGlossaryItems.map(fromLibraryGlossaryItem),
+    [filteredGlossaryItems]
+  );
+
   useEffect(() => {
-    setRemainingCount(filteredGlossaryItems.length);
-  }, [filteredGlossaryItems]);
+    setRemainingCount(practiceItems.length);
+  }, [practiceItems]);
 
   /**************************
    * `toggleTargetLanguage()`
@@ -112,7 +118,7 @@ export default function Review() {
 
         <div className="mt-10 flex-1 min-h-0">
           <PracticeDeck
-            glossaryItems={filteredGlossaryItems}
+            practiceItems={practiceItems}
             onRemainingChange={setRemainingCount}
             emptyState={<div />}
           />

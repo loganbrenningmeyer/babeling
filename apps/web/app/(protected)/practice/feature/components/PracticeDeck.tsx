@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import { X, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import type { LibraryGlossaryItem } from "@/app/(protected)/library/feature/types/glossaryItem";
 
 import { ContextClozeCard } from "./cards/ContextCloze/ContextClozeCard";
 import { DefinitionCard } from "./cards/DefinitionCard";
@@ -15,6 +14,7 @@ import {
   type RecognitionChoice,
 } from "./cards/RecognitionCard";
 import type { PracticeCardType } from "../types/practice";
+import type { PracticeItem } from "../types/practiceItem";
 
 type PracticeTransitionAction = "again" | "known";
 
@@ -23,7 +23,7 @@ const PRACTICE_CARD_TRANSITION = {
   ease: [0.2, 0.8, 0.2, 1] as const,
 };
 
-function shuffleIds(ids: number[]): number[] {
+function shuffleIds(ids: string[]): string[] {
   const next = [...ids];
 
   for (let i = next.length - 1; i > 0; i -= 1) {
@@ -46,59 +46,57 @@ function getRandomCardType(): PracticeCardType {
 
 function renderPracticeCard(args: {
   cardType: PracticeCardType | null;
-  glossaryItem: LibraryGlossaryItem;
-  glossaryItems: LibraryGlossaryItem[];
-  recognitionChoicesById: Record<number, RecognitionChoice[]>;
+  practiceItem: PracticeItem;
+  recognitionChoicesById: Record<string, RecognitionChoice[]>;
 }) {
   const {
     cardType,
-    glossaryItem,
-    glossaryItems,
+    practiceItem,
     recognitionChoicesById,
   } = args;
 
   if (cardType === "recognition") {
     const recognitionChoices =
-      recognitionChoicesById[glossaryItem.glossaryItemId];
+      recognitionChoicesById[practiceItem.practiceItemId];
 
     if (!recognitionChoices) return null;
 
     return (
       <RecognitionCard
-        glossaryItem={glossaryItem}
+        practiceItem={practiceItem}
         choices={recognitionChoices}
       />
     );
   }
 
   if (cardType === "definition") {
-    return <DefinitionCard glossaryItem={glossaryItem} />;
+    return <DefinitionCard practiceItem={practiceItem} />;
   }
 
-  return <ContextClozeCard glossaryItem={glossaryItem} />;
+  return <ContextClozeCard practiceItem={practiceItem} />;
 }
 
 export function PracticeDeck({
-  glossaryItems,
+  practiceItems,
   emptyState,
   onRemainingChange,
 }: {
-  glossaryItems: LibraryGlossaryItem[];
+  practiceItems: PracticeItem[];
   emptyState?: ReactNode;
   onRemainingChange?: (remaining: number) => void;
 }) {
-  const [queue, setQueue] = useState<number[]>([]);
-  const [cardTypeById, setCardTypeById] = useState<Record<number, PracticeCardType>>(
+  const [queue, setQueue] = useState<string[]>([]);
+  const [cardTypeById, setCardTypeById] = useState<Record<string, PracticeCardType>>(
     {}
   );
   const [recognitionChoicesById, setRecognitionChoicesById] = useState<
-    Record<number, RecognitionChoice[]>
+    Record<string, RecognitionChoice[]>
   >({});
   const [transitionAction, setTransitionAction] =
     useState<PracticeTransitionAction | null>(null);
 
   useEffect(() => {
-    const ids = glossaryItems.map((item) => item.glossaryItemId);
+    const ids = practiceItems.map((item) => item.practiceItemId);
     const shuffledIds = shuffleIds(ids);
     const sessionSeed = Math.floor(Math.random() * 4294967296);
 
@@ -106,40 +104,40 @@ export function PracticeDeck({
     setCardTypeById(
       Object.fromEntries(
         shuffledIds.map((id) => [id, getRandomCardType()])
-      ) as Record<number, PracticeCardType>
+      ) as Record<string, PracticeCardType>
     );
     setRecognitionChoicesById(
       Object.fromEntries(
-        glossaryItems.map((item) => [
-          item.glossaryItemId,
+        practiceItems.map((item) => [
+          item.practiceItemId,
           buildRecognitionChoices({
-            glossaryItem: item,
-            glossaryItems,
+            practiceItem: item,
+            practiceItems,
             choiceSeed: sessionSeed,
           }),
         ])
-      ) as Record<number, RecognitionChoice[]>
+      ) as Record<string, RecognitionChoice[]>
     );
     setTransitionAction(null);
-  }, [glossaryItems]);
+  }, [practiceItems]);
 
   useEffect(() => {
     onRemainingChange?.(queue.length);
   }, [onRemainingChange, queue.length]);
 
-  const glossaryById = useMemo(
+  const practiceById = useMemo(
     () =>
       Object.fromEntries(
-        glossaryItems.map((item) => [item.glossaryItemId, item])
+        practiceItems.map((item) => [item.practiceItemId, item])
       ),
-    [glossaryItems]
+    [practiceItems]
   );
 
   const currentId = queue[0];
-  const currentItem = currentId ? glossaryById[currentId] : null;
+  const currentItem = currentId ? practiceById[currentId] : null;
   const currentCardType = currentId ? cardTypeById[currentId] : null;
   const nextId = queue[1];
-  const nextItem = nextId ? glossaryById[nextId] : null;
+  const nextItem = nextId ? practiceById[nextId] : null;
   const nextCardType = nextId ? cardTypeById[nextId] : null;
 
   const isTransitioning = transitionAction != null;
@@ -203,15 +201,14 @@ export function PracticeDeck({
           >
             {renderPracticeCard({
               cardType: nextCardType,
-              glossaryItem: nextItem,
-              glossaryItems,
+              practiceItem: nextItem,
               recognitionChoicesById,
             })}
           </motion.div>
         ) : null}
 
         <motion.div
-          key={`${currentItem.glossaryItemId}-${currentCardType}`}
+          key={`${currentItem.practiceItemId}-${currentCardType}`}
           className="col-start-1 row-start-1 z-10"
           animate={
             isTransitioning
@@ -234,8 +231,7 @@ export function PracticeDeck({
         >
           {renderPracticeCard({
             cardType: currentCardType,
-            glossaryItem: currentItem,
-            glossaryItems,
+            practiceItem: currentItem,
             recognitionChoicesById,
           })}
         </motion.div>

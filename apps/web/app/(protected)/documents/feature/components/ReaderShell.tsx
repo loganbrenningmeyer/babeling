@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, ChevronRight, Book, Repeat } from "lucide-react";
+import { ChevronLeft, ChevronRight, Book, Brain, Repeat } from "lucide-react";
 
 import type { LoadedDocumentImage, SavedPage } from "../types/document";
 import type { ReaderSession } from "../types/readerSession";
@@ -48,6 +48,7 @@ type ReaderShellProps = {
   pageCount: number;
   onPrevPage: () => void;
   onNextPage: () => void;
+  onOpenPractice: () => void;
 
   // Blur-mode UI
   blurMode: BlurMode;
@@ -104,6 +105,7 @@ export function ReaderShell({
   pageCount,
   onPrevPage,
   onNextPage,
+  onOpenPractice,
   blurMode,
   onBlurModeChange,
   sourceBlurEnabled,
@@ -330,15 +332,23 @@ export function ReaderShell({
               {pageCount}
             </div>
 
-            <div className="items-center justify-center mx-auto">
+            {/* <div className="items-center justify-center mx-auto">
               <HelpPopover />
-            </div>
+            </div> */}
             {/* -------------------------
             //* Practice page
             //* ------------------------- */}
-            {/* <div className="inline-flex items-center justify-center">
-              Practice
-            </div> */}
+            <div className="inline-flex items-center justify-center">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onOpenPractice}
+                className="gap-2"
+              >
+                <Brain className="h-4 w-4" />
+                {msgs.footer.practice}
+              </Button>
+            </div>
             {/* -------------------------
             //* Next page
             //* ------------------------- */}

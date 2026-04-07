@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 
 import { ReaderShell } from "../feature/components/ReaderShell";
 import { TOCSheet } from "../feature/components/Navigation/TOCSheet";
+import { ReaderPracticeDialog } from "../feature/components/Practice/ReaderPracticeDialog";
 
 import { BlurMode } from "../feature/types/blur";
 
@@ -20,6 +21,7 @@ import {
 import { useMessages } from "@/app/hooks/useMessages";
 import { toUiLang } from "@/app/i18n/messages";
 import { useReaderInteraction } from "../feature/hooks/useReaderInteraction";
+import { usePagePracticeItems } from "../feature/hooks/usePagePracticeItems";
 
 // Search Params type
 type SP = Record<string, string | string[] | undefined>;
@@ -124,6 +126,7 @@ export default function ReaderPageClient({
   const [blurMode, setBlurMode] = useState<BlurMode>("sentence");
   const [sourceBlurEnabled, setSourceBlurEnabled] = useState(true);
   const [isSwapped, setIsSwapped] = useState(false);
+  const [practiceOpen, setPracticeOpen] = useState(false);
 
   // -------------------------
   // Wire blurredSource to session.ui via updateCachedUi
@@ -159,6 +162,27 @@ export default function ReaderPageClient({
     blurredSource,
     setBlurredSource,
     updateCachedUi,
+  });
+
+  // -------------------------
+  // Page practice items
+  // -------------------------
+  const {
+    practiceItems,
+    loading: practiceLoading,
+    hasMoreItems: hasMorePracticeItems,
+    reload: reloadPracticeItems,
+  } = usePagePracticeItems({
+    open: practiceOpen,
+    session,
+    documentId: document?.documentId ?? null,
+    documentTitle: document?.title ?? "",
+    pageId: currentPage?.id ?? null,
+    srcLang: document?.srcLang ?? prefSrcLang ?? "en",
+    tgtLang,
+    uiLang,
+    isSwapped,
+    maxNewItems: 10,
   });
 
   // -------------------------
@@ -207,6 +231,13 @@ export default function ReaderPageClient({
     blurSyncKeyRef.current = nextKey;
   }, [session, currentPage?.id, tgtLang, isSwapped, updateCachedUi]);
 
+  useEffect(() => {
+    if (!practiceOpen) return;
+    if (!interaction.popoverOpen) return;
+
+    interaction.onPopoverOpenChange(false);
+  }, [practiceOpen, interaction]);
+
   const setPage = useCallback(
     (nextIndex: number) => {
       const sp = new URLSearchParams();
@@ -230,6 +261,7 @@ export default function ReaderPageClient({
   // -------------------------
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
+      if (practiceOpen) return;
       if (interaction.popoverOpen) return;
 
       const isArrow = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key);
@@ -251,7 +283,7 @@ export default function ReaderPageClient({
 
     window.addEventListener("keydown", onKeyDown, true);
     return () => window.removeEventListener("keydown", onKeyDown, true);
-  }, [interaction, onPrevPage, onNextPage]);
+  }, [practiceOpen, interaction, onPrevPage, onNextPage]);
 
   // -------------------------
   // Save read progress for user/document/tgtLang
@@ -385,6 +417,7 @@ export default function ReaderPageClient({
             pageCount={pageCount}
             onPrevPage={onPrevPage}
             onNextPage={onNextPage}
+            onOpenPractice={() => setPracticeOpen(true)}
             blurMode={blurMode}
             onBlurModeChange={setBlurMode}
             sourceBlurEnabled={sourceBlurEnabled}
@@ -398,6 +431,15 @@ export default function ReaderPageClient({
           />
         </div>
       </div>
+
+      <ReaderPracticeDialog
+        open={practiceOpen}
+        onOpenChange={setPracticeOpen}
+        practiceItems={practiceItems}
+        loading={practiceLoading}
+        canRestart={hasMorePracticeItems}
+        onRestart={reloadPracticeItems}
+      />
     </div>
   );
 }
