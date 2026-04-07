@@ -1,4 +1,5 @@
 import hashlib
+import logging
 from collections import defaultdict, OrderedDict
 from pathlib import Path
 from fastapi import (
@@ -10,9 +11,9 @@ from fastapi import (
     Response, 
     UploadFile, 
 )
-from sqlalchemy import select, func
+from sqlalchemy import select, func, and_, or_
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 from api.database.db import get_db
 from api.auth.users import get_current_app_user
@@ -43,6 +44,7 @@ from api.parsing.pdf import PdfDocument, PdfParser, PdfPage
 
 
 router = APIRouter(prefix="/documents", tags=["documents"])
+logger = logging.getLogger(__name__)
 
 def _normalize_text_for_hash(text: str) -> str:
     return (strip_control_chars(text) or "").replace("\r\n", "\n").replace("\r", "\n").strip()
@@ -66,6 +68,32 @@ def _get_accessible_document(
         .where(
             Document.id == document_id,
             UserDocuments.user_id == user_id,
+        )
+    ).scalar_one_or_none()
+
+
+def _get_existing_uploaded_document(
+    *,
+    db: Session,
+    source_kind: str,
+    source_file_hash: str,
+    src_lang: str,
+    src_text_hash: str,
+) -> Document | None:
+    """
+    Returns an existing uploaded document that matches either the original file
+    bytes or the normalized extracted source text.
+    """
+    return db.execute(
+        select(Document).where(
+            Document.source_kind == source_kind,
+            or_(
+                Document.source_file_hash == source_file_hash,
+                and_(
+                    Document.src_lang == src_lang,
+                    Document.src_text_hash == src_text_hash,
+                ),
+            ),
         )
     ).scalar_one_or_none()
 
@@ -278,6 +306,12 @@ def _save_text_document(
     
     except SQLAlchemyError as e:
         db.rollback()
+        logger.exception(
+            "Failed to save text document title=%r src_lang=%s user_id=%s",
+            title,
+            src_lang,
+            user.id,
+        )
         raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
 
 
@@ -312,12 +346,13 @@ def _save_epub_document(
     # -------------------------
     # Dedupe by source_file_hash
     # -------------------------
-    existing_doc = db.execute(
-        select(Document).where(
-            Document.source_kind == "epub",
-            Document.source_file_hash == source_file_hash,
-        )
-    ).scalar_one_or_none()
+    existing_doc = _get_existing_uploaded_document(
+        db=db,
+        source_kind="epub",
+        source_file_hash=source_file_hash,
+        src_lang=src_lang,
+        src_text_hash=src_text_hash,
+    )
 
     try:
         # -------------------------
@@ -523,8 +558,38 @@ def _save_epub_document(
 
         return DocumentSaveResponse(document_id=doc.id)
     
+    except IntegrityError as e:
+        db.rollback()
+
+        existing_doc = _get_existing_uploaded_document(
+            db=db,
+            source_kind="epub",
+            source_file_hash=source_file_hash,
+            src_lang=src_lang,
+            src_text_hash=src_text_hash,
+        )
+        if existing_doc is not None:
+            _update_document_membership(existing_doc, db, user.id)
+            return DocumentSaveResponse(document_id=existing_doc.id)
+
+        logger.exception(
+            "Integrity error while saving EPUB document title=%r src_lang=%s source_filename=%r user_id=%s",
+            title,
+            src_lang,
+            source_filename,
+            user.id,
+        )
+        raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
+
     except SQLAlchemyError as e:
         db.rollback()
+        logger.exception(
+            "Failed to save EPUB document title=%r src_lang=%s source_filename=%r user_id=%s",
+            title,
+            src_lang,
+            source_filename,
+            user.id,
+        )
         raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
 
 
@@ -563,12 +628,13 @@ def _save_pdf_document(
     # -------------------------
     # Dedupe by source_file_hash
     # -------------------------
-    existing_doc = db.execute(
-        select(Document).where(
-            Document.source_kind == "pdf",
-            Document.source_file_hash == source_file_hash,
-        )
-    ).scalar_one_or_none()
+    existing_doc = _get_existing_uploaded_document(
+        db=db,
+        source_kind="pdf",
+        source_file_hash=source_file_hash,
+        src_lang=src_lang,
+        src_text_hash=src_text_hash,
+    )
 
     try:
         # -------------------------
@@ -775,8 +841,38 @@ def _save_pdf_document(
 
         return DocumentSaveResponse(document_id=doc.id)
 
+    except IntegrityError as e:
+        db.rollback()
+
+        existing_doc = _get_existing_uploaded_document(
+            db=db,
+            source_kind="pdf",
+            source_file_hash=source_file_hash,
+            src_lang=src_lang,
+            src_text_hash=src_text_hash,
+        )
+        if existing_doc is not None:
+            _update_document_membership(existing_doc, db, user.id)
+            return DocumentSaveResponse(document_id=existing_doc.id)
+
+        logger.exception(
+            "Integrity error while saving PDF document title=%r src_lang=%s source_filename=%r user_id=%s",
+            title,
+            src_lang,
+            source_filename,
+            user.id,
+        )
+        raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
+
     except SQLAlchemyError as e:
         db.rollback()
+        logger.exception(
+            "Failed to save PDF document title=%r src_lang=%s source_filename=%r user_id=%s",
+            title,
+            src_lang,
+            source_filename,
+            user.id,
+        )
         raise HTTPException(status_code=500, detail=f"Failed to save document: {str(e)}")
 
 
@@ -812,64 +908,75 @@ async def create_document_with_file(
     db: Session = Depends(get_db),
     user: AppUser = Depends(get_current_app_user),
 ) -> DocumentSaveResponse:
+    filename = file.filename or "unknown"
+    suffix = Path(filename).suffix.lower()
+
     # -- Read file as bytes
     contents = await file.read()
 
-    # =========================
-    # ( .txt ): Extract raw text, split, and save
-    # =========================
-    if file.filename.endswith(".txt"):
-        text = contents.decode("utf-8", errors="replace")
+    try:
+        # =========================
+        # ( .txt ): Extract raw text, split, and save
+        # =========================
+        if suffix == ".txt":
+            text = contents.decode("utf-8", errors="replace")
 
-        return _save_text_document(
-            text=text,
-            title=title,
-            src_lang=src_lang,
-            db=db,
-            user=user,
-        )
-
-    # =========================
-    # ( .epub ): Parse with EpubParser and return EpubDocument information
-    # =========================
-    elif file.filename.endswith(".epub"):
-        epub_doc = EpubParser().build_document(epub_bytes=contents)
-
-        return _save_epub_document(
-            epub_doc=epub_doc,
-            file_bytes=contents,
-            source_filename=file.filename,
-            title=title,
-            src_lang=src_lang,
-            db=db,
-            user=user,
-        )
-    
-    # =========================
-    # ( .pdf ): Parse with PdfParser and return PdfDocument information
-    # =========================
-    elif file.filename.endswith(".pdf"):
-        try:
-            pdf_doc = PdfParser().build_document(pdf_bytes=contents)
-            return _save_pdf_document(
-                pdf_doc=pdf_doc,
-                file_bytes=contents,
-                source_filename=file.filename,
+            return _save_text_document(
+                text=text,
                 title=title,
                 src_lang=src_lang,
                 db=db,
                 user=user,
             )
-        except Exception as e:
-            print(f"Failed to parse PDF: {e}", flush=False)
-            raise HTTPException(500, f"Failed to parse PDF: {e}")
 
+        # =========================
+        # ( .epub ): Parse with EpubParser and return EpubDocument information
+        # =========================
+        if suffix == ".epub":
+            epub_doc = EpubParser().build_document(epub_bytes=contents)
 
-    # =========================
-    # ( 400 Error ): Unsupported file type
-    # =========================
-    else:
-        raise HTTPException(400, f"Unsupported file type: {Path(file.filename).suffix.lower()}")
+            return _save_epub_document(
+                epub_doc=epub_doc,
+                file_bytes=contents,
+                source_filename=filename,
+                title=title,
+                src_lang=src_lang,
+                db=db,
+                user=user,
+            )
+
+        # =========================
+        # ( .pdf ): Parse with PdfParser and return PdfDocument information
+        # =========================
+        if suffix == ".pdf":
+            pdf_doc = PdfParser().build_document(pdf_bytes=contents)
+            return _save_pdf_document(
+                pdf_doc=pdf_doc,
+                file_bytes=contents,
+                source_filename=filename,
+                title=title,
+                src_lang=src_lang,
+                db=db,
+                user=user,
+            )
+
+        # =========================
+        # ( 400 Error ): Unsupported file type
+        # =========================
+        raise HTTPException(400, f"Unsupported file type: {suffix}")
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.exception(
+            "Failed to upload document filename=%r suffix=%s size_bytes=%s src_lang=%s user_id=%s",
+            filename,
+            suffix,
+            len(contents),
+            src_lang,
+            user.id,
+        )
+        raise HTTPException(500, f"Failed to process uploaded file {filename}: {e}") from e
     
 
 # -------------------------

@@ -515,6 +515,11 @@ export default function UploadPage() {
           )}
         </Button>
       </div>
+      {createError ? (
+        <p className="mt-3 font-ui text-sm text-red-600">
+          {createError}
+        </p>
+      ) : null}
     </div>
   );
 }

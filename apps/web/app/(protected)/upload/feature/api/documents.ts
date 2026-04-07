@@ -59,12 +59,27 @@ export async function createFileDocument(args: {
   });
 
   const text = await res.text();
+  let payload: { document_id?: number; detail?: string; error?: string } | null = null;
 
-  if (!res.ok) {
-    throw new Error(text || "Failed to save document");
+  try {
+    payload = JSON.parse(text) as { document_id?: number; detail?: string; error?: string };
+  } catch {
+    payload = null;
   }
 
-  const data = JSON.parse(text) as { document_id: number };
+  if (!res.ok) {
+    throw new Error(
+      payload?.detail ||
+      payload?.error ||
+      text ||
+      "Failed to save document",
+    );
+  }
+
+  const data =
+    payload && typeof payload.document_id === "number"
+      ? payload as { document_id: number }
+      : JSON.parse(text) as { document_id: number };
 
   return { documentId: data.document_id };
 }
