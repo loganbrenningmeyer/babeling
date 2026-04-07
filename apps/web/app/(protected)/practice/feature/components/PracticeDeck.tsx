@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { motion } from "framer-motion";
-import { X, Check } from "lucide-react";
+import { Redo2, Check } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
@@ -246,7 +246,7 @@ export function PracticeDeck({
           disabled={isTransitioning}
           className="h-12 w-12 rounded-full"
         >
-          <X className="h-5 w-5" />
+          <Redo2 className="h-5 w-5" />
         </Button>
 
         <Button
