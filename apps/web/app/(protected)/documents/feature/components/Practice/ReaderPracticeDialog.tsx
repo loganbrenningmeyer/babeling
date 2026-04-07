@@ -105,9 +105,15 @@ export function ReaderPracticeDialog({
                       </div>
                     ) : null}
                     {batchComplete && canRestart ? (
-                      <Button type="button" onClick={onRestart}>
-                        <RotateCw className="size-4" />
-                        {m.reader.footer.practiceMoreWords}
+                      <Button
+                        type="button"
+                        onClick={onRestart}
+                        className="font-ui leading-none"
+                      >
+                        <span className="flex items-center gap-2">
+                          <RotateCw className="size-4 shrink-0" />
+                          <span>{m.reader.footer.practiceMoreWords}</span>
+                        </span>
                       </Button>
                     ) : null}
                   </div>
