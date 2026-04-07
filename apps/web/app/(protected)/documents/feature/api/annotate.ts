@@ -65,6 +65,7 @@ export async function annotate(args: AnnotateArgs): Promise<AnnotateResponse> {
       tgtParagraph: data.definition.tgt_paragraph,
     },
     usage: {
+      contextMeaning: data.usage.context_meaning,
       explanation: data.usage.explanation,
       examples: data.usage.examples,
     },

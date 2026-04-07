@@ -168,6 +168,7 @@ export function GlossaryItemBack({
                 <Separator />
 
                 <UsageInfo
+                  contextMeaning={glossaryItem.usage.contextMeaning}
                   explanation={glossaryItem.usage.explanation}
                   examples={glossaryItem.usage.examples}
                 />

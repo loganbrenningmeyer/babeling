@@ -71,6 +71,7 @@ export type GlossaryItemDefinition = {
 };
 
 export type GlossaryItemUsage = {
+  contextMeaning: string | null;
   explanation: string;
   examples: GlossaryItemExample[];
 };
@@ -139,6 +140,7 @@ export type GlossaryItemDefinitionDTO = {
 };
 
 export type GlossaryItemUsageDTO = {
+  context_meaning: string | null;
   explanation: string;
   examples: GlossaryItemExampleDTO[];
 };
@@ -258,7 +260,11 @@ export function toGlossaryItemSaveRequestDTO(
       sent_id: req.definition.sentId,
       word_id: req.definition.wordId,
     },
-    usage: req.usage,
+    usage: {
+      context_meaning: req.usage.contextMeaning,
+      explanation: req.usage.explanation,
+      examples: req.usage.examples,
+    },
   };
 }
 
@@ -298,7 +304,11 @@ export function fromGlossaryItemLoadResponseDTO(
       sentId: dto.definition.sent_id,
       wordId: dto.definition.word_id,
     },
-    usage: dto.usage,
+    usage: {
+      contextMeaning: dto.usage.context_meaning,
+      explanation: dto.usage.explanation,
+      examples: dto.usage.examples,
+    },
     createdAt: dto.created_at,
   };
 }

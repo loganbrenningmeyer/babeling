@@ -11,6 +11,7 @@ class ExplainDefineOut(BaseModel):
     pos_lemma: str
     pos_form: str
     gloss: str
+    context_meaning: str
     ipa_form: str
     ipa_lemma: str
     explanation: str

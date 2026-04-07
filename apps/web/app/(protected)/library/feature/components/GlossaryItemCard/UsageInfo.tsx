@@ -10,9 +10,11 @@ import type { LibraryGlossaryItem } from "../../types/glossaryItem";
 
 
 export function UsageInfo({
+  contextMeaning,
   explanation,
   examples,
 }: {
+  contextMeaning: LibraryGlossaryItem["usage"]["contextMeaning"],
   explanation: LibraryGlossaryItem["usage"]["explanation"],
   examples: LibraryGlossaryItem["usage"]["examples"],
 }) {
@@ -30,6 +32,11 @@ export function UsageInfo({
         [&_li::marker]:text-muted-foreground
       "
     >
+      {contextMeaning && (
+        <p className="not-prose rounded-md border bg-muted/30 px-3 py-2 text-sm font-medium">
+          {contextMeaning}
+        </p>
+      )}
       {/* -------------------------
       //* Explanation
       //* ------------------------- */}

@@ -110,6 +110,7 @@ def save_glossary(
         # -- Definition
         gloss=req.definition.gloss,
         # -- Explanation / examples
+        context_meaning=req.usage.context_meaning,
         explanation=req.usage.explanation,
         examples=[e.model_dump() for e in req.usage.examples],
         # -- Source / target languages
@@ -195,6 +196,7 @@ def load_glossary(
                     word_id=item.word_id,
                 ),
                 usage=GlossaryUsageData(
+                    context_meaning=item.context_meaning,
                     explanation=item.explanation,
                     examples=item.examples,
                 ),
@@ -257,6 +259,7 @@ def load_glossary_item(
             word_id=item.word_id,
         ),
         usage=GlossaryUsageData(
+            context_meaning=item.context_meaning,
             explanation=item.explanation,
             examples=item.examples,
         ),

@@ -46,6 +46,7 @@ class GlossaryExample(BaseModel):
     target: str
 
 class GlossaryUsageData(BaseModel):
+    context_meaning: str | None = None
     explanation: str
     examples: list[GlossaryExample]
 

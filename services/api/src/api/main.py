@@ -2,6 +2,7 @@ import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from api.database.init_db import ensure_database_compatibility
 from api.routes import (
     align,
     annotate,
@@ -33,6 +34,7 @@ app.add_middleware(
 # -------------------------
 # Include API Routers
 # -------------------------
+ensure_database_compatibility()
 app.include_router(align.router)
 app.include_router(annotate.router)
 app.include_router(auth.router)

@@ -124,6 +124,7 @@ class GeminiAPI:
                 "gloss": data.get("gloss"),
             },
             "usage": {
+                "context_meaning": data.get("context_meaning"),
                 "explanation": data.get("explanation"),
                 "examples": data.get("examples"),
             },

@@ -184,6 +184,7 @@ export function buildGlossaryItemSaveRequest(args: {
       wordId: lockedTargetIndex,
     },
     usage: {
+      contextMeaning: explainData.contextMeaning,
       explanation: explainData.explanation,
       examples: explainData.examples,
     },
@@ -260,6 +261,7 @@ export function buildPracticeItemFromAnnotateResponse(args: {
       wordId: tgtIdx,
     },
     usage: {
+      contextMeaning: annotateResponse.usage.contextMeaning,
       explanation: annotateResponse.usage.explanation,
       examples: annotateResponse.usage.examples,
     },
