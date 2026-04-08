@@ -69,10 +69,6 @@ class GlossaryItem(Base):
         Text,
         nullable=False,
     )
-    context_meaning: Mapped[str | None] = mapped_column(
-        Text,
-        nullable=True,
-    )
     explanation: Mapped[str] = mapped_column(
         Text,
         nullable=False,

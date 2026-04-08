@@ -62,7 +62,6 @@ export function fromLibraryGlossaryItemDTO(
       wordId: dto.definition.word_id,
     },
     usage: {
-      contextMeaning: dto.usage.context_meaning,
       explanation: dto.usage.explanation,
       examples: dto.usage.examples,
     },

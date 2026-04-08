@@ -33,7 +33,6 @@ export type DefineEntry = {
 export type ExplainExample = { source: string; target: string };
 
 export type ExplainEntry = {
-  contextMeaning: string | null;
   explanation: string;
   examples: ExplainExample[];
 };
@@ -152,11 +151,6 @@ export function AnnotateCard({
             [&_li::marker]:text-muted-foreground
           `)}
         >
-          {explainData.contextMeaning && (
-            <p className="not-prose rounded-md border bg-muted/30 px-3 py-2 text-sm font-medium">
-              {explainData.contextMeaning}
-            </p>
-          )}
           <ReactMarkdown>{explainData.explanation}</ReactMarkdown>
 
           <TooltipProvider delayDuration={200}>

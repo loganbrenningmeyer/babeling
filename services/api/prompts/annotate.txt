@@ -24,7 +24,6 @@ Return ONLY valid JSON with exactly these keys:
 - "pos_lemma": string
 - "pos_form": string
 - "gloss": string
-- "context_meaning": string
 - "ipa_form": string
 - "ipa_lemma": string
 - "explanation": string
@@ -38,7 +37,6 @@ Do NOT escape markdown characters (no backslashes). Output markdown with literal
 OUTPUT LANGUAGES (HARD):
 - <ui_lang> Outputs:
   - `gloss` MUST be in <ui_lang>.
-  - `context_meaning` MUST be in <ui_lang>.
   - `explanation` MUST be in <ui_lang>.
 - <src_lang> Outputs:
   - For each example object, `source` MUST be in <src_lang>.
@@ -79,8 +77,8 @@ IPA FORMAT RULES (STRICT)
 EXPLANATION RULES (USER-FACING)
 ────────────────────────────────
 - Write 2–3 concise sentences in <ui_lang>.
-- `context_meaning` must be a short phrase describing what the marked word means in this sentence.
 - Explain the meaning of the marked word **as used in this sentence**.
+- If the contextual usage differs meaningfully from the general gloss, explain that difference directly in `explanation`.
 - Clearly relate the clicked <TARGET> word to the displayed `lemma` when they differ.
 - If the <TARGET> word is an inflected or derived form, briefly explain what form it is
   (e.g. tense, number, case, gender, person) in simple learner terms.

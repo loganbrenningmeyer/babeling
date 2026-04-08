@@ -14,18 +14,18 @@ def ensure_database_compatibility():
         column["name"] for column in inspector.get_columns("glossary_items")
     }
 
-    if "context_meaning" not in glossary_columns:
+    if "context_meaning" in glossary_columns:
         with engine.begin() as conn:
             if conn.dialect.name == "postgresql":
                 conn.execute(
                     text(
                         "ALTER TABLE glossary_items "
-                        "ADD COLUMN IF NOT EXISTS context_meaning TEXT"
+                        "DROP COLUMN IF EXISTS context_meaning"
                     )
                 )
             else:
                 conn.execute(
-                    text("ALTER TABLE glossary_items ADD COLUMN context_meaning TEXT")
+                    text("ALTER TABLE glossary_items DROP COLUMN context_meaning")
                 )
 
 

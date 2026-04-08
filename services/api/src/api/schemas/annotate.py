@@ -29,7 +29,6 @@ class AnnotateExample(BaseModel):
     target: str
 
 class AnnotateUsageData(BaseModel):
-    context_meaning: str
     explanation: str
     examples: list[AnnotateExample]
 

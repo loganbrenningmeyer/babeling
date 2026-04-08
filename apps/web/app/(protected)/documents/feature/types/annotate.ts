@@ -34,7 +34,6 @@ export type AnnotateExample = {
 };
 
 export type AnnotateUsageData = {
-  contextMeaning: string;
   explanation: string;
   examples: AnnotateExample[];
 };
@@ -72,7 +71,6 @@ export type AnnotateDefinitionDataDTO = {
 };
 
 export type AnnotateUsageDataDTO = {
-  context_meaning: string;
   explanation: string;
   examples: AnnotateExample[];
 };
@@ -155,7 +153,6 @@ export function toAnnotateEntries(res: AnnotateResponse): {
 } {
   return {
     explainData: {
-      contextMeaning: res.usage.contextMeaning,
       explanation: res.usage.explanation,
       examples: res.usage.examples,
     },

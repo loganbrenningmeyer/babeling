@@ -89,7 +89,6 @@ def annotate(req: AnnotateRequest):
             tgt_paragraph=tgt_paragraph,
         ),
         usage=AnnotateUsageData(
-            context_meaning=usage_data["context_meaning"],
             explanation=usage_data["explanation"],
             examples=usage_data["examples"],
         ),
