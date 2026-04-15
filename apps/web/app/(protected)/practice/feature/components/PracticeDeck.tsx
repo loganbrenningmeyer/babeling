@@ -96,29 +96,35 @@ export function PracticeDeck({
     useState<PracticeTransitionAction | null>(null);
 
   useEffect(() => {
-    const ids = practiceItems.map((item) => item.practiceItemId);
-    const shuffledIds = shuffleIds(ids);
-    const sessionSeed = Math.floor(Math.random() * 4294967296);
+    const frameId = window.requestAnimationFrame(() => {
+      const ids = practiceItems.map((item) => item.practiceItemId);
+      const shuffledIds = shuffleIds(ids);
+      const sessionSeed = Math.floor(Math.random() * 4294967296);
 
-    setQueue(shuffledIds);
-    setCardTypeById(
-      Object.fromEntries(
-        shuffledIds.map((id) => [id, getRandomCardType()])
-      ) as Record<string, PracticeCardType>
-    );
-    setRecognitionChoicesById(
-      Object.fromEntries(
-        practiceItems.map((item) => [
-          item.practiceItemId,
-          buildRecognitionChoices({
-            practiceItem: item,
-            practiceItems,
-            choiceSeed: sessionSeed,
-          }),
-        ])
-      ) as Record<string, RecognitionChoice[]>
-    );
-    setTransitionAction(null);
+      setQueue(shuffledIds);
+      setCardTypeById(
+        Object.fromEntries(
+          shuffledIds.map((id) => [id, getRandomCardType()])
+        ) as Record<string, PracticeCardType>
+      );
+      setRecognitionChoicesById(
+        Object.fromEntries(
+          practiceItems.map((item) => [
+            item.practiceItemId,
+            buildRecognitionChoices({
+              practiceItem: item,
+              practiceItems,
+              choiceSeed: sessionSeed,
+            }),
+          ])
+        ) as Record<string, RecognitionChoice[]>
+      );
+      setTransitionAction(null);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
   }, [practiceItems]);
 
   useEffect(() => {
@@ -186,12 +192,12 @@ export function PracticeDeck({
   }
 
   return (
-    <div className="flex h-full flex-col gap-6">
-      <div className="grid py-8">
+    <div className="flex h-full min-h-0 flex-col gap-3 sm:gap-6">
+      <div className="grid min-h-0 flex-1 items-center py-2 sm:py-8">
         {nextItem ? (
           <motion.div
             aria-hidden="true"
-            className="col-start-1 row-start-1 pointer-events-none"
+            className="pointer-events-none col-start-1 row-start-1 min-h-0"
             animate={
               isTransitioning
                 ? { scale: 1, opacity: 1 }
@@ -209,7 +215,7 @@ export function PracticeDeck({
 
         <motion.div
           key={`${currentItem.practiceItemId}-${currentCardType}`}
-          className="col-start-1 row-start-1 z-10"
+          className="col-start-1 row-start-1 z-10 min-h-0"
           animate={
             isTransitioning
               ? {
@@ -237,7 +243,7 @@ export function PracticeDeck({
         </motion.div>
       </div>
 
-      <div className="flex items-center justify-center gap-3">
+      <div className="flex shrink-0 items-center justify-center gap-3 pb-1 sm:pb-0">
         <Button
           type="button"
           variant="outline"

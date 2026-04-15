@@ -31,7 +31,7 @@ export function DefinitionCard({
       }}
       className="mx-auto w-full max-w-xl text-left"
     >
-      <div className="relative aspect-[4/3] w-full [perspective:1400px]">
+      <div className="relative h-[min(62vh,31rem)] min-h-[24rem] w-full [perspective:1400px] sm:aspect-[4/3] sm:h-auto sm:min-h-0">
         <motion.div
           animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
@@ -50,12 +50,12 @@ export function DefinitionCard({
               <Card
                 className="
                   relative rounded-xl h-full w-full
-                  border bg-card p-5 shadow-sm
+                  border bg-card p-4 shadow-sm sm:p-5
                   transition duration-200 ease-out
                 "
               >
-                <div className="pointer-events-none absolute left-5 top-5 z-10">
-                  <LangBadge lang={practiceItem.tgtLang} className="text-sm" />
+                <div className="pointer-events-none absolute left-4 top-4 z-10 sm:left-5 sm:top-5">
+                  <LangBadge lang={practiceItem.tgtLang} className="text-xs sm:text-sm" />
                 </div>
                 <div
                   className="
@@ -79,7 +79,7 @@ export function DefinitionCard({
                   className="
                     flex items-center justify-center text-center
                     h-full p-0 space-y-2 
-                    font-reading font-semibold text-6xl
+                    break-words font-reading text-4xl font-semibold sm:text-6xl
                   "
                 >
                   {practiceItem.definition.form}
@@ -106,15 +106,15 @@ export function DefinitionCard({
               <Card
                 className="
                   relative rounded-xl h-full w-full
-                  border bg-card p-5 shadow-sm
+                  border bg-card p-4 shadow-sm sm:p-5
                   transition duration-200 ease-out
                 "
               >
-                <CardContent className="relative h-full p-0">
+                <CardContent className="relative h-full overflow-y-auto p-0">
                   <div
                     className="
-                      flex h-full items-center justify-center text-center
-                      font-ui text-3xl font-normal
+                      flex min-h-full items-center justify-center text-center
+                      font-ui text-xl font-normal leading-7 sm:text-3xl sm:leading-normal
                     "
                   >
                     {practiceItem.definition.gloss}

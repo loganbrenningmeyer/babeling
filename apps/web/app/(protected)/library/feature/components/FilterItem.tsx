@@ -37,8 +37,8 @@ export function FilterItem({
     <ToggleGroupItem
       value={value}
       className={`
-        rounded-full px-4
-        text-sm font-medium
+        w-full justify-center rounded-full px-2
+        text-xs font-medium sm:w-auto sm:px-4 sm:text-sm
         border
         ${LibraryFilterColors[value]}
         data-[state=off]:bg-muted/20
@@ -50,12 +50,12 @@ export function FilterItem({
         cursor-pointer
       `}
     >
-      <span className="flex items-center gap-2">
+      <span className="flex min-w-0 items-center gap-1.5 sm:gap-2">
         {children}
         <span
           className="
-            rounded-full px-2
-            font-ui font-bold text-xs
+            rounded-full px-1.5 sm:px-2
+            font-ui text-[11px] font-bold sm:text-xs
             bg-muted/40
           "
         >

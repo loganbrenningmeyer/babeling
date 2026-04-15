@@ -29,6 +29,10 @@ import { TabbedInputCard } from "./feature/components/TabbedInputCard";
 import { Separator } from "@/components/ui/separator";
 import { LANG_COLOR_BY_CODE } from "@/types/langs";
 
+type LangCode = "en" | "fr" | "es" | "de" | "it";
+
+const LANGS: LangCode[] = ["en", "fr", "es", "de", "it"];
+
 export default function UploadPage() {
   const router = useRouter();
 
@@ -36,10 +40,6 @@ export default function UploadPage() {
     srcLang: prefSrcLang,
     tgtLang: prefTgtLang,
   } = useUserPreferences();
-
-  type LangCode = "en" | "fr" | "es" | "de" | "it";
-
-  const LANGS: LangCode[] = ["en", "fr", "es", "de", "it"];
 
   // -------------------------
   // Use UI language messages from user preferences
@@ -84,7 +84,7 @@ export default function UploadPage() {
   // -------------------------
   // Upload File Information
   // -------------------------
-  const [title, setTitle] = useState("");
+  const title = "";
   const [srcText, setSrcText] = useState("");
   const [srcFile, setSrcFile] = useState<File | null>(null);
 
@@ -299,12 +299,12 @@ export default function UploadPage() {
   }, [syncLanguagesForImportedBook]);
 
   return (
-    <div className="min-h-screen mx-auto w-full max-w-6xl py-12">
+    <div className="mx-auto min-h-screen w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
       {/* -------------------------
        * Hero
        * ------------------------- */}
       <div className="">
-        <h1 className="font-reading font-semibold text-4xl tracking-tight">
+        <h1 className="font-reading text-3xl font-semibold tracking-tight sm:text-4xl">
           {m.upload.hero}
         </h1>
         <p className="font-ui mt-4 text-sm text-muted-foreground">
@@ -318,10 +318,10 @@ export default function UploadPage() {
       <div 
         className="
           flex flex-col gap-4
-          rounded-xl p-4 
+          rounded-lg p-4 sm:rounded-xl sm:p-5
           border border-foreground/20 shadow-sm
           bg-card
-          font-ui mt-10
+          font-ui mt-8 sm:mt-10
         "
       >
         {/* -------------------------
@@ -336,23 +336,18 @@ export default function UploadPage() {
 
         <Separator />
 
-        <div className="grid grid-cols-[1fr_auto_1fr] grid-rows-[auto_auto] gap-x-3 gap-y-2">
+        <div className="grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-end">
           {/* -------------------------
            * Source Language
            * ------------------------- */}
-          <div className="w-full text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-            {m.upload.sourceLang}
-          </div>
-          <div />
-          <div className="w-full text-[11px] font-medium tracking-wider text-muted-foreground uppercase">
-            {m.upload.targetLang}
-          </div>
-
-          <div className="w-full">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="w-full text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {m.upload.sourceLang}
+            </div>
             <Select value={srcLang} onValueChange={(v) => setLocalSrcLang(v)}>
               <SelectTrigger
                 className={cn(
-                  "w-full py-8",
+                  "w-full py-7 sm:py-8",
                   srcSelectColors.border,
                   srcSelectColors.focusBorder,
                   srcSelectColors.bg,
@@ -391,7 +386,7 @@ export default function UploadPage() {
           {/* -------------------------
            * Swap Languages
            * ------------------------- */}
-          <div className="flex items-center justify-center">
+          <div className="flex items-center justify-center py-1 sm:pb-3">
             <Button
               type="button"
               variant="outline"
@@ -419,11 +414,14 @@ export default function UploadPage() {
           {/* -------------------------
            * Target Language
            * ------------------------- */}
-          <div className="w-full">
+          <div className="flex min-w-0 flex-col gap-2">
+            <div className="w-full text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+              {m.upload.targetLang}
+            </div>
             <Select value={tgtLang} onValueChange={(v) => setLocalTgtLang(v)}>
               <SelectTrigger
                 className={cn(
-                  "w-full bg-background/60 py-8",
+                  "w-full bg-background/60 py-7 sm:py-8",
                   tgtSelectColors.border,
                   tgtSelectColors.focusBorder,
                   tgtSelectColors.bg,
@@ -464,7 +462,7 @@ export default function UploadPage() {
       {/* -------------------------
        * Tabbed Input Area
        * ------------------------- */}
-      <div className="mt-10">
+      <div className="mt-8 sm:mt-10">
         <TabbedInputCard
           onPayloadChange={handleInputPayloadChange}
           langLabels={m.langs}
@@ -475,9 +473,9 @@ export default function UploadPage() {
       {/* -------------------------
        * ( Start Reading Button ): Save document -> Reader Page
        * ------------------------- */}
-      <div className="font-ui mt-8 flex items-center justify-between">
+      <div className="font-ui mt-6 flex flex-col gap-4 sm:mt-8 sm:flex-row sm:items-center sm:justify-between">
         {/* Translation / Alignment Hint */}
-        <span className="inline-flex gap-2 items-center text-sm text-muted-foreground">
+        <span className="inline-flex items-center gap-2 text-sm text-muted-foreground">
           <Clock className="h-4 w-4" />
           <span>{m.upload.translateAlignInfo}</span>
         </span>
@@ -487,7 +485,7 @@ export default function UploadPage() {
           onClick={() => void onClickTranslate()}
           disabled={!canTranslate || creating}
           className="
-            group h-12 rounded-xl px-6 font-semibold
+            group h-12 w-full rounded-xl px-6 font-semibold sm:w-auto
             bg-primary/90 text-primary-foreground
             border border-primary/60
             shadow-lg shadow-primary/40
@@ -501,7 +499,7 @@ export default function UploadPage() {
           {creating ? (
             "Uploading document..."
           ) : (
-            <span className="inline-flex gap-3 items-center text-[16px]">
+            <span className="inline-flex items-center gap-3 text-[16px]">
               <span>{m.upload.startReading}</span>
               <ArrowRight
                 className="

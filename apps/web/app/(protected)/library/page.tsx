@@ -16,7 +16,7 @@ export default function Library() {
   // -------------------------
   // Load user information
   // -------------------------
-  const { user, loading: userLoading, error: userError } = useAppUser();
+  const { loading: userLoading, error: userError } = useAppUser();
 
   // -------------------------
   // Recent Documents / Glossary Items Hooks
@@ -25,14 +25,12 @@ export default function Library() {
     documents,
     loading: docsLoading,
     error: docsError,
-    reload: reloadDocs,
   } = useRecentDocuments();
 
   const {
     glossaryItems,
     loading: glossaryLoading,
     error: glossaryError,
-    reload: reloadGlossary,
   } = useRecentGlossaryItems();
 
   // -------------------------
@@ -47,17 +45,17 @@ export default function Library() {
   }
 
   if (userError || docsError || glossaryError) {
-    return <div className="px-12">{m.library.error}: {userError ?? docsError ?? glossaryError}</div>;
+    return <div className="px-4 sm:px-12">{m.library.error}: {userError ?? docsError ?? glossaryError}</div>;
   }
 
   return (
-    <div className="min-h-screen mx-auto max-w-6xl py-12 px-8">
-      <div className="flex items-end justify-between">
+    <div className="mx-auto min-h-screen max-w-6xl px-4 py-8 sm:px-6 sm:py-10 lg:px-8 lg:py-12">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         {/* -------------------------
         //* Hero
         //* ------------------------- */}
-        <div>
-          <h1 className="font-reading font-semibold text-4xl tracking-tight">
+        <div className="min-w-0">
+          <h1 className="font-reading text-3xl font-semibold tracking-tight sm:text-4xl">
             {m.library.hero}
           </h1>
           <p className="font-ui mt-4 text-sm text-muted-foreground">
@@ -68,9 +66,9 @@ export default function Library() {
         {/* -------------------------
         //* Reading Stats
         //* ------------------------- */}
-        <div className="flex items-center gap-8">
+        <div className="grid w-full grid-cols-[1fr_auto_1fr] items-center gap-4 sm:w-auto sm:gap-8">
           {/* Texts */}
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-center sm:items-end">
             <h2 className="font-reading text-xl font-semibold">
               {documents.length}
             </h2>
@@ -82,7 +80,7 @@ export default function Library() {
           <div aria-hidden="true" className="h-10 w-[2px] bg-border" />
 
           {/* Words Saved */}
-          <div className="flex flex-col items-end">
+          <div className="flex flex-col items-center sm:items-end">
             <h2 className="font-reading text-xl font-semibold">
               {glossaryItems.length}
             </h2>

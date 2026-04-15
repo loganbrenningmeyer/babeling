@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { ToggleGroup } from "@/components/ui/toggle-group";
 import { DocumentFlipCard } from "./DocumentCard/DocumentFlipCard";
 import { GlossaryItemFlipCard } from "./GlossaryItemCard/GlossaryItemFlipCard";
 import { FilterItem } from "./FilterItem";
@@ -115,12 +115,12 @@ export function LibraryPage({
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-3 flex-1">
+      <div className="flex min-w-0 flex-col gap-3 sm:flex-row sm:items-center">
+        <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row sm:items-center">
           {/* -------------------------
           //* Search Bar
           //* ------------------------- */}
-          <div className="relative w-72">
+          <div className="relative w-full sm:w-72">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
             <Input 
               value={query}
@@ -139,7 +139,7 @@ export function LibraryPage({
               if (!v) return;
               setLibraryFilter(v as LibraryFilterKey);
             }}
-            className="inline-flex bg-transparent p-0"
+            className="grid w-full grid-cols-3 gap-2 bg-transparent p-0 sm:inline-flex sm:w-auto"
             spacing={2}
             >
             <FilterItem value="all" count={documents.length + glossaryItems.length}>
@@ -160,11 +160,11 @@ export function LibraryPage({
         * ------------------------- */}
         {(filteredDocuments.length > 0 && (libraryFilter === "all" || libraryFilter === "texts")) && (
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               {/* -------------------------
               //* Documents Header
               //* ------------------------- */}
-              <div className="inline-flex gap-2">
+              <div className="inline-flex min-w-0 items-center gap-2">
                 <div className="rounded-sm p-1 bg-blue-300/20">
                   <Book className="h-4 w-4 text-blue-500" />
                 </div>
@@ -180,7 +180,7 @@ export function LibraryPage({
                 value={documentSort} 
                 onValueChange={(v) => setDocumentSort(v as DocumentSortKey)}
               >
-                <SelectTrigger className="w-56 bg-card">
+                <SelectTrigger className="w-full bg-card sm:w-56">
                   <SelectValue placeholder={m.library.sortDocuments} />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
@@ -194,8 +194,8 @@ export function LibraryPage({
             //* Documents Card Grid
             //* ------------------------- */}
             <div className="
-              grid gap-6 justify-start 
-              [grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]
+              grid grid-cols-2 gap-3 sm:gap-6
+              sm:[grid-template-columns:repeat(auto-fill,minmax(18rem,1fr))]
               ">
               {filteredDocuments.map((doc) => (
                 <DocumentFlipCard
@@ -215,11 +215,11 @@ export function LibraryPage({
           {libraryFilter === "all" && <Separator/>}
 
           <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               {/* -------------------------
               //* GlossaryItems Header
               //* ------------------------- */}
-              <div className="inline-flex gap-2">
+              <div className="inline-flex min-w-0 items-center gap-2">
                 <div className="rounded-sm p-1 bg-orange-300/20">
                   <Languages className="h-4 w-4 text-orange-500"/>  
                 </div>
@@ -235,7 +235,7 @@ export function LibraryPage({
                 value={glossarySort} 
                 onValueChange={(v) => setGlossarySort(v as GlossarySortKey)}
               >
-                <SelectTrigger className="w-56 bg-card">
+                <SelectTrigger className="w-full bg-card sm:w-56">
                   <SelectValue placeholder={m.library.sortGlossary} />
                 </SelectTrigger>
                 <SelectContent position="popper" align="end">
@@ -250,8 +250,8 @@ export function LibraryPage({
             //* GlossaryItems Card Grid
             //* ------------------------- */}
             <div className="
-              grid gap-3 justify-start 
-              [grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]
+              grid grid-cols-2 gap-3
+              sm:[grid-template-columns:repeat(auto-fill,minmax(15rem,1fr))]
               ">
               {filteredGlossaryItems.map((glossaryItem) => (
                 <GlossaryItemFlipCard 

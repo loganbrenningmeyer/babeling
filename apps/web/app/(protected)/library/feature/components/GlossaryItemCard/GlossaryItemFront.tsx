@@ -33,7 +33,7 @@ export function GlossaryItemFront({
         className={`
           relative rounded-xl h-full w-full overflow-hidden
           
-          border bg-card p-5 pb-2 shadow-sm
+          border bg-card p-3 pb-2 shadow-sm sm:p-5 sm:pb-2
           
           transform-gpu will-change-transform
           transition duration-200 ease-out
@@ -47,14 +47,14 @@ export function GlossaryItemFront({
       >
         {/* Source Language Accent Strip */}
         <div className={`absolute inset-y-0 left-0 w-1.5 ${langAccent}`} />
-        <CardContent className="h-full p-0 space-y-2 flex flex-col">
+        <CardContent className="flex h-full flex-col space-y-2 p-0">
           {/* -------------------------
           //* Form + POS + Language Badge
           //* ------------------------- */}
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
+          <div className="flex items-start justify-between gap-2">
+            <div className="min-w-0 space-y-1">
               {/* Form */}
-              <div className="text-lg font-reading font-semibold leading-tight">
+              <div className="truncate font-reading text-sm font-semibold leading-tight sm:text-lg">
                 {glossaryItem.definition.form.toLowerCase()}
               </div>
               {/* POS */}
@@ -62,18 +62,18 @@ export function GlossaryItemFront({
                 <div
                   className="
                     h-6 inline-flex 
-                    text-md text-orange-600 font-ui 
+                    font-ui text-xs text-orange-600 sm:text-md
                 ">
                   {glossaryItem.definition.posForm}
                 </div>
               )}
             </div>
-            <LangBadge lang={glossaryItem.tgtLang} />
+            <LangBadge lang={glossaryItem.tgtLang} className="shrink-0 text-[10px] sm:text-xs" />
           </div>
           {/* -------------------------
           //* Definition
           //* ------------------------- */}
-          <p className="line-clamp-2 text-sm font-ui">
+          <p className="line-clamp-2 font-ui text-xs sm:text-sm">
             {glossaryItem.definition.gloss}
           </p>
           {/* -------------------------
@@ -81,9 +81,9 @@ export function GlossaryItemFront({
           //* ------------------------- */}
           <div className="mt-auto space-y-2">
             <Separator />
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-2">
               {/* from {document title} */}
-              <p className="font-ui text-xs text-muted-foreground">
+              <p className="line-clamp-2 min-w-0 font-ui text-[11px] text-muted-foreground sm:text-xs">
                 {`${m.library.from} `}
                 <span className="italic">
                   {glossaryItem.documentTitle}
@@ -93,7 +93,7 @@ export function GlossaryItemFront({
               <Maximize2 
                 className="
                   pointer-events-none
-                  h-4 w-4
+                  h-4 w-4 shrink-0
                   text-muted-foreground
                   opacity-0 group-hover/gloss-front:opacity-60
                   transition-opacity duration-150

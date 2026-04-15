@@ -141,12 +141,12 @@ export function ImportEbookPanel({
         e.preventDefault();
         handleSubmitSearch();
       }}
-      className="flex-1 p-6 flex flex-col gap-6 bg-muted/20 overflow-y-auto no-scrollbar"
+      className="no-scrollbar flex flex-1 flex-col gap-3 overflow-y-auto bg-muted/20 p-3 sm:gap-6 sm:p-6"
     >
       {/* -------------------------
       * Searching / Filtering
       * ------------------------- */}
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-3 sm:gap-4">
         {/* -------------------------
         * Search Input / Button
         * ------------------------- */}
@@ -164,7 +164,7 @@ export function ImportEbookPanel({
             <Input
               placeholder={msgs.searchBy}
               onChange={(e) => setSearchDraft(e.target.value)}
-              className="h-12 pl-10 rounded-full bg-card border border-border font-ui focus-visible:ring-0"
+              className="h-12 rounded-full border border-border bg-card pl-10 font-ui text-xs placeholder:text-xs focus-visible:ring-0 sm:text-sm sm:placeholder:text-sm"
             />
             <button
               type="submit"
@@ -192,11 +192,11 @@ export function ImportEbookPanel({
         {/* -------------------------
         * ( Filtering ): Language / Author
         * ------------------------- */}
-        <div className="flex w-full justify-between gap-4">
+        <div className="flex w-full flex-col gap-3 sm:flex-row sm:justify-between sm:gap-4">
           {/* -------------------------
           * Language Filter Buttons
           * ------------------------- */}
-          <div className="flex flex-col w-1/2 gap-1">
+          <div className="order-2 flex w-full flex-col gap-1 sm:order-1 sm:w-1/2">
             <div 
               className="
                 font-ui uppercase tracking-widest
@@ -206,13 +206,13 @@ export function ImportEbookPanel({
               {msgs.language}
             </div>
             {/* Language Buttons Grid */}
-            <div className="flex flex-wrap gap-2">
+            <div className="grid grid-cols-5 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
               {LANGUAGE_OPTIONS.map((lang) => (
                 <div
                   key={lang["code"]} 
                   className={cn(
-                    "inline-flex h-10 items-center justify-center rounded-full border px-3",
-                    "font-ui text-xs font-medium tracking-wide",
+                    "inline-flex h-8 min-w-0 items-center justify-center rounded-full border px-1 sm:h-10 sm:px-3",
+                    "font-ui text-[10px] font-medium tracking-wide min-[380px]:text-[11px] sm:text-xs",
                     "cursor-pointer select-none transition-colors duration-200 ease-out",
                     "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
                     selectedLanguagesDraft.includes(lang["code"]) &&
@@ -220,7 +220,9 @@ export function ImportEbookPanel({
                   )}
                   onClick={() => toggleLanguage(lang["code"])}
                 >
-                  {langLabels[toUiLang(lang["code"])]}
+                  <span className="min-w-0 truncate">
+                    {langLabels[toUiLang(lang["code"])]}
+                  </span>
                 </div>
               ))}
             </div>
@@ -229,7 +231,7 @@ export function ImportEbookPanel({
           {/* -------------------------
           * Author Search
           * ------------------------- */}
-          <div className="flex flex-col w-1/2 gap-1">
+          <div className="order-1 flex w-full flex-col gap-1 sm:order-2 sm:w-1/2">
             <div 
               className="
                 font-ui uppercase tracking-widest
@@ -242,7 +244,7 @@ export function ImportEbookPanel({
               <Input 
                 placeholder={msgs.filterByAuthor}
                 onChange={(e) => setAuthorDraft(e.target.value)}
-                className="h-10 pl-10 rounded-none bg-card border border-border font-ui focus-visible:ring-0"
+                className="h-9 rounded-none border border-border bg-card pl-10 font-ui text-xs placeholder:text-xs focus-visible:ring-0 sm:h-10 sm:text-sm sm:placeholder:text-sm"
               />
               <div
                 className="
@@ -265,7 +267,7 @@ export function ImportEbookPanel({
 
       <div className="flex-1 min-h-0">
         {!hasSearched ? (
-          <div className="flex h-full items-center justify-center -mt-4">
+          <div className="flex h-full items-center justify-center sm:-mt-4">
             <div className="flex flex-col items-center text-center gap-2">
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted-foreground/10">
                 <BookSearch className="h-5 w-5 text-muted-foreground" />
@@ -275,7 +277,7 @@ export function ImportEbookPanel({
                 {msgs.searchGutenberg}
               </div>
 
-              <div className="font-ui text-sm text-muted-foreground max-w-sm">
+              <div className="font-ui max-w-sm text-sm text-muted-foreground">
                 {msgs.enterTitle}
               </div>
             </div>
@@ -283,7 +285,7 @@ export function ImportEbookPanel({
         ) : (
           <>
             {loading ? (
-              <div className="flex h-full items-center justify-center -mt-4">
+              <div className="flex h-full items-center justify-center sm:-mt-4">
                 <Loader2 className="h-8 w-8 animate-spin text-muted-foreground"/>
               </div>
             ) : error ? (
@@ -292,7 +294,7 @@ export function ImportEbookPanel({
               </div>
             ) : (
               <div className="flex flex-col gap-3">
-                <div className="flex items-center justify-between gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
                   <div className="font-ui text-sm tracking-widest uppercase text-foreground/80">
                     <span className="font-bold">{count.toLocaleString()}</span>
                     {" "}{msgs.booksFound}
@@ -303,7 +305,7 @@ export function ImportEbookPanel({
                     ) : null}
                   </div>
 
-                  <div className="inline-flex items-center gap-2">
+                  <div className="grid grid-cols-2 gap-2 sm:inline-flex sm:items-center">
                     <Button
                       type="button"
                       variant="outline"
@@ -349,7 +351,7 @@ export function ImportEbookPanel({
                     No books match the current filters on this page.
                   </div>
                 ) : (
-                  <div className="grid grid-cols-3 gap-4 pb-6">
+                  <div className="grid grid-cols-1 gap-3 pb-6 min-[420px]:grid-cols-2 sm:gap-4 lg:grid-cols-3">
                     {filteredBooks.map((book) => (
                       <BookCard 
                         key={book.id}

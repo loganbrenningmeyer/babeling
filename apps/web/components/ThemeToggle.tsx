@@ -44,9 +44,10 @@ export function ThemeToggle() {
       <span
           className={cn(
           `
-            relative inline-flex h-10 w-[4rem] items-center overflow-hidden rounded-full
-            border border-transparent px-2
+            relative inline-flex h-9 w-9 items-center overflow-hidden rounded-full
+            border border-transparent px-1
             transition-colors duration-300 ease-out
+            sm:h-10 sm:w-[4rem] sm:px-2
           `,
           isDark
             ? "bg-zinc-800"
@@ -56,13 +57,14 @@ export function ThemeToggle() {
         <span
           className={cn(
             `
-              absolute left-0.75 top-1/2 inline-flex h-8 w-8 items-center justify-center
+              absolute left-0.75 top-1/2 inline-flex h-7 w-7 items-center justify-center
               rounded-full shadow-sm
               transition-all duration-300 ease-out
               -translate-y-1/2
+              sm:h-8 sm:w-8
             `,
             isDark
-              ? "translate-x-[1.5rem] bg-blue-800/60 text-slate-400/70"
+              ? "translate-x-0 bg-blue-800/60 text-slate-400/70 sm:translate-x-[1.5rem]"
               : "translate-x-0 bg-amber-400/60 text-amber-950"
           )}
         >

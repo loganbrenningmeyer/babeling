@@ -20,7 +20,7 @@ export function BookCard({
   return (
     <div
       className={cn(
-        "flex flex-col aspect-[21/10] gap-4",
+        "flex min-h-40 flex-col gap-4 sm:aspect-[21/10] sm:min-h-0",
         "p-4 rounded-sm overflow-hidden cursor-pointer",
         "border transition-[border-color,box-shadow,transform] duration-200 ease-out",
         "hover:-translate-y-0.5",

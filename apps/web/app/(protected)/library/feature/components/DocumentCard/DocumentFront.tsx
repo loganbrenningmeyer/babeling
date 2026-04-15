@@ -64,7 +64,7 @@ export function DocumentFront({
       className={`
         relative h-full w-full overflow-hidden
 
-        rounded-xl border bg-card p-5 shadow-sm
+        rounded-xl border bg-card p-3 shadow-sm sm:p-5
         
         transform-gpu will-change-transform
         transition duration-200 ease-out
@@ -77,12 +77,12 @@ export function DocumentFront({
     >
       {/* Source Language Accent Strip */}
       <div className={`absolute inset-y-0 left-0 w-1.5 ${srcAccent}`} />
-      <CardContent className="flex h-full flex-col gap-4 p-0">
+      <CardContent className="flex h-full flex-col gap-3 p-0 sm:gap-4">
         {/* -------------------------
         * Title + Source Language Badge
         * ------------------------- */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="flex min-w-0 items-start gap-3">
+        <div className="flex items-start justify-between gap-2 sm:gap-3">
+          <div className="flex min-w-0 items-start gap-2 sm:gap-3">
             {/* -------------------------
             * Cover Image
             * ------------------------- */}
@@ -97,33 +97,33 @@ export function DocumentFront({
                 width={48}
                 height={64}
                 unoptimized
-                className="h-16 w-12 shrink-0 rounded-md border border-border/60 object-cover shadow-sm"
+                className="h-14 w-10 shrink-0 rounded-md border border-border/60 object-cover shadow-sm sm:h-16 sm:w-12"
               />
             ) : (
               <div
                 className="
-                  flex h-16 w-12 shrink-0 items-center justify-center
+                  flex h-14 w-10 shrink-0 items-center justify-center sm:h-16 sm:w-12
                   rounded-md border border-border/60 bg-muted/40 text-muted-foreground/70
                   shadow-sm
                 "
                 aria-hidden="true"
               >
-                <BookText className="h-6 w-6" />
+                <BookText className="h-5 w-5 sm:h-6 sm:w-6" />
               </div>
             )}
             {/* -------------------------
             * Title / Author
             * ------------------------- */}
-            <div>
-              <h2 className="line-clamp-2 text-md font-reading font-semibold leading-tight">
+            <div className="min-w-0">
+              <h2 className="line-clamp-2 font-reading text-sm font-semibold leading-tight sm:text-md">
                 {document.title}
               </h2>
-              <h3 className="text-xs font-ui text-muted-foreground">
+              <h3 className="line-clamp-1 font-ui text-[11px] text-muted-foreground sm:text-xs">
                 {document.author}
               </h3>
             </div>
           </div>
-          <LangBadge lang={document.srcLang}/>
+          <LangBadge lang={document.srcLang} className="shrink-0 text-[10px] sm:text-xs"/>
         </div>
 
         <Separator />
@@ -133,7 +133,7 @@ export function DocumentFront({
           * Continue Recent Translation Info
           * ------------------------- */}
           <div className="flex flex-1 flex-col gap-2 border border-border/50 bg-muted/35 p-2">
-            <div className="flex items-center justify-between gap-3 text-[11px] font-medium tracking-wide text-muted-foreground/80">
+            <div className="flex items-center justify-between gap-2 text-[10px] font-medium tracking-wide text-muted-foreground/80 sm:gap-3 sm:text-[11px]">
               {/* -------------------------
               * Page Number / Last Opened Time
               * ------------------------- */}
@@ -141,9 +141,9 @@ export function DocumentFront({
                 {sampleMetaLabel}
               </span>
               {sampleTime ? (
-                <span className="inline-flex items-center gap-1">
-                  <Clock size={12} />
-                  {sampleTime}
+                <span className="inline-flex min-w-0 items-center gap-1">
+                  <Clock size={12} className="shrink-0" />
+                  <span className="truncate">{sampleTime}</span>
                 </span>
               ) : null}
             </div>
@@ -153,9 +153,9 @@ export function DocumentFront({
             <p
               className="
                 min-w-0 flex-1
-                font-reading text-xs italic
+                font-reading text-[11px] italic sm:text-xs
                 text-muted-foreground leading-relaxed 
-                line-clamp-2
+                line-clamp-2 sm:line-clamp-2
               "
             >
               {sampleText}…
@@ -170,9 +170,9 @@ export function DocumentFront({
                 document={document}
                 translation={recentTranslation}
                 loading={translationsLoading}
-                className="w-full rounded-none"
+                className="w-full rounded-none px-2 text-xs sm:px-6 sm:text-sm"
               >
-                <span>
+                <span className="min-w-0 truncate">
                   {m.library.continueIn}{" "}
                   <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
                     {sampleLangLabel}

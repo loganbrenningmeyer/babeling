@@ -60,7 +60,7 @@ export function ReaderPracticeDialog({
       <DialogContent
         overlayClassName="bg-background/35 backdrop-blur-sm"
         className="
-          max-w-4xl border-none bg-transparent p-0 shadow-none
+          max-w-4xl border-none bg-transparent p-2 shadow-none sm:p-0
           sm:max-w-4xl
         "
       >
@@ -69,9 +69,9 @@ export function ReaderPracticeDialog({
         </DialogTitle>
         <div
           className="
-            mx-auto flex h-[min(78vh,44rem)] w-full max-w-4xl flex-col
+            mx-auto flex h-[min(86vh,44rem)] w-full max-w-4xl flex-col
             rounded-2xl border border-border/70 bg-background/92
-            px-5 py-5 shadow-2xl
+            px-3 py-4 shadow-2xl sm:h-[min(78vh,44rem)] sm:px-5 sm:py-5
           "
         >
           <div className="mb-3 space-y-2">

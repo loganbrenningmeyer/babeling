@@ -155,34 +155,34 @@ export function RecognitionCard({
 
   return (
     <div className="mx-auto w-full max-w-xl text-left">
-      <div className="relative aspect-[4/3] w-full">
+      <div className="relative h-[min(62vh,31rem)] min-h-[24rem] w-full sm:aspect-[4/3] sm:h-auto sm:min-h-0">
         <Card
           className={cn(
             `
               relative h-full w-full overflow-hidden rounded-xl
-              border bg-card p-5 shadow-sm
+              border bg-card p-4 shadow-sm sm:p-5
               transition-[border-color,box-shadow] duration-300 ease-out
             `,
             isCorrect && SUCCESS_CARD_CLASS_NAME
           )}
         >
-          <div className="pointer-events-none absolute left-5 top-5 z-10">
-            <LangBadge lang={practiceItem.tgtLang} className="text-sm" />
+          <div className="pointer-events-none absolute left-4 top-4 z-10 sm:left-5 sm:top-5">
+            <LangBadge lang={practiceItem.tgtLang} className="text-xs sm:text-sm" />
           </div>
 
           <CardContent className="flex h-full flex-col p-0">
-            <div className="flex flex-1 flex-col justify-center gap-8">
+            <div className="flex min-h-0 flex-1 flex-col justify-center gap-5 pt-8 sm:gap-8 sm:pt-0">
               {/* -------------------------
               //* Prompt
               //* ------------------------- */}
-              <div className="font-reading text-center text-5xl font-semibold leading-none sm:text-6xl">
+              <div className="break-words text-center font-reading text-4xl font-semibold leading-none sm:text-6xl">
                 {practiceItem.definition.form}
               </div>
 
               {/* -------------------------
               //* Multiple Choice Buttons
               //* ------------------------- */}
-              <div className="grid gap-3">
+              <div className="grid min-h-0 gap-2 overflow-y-auto pr-1 sm:gap-3 sm:overflow-visible sm:pr-0">
                 {choices.map((choice, choiceIndex) => {
                   const isSelected = selectedChoiceIndex === choiceIndex;
                   const showGrading = selectedChoiceIndex != null;
@@ -195,8 +195,8 @@ export function RecognitionCard({
                       disabled={showGrading}
                       className={cn(
                         `
-                          rounded-xl border px-4 py-3 text-left
-                          font-ui text-base leading-6
+                          rounded-xl border px-3 py-2.5 text-left
+                          font-ui text-sm leading-5 sm:px-4 sm:py-3 sm:text-base sm:leading-6
                           transition-colors duration-150
                         `,
                         !showGrading &&

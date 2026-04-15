@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { Book, MoveRight } from "lucide-react";
 
@@ -22,16 +22,12 @@ export function ContinueReadingCard({
   document: LibraryDocument;
 }) {
   const m = useMessages();
-  const [coverLoadFailed, setCoverLoadFailed] = useState(false);
+  const [failedCoverSrc, setFailedCoverSrc] = useState<string | null>(null);
 
   const coverImageSrc = document.coverImageId != null
     ? `/api/documents/${document.id}/images/${document.coverImageId}`
     : null;
-  const showCoverImage = coverImageSrc && !coverLoadFailed;
-
-  useEffect(() => {
-    setCoverLoadFailed(false);
-  }, [document.id, document.coverImageId]);
+  const showCoverImage = coverImageSrc && failedCoverSrc !== coverImageSrc;
 
   // -------------------------
   // Get document's most recent translation
@@ -47,96 +43,89 @@ export function ContinueReadingCard({
   const completionPercent = recentTranslation?.completionPercent ?? 0;
 
   return (
-    <div 
+    <div
       className="
-        flex w-full
-        items-center
-        gap-4 p-4 mt-6
-        rounded-xl
-        bg-card
-        border border-border
+        mt-6 flex w-full flex-col gap-4
+        rounded-xl border border-border bg-card p-4
+        sm:flex-row sm:items-center
       "
     >
-      {/* Cover Image / Fallback Icon */}
-      {showCoverImage ? (
-        <Image
-          src={coverImageSrc}
-          alt={document.title ? `${document.title} cover` : m.library.documentCover}
-          width={48}
-          height={64}
-          unoptimized
-          onError={() => setCoverLoadFailed(true)}
-          className="h-16 w-12 shrink-0 rounded-md border border-border/60 object-cover shadow-sm"
-        />
-      ) : (
-        <div 
-          className="
-            flex items-center justify-center 
-            size-16 shrink-0
-            rounded-lg 
-            border border-border bg-muted/60
-          "
-        >
-          <Book className="h-8 w-8 text-muted-foreground"/>
-        </div>
-      )}
+      <div className="flex min-w-0 items-center gap-4">
+        {/* Cover Image / Fallback Icon */}
+        {showCoverImage ? (
+          <Image
+            src={coverImageSrc}
+            alt={document.title ? `${document.title} cover` : m.library.documentCover}
+            width={48}
+            height={64}
+            unoptimized
+            onError={() => setFailedCoverSrc(coverImageSrc)}
+            className="h-16 w-12 shrink-0 rounded-md border border-border/60 object-cover shadow-sm"
+          />
+        ) : (
+          <div
+            className="
+              flex size-16 shrink-0 items-center justify-center
+              rounded-lg border border-border bg-muted/60
+            "
+          >
+            <Book className="h-8 w-8 text-muted-foreground" />
+          </div>
+        )}
 
-      {/* Continue Reading / Title + Author */}
-      <div 
-        className="
-          flex min-w-0 flex-1 flex-col justify-center
-          h-16 gap-0
-        "
-      >
-        <p className="font-ui font-bold text-xs text-muted-foreground uppercase">
-          {m.library.continueReading}
-        </p>
-        <p className="truncate font-reading font-semibold text-lg text-foreground">
-          {document.title}
-        </p>
-        <div className="inline-flex items-center gap-2 font-ui text-sm text-muted-foreground">
-          {document.author ? (
-            <>
-              <span className="truncate">{document.author}</span>
-              <span aria-hidden="true">•</span>
-            </>
-          ) : null}
-          <LangBadge lang={document.srcLang} className="text-[10px] px-1.5 py-0"/>
-          {tgtLang ? (
-            <>
-              <MoveRight size={10}/>
-              <LangBadge lang={tgtLang} className="text-[10px] px-1.5 py-0"/>
-            </>
-          ) : null}
+        {/* Continue Reading / Title + Author */}
+        <div className="flex h-16 min-w-0 flex-1 flex-col justify-center gap-0">
+          <p className="font-ui text-xs font-bold uppercase text-muted-foreground">
+            {m.library.continueReading}
+          </p>
+          <p className="truncate font-reading text-lg font-semibold text-foreground">
+            {document.title}
+          </p>
+          <div className="inline-flex min-w-0 items-center gap-2 font-ui text-sm text-muted-foreground">
+            {document.author ? (
+              <>
+                <span className="min-w-0 truncate">{document.author}</span>
+                <span className="shrink-0" aria-hidden="true">•</span>
+              </>
+            ) : null}
+            <LangBadge lang={document.srcLang} className="shrink-0 px-1.5 py-0 text-[10px]" />
+            {tgtLang ? (
+              <>
+                <MoveRight size={10} className="shrink-0" />
+                <LangBadge lang={tgtLang} className="shrink-0 px-1.5 py-0 text-[10px]" />
+              </>
+            ) : null}
+          </div>
         </div>
       </div>
 
       {/* Continue Button */}
-      <div className="flex ml-auto gap-4 shrink-0">
-        <div className="flex-1 w-40">
+      <div className="grid min-w-0 gap-3 sm:ml-auto sm:flex sm:shrink-0 sm:items-center sm:gap-4">
+        <div className="min-w-0 sm:w-40">
           <div className="flex items-baseline gap-2">
             <div>
-              <span className="text-lg text-foreground font-reading font-semibold">{m.library.pageAbbrev} {currentPageNumber}</span>
-              <span className="text-sm text-foreground font-reading font-normal"> {m.library.of} {document.totalPages}</span>
+              <span className="font-reading text-lg font-semibold text-foreground">{m.library.pageAbbrev} {currentPageNumber}</span>
+              <span className="font-reading text-sm font-normal text-foreground"> {m.library.of} {document.totalPages}</span>
             </div>
           </div>
-          <Progress 
+          <Progress
             value={completionPercent}
             className="h-1 w-full bg-muted"
             indicatorClassName={tgtLang ? getLangColors(tgtLang).progress : undefined}
           />
         </div>
-        
+
         <ResumeTranslationButton
           document={document}
           translation={recentTranslation}
           loading={loading}
           className="
-            rounded-full
-            bg-blue-600 dark:bg-blue-600/80
-            text-primary-foreground
-            hover:bg-blue-600/90 dark:hover:bg-blue-600/70
+            w-full rounded-full
+            bg-blue-600 text-primary-foreground
             shadow-sm shadow-primary/20
+            hover:bg-blue-600/90
+            dark:bg-blue-600/80 dark:hover:bg-blue-600/70
+            sm:w-auto
           "
         >
           {m.library.continue}

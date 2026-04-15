@@ -57,8 +57,8 @@ export function GlossaryItemFlipCard({
     * ------------------------- */}
     const CardBody = ({ side }: { side: "front" | "back" }) => (
       <div className="
-      relative aspect-[3/2] w-full 
-      cursor-pointer
+      relative min-h-40 w-full cursor-pointer
+      sm:aspect-[3/2] sm:min-h-0
       ">
       <div className="absolute inset-0">
         { side === "front" ? (

@@ -14,20 +14,20 @@ import type { GlossaryContextTokenSlice } from "@/app/(protected)/documents/feat
 import { GlossaryInfoOverlay } from "../GlossaryInfoOverlay";
 import type { PracticeItem } from "../../../types/practiceItem";
 
-const srcFontSize = "text-md";
-const tgtFontSize = "text-lg";
+const srcFontSize = "text-sm sm:text-md";
+const tgtFontSize = "text-base sm:text-lg";
 
 const CHOICE_BUTTON_CLASS_NAME =
-  `col-start-1 row-start-1 inline-flex h-7 w-full cursor-pointer items-center justify-center rounded-full border border-border bg-card px-4 py-2 leading-none transition-colors hover:border-foreground/30 hover:bg-muted/15 ${tgtFontSize} font-ui`;
+  `col-start-1 row-start-1 inline-flex h-7 w-full cursor-pointer items-center justify-center rounded-full border border-border bg-card px-3 py-2 leading-none transition-colors hover:border-foreground/30 hover:bg-muted/15 sm:px-4 ${tgtFontSize} font-ui`;
 
 const CHOICE_PLACEHOLDER_CLASS_NAME =
-  "col-start-1 row-start-1 inline-flex h-7 w-full items-center justify-center rounded-full bg-muted/70 px-4 py-2 text-sm font-ui text-transparent select-none";
+  "col-start-1 row-start-1 inline-flex h-7 w-full items-center justify-center rounded-full bg-muted/70 px-3 py-2 text-sm font-ui text-transparent select-none sm:px-4";
 
 const CHOICE_SLOT_CLASS_NAME =
   "relative inline-grid";
 
 const CHOICE_SLOT_SIZER_CLASS_NAME =
-  "col-start-1 row-start-1 inline-flex h-7 items-center justify-center rounded-full border px-4 py-2 leading-none text-sm font-ui invisible select-none";
+  "col-start-1 row-start-1 inline-flex h-7 items-center justify-center rounded-full border px-3 py-2 leading-none text-sm font-ui invisible select-none sm:px-4";
 
 const CHOICE_TRANSITION = {
   type: "spring" as const,
@@ -443,16 +443,26 @@ export function ContextClozeCard({
   const [gradingReady, setGradingReady] = useState(false);
 
   useEffect(() => {
+    let frameId: number | null = null;
+    let timeoutId: number | null = null;
+
     if (!allFilled) {
-      setGradingReady(false);
-      return;
+      frameId = window.requestAnimationFrame(() => {
+        setGradingReady(false);
+      });
+
+      return () => {
+        if (frameId != null) window.cancelAnimationFrame(frameId);
+      };
     }
 
-    const timeoutId = window.setTimeout(() => {
+    timeoutId = window.setTimeout(() => {
       setGradingReady(true);
     }, GRADE_REVEAL_DELAY_MS);
 
-    return () => window.clearTimeout(timeoutId);
+    return () => {
+      if (timeoutId != null) window.clearTimeout(timeoutId);
+    };
   }, [allFilled]);
 
   /**************************
@@ -605,25 +615,25 @@ export function ContextClozeCard({
 
   return (
     <div className="mx-auto w-full max-w-xl text-left">
-      <div className="aspect-[4/3] w-full">
+      <div className="h-[min(64vh,32rem)] min-h-[27rem] w-full sm:aspect-[4/3] sm:h-auto sm:min-h-0">
         <Card
           className={cn(
             `
-              relative h-full w-full rounded-xl border bg-card p-5 shadow-sm
+              relative h-full w-full overflow-hidden rounded-xl border bg-card p-3 shadow-sm sm:p-5
               transition-[border-color,box-shadow] duration-300 ease-out
             `,
             isCorrect && SUCCESS_CARD_CLASS_NAME
           )}
         >
-          <CardContent className="h-full p-0">
+          <CardContent className="h-full min-h-0 p-0">
             <LayoutGroup id={layoutGroupId}>
-              <div className="flex h-full flex-col gap-4">
+              <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto pr-1 sm:gap-4 sm:overflow-visible sm:pr-0">
 
                 {/* -------------------------
                 //* Source Sentence
                 //* ------------------------- */}
-                <div className={`${srcFontSize} p-3 font-ui text-muted-foreground`}>
-                  <div className="mb-4 flex items-center justify-between">
+                <div className={`${srcFontSize} p-2 font-ui text-muted-foreground sm:p-3`}>
+                  <div className="mb-2 flex items-center justify-between sm:mb-4">
                     <div className="flex items-center gap-2">
                       <LangBadge
                         lang={practiceItem.srcLang}
@@ -633,7 +643,7 @@ export function ContextClozeCard({
                     </div>
                   </div>
                   <p
-                    className={`${srcFontSize} whitespace-pre-wrap leading-7 text-muted-foreground`}
+                    className={`${srcFontSize} whitespace-pre-wrap leading-6 text-muted-foreground sm:leading-7`}
                   >
                     {truncatedSourceSlice.words.map((word, i) => {
                       const rawSpace = truncatedSourceSlice.spaces[i] ?? "";
@@ -659,9 +669,9 @@ export function ContextClozeCard({
                 //* ------------------------- */}
                 <motion.div
                   animate={shakeControls}
-                  className="border bg-muted/30 p-3"
+                  className="border bg-muted/30 p-2 sm:p-3"
                 >
-                  <div className="mb-4 flex items-center justify-between">
+                  <div className="mb-2 flex items-center justify-between sm:mb-4">
                     <div className="flex items-center gap-2">
                       <LangBadge
                         lang={practiceItem.tgtLang}
@@ -686,14 +696,14 @@ export function ContextClozeCard({
                       handleFilledChoiceClick(originalWordId);
                     }}
                     blankWidth={blankWidthPx}
-                    className={`${tgtFontSize} font-ui leading-9`}
+                    className={`${tgtFontSize} font-ui leading-7 sm:leading-9`}
                   />
                 </motion.div>
 
                 {/* -------------------------
                 //* Choice Buttons
                 //* ------------------------- */}
-                <div className="flex flex-wrap gap-2">
+                <div className="flex flex-wrap gap-1.5 sm:gap-2">
                   {shuffledChoiceIndices.map((choiceIndex) => {
                     const choice = choices[choiceIndex];
                     const isUsed = usedChoices.has(choiceIndex);
@@ -742,9 +752,9 @@ export function ContextClozeCard({
                 {/* -------------------------
                 //* Source Text Footnote
                 //* ------------------------- */}
-                <div className="mt-auto space-y-3">
+                <div className="mt-auto space-y-2 sm:space-y-3">
                   <Separator className="bg-border/60" />
-                  <p className="font-ui text-sm italic text-muted-foreground">
+                  <p className="line-clamp-2 font-ui text-xs italic text-muted-foreground sm:text-sm">
                     {practiceItem.documentTitle}
                   </p>
                 </div>

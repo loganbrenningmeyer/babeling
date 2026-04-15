@@ -70,23 +70,23 @@ export default function Review() {
   }
 
   return (
-    <div className="fixed inset-x-0 bottom-0 top-[65px] overflow-hidden bg-background">
-      <div className="mx-auto flex h-full max-w-6xl flex-col px-8 py-10">
+    <div className="fixed inset-x-0 bottom-0 top-[125px] overflow-hidden bg-background sm:top-[65px]">
+      <div className="mx-auto flex h-full max-w-6xl flex-col px-4 py-5 sm:px-8 sm:py-10">
         {/* -------------------------
         //* Hero
         //* ------------------------- */}
-        <h1 className="font-reading font-semibold text-4xl tracking-tight">
+        <h1 className="font-reading text-3xl font-semibold tracking-tight sm:text-4xl">
           Review
         </h1>
 
-        <p className="mt-3 font-ui text-lg text-muted-foreground">
+        <p className="mt-2 font-ui text-sm text-muted-foreground sm:mt-3 sm:text-lg">
           {remainingCount} remaining
         </p>
 
         {/* -------------------------
         //* Target Language Filters
         //* ------------------------- */}
-        <div className="mt-6 flex flex-col gap-2">
+        <div className="mt-4 flex flex-col gap-2 sm:mt-6">
           <div
             className="
               font-ui uppercase tracking-widest
@@ -102,7 +102,7 @@ export default function Review() {
                 type="button"
                 onClick={() => toggleTargetLanguage(lang)}
                 className={cn(
-                  "inline-flex h-10 items-center justify-center rounded-full border px-3",
+                  "inline-flex h-8 items-center justify-center rounded-full border px-2.5 sm:h-10 sm:px-3",
                   "font-ui text-xs font-medium tracking-wide",
                   "cursor-pointer select-none transition-colors duration-200 ease-out",
                   "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
@@ -116,7 +116,7 @@ export default function Review() {
           </div>
         </div>
 
-        <div className="mt-10 flex-1 min-h-0">
+        <div className="mt-5 min-h-0 flex-1 sm:mt-10">
           <PracticeDeck
             practiceItems={practiceItems}
             onRemainingChange={setRemainingCount}

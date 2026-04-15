@@ -38,9 +38,9 @@ export function DocumentFlipCard({
     <div
       role="button"
       onClick={() => setFlipped((v) => !v)}
-      className="w-full max-w-sm justify-self-start text-left"
+      className="w-full justify-self-stretch text-left sm:max-w-sm sm:justify-self-start"
     >
-      <div className="relative aspect-[5/4] w-full [perspective:1400px]">
+      <div className="relative min-h-[17.5rem] w-full [perspective:1400px] sm:aspect-[5/4] sm:min-h-0">
         <motion.div
           animate={{ rotateY: flipped ? -180 : 0 }}
           transition={{ duration: 0.45, ease: [0.2, 0.8, 0.2, 1] }}
