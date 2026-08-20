@@ -404,6 +404,7 @@ export default function ReaderPageClient({
         <div className="mx-auto h-full w-full max-w-[90rem] overflow-hidden">
           <ReaderShell
             srcLang={document?.srcLang ?? prefSrcLang ?? "en"}
+            srcLangReady={document != null}
             tgtLang={tgtLang}
             langLabels={m.langs}
             isSwapped={isSwapped}

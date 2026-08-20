@@ -106,7 +106,7 @@ export function AnnotateCard({
                   <div
                     className="
                       h-6 inline-flex 
-                      text-md text-orange-600 font-ui 
+                      text-md text-warning-subtle-foreground font-ui 
                   ">
                     {defineData.posForm}
                   </div>

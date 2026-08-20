@@ -14,6 +14,7 @@ import { BookCard } from "./BookCard";
 import type { LangLabels } from "@/app/i18n/messages";
 import { useGutendexBooks } from "../../hooks/useGutendexBooks";
 import { toUiLang } from "@/app/i18n/messages";
+import { getLangSelectColors } from "@/types/langs";
 import type { GutendexBook } from "../../types/gutendex";
 
 type ImportEbookMsgs = {
@@ -207,24 +208,31 @@ export function ImportEbookPanel({
             </div>
             {/* Language Buttons Grid */}
             <div className="grid grid-cols-5 gap-1.5 sm:flex sm:flex-wrap sm:gap-2">
-              {LANGUAGE_OPTIONS.map((lang) => (
-                <div
-                  key={lang["code"]} 
-                  className={cn(
-                    "inline-flex h-8 min-w-0 items-center justify-center rounded-full border px-1 sm:h-10 sm:px-3",
-                    "font-ui text-[10px] font-medium tracking-wide min-[380px]:text-[11px] sm:text-xs",
-                    "cursor-pointer select-none transition-colors duration-200 ease-out",
-                    "border-border bg-card text-muted-foreground hover:border-foreground/30 hover:text-foreground",
-                    selectedLanguagesDraft.includes(lang["code"]) &&
-                      "border-primary/30 bg-primary/5 text-foreground hover:border-primary/40 hover:text-foreground",
-                  )}
-                  onClick={() => toggleLanguage(lang["code"])}
-                >
-                  <span className="min-w-0 truncate">
-                    {langLabels[toUiLang(lang["code"])]}
-                  </span>
-                </div>
-              ))}
+              {LANGUAGE_OPTIONS.map((lang) => {
+                const langColors = getLangSelectColors(lang["code"]);
+                const selected = selectedLanguagesDraft.includes(lang["code"]);
+
+                return (
+                  <div
+                    key={lang["code"]}
+                    className={cn(
+                      "inline-flex h-8 min-w-0 items-center justify-center rounded-full border px-1 sm:h-10 sm:px-3",
+                      "font-ui text-[10px] font-medium tracking-wide min-[380px]:text-[11px] sm:text-xs",
+                      "cursor-pointer select-none transition-colors duration-200 ease-out",
+                      "border-border bg-card text-muted-foreground",
+                      langColors.hoverBg,
+                      selected
+                        ? cn(langColors.border, langColors.bg, langColors.text)
+                        : "hover:border-foreground/30 hover:text-foreground",
+                    )}
+                    onClick={() => toggleLanguage(lang["code"])}
+                  >
+                    <span className="min-w-0 truncate">
+                      {langLabels[toUiLang(lang["code"])]}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </div>
 

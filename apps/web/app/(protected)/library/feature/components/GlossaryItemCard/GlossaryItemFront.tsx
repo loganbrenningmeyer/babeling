@@ -62,7 +62,7 @@ export function GlossaryItemFront({
                 <div
                   className="
                     h-6 inline-flex 
-                    font-ui text-xs text-orange-600 sm:text-md
+                    font-ui text-xs text-warning-subtle-foreground sm:text-md
                 ">
                   {glossaryItem.definition.posForm}
                 </div>

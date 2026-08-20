@@ -86,7 +86,7 @@ export function GlossaryItemBack({
                   <div
                     className="
                       h-6 inline-flex 
-                      text-md text-orange-600 font-ui 
+                      text-md text-warning-subtle-foreground font-ui 
                     "
                   >
                     {glossaryItem.definition.posForm}
@@ -125,7 +125,7 @@ export function GlossaryItemBack({
                   {/* -------------------------
                   //* Source Sentence
                   //* ------------------------- */}
-                  <div className="border bg-muted/30 p-3">
+                  <div className="border border-border bg-subtle p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <LangBadge 
@@ -145,7 +145,7 @@ export function GlossaryItemBack({
                   {/* -------------------------
                   //* Target Sentence
                   //* ------------------------- */}
-                  <div className="border bg-muted/30 p-3">
+                  <div className="border border-border bg-subtle p-3">
                     <div className="mb-2 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <LangBadge 

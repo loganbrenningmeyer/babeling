@@ -135,11 +135,12 @@ export function RecentDocumentsPanel({
                       className="
                           group
                           rounded-full px-6
-                          bg-primary/15 text-primary
-                          border border-primary/35
+                          bg-primary-subtle text-primary-subtle-foreground
+                          border border-primary-border/45
                           cursor-pointer
-                          transition-[transform, colors] duration-200 ease-out
-                          hover:bg-blue-600/20
+                          transition-[transform,border-color,box-shadow] duration-200 ease-out
+                          hover:border-primary
+                          hover:shadow-sm
                           hover:-translate-y-0.5
                           motion-reduce:transform-none
                         "

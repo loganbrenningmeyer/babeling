@@ -46,7 +46,7 @@ export function ContinueReadingCard({
     <div
       className="
         mt-6 flex w-full flex-col gap-4
-        rounded-xl border border-border bg-card p-4
+        rounded-xl border border-border bg-card p-4 shadow-sm
         sm:flex-row sm:items-center
       "
     >
@@ -121,10 +121,10 @@ export function ContinueReadingCard({
           loading={loading}
           className="
             w-full rounded-full
-            bg-blue-600 text-primary-foreground
-            shadow-sm shadow-primary/20
-            hover:bg-blue-600/90
-            dark:bg-blue-600/80 dark:hover:bg-blue-600/70
+            bg-primary text-primary-foreground
+            border-transparent font-semibold
+            shadow-sm
+            hover:bg-primary-hover hover:border-transparent
             sm:w-auto
           "
         >

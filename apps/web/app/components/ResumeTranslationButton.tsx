@@ -51,10 +51,8 @@ export function ResumeTranslationButton({
           }}
           className={cn(`            
               rounded-full px-6
-              bg-blue-600/10 text-blue-700
-              border border-blue-600/35
-              dark:bg-blue-500/10 dark:text-blue-300
-              dark:border-blue-400/25
+              bg-primary-subtle text-primary-subtle-foreground
+              border border-primary-border/40
               opacity-100
             `, className
           )}
@@ -75,13 +73,13 @@ export function ResumeTranslationButton({
           className={cn(`
               group
               rounded-sm px-6 
-              bg-primary/20 text-primary
-              border border-primary/40
-              font-ui
+              bg-primary-subtle text-primary-subtle-foreground
+              border border-primary-border/45
+              font-ui font-medium
               cursor-pointer
-              transition-[transform, colors] duration-200 ease-out
-              hover:bg-primary/35
-              hover:border-primary/60
+              transition-[transform,border-color,box-shadow] duration-200 ease-out
+              hover:border-primary
+              hover:shadow-sm
               hover:-translate-y-0.5
               motion-reduce:transform-none
             `, className
@@ -105,7 +103,7 @@ export function ResumeTranslationButton({
           onClick={(e) => {
             e.stopPropagation();
           }}
-          className="rounded-full px-6 opacity-70"
+          className="rounded-full border border-border bg-muted px-6 text-muted-foreground"
         >
           {m.library.continue}
         </Button>

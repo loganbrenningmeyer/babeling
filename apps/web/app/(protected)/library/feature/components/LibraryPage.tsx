@@ -165,11 +165,11 @@ export function LibraryPage({
               //* Documents Header
               //* ------------------------- */}
               <div className="inline-flex min-w-0 items-center gap-2">
-                <div className="rounded-sm p-1 bg-blue-300/20">
-                  <Book className="h-4 w-4 text-blue-500" />
+                <div className="rounded-sm bg-info-subtle p-1">
+                  <Book className="h-4 w-4 text-info-subtle-foreground" />
                 </div>
                 <h3 className="font-ui text-md font-semibold">{m.library.texts}</h3>
-                <Badge className="font-ui font-bold text-xs bg-muted-foreground/10 text-muted-foreground">
+                <Badge className="border border-border bg-muted font-ui text-xs font-bold text-muted-foreground">
                   {documents.length}
                 </Badge>
               </div>
@@ -220,11 +220,11 @@ export function LibraryPage({
               //* GlossaryItems Header
               //* ------------------------- */}
               <div className="inline-flex min-w-0 items-center gap-2">
-                <div className="rounded-sm p-1 bg-orange-300/20">
-                  <Languages className="h-4 w-4 text-orange-500"/>  
+                <div className="rounded-sm bg-warning-subtle p-1">
+                  <Languages className="h-4 w-4 text-warning-subtle-foreground"/>  
                 </div>
                 <h3 className="font-ui text-md font-semibold">{m.library.glossary}</h3>
-                <Badge className="font-ui font-bold bg-muted-foreground/10 text-muted-foreground">
+                <Badge className="border border-border bg-muted font-ui font-bold text-muted-foreground">
                   {glossaryItems.length}
                 </Badge>
               </div>

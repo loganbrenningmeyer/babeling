@@ -132,7 +132,7 @@ export function DocumentFront({
           {/* -------------------------
           * Continue Recent Translation Info
           * ------------------------- */}
-          <div className="flex flex-1 flex-col gap-2 border border-border/50 bg-muted/35 p-2">
+          <div className="flex flex-1 flex-col gap-2 border border-border/60 bg-subtle p-2">
             <div className="flex items-center justify-between gap-2 text-[10px] font-medium tracking-wide text-muted-foreground/80 sm:gap-3 sm:text-[11px]">
               {/* -------------------------
               * Page Number / Last Opened Time
@@ -174,7 +174,7 @@ export function DocumentFront({
               >
                 <span className="min-w-0 truncate">
                   {m.library.continueIn}{" "}
-                  <span className={`rounded-xl border px-1 ${sampleLangColors.bg} ${sampleLangColors.border} ${sampleLangColors.text}`}>
+                  <span className={`rounded-md border px-1.5 font-semibold ${sampleLangColors.chip}`}>
                     {sampleLangLabel}
                   </span>
                 </span>

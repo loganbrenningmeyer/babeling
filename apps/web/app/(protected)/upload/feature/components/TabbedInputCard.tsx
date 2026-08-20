@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
 import { Clipboard, FileUp, BookSearch } from "lucide-react";
@@ -80,15 +80,28 @@ export function TabbedInputCard({
   const [epubUrl, setEpubUrl] = useState<string | null>(null);
   const [bookLanguages, setBookLanguages] = useState<string[]>([]);
 
+  // Keep the latest callback available without treating a new callback
+  // identity as a change to the active input payload. In particular, the
+  // upload page recreates this callback when its language state changes. If
+  // that alone re-emits a selected Gutenberg book, the book's original
+  // language is applied again immediately after the user swaps languages.
+  const onPayloadChangeRef = useRef(onPayloadChange);
+
+  useEffect(() => {
+    onPayloadChangeRef.current = onPayloadChange;
+  }, [onPayloadChange]);
+
   // -------------------------
   // Keep parent in sync with active tab
   // -------------------------
   useEffect(() => {
-    if (!onPayloadChange) return;
-    if (tab === "paste") onPayloadChange({ type: "text", text });
-    if (tab === "upload") onPayloadChange({ type: "file", file });
+    const notifyPayloadChange = onPayloadChangeRef.current;
+    if (!notifyPayloadChange) return;
+
+    if (tab === "paste") notifyPayloadChange({ type: "text", text });
+    if (tab === "upload") notifyPayloadChange({ type: "file", file });
     if (tab === "import") {
-      onPayloadChange({
+      notifyPayloadChange({
         type: "gutenberg",
         bookId,
         format,
@@ -97,7 +110,7 @@ export function TabbedInputCard({
         languages: bookLanguages,
       });
     }
-  }, [tab, text, file, bookId, format, bookTitle, epubUrl, bookLanguages, onPayloadChange]);
+  }, [tab, text, file, bookId, format, bookTitle, epubUrl, bookLanguages]);
 
   const tabClassName = cn(
     "h-full inline-flex min-w-0 items-center justify-center overflow-hidden",

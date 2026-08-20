@@ -27,7 +27,7 @@ import { toUiLang } from "@/app/i18n/messages";
 import { LangBadge } from "@/app/components/LangBadge";
 import { TabbedInputCard } from "./feature/components/TabbedInputCard";
 import { Separator } from "@/components/ui/separator";
-import { LANG_COLOR_BY_CODE } from "@/types/langs";
+import { getLangSelectColors } from "@/types/langs";
 
 type LangCode = "en" | "fr" | "es" | "de" | "it";
 
@@ -59,27 +59,6 @@ export default function UploadPage() {
 
   const srcLang = localSrcLang ?? prefSrcLang ?? "en";
   const tgtLang = localTgtLang ?? prefTgtLang ?? "es";
-  const fallbackLangColors = {
-    border: "border-foreground/20",
-    focusBorder: "focus-visible:border-foreground/20 dark:focus-visible:border-foreground/20",
-    bg: "bg-background/20",
-    hoverBg: "hover:bg-background/20 dark:hover:bg-background/20",
-  };
-
-  function getSelectBorderClasses(lang: string) {
-    const colors = LANG_COLOR_BY_CODE[toUiLang(lang)];
-    if (!colors) return fallbackLangColors;
-
-    return {
-      border: colors.border,
-      focusBorder: colors.border.replaceAll("border-", "focus-visible:border-"),
-      bg: colors.bg,
-      hoverBg: colors.bg
-        .replaceAll("bg-", "hover:bg-")
-        .replaceAll("dark:hover:bg-", "dark:bg-")
-        .replaceAll("dark:bg-", "dark:hover:bg-"),
-    };
-  }
 
   // -------------------------
   // Upload File Information
@@ -104,8 +83,8 @@ export default function UploadPage() {
     !!srcFile ||
     !!selectedGutenbergBook?.epubUrl;
 
-  const srcSelectColors = getSelectBorderClasses(srcLang);
-  const tgtSelectColors = getSelectBorderClasses(tgtLang);
+  const srcSelectColors = getLangSelectColors(srcLang);
+  const tgtSelectColors = getLangSelectColors(tgtLang);
 
   /**************************
    * `handleSwapLanguages()`

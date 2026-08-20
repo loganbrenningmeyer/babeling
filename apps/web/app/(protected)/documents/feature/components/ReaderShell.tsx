@@ -32,6 +32,7 @@ export type ReaderMsgs = (typeof messages)[UiLang]["reader"];
 
 type ReaderShellProps = {
   srcLang: string;
+  srcLangReady: boolean;
   tgtLang: string;
   langLabels: LangLabels;
   isSwapped: boolean;
@@ -92,6 +93,7 @@ type ReaderShellProps = {
 
 export function ReaderShell({
   srcLang,
+  srcLangReady,
   tgtLang,
   langLabels,
   isSwapped,
@@ -116,23 +118,31 @@ export function ReaderShell({
   const renderLoading = loading || !session;
   const srcLangColors = LANG_COLOR_BY_CODE[toUiLang(srcLang)];
   const tgtLangColors = LANG_COLOR_BY_CODE[toUiLang(tgtLang)];
+  // `tgtLang` always comes from the URL / user preferences, so it's known
+  // immediately. `srcLang` comes from the document itself, which is still
+  // loading on first paint (it falls back to a placeholder until then) — so
+  // only the source-language pane needs to wait before showing its label.
   const sourcePane = isSwapped
     ? {
         label: langLabels[toUiLang(tgtLang)],
         colors: tgtLangColors,
+        known: true,
       }
     : {
         label: langLabels[toUiLang(srcLang)],
         colors: srcLangColors,
+        known: srcLangReady,
       };
   const targetPane = isSwapped
     ? {
         label: langLabels[toUiLang(srcLang)],
         colors: srcLangColors,
+        known: srcLangReady,
       }
     : {
         label: langLabels[toUiLang(tgtLang)],
         colors: tgtLangColors,
+        known: true,
       };
   const annotateTgtLang = isSwapped ? srcLang : tgtLang;
 
@@ -197,14 +207,18 @@ export function ReaderShell({
               <div className="relative flex items-center justify-center">
                 <div className="flex justify-center">
                   <div
-                    className={`
-                      rounded-md border px-2 py-1
-                      text-md font-ui
-                      ${sourcePane.colors.bg} ${sourcePane.colors.text}
-                      ${sourcePane.colors.border}
-                    `}
+                    className={
+                      sourcePane.known
+                        ? `
+                          rounded-md border px-2 py-1
+                          text-md font-ui
+                          ${sourcePane.colors.bg} ${sourcePane.colors.text}
+                          ${sourcePane.colors.border}
+                        `
+                        : "h-[30px] w-16 animate-pulse rounded-md border border-border bg-muted"
+                    }
                   >
-                    {sourcePane.label}
+                    {sourcePane.known ? sourcePane.label : null}
                   </div>
                 </div>
                 {/* -------------------------
@@ -226,15 +240,19 @@ export function ReaderShell({
             <div className="pt-4 pb-3">
               <div className="flex justify-center">
                 <div
-                  className={`
-                    inline-flex items-center
-                    rounded-md border px-2 py-1
-                    text-md font-ui
-                    ${targetPane.colors.bg} ${targetPane.colors.text}
-                    ${targetPane.colors.border}
-                  `}
+                  className={
+                    targetPane.known
+                      ? `
+                        inline-flex items-center
+                        rounded-md border px-2 py-1
+                        text-md font-ui
+                        ${targetPane.colors.bg} ${targetPane.colors.text}
+                        ${targetPane.colors.border}
+                      `
+                      : "inline-flex h-[30px] w-16 animate-pulse items-center rounded-md border border-border bg-muted"
+                  }
                 >
-                  {targetPane.label}
+                  {targetPane.known ? targetPane.label : null}
                 </div>
               </div>
             </div>

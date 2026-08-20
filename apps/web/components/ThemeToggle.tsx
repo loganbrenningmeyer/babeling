@@ -36,56 +36,30 @@ export function ThemeToggle() {
       aria-label={`Switch to ${nextLabel} mode`}
       aria-pressed={isDark}
       title={`Switch to ${nextLabel} mode`}
-      className="
-        inline-flex rounded-full p-0.5
-        transition-transform duration-200
-      "
+      className={cn(
+        `
+          relative inline-flex size-9 shrink-0 items-center justify-center
+          rounded-md border border-input bg-transparent shadow-xs
+          outline-none transition-colors
+          hover:bg-accent
+          focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50
+          dark:bg-input/30 dark:hover:bg-input/50
+        `,
+        isDark ? "text-slate-300" : "text-amber-500"
+      )}
     >
-      <span
-          className={cn(
-          `
-            relative inline-flex h-9 w-9 items-center overflow-hidden rounded-full
-            border border-transparent px-1
-            transition-colors duration-300 ease-out
-            sm:h-10 sm:w-[4rem] sm:px-2
-          `,
-          isDark
-            ? "bg-zinc-800"
-            : "bg-zinc-200"
+      <Sun
+        className={cn(
+          "absolute size-4 transition-all duration-300 ease-out",
+          isDark ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
         )}
-      >
-        <span
-          className={cn(
-            `
-              absolute left-0.75 top-1/2 inline-flex h-7 w-7 items-center justify-center
-              rounded-full shadow-sm
-              transition-all duration-300 ease-out
-              -translate-y-1/2
-              sm:h-8 sm:w-8
-            `,
-            isDark
-              ? "translate-x-0 bg-blue-800/60 text-slate-400/70 sm:translate-x-[1.5rem]"
-              : "translate-x-0 bg-amber-400/60 text-amber-950"
-          )}
-        >
-          <Sun
-            className={cn(
-              "absolute size-4 transition-all duration-300 ease-out",
-              isDark
-                ? "rotate-90 scale-0 opacity-0"
-                : "rotate-0 scale-100 opacity-100"
-            )}
-          />
-          <Moon
-            className={cn(
-              "absolute size-4 transition-all duration-300 ease-out",
-              isDark
-                ? "rotate-0 scale-100 opacity-100"
-                : "-rotate-90 scale-0 opacity-0"
-            )}
-          />
-        </span>
-      </span>
+      />
+      <Moon
+        className={cn(
+          "absolute size-4 transition-all duration-300 ease-out",
+          isDark ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+        )}
+      />
     </button>
   );
 }

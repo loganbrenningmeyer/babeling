@@ -21,8 +21,8 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 
 /* Nav */
 .nav {
-  border-bottom: 1px solid rgba(0,0,0,0.08);
-  background: white;
+  border-bottom: 1px solid var(--border);
+  background: var(--card);
   position: sticky;
   top: 0;
 }
@@ -47,11 +47,11 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 
 .navLink {
   text-decoration: none;
-  color: rgba(0,0,0,0.75);
+  color: var(--muted-foreground);
 }
 
 .navLink:hover {
-  color: rgba(0,0,0,1);
+  color: var(--foreground);
 }
 
 /* -------------------------
@@ -70,7 +70,7 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 /* Subtle, modern scrollbar */
 .scrollbar-thin {
   scrollbar-width: thin;                 /* Firefox */
-  scrollbar-color: hsl(var(--muted)) transparent;
+  scrollbar-color: var(--muted) transparent;
 }
 
 /* WebKit */
@@ -83,14 +83,14 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
+  background-color: var(--muted);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: content-box;
 }
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background-color: hsl(var(--muted-foreground));
+  background-color: var(--muted-foreground);
 }
 
 .scrollbar-hover::-webkit-scrollbar-thumb {
@@ -98,7 +98,7 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
 }
 
 .scrollbar-hover:hover::-webkit-scrollbar-thumb {
-  background-color: hsl(var(--muted));
+  background-color: var(--muted);
 }
 
 /* -------------------------
@@ -185,30 +185,75 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
   --radius-2xl: calc(var(--radius) + 8px); 
   --radius-3xl: calc(var(--radius) + 12px); 
   --radius-4xl: calc(var(--radius) + 16px); 
+
+  /* [ Surfaces ] */
   --color-background: var(--background); 
   --color-foreground: var(--foreground); 
   --color-card: var(--card); 
   --color-card-foreground: var(--card-foreground); 
+  --color-elevated: var(--elevated);
+  --color-elevated-foreground: var(--elevated-foreground);
   --color-popover: var(--popover); 
   --color-popover-foreground: var(--popover-foreground); 
-  --color-primary: var(--primary); 
-  --color-primary-foreground: var(--primary-foreground); 
-  --color-primary-border: var(--primary-border);
-  --color-secondary: var(--secondary); 
-  --color-secondary-foreground: var(--secondary-foreground); 
+
+  /* [ Neutrals ] */
   --color-muted: var(--muted); 
   --color-muted-foreground: var(--muted-foreground); 
+  --color-subtle: var(--subtle);
   --color-accent: var(--accent); 
   --color-accent-foreground: var(--accent-foreground); 
-  --color-destructive: var(--destructive); 
+  --color-secondary: var(--secondary); 
+  --color-secondary-foreground: var(--secondary-foreground); 
   --color-border: var(--border); 
+  --color-border-strong: var(--border-strong);
   --color-input: var(--input); 
   --color-ring: var(--ring); 
+
+  /* [ Primary ] */
+  --color-primary: var(--primary); 
+  --color-primary-foreground: var(--primary-foreground); 
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-border: var(--primary-border);
+  --color-primary-subtle: var(--primary-subtle);
+  --color-primary-subtle-foreground: var(--primary-subtle-foreground);
+
+  /* [ Semantic accents ]
+  //* -- `x`        : solid fill (pair with `x-foreground`)
+  //* -- `x-subtle` : tinted surface (pair with `x-subtle-foreground`)
+  //* -- `x-border` : hairline that reads on both surfaces
+  //* ------------------------- */
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-info-subtle: var(--info-subtle);
+  --color-info-subtle-foreground: var(--info-subtle-foreground);
+  --color-info-border: var(--info-border);
+
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-subtle: var(--success-subtle);
+  --color-success-subtle-foreground: var(--success-subtle-foreground);
+  --color-success-border: var(--success-border);
+
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-warning-subtle-foreground: var(--warning-subtle-foreground);
+  --color-warning-border: var(--warning-border);
+
+  --color-destructive: var(--destructive); 
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-subtle: var(--destructive-subtle);
+  --color-destructive-subtle-foreground: var(--destructive-subtle-foreground);
+  --color-destructive-border: var(--destructive-border);
+
+  /* [ Charts ] */
   --color-chart-1: var(--chart-1); 
   --color-chart-2: var(--chart-2); 
   --color-chart-3: var(--chart-3); 
   --color-chart-4: var(--chart-4); 
   --color-chart-5: var(--chart-5); 
+
+  /* [ Sidebar ] */
   --color-sidebar: var(--sidebar); 
   --color-sidebar-foreground: var(--sidebar-foreground); 
   --color-sidebar-primary: var(--sidebar-primary); 
@@ -219,56 +264,188 @@ body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
   --color-sidebar-ring: var(--sidebar-ring); 
   }
 
+/* -------------------------
+//* [ Light theme ]
+//* -- Warm paper base. Surfaces step *up* toward white as they gain
+//*    importance (background -> card -> elevated), while neutral fills
+//*    step *down* (subtle -> muted -> accent) so a recessed well and a
+//*    raised card never read as the same layer.
+//* -- Every `*-foreground` here clears WCAG AA (4.5:1) on the surface it
+//*    is named for, so `/70`-style opacity tweaks still stay legible.
+//* ------------------------- */
 :root { 
   --radius: 0.625rem;
 
-  --background: #F8F6F2;
-  --foreground: #1F1F1F;
+  /* Surfaces */
+  --background: #F7F5F1;
+  --foreground: #1A1917;
 
   --card: #FFFFFF;
-  --card-foreground: #1F1F1F;
+  --card-foreground: #1A1917;
 
-  --muted: #E6E2DA;
-  --muted-foreground: #6B6B6B;
-
-  --border: #E6E2DA;
-
-  --primary: #548ac9;
-  --primary-foreground: #FFFFFF;
-  --primary-border: #4784ca;
+  --elevated: #FFFFFF;
+  --elevated-foreground: #1A1917;
 
   --popover: #FFFFFF;
-  --popover-foreground: #1F1F1F;
-  --accent: #E6E2DA;
-  --accent-foreground: #1F1F1F;
-  --input: #E6E2DA;
-  --ring: #548ac9;
+  --popover-foreground: #1A1917;
+
+  /* Neutrals */
+  --subtle: #F2EFE9;
+  --muted: #EAE6DE;
+  --muted-foreground: #5B5852;
+
+  --accent: #E2DCD1;
+  --accent-foreground: #1A1917;
+
+  --secondary: #EAE6DE;
+  --secondary-foreground: #33302B;
+
+  --border: #DDD7CC;
+  --border-strong: #C6BFB1;
+  --input: #DDD7CC;
+  --ring: #2F6FBF;
+
+  /* Primary — solid fill clears AA against white text (5.1:1) */
+  --primary: #2F6FBF;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #265EA6;
+  --primary-border: #2F6FBF;
+  --primary-subtle: #E8F0FB;
+  --primary-subtle-foreground: #1B5296;
+
+  /* Semantic accents */
+  --info: #2F6FBF;
+  --info-foreground: #FFFFFF;
+  --info-subtle: #E8F0FB;
+  --info-subtle-foreground: #1B5296;
+  --info-border: #A9C8EE;
+
+  --success: #0E7A54;
+  --success-foreground: #FFFFFF;
+  --success-subtle: #E4F5EE;
+  --success-subtle-foreground: #0B6446;
+  --success-border: #9FD9C3;
+
+  --warning: #B45309;
+  --warning-foreground: #FFFFFF;
+  --warning-subtle: #FDF0E0;
+  --warning-subtle-foreground: #9A4508;
+  --warning-border: #EEC49A;
+
+  --destructive: #B42318;
+  --destructive-foreground: #FFFFFF;
+  --destructive-subtle: #FCEAE8;
+  --destructive-subtle-foreground: #98221A;
+  --destructive-border: #EFB4AE;
+
+  /* Charts */
+  --chart-1: #2F6FBF;
+  --chart-2: #0E7A54;
+  --chart-3: #B45309;
+  --chart-4: #6D46C4;
+  --chart-5: #B4185F;
+
+  /* Sidebar */
+  --sidebar: #F2EFE9;
+  --sidebar-foreground: #1A1917;
+  --sidebar-primary: #2F6FBF;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #E2DCD1;
+  --sidebar-accent-foreground: #1A1917;
+  --sidebar-border: #DDD7CC;
+  --sidebar-ring: #2F6FBF;
 }
 
+/* -------------------------
+//* [ Dark theme ]
+//* -- Mirror of the light ladder: surfaces step *up* in lightness as they
+//*    gain importance, neutral fills step up alongside them, and accent
+//*    hues are pulled toward the 300/400 range so they stay bright enough
+//*    to read on near-black.
+//* -- Solid accents pair with a *dark* `*-foreground`; anything drawn on a
+//*    dark surface uses the `*-subtle-foreground` tint instead.
+//* ------------------------- */
 .dark { 
   --radius: 0.625rem;
 
-  --background: #121212;
-  --foreground: #F2F2F2;
+  /* Surfaces */
+  --background: #0F1113;
+  --foreground: #E9EAEC;
 
-  --card: #1B1B1B;
-  --card-foreground: #F2F2F2;
+  --card: #17191C;
+  --card-foreground: #E9EAEC;
 
-  --muted: #353535;
-  --muted-foreground: #A8A8A8;
+  --elevated: #1D2024;
+  --elevated-foreground: #E9EAEC;
 
-  --border: #353535;
+  --popover: #1D2024;
+  --popover-foreground: #E9EAEC;
 
-  --primary: #6FA8FF;
-  --primary-foreground: #0B1220;
-  --primary-border: #4784ca;
-  
-  --popover: #1B1B1B;
-  --popover-foreground: #F2F2F2;
-  --accent: #353535;
-  --accent-foreground: #F2F2F2;
-  --input: #353535;
+  /* Neutrals */
+  --subtle: #1C1F22;
+  --muted: #262A2F;
+  --muted-foreground: #A3A8AE;
+
+  --accent: #2E333A;
+  --accent-foreground: #F2F3F5;
+
+  --secondary: #262A2F;
+  --secondary-foreground: #E4E6E9;
+
+  --border: #2C3035;
+  --border-strong: #414750;
+  --input: #2C3035;
   --ring: #6FA8FF;
+
+  /* Primary — solid fill pairs with dark text (7.9:1) */
+  --primary: #6FA8FF;
+  --primary-foreground: #0A1526;
+  --primary-hover: #8CBAFF;
+  --primary-border: #4E86D8;
+  --primary-subtle: #16273E;
+  --primary-subtle-foreground: #9EC6FF;
+
+  /* Semantic accents */
+  --info: #6FA8FF;
+  --info-foreground: #0A1526;
+  --info-subtle: #16273E;
+  --info-subtle-foreground: #9EC6FF;
+  --info-border: #33507A;
+
+  --success: #34D399;
+  --success-foreground: #052E22;
+  --success-subtle: #12291F;
+  --success-subtle-foreground: #6EE7B7;
+  --success-border: #26543F;
+
+  --warning: #FBBF24;
+  --warning-foreground: #2B1B02;
+  --warning-subtle: #2E2211;
+  --warning-subtle-foreground: #FCD34D;
+  --warning-border: #5C4519;
+
+  --destructive: #F87171;
+  --destructive-foreground: #2A0A0A;
+  --destructive-subtle: #2E1616;
+  --destructive-subtle-foreground: #FCA5A5;
+  --destructive-border: #5E2A2A;
+
+  /* Charts */
+  --chart-1: #6FA8FF;
+  --chart-2: #34D399;
+  --chart-3: #FBBF24;
+  --chart-4: #A78BFA;
+  --chart-5: #F472B6;
+
+  /* Sidebar */
+  --sidebar: #17191C;
+  --sidebar-foreground: #E9EAEC;
+  --sidebar-primary: #6FA8FF;
+  --sidebar-primary-foreground: #0A1526;
+  --sidebar-accent: #2A2E34;
+  --sidebar-accent-foreground: #F2F3F5;
+  --sidebar-border: #2C3035;
+  --sidebar-ring: #6FA8FF;
 }
 
 @layer base {

@@ -46,7 +46,7 @@ export function HelpPopover() {
         <span
           onMouseEnter={openPopover}
           onMouseLeave={closePopoverWithDelay}
-          className="inline-flex items-center text-muted-foreground hover:text-blue-600 cursor-default"
+          className="inline-flex items-center text-muted-foreground hover:text-primary cursor-default"
           aria-label={msgs.helpLabel}
         >
           <HelpCircle className="h-4 w-4" />

@@ -227,7 +227,7 @@ export function DocumentBack({
               <div className="mt-auto flex flex-col gap-2">
                 <Separator />
 
-                <div className="border border-border bg-muted/35 p-2">
+                <div className="border border-border bg-subtle p-2">
                   <div className="space-y-2">
                     <div className="flex items-center justify-between gap-3 text-[11px] font-medium tracking-wide text-muted-foreground/80">
                       <span className="rounded-xs border border-border px-2">
@@ -250,10 +250,8 @@ export function DocumentBack({
                           {m.library.continueIn}{" "}
                           <span
                             className={`
-                              rounded-xl border px-1 
-                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].text}
-                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].bg}
-                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].border}
+                              rounded-md border px-1.5 font-semibold
+                              ${LANG_COLOR_BY_CODE[toUiLang(t.tgtLang)].chip}
                             `}
                           >
                             {langLabels[toUiLang(t.tgtLang)]}
